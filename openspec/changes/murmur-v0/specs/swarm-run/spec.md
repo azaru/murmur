@@ -87,7 +87,7 @@ The run SHALL append one JSON object per line to `events.jsonl`, each with a tim
 - **THEN** each post appears in `events.jsonl` with sender, optional thread and text
 
 ### Requirement: Result file
-At the end of every run that got past task validation, the run SHALL write `result.json` with: `status` (`passed` when the check exit code is 0, else `failed`), `reason` (end condition), the check's exit code and bounded output, total cost, total tokens, duration, and per agent: name, whether it called `done` and its reason, cost and tokens.
+At the end of every run that got past task validation, the run SHALL write `result.json` with: `status` (`passed` when the check exit code is 0, else `failed`), `reason` (end condition), the check's exit code and bounded output, total cost, total tokens with their input/output/cache-read/cache-write breakdown, duration, and per agent: name, whether it called `done` and its reason, cost and tokens.
 
 #### Scenario: Hello world
 - **WHEN** one agent is asked to create `hello.txt` containing `hi` with check `test "$(cat hello.txt)" = hi`, and it succeeds

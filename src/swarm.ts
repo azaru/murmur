@@ -27,6 +27,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   if (!model) throw new Error(`unknown model ${task.provider}/${task.model}`);
 
   const workspace = opts.workspace ?? join(opts.runDir, "workspace");
+  mkdirSync(opts.runDir, { recursive: true });
   mkdirSync(workspace, { recursive: true });
   if (!opts.workspace && task.project) cpSync(task.project, workspace, { recursive: true });
   const log = (type: string, data: Record<string, unknown> = {}) =>
@@ -37,13 +38,15 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   let reason: EndReason | undefined;
 
   const totals = () => {
+    const usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
     let cost = 0, tokens = 0;
     for (const { session } of agents) {
       const stats = session.getSessionStats();
       cost += stats.cost;
       tokens += stats.tokens.total;
+      for (const key of Object.keys(usage) as (keyof typeof usage)[]) usage[key] += stats.tokens[key];
     }
-    return { cost, tokens };
+    return { cost, tokens, usage };
   };
   const budgetText = () => {
     const { cost, tokens } = totals();
@@ -149,10 +152,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
 
   const check = await runCheck(task.check, workspace, opts.checkTimeoutMs ?? 10 * 60_000);
   log("check", check);
-  const { cost, tokens } = totals();
+  const { cost, tokens, usage } = totals();
   const result = {
     status: check.exitCode === 0 ? "passed" : "failed",
-    reason, check, costUsd: cost, tokens, durationMs: Date.now() - started,
+    reason, check, costUsd: cost, tokens, usage, durationMs: Date.now() - started,
     agents: [...board.members.values()].map(m => {
       const stats = agents.find(a => a.name === m.name)?.session.getSessionStats();
       return { name: m.name, done: m.doneReason !== undefined, doneReason: m.doneReason, costUsd: stats?.cost ?? 0, tokens: stats?.tokens.total ?? 0 };
