@@ -5,10 +5,14 @@ import type { Profile } from "./profile.ts";
 
 export type Log = (type: string, data?: Record<string, unknown>) => void;
 export type Member = {
-  name: string; working: boolean; doneReason?: string;
-  read: number; nudged: boolean; wake?: () => void;
+  name: string; working: boolean; doneReason?: string; role?: string;
+  read: number; nudged: boolean; revivals: number; wake?: () => void;
 };
 type Message = { from: string; thread?: string; text: string };
+export type Verify = () => Promise<{ ok: boolean; output: string }>;
+
+export const formatMessages = (messages: Message[]) =>
+  messages.map(m => `${m.thread ? `[${m.thread}] ` : ""}${m.from}: ${m.text}`).join("\n\n");
 
 /** Shared in-memory state of one swarm: messages, claims and each agent's status. */
 export class Board {
@@ -24,7 +28,7 @@ export class Board {
     this.log = log;
     this.notify = notify;
     this.budget = budget;
-    for (const name of names) this.members.set(name, { name, working: true, read: 0, nudged: false }); // working until its first turn ends
+    for (const name of names) this.members.set(name, { name, working: true, read: 0, nudged: false, revivals: 0 }); // working until its first turn ends
   }
 
   unread(agent: string) {
@@ -35,7 +39,7 @@ export class Board {
     this.messages.push({ from, thread, text });
     this.log("post", { agent: from, thread, text });
     for (const member of this.members.values()) {
-      if (member.name !== from && member.doneReason === undefined) this.notify(member);
+      if (member.name !== from) this.notify(member);
     }
   }
 
@@ -68,7 +72,7 @@ export class Board {
     return [...this.members.values()].map(m => {
       const state = m.doneReason !== undefined ? `done (${m.doneReason})` : m.working ? "working" : "idle";
       const claims = [...this.claims].filter(([, holder]) => holder === m.name).map(([path]) => path);
-      return `${m.name}${m.name === agent ? " (you)" : ""}: ${state}${claims.length ? `; claims ${claims.join(", ")}` : ""}`;
+      return `${m.name}${m.name === agent ? " (you)" : ""}: ${state}${m.role ? `; role ${m.role}` : ""}${claims.length ? `; claims ${claims.join(", ")}` : ""}`;
     }).join("\n");
   }
 }
@@ -76,7 +80,7 @@ export class Board {
 const reply = (text: string) => ({ content: [{ type: "text" as const, text }], details: {} });
 
 /** Coordination tools for one agent; only `done` when messaging is off. */
-export function boardTools(board: Board, agent: string, { messaging, toolDescriptions }: Profile) {
+export function boardTools(board: Board, agent: string, { messaging, toolDescriptions, roles, doneGate }: Profile, verify: Verify) {
   const describe = (name: string, text: string) => toolDescriptions[name] ?? text;
   const done = defineTool({
     name: "done",
@@ -84,11 +88,30 @@ export function boardTools(board: Board, agent: string, { messaging, toolDescrip
     description: describe("done", "Finish your work in the swarm. Call it when the definition of done is met, or to give up with the reason why the goal cannot be reached."),
     parameters: Type.Object({ reason: Type.String({ description: "Why you are finishing" }) }),
     async execute(_id, { reason }) {
+      if (doneGate) {
+        const unread = board.unread(agent).length;
+        if (unread) return reply(`Not done: you have ${unread} unread message(s); read them first.`);
+        const check = await verify();
+        if (!check.ok) return reply(`Not done: the acceptance check fails:\n${check.output.slice(-1500)}`);
+      }
       board.done(agent, reason);
       return reply("You are done. End your turn now.");
     },
   });
   if (!messaging) return [done];
+  const menu = Object.keys(roles);
+  const role = defineTool({
+    name: "role",
+    label: "role",
+    description: describe("role", `Take a role from the menu, or switch to another one: returns its instructions and tells the team. Roles: ${menu.join(", ")}.`),
+    parameters: Type.Object({ name: Type.String() }),
+    async execute(_id, { name }) {
+      if (!roles[name]) throw new Error(`unknown role ${name} (roles: ${menu.join(", ")})`);
+      board.members.get(agent)!.role = name;
+      board.post(agent, `I take the role ${name}.`);
+      return reply(roles[name].instructions);
+    },
+  });
   const path = Type.Object({ path: Type.String({ description: "File path relative to the working directory" }) });
   return [
     defineTool({
@@ -109,7 +132,7 @@ export function boardTools(board: Board, agent: string, { messaging, toolDescrip
       async execute() {
         const messages = board.inbox(agent);
         if (!messages.length) return reply("No new messages.");
-        return reply(messages.map(m => `${m.thread ? `[${m.thread}] ` : ""}${m.from}: ${m.text}`).join("\n\n"));
+        return reply(formatMessages(messages));
       },
     }),
     defineTool({
@@ -150,6 +173,7 @@ export function boardTools(board: Board, agent: string, { messaging, toolDescrip
         return reply(`Released ${normalize(path)}.`);
       },
     }),
+    ...(menu.length ? [role] : []),
     done,
   ];
 }

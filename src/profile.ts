@@ -3,7 +3,7 @@ import { Type } from "typebox";
 import { Errors } from "typebox/value";
 
 export const BUILTIN_TOOLS = ["read", "bash", "edit", "write", "grep", "find", "ls"];
-export const BOARD_TOOLS = ["post", "inbox", "team", "budget", "claim", "release", "done"];
+export const BOARD_TOOLS = ["post", "inbox", "team", "budget", "claim", "release", "role", "done"];
 
 /** Everything about how murmur behaves that an experiment may change. */
 export const DEFAULT_PROFILE = {
@@ -34,6 +34,12 @@ Start by reading your inbox and posting what you will work on. When told you hav
   toolDescriptions: {} as Record<string, string>,
   tools: ["read", "bash", "edit", "write"],
   spawnGapSeconds: 0,
+  /** Menu agents may pick from with role(name); empty means no role tool. Never assigned. */
+  roles: {} as Record<string, { summary: string; instructions: string }>,
+  /** How many times a new post may wake an agent that already called done. */
+  revive: 0,
+  /** done is refused while the agent has unread messages or the acceptance check fails. */
+  doneGate: false,
 };
 export type Profile = typeof DEFAULT_PROFILE;
 
@@ -44,6 +50,9 @@ const ProfileSchema = Type.Object({
   toolDescriptions: Type.Optional(Type.Record(Type.String(), Type.String())),
   tools: Type.Optional(Type.Array(Type.String())),
   spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })),
+  roles: Type.Optional(Type.Record(Type.String(), Type.Object({ summary: Type.String(), instructions: Type.String() }, { additionalProperties: false }))),
+  revive: Type.Optional(Type.Integer({ minimum: 0 })),
+  doneGate: Type.Optional(Type.Boolean()),
 }, { additionalProperties: false });
 
 export function loadProfile(path?: string): Profile {
