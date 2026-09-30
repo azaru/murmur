@@ -5,7 +5,7 @@ import {
   type AgentSession, type CreateAgentSessionOptions, createAgentSession, DefaultResourceLoader,
   getAgentDir, ModelRuntime, SessionManager, SettingsManager,
 } from "@earendil-works/pi-coding-agent";
-import { Board, boardTools } from "./board.ts";
+import { Board, boardTools, type Member } from "./board.ts";
 
 export type Task = {
   goal: string; done: string; check: string; project?: string;
@@ -33,7 +33,6 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     appendFileSync(join(opts.runDir, "events.jsonl"), JSON.stringify({ t: new Date().toISOString(), type, ...data }) + "\n");
 
   const names = NAMES.slice(0, task.agents);
-  const board = new Board(names, log);
   let agents: Agent[] = [];
   let reason: EndReason | undefined;
 
@@ -46,9 +45,25 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     }
     return { cost, tokens };
   };
+  const budgetText = () => {
+    const { cost, tokens } = totals();
+    const left = [task.budgetUsd && `$${(task.budgetUsd - cost).toFixed(4)}`, task.budgetTokens && `${task.budgetTokens - tokens} tokens`];
+    return `Spent $${cost.toFixed(4)} and ${tokens} tokens. Remaining: ${left.filter(Boolean).join(", ") || "no limit"}.`;
+  };
+  // A new post steers a busy agent once (until it reads its inbox) or wakes an idle one.
+  const notify = (member: Member) => {
+    const session = agents.find(a => a.name === member.name)?.session;
+    if (!member.working) return member.wake?.();
+    if (!session?.isStreaming || member.nudged) return;
+    member.nudged = true;
+    log("steer", { agent: member.name });
+    session.steer("You have new messages on the board; call inbox.").catch(() => {});
+  };
+  const board = new Board(names, log, notify, budgetText);
   const end = (why: EndReason) => {
     if (reason) return;
     reason = why;
+    for (const member of board.members.values()) member.wake?.();
     if (why === "all_done" || why === "quiescent") return;
     log("abort", { reason: why });
     for (const { session } of agents) session.abort().catch(() => {});
@@ -61,17 +76,31 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   const evaluate = () => {
     const members = [...board.members.values()];
     if (members.some(m => m.working)) return;
-    end(members.every(m => m.doneReason !== undefined) ? "all_done" : "quiescent");
+    if (members.every(m => m.doneReason !== undefined)) end("all_done");
+    else if (members.every(m => m.doneReason !== undefined || !board.unread(m.name).length)) end("quiescent");
   };
   const runAgent = async ({ name, session, briefing }: Agent) => {
     const member = board.members.get(name)!;
-    member.working = true;
-    try {
-      await session.prompt(briefing);
-    } catch (error) {
-      log("error", { agent: name, message: String(error) });
+    let prompt = briefing;
+    while (true) {
+      member.working = true;
+      try {
+        await session.prompt(prompt);
+      } catch (error) {
+        log("error", { agent: name, message: String(error) });
+      }
+      member.working = false;
+      if (reason || member.doneReason !== undefined) break;
+      if (!board.unread(name).length) {
+        evaluate();
+        if (reason) break;
+        await new Promise<void>(resolve => { member.wake = resolve; });
+        member.wake = undefined;
+        if (reason) break;
+      }
+      log("wake", { agent: name });
+      prompt = "You have new messages on the board. Call inbox, then continue toward the goal.";
     }
-    member.working = false;
     evaluate();
   };
 
@@ -83,7 +112,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
       });
       await loader.reload();
-      const tools = boardTools(board, name);
+      const tools = boardTools(board, name, task.messaging);
       const { session } = await createAgentSession({
         cwd: workspace, modelRuntime: runtime, model,
         thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],
@@ -99,7 +128,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
           setImmediate(checkBudget); // session stats include this message only after listeners run
         }
       });
-      return { name, session, briefing: briefing(task, name) };
+      return { name, session, briefing: briefing(task, name, names) };
     }));
     log("run_start", {
       task, workspace,
@@ -129,9 +158,18 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   return result;
 }
 
-function briefing(task: Task, name: string) {
+function briefing(task: Task, name: string, names: string[]) {
+  const others = names.filter(n => n !== name);
+  const team = !task.messaging ? "" : `
+Teammates: ${others.join(", ") || "none"}. You all share this folder and this goal; nobody is in charge.
+Coordinate on the shared board:
+- post(text, thread?) sends a message to every teammate; inbox() returns the messages you have not read.
+- team() shows who is working, idle or done and which files they claim; budget() shows the shared spend.
+- claim(path) / release(path) announce which file you are editing (advisory; claim fails if someone else holds it).
+Start by reading your inbox and posting what you will work on. When told you have new messages, call inbox.
+`;
   return `You are ${name}, an agent in a swarm. You work in the current directory; stay inside it.
-
+${team}
 Goal:
 ${task.goal}
 
