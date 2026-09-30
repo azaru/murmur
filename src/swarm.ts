@@ -1,0 +1,161 @@
+import { spawn } from "node:child_process";
+import { appendFileSync, cpSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import {
+  type AgentSession, type CreateAgentSessionOptions, createAgentSession, DefaultResourceLoader,
+  getAgentDir, ModelRuntime, SessionManager, SettingsManager,
+} from "@earendil-works/pi-coding-agent";
+import { Board, boardTools } from "./board.ts";
+
+export type Task = {
+  goal: string; done: string; check: string; project?: string;
+  agents: number; provider: string; model: string; thinking?: string;
+  budgetUsd?: number; budgetTokens?: number; timeoutMinutes: number; messaging: boolean;
+};
+export type RunOptions = { runDir: string; workspace?: string; authPath?: string; checkTimeoutMs?: number };
+export type EndReason = "all_done" | "quiescent" | "budget" | "timeout" | "error";
+type Agent = { name: string; session: AgentSession; briefing: string };
+
+export const NAMES = ["wren", "finch", "robin", "lark", "swift", "tern", "kite", "heron", "crane", "linnet", "plover", "dunlin"];
+const BUILTIN_TOOLS = ["read", "bash", "edit", "write"];
+const OUTPUT_LIMIT = 4000;
+
+export async function runSwarm(task: Task, opts: RunOptions) {
+  const started = Date.now();
+  const runtime = await ModelRuntime.create(opts.authPath ? { authPath: opts.authPath } : {});
+  const model = runtime.getModel(task.provider, task.model);
+  if (!model) throw new Error(`unknown model ${task.provider}/${task.model}`);
+
+  const workspace = opts.workspace ?? join(opts.runDir, "workspace");
+  mkdirSync(workspace, { recursive: true });
+  if (!opts.workspace && task.project) cpSync(task.project, workspace, { recursive: true });
+  const log = (type: string, data: Record<string, unknown> = {}) =>
+    appendFileSync(join(opts.runDir, "events.jsonl"), JSON.stringify({ t: new Date().toISOString(), type, ...data }) + "\n");
+
+  const names = NAMES.slice(0, task.agents);
+  const board = new Board(names, log);
+  let agents: Agent[] = [];
+  let reason: EndReason | undefined;
+
+  const totals = () => {
+    let cost = 0, tokens = 0;
+    for (const { session } of agents) {
+      const stats = session.getSessionStats();
+      cost += stats.cost;
+      tokens += stats.tokens.total;
+    }
+    return { cost, tokens };
+  };
+  const end = (why: EndReason) => {
+    if (reason) return;
+    reason = why;
+    if (why === "all_done" || why === "quiescent") return;
+    log("abort", { reason: why });
+    for (const { session } of agents) session.abort().catch(() => {});
+  };
+  const checkBudget = () => {
+    const { cost, tokens } = totals();
+    if ((task.budgetUsd && cost > task.budgetUsd) || (task.budgetTokens && tokens > task.budgetTokens)) end("budget");
+  };
+  // Called whenever a turn ends: the swarm is over once nobody is working.
+  const evaluate = () => {
+    const members = [...board.members.values()];
+    if (members.some(m => m.working)) return;
+    end(members.every(m => m.doneReason !== undefined) ? "all_done" : "quiescent");
+  };
+  const runAgent = async ({ name, session, briefing }: Agent) => {
+    const member = board.members.get(name)!;
+    member.working = true;
+    try {
+      await session.prompt(briefing);
+    } catch (error) {
+      log("error", { agent: name, message: String(error) });
+    }
+    member.working = false;
+    evaluate();
+  };
+
+  const timer = setTimeout(() => end("timeout"), task.timeoutMinutes * 60_000);
+  try {
+    agents = await Promise.all(names.map(async name => {
+      const loader = new DefaultResourceLoader({
+        cwd: workspace, agentDir: getAgentDir(),
+        noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
+      });
+      await loader.reload();
+      const tools = boardTools(board, name);
+      const { session } = await createAgentSession({
+        cwd: workspace, modelRuntime: runtime, model,
+        thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],
+        resourceLoader: loader, settingsManager: SettingsManager.inMemory(),
+        sessionManager: SessionManager.inMemory(workspace),
+        tools: [...BUILTIN_TOOLS, ...tools.map(t => t.name)], customTools: tools,
+      });
+      session.subscribe(event => {
+        if (event.type === "tool_execution_start") log("tool", { agent: name, tool: event.toolName, args: event.args });
+        if (event.type === "message_end" && event.message.role === "assistant") {
+          const { input, output, totalTokens, cost } = event.message.usage;
+          log("usage", { agent: name, input, output, total: totalTokens, cost: cost.total });
+          checkBudget();
+        }
+      });
+      return { name, session, briefing: briefing(task, name) };
+    }));
+    log("run_start", {
+      task, workspace,
+      agents: agents.map(a => ({ name: a.name, tools: a.session.getActiveToolNames(), briefing: a.briefing })),
+    });
+    await Promise.all(agents.map(runAgent));
+  } catch (error) {
+    log("error", { message: String(error) });
+    end("error");
+  }
+  clearTimeout(timer);
+
+  const check = await runCheck(task.check, workspace, opts.checkTimeoutMs ?? 10 * 60_000);
+  log("check", check);
+  const { cost, tokens } = totals();
+  const result = {
+    status: check.exitCode === 0 ? "passed" : "failed",
+    reason, check, costUsd: cost, tokens, durationMs: Date.now() - started,
+    agents: [...board.members.values()].map(m => {
+      const stats = agents.find(a => a.name === m.name)?.session.getSessionStats();
+      return { name: m.name, done: m.doneReason !== undefined, doneReason: m.doneReason, costUsd: stats?.cost ?? 0, tokens: stats?.tokens.total ?? 0 };
+    }),
+  };
+  for (const { session } of agents) session.dispose();
+  writeFileSync(join(opts.runDir, "result.json"), JSON.stringify(result, null, 2) + "\n");
+  log("run_end", { status: result.status, reason });
+  return result;
+}
+
+function briefing(task: Task, name: string) {
+  return `You are ${name}, an agent in a swarm. You work in the current directory; stay inside it.
+
+Goal:
+${task.goal}
+
+Definition of done:
+${task.done}
+
+Acceptance check (run from the current directory, must exit 0):
+${task.check}
+
+When the definition of done is met and the check passes, call done(reason). If you conclude the goal cannot be reached, call done(reason) with the reason instead of pushing on.`;
+}
+
+function runCheck(command: string, cwd: string, timeoutMs: number) {
+  return new Promise<{ exitCode: number | null; output: string; timedOut: boolean }>(resolve => {
+    const child = spawn("sh", ["-c", command], { cwd, detached: true });
+    let output = "", timedOut = false;
+    const add = (chunk: Buffer) => { output = (output + chunk).slice(-OUTPUT_LIMIT); };
+    child.stdout.on("data", add);
+    child.stderr.on("data", add);
+    const timer = setTimeout(() => {
+      timedOut = true;
+      try { process.kill(-child.pid!, "SIGKILL"); } catch {}
+    }, timeoutMs);
+    child.on("error", error => { output += String(error); });
+    child.on("close", exitCode => { clearTimeout(timer); resolve({ exitCode, output, timedOut }); });
+  });
+}
