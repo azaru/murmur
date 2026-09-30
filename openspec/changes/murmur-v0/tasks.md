@@ -19,8 +19,8 @@
 
 ## 3. Hito 3 — swarmtest adapter
 
-- [ ] 3.1 Make `runSwarm` accept `{ workspace, authPath, checkTimeoutMs }` options (workspace used in place, no copy; auth passed to `ModelRuntime.create`; check cap overridable); verify the hello example still passes through the CLI
-- [ ] 3.2 Write `../swarmtest/adapters/murmur.mjs` following `adapters/pi.mjs` / `arcswarm.mjs`: request→task mapping from design.md, `--check` preflight printing `{"status":"ready"}`, status/usage mapping per the swarmtest-adapter spec, swarm timeout reduced by a margin so the check finishes before swarmtest's deadline; verify `--check` returns ready for the chosen model
-- [ ] 3.3 Register `murmur` in `../swarmtest` (`SYSTEMS`/projects, `token_budget == 0` allowlist, tsx loader in `adapter_command`, `pi_auth_path` passing); verify swarmtest's own tests still pass
-- [ ] 3.4 Run one swarmtest task with murmur (small budget); verify an adapter result is written, the grader runs, and no credential content appears in the workspace, trace or result
+- [x] 3.1 Make `runSwarm` accept `{ workspace, authPath, checkTimeoutMs }` options (workspace used in place, no copy; auth passed to `ModelRuntime.create`; check cap overridable); verify the hello example still passes through the CLI
+- [x] 3.2 Write `../swarmtest/adapters/murmur.mjs` following `adapters/pi.mjs` / `arcswarm.mjs`: request→task mapping from design.md, `--check` preflight printing `{"status":"ready"}`, status/usage mapping per the swarmtest-adapter spec, swarm timeout reduced by a margin so the check finishes before swarmtest's deadline; verify `--check` returns ready for the chosen model
+- [x] 3.3 Register `murmur` in `../swarmtest` (`SYSTEMS`/projects, `token_budget == 0` allowlist, tsx loader in `adapter_command`, `pi_auth_path` passing); verify swarmtest's own tests still pass
+- [x] 3.4 Run one swarmtest task with murmur (small budget); verify an adapter result is written, the grader runs, and no credential content appears in the workspace, trace or result
 - [ ] 3.5 Commit (murmur and swarmtest repos separately) and stop for review
