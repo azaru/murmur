@@ -172,7 +172,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       return { name: m.name, done: m.doneReason !== undefined, doneReason: m.doneReason, costUsd: stats?.cost ?? 0, tokens: stats?.tokens.total ?? 0 };
     }),
   };
-  for (const { session } of agents) session.dispose();
+  for (const { name, session } of agents) {
+    writeFileSync(join(opts.runDir, `${name}.messages.json`), JSON.stringify(session.messages, null, 1) + "\n");
+    session.dispose();
+  }
   writeFileSync(join(opts.runDir, "result.json"), JSON.stringify(result, null, 2) + "\n");
   log("run_end", { status: result.status, reason });
   return result;
