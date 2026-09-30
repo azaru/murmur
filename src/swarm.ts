@@ -120,6 +120,9 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         sessionManager: SessionManager.inMemory(workspace),
         tools: [...BUILTIN_TOOLS, ...tools.map(t => t.name)], customTools: tools,
       });
+      if (task.thinking && session.thinkingLevel !== task.thinking) {
+        throw new Error(`${task.model} ran with thinking ${session.thinkingLevel}, not ${task.thinking}`);
+      }
       session.subscribe(event => {
         if (event.type === "tool_execution_start") log("tool", { agent: name, tool: event.toolName, args: event.args });
         if (event.type === "message_end" && event.message.role === "assistant") {
@@ -132,7 +135,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     }));
     log("run_start", {
       task, workspace,
-      agents: agents.map(a => ({ name: a.name, tools: a.session.getActiveToolNames(), briefing: a.briefing })),
+      agents: agents.map(a => ({
+        name: a.name, model: a.session.model?.id, thinking: a.session.thinkingLevel,
+        tools: a.session.getActiveToolNames(), briefing: a.briefing,
+      })),
     });
     await Promise.all(agents.map(runAgent));
   } catch (error) {
