@@ -1,0 +1,13 @@
+{
+  "goal": "Implement three small Python modules in this folder so that test_trio.py passes: slug.py with slugify(text), roman.py with to_roman(n) and from_roman(s), and wordfreq.py with top_words(text, n). Read test_trio.py for the exact behaviour. Do not modify test_trio.py. Use only the standard library.",
+  "done": "slug.py, roman.py and wordfreq.py exist, test_trio.py is unchanged, and every test in it passes.",
+  "check": "python3 -m unittest -q test_trio",
+  "project": "trio",
+  "agents": 3,
+  "provider": "openai-codex",
+  "model": "gpt-6-luna",
+  "thinking": "medium",
+  "budgetTokens": 1500000,
+  "timeoutMinutes": 15,
+  "messaging": true
+}
