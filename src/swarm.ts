@@ -96,7 +96,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         if (event.type === "message_end" && event.message.role === "assistant") {
           const { input, output, totalTokens, cost } = event.message.usage;
           log("usage", { agent: name, input, output, total: totalTokens, cost: cost.total });
-          checkBudget();
+          setImmediate(checkBudget); // session stats include this message only after listeners run
         }
       });
       return { name, session, briefing: briefing(task, name) };

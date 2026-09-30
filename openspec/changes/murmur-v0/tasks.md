@@ -6,7 +6,7 @@
 - [x] 1.4 Write `src/swarm.ts`: run dir + workspace copy, `ModelRuntime` + model lookup, sessions (tools allowlist, in-memory session manager, resource isolation via `DefaultResourceLoader`), briefing as first prompt, `events.jsonl` (run_start, tool, usage, done, error, abort, check, run_end), budget from `getSessionStats` on `message_end`, timeout + `abort()`, end on all-done/idle, check with 10-min cap and bounded output, `result.json`; verify `tsc --noEmit` passes
 - [x] 1.5 Add `examples/hello.json` (1 agent, `openai-codex`/`gpt-6-luna`/`medium`, "create hello.txt containing hi", check `test "$(cat hello.txt)" = hi`, small token budget, 5-min timeout) and run it with `--unsafe`; verify `result.json` has `status: "passed"`, reason `all_done`, non-zero tokens, and `events.jsonl` shows the write tool call, usage lines and `done`
 - [x] 1.6 Add the `Dockerfile` (node + git + python3, `MURMUR_SANDBOX=1`, entry `npx tsx src/cli.ts`); verify `docker build` succeeds and the hello task passes inside the container with the mounts from design.md (skip and report if Docker is unavailable)
-- [ ] 1.7 Commit hito 1 in small English commits and stop for review
+- [x] 1.7 Commit hito 1 in small English commits and stop for review
 
 ## 2. Hito 2 — 3 agents talking
 
