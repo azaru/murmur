@@ -1,0 +1,12 @@
+{
+  "goal": "Create a file named hello.txt whose entire content is the word hi.",
+  "done": "hello.txt exists in the working directory and contains exactly hi (a trailing newline is fine).",
+  "check": "test \"$(cat hello.txt)\" = hi",
+  "agents": 1,
+  "provider": "openai-codex",
+  "model": "gpt-6-luna",
+  "thinking": "medium",
+  "budgetTokens": 200000,
+  "timeoutMinutes": 5,
+  "messaging": true
+}
