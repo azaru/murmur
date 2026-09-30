@@ -6,22 +6,23 @@ import {
   getAgentDir, ModelRuntime, SessionManager, SettingsManager,
 } from "@earendil-works/pi-coding-agent";
 import { Board, boardTools, type Member } from "./board.ts";
+import { loadProfile, type Profile, render } from "./profile.ts";
 
 export type Task = {
   goal: string; done: string; check: string; project?: string;
   agents: number; provider: string; model: string; thinking?: string;
-  budgetUsd?: number; budgetTokens?: number; timeoutMinutes: number; messaging: boolean;
+  budgetUsd?: number; budgetTokens?: number; timeoutMinutes: number; profile?: string;
 };
 export type RunOptions = { runDir: string; workspace?: string; authPath?: string; checkTimeoutMs?: number };
 export type EndReason = "all_done" | "quiescent" | "budget" | "timeout" | "error";
 type Agent = { name: string; session: AgentSession; briefing: string };
 
 export const NAMES = ["wren", "finch", "robin", "lark", "swift", "tern", "kite", "heron", "crane", "linnet", "plover", "dunlin"];
-const BUILTIN_TOOLS = ["read", "bash", "edit", "write"];
 const OUTPUT_LIMIT = 4000;
 
 export async function runSwarm(task: Task, opts: RunOptions) {
   const started = Date.now();
+  const profile = loadProfile(task.profile);
   const runtime = await ModelRuntime.create(opts.authPath ? { authPath: opts.authPath } : {});
   const model = runtime.getModel(task.provider, task.model);
   if (!model) throw new Error(`unknown model ${task.provider}/${task.model}`);
@@ -60,7 +61,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     if (!session?.isStreaming || member.nudged) return;
     member.nudged = true;
     log("steer", { agent: member.name });
-    session.steer("You have new messages on the board; call inbox.").catch(() => {});
+    session.steer(profile.steer).catch(() => {});
   };
   const board = new Board(names, log, notify, budgetText);
   const end = (why: EndReason) => {
@@ -82,8 +83,17 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     if (members.every(m => m.doneReason !== undefined)) end("all_done");
     else if (members.every(m => m.doneReason !== undefined || !board.unread(m.name).length)) end("quiescent");
   };
-  const runAgent = async ({ name, session, briefing }: Agent) => {
+  const runAgent = async ({ name, session, briefing }: Agent, index: number) => {
     const member = board.members.get(name)!;
+    if (index && profile.spawnGapSeconds) {
+      // Staggered start; end() cuts the wait short through wake.
+      await new Promise<void>(resolve => {
+        const timer = setTimeout(resolve, index * profile.spawnGapSeconds * 1000);
+        member.wake = () => { clearTimeout(timer); resolve(); };
+      });
+      member.wake = undefined;
+      if (reason) return;
+    }
     let prompt = briefing;
     while (true) {
       member.working = true;
@@ -102,7 +112,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         if (reason) break;
       }
       log("wake", { agent: name });
-      prompt = "You have new messages on the board. Call inbox, then continue toward the goal.";
+      prompt = profile.wake;
     }
     evaluate();
   };
@@ -113,15 +123,16 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       const loader = new DefaultResourceLoader({
         cwd: workspace, agentDir: getAgentDir(),
         noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
+        appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
       });
       await loader.reload();
-      const tools = boardTools(board, name, task.messaging);
+      const tools = boardTools(board, name, profile);
       const { session } = await createAgentSession({
         cwd: workspace, modelRuntime: runtime, model,
         thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],
         resourceLoader: loader, settingsManager: SettingsManager.inMemory(),
         sessionManager: SessionManager.inMemory(workspace),
-        tools: [...BUILTIN_TOOLS, ...tools.map(t => t.name)], customTools: tools,
+        tools: [...profile.tools, ...tools.map(t => t.name)], customTools: tools,
       });
       if (task.thinking && session.thinkingLevel !== task.thinking) {
         throw new Error(`${task.model} ran with thinking ${session.thinkingLevel}, not ${task.thinking}`);
@@ -134,16 +145,16 @@ export async function runSwarm(task: Task, opts: RunOptions) {
           setImmediate(checkBudget); // session stats include this message only after listeners run
         }
       });
-      return { name, session, briefing: briefing(task, name, names) };
+      return { name, session, briefing: briefing(task, profile, name, names) };
     }));
     log("run_start", {
-      task, workspace,
+      task, profile, workspace,
       agents: agents.map(a => ({
         name: a.name, model: a.session.model?.id, thinking: a.session.thinkingLevel,
         tools: a.session.getActiveToolNames(), briefing: a.briefing,
       })),
     });
-    await Promise.all(agents.map(runAgent));
+    await Promise.all(agents.map((agent, index) => runAgent(agent, index)));
   } catch (error) {
     log("error", { message: String(error) });
     end("error");
@@ -167,28 +178,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   return result;
 }
 
-function briefing(task: Task, name: string, names: string[]) {
-  const others = names.filter(n => n !== name);
-  const team = !task.messaging ? "" : `
-Teammates: ${others.join(", ") || "none"}. You all share this folder and this goal; nobody is in charge.
-Coordinate on the shared board:
-- post(text, thread?) sends a message to every teammate; inbox() returns the messages you have not read.
-- team() shows who is working, idle or done and which files they claim; budget() shows the shared spend.
-- claim(path) / release(path) announce which file you are editing (advisory; claim fails if someone else holds it).
-Start by reading your inbox and posting what you will work on. When told you have new messages, call inbox.
-`;
-  return `You are ${name}, an agent in a swarm. You work in the current directory; stay inside it.
-${team}
-Goal:
-${task.goal}
-
-Definition of done:
-${task.done}
-
-Acceptance check (run from the current directory, must exit 0):
-${task.check}
-
-When the definition of done is met and the check passes, call done(reason). If you conclude the goal cannot be reached, call done(reason) with the reason instead of pushing on.`;
+function briefing(task: Task, profile: Profile, name: string, names: string[]) {
+  const teammates = names.filter(n => n !== name).join(", ") || "none";
+  const team = profile.messaging ? render(profile.teamBriefing, { teammates }) : "";
+  return render(profile.briefing, { name, teammates, team, goal: task.goal, done: task.done, check: task.check });
 }
 
 function runCheck(command: string, cwd: string, timeoutMs: number) {

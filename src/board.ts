@@ -1,6 +1,7 @@
 import { normalize } from "node:path";
 import { defineTool } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import type { Profile } from "./profile.ts";
 
 export type Log = (type: string, data?: Record<string, unknown>) => void;
 export type Member = {
@@ -15,8 +16,15 @@ export class Board {
   messages: Message[] = [];
   claims = new Map<string, string>();
 
-  constructor(names: string[], private log: Log, private notify: (member: Member) => void, public budget: () => string) {
-    for (const name of names) this.members.set(name, { name, working: false, read: 0, nudged: false });
+  private log: Log;
+  private notify: (member: Member) => void;
+  budget: () => string;
+
+  constructor(names: string[], log: Log, notify: (member: Member) => void, budget: () => string) {
+    this.log = log;
+    this.notify = notify;
+    this.budget = budget;
+    for (const name of names) this.members.set(name, { name, working: true, read: 0, nudged: false }); // working until its first turn ends
   }
 
   unread(agent: string) {
@@ -68,11 +76,12 @@ export class Board {
 const reply = (text: string) => ({ content: [{ type: "text" as const, text }], details: {} });
 
 /** Coordination tools for one agent; only `done` when messaging is off. */
-export function boardTools(board: Board, agent: string, messaging: boolean) {
+export function boardTools(board: Board, agent: string, { messaging, toolDescriptions }: Profile) {
+  const describe = (name: string, text: string) => toolDescriptions[name] ?? text;
   const done = defineTool({
     name: "done",
     label: "done",
-    description: "Finish your work in the swarm. Call it when the definition of done is met, or to give up with the reason why the goal cannot be reached.",
+    description: describe("done", "Finish your work in the swarm. Call it when the definition of done is met, or to give up with the reason why the goal cannot be reached."),
     parameters: Type.Object({ reason: Type.String({ description: "Why you are finishing" }) }),
     async execute(_id, { reason }) {
       board.done(agent, reason);
@@ -85,7 +94,7 @@ export function boardTools(board: Board, agent: string, messaging: boolean) {
     defineTool({
       name: "post",
       label: "post",
-      description: "Post a message to every teammate on the shared board. Use an optional thread label to group a conversation.",
+      description: describe("post", "Post a message to every teammate on the shared board. Use an optional thread label to group a conversation."),
       parameters: Type.Object({ text: Type.String(), thread: Type.Optional(Type.String()) }),
       async execute(_id, { text, thread }) {
         board.post(agent, text, thread);
@@ -95,7 +104,7 @@ export function boardTools(board: Board, agent: string, messaging: boolean) {
     defineTool({
       name: "inbox",
       label: "inbox",
-      description: "Read the board messages from teammates that you have not read yet.",
+      description: describe("inbox", "Read the board messages from teammates that you have not read yet."),
       parameters: Type.Object({}),
       async execute() {
         const messages = board.inbox(agent);
@@ -106,7 +115,7 @@ export function boardTools(board: Board, agent: string, messaging: boolean) {
     defineTool({
       name: "team",
       label: "team",
-      description: "Show every agent's state (working, idle or done with its reason) and the files it claims.",
+      description: describe("team", "Show every agent's state (working, idle or done with its reason) and the files it claims."),
       parameters: Type.Object({}),
       async execute() {
         return reply(board.team(agent));
@@ -115,7 +124,7 @@ export function boardTools(board: Board, agent: string, messaging: boolean) {
     defineTool({
       name: "budget",
       label: "budget",
-      description: "Show the swarm's shared spend and what remains of its budget.",
+      description: describe("budget", "Show the swarm's shared spend and what remains of its budget."),
       parameters: Type.Object({}),
       async execute() {
         return reply(board.budget());
@@ -124,7 +133,7 @@ export function boardTools(board: Board, agent: string, messaging: boolean) {
     defineTool({
       name: "claim",
       label: "claim",
-      description: "Announce that you are editing a file. Fails if another agent holds it. Advisory only: it does not lock the file.",
+      description: describe("claim", "Announce that you are editing a file. Fails if another agent holds it. Advisory only: it does not lock the file."),
       parameters: path,
       async execute(_id, { path }) {
         board.claim(agent, normalize(path));
@@ -134,7 +143,7 @@ export function boardTools(board: Board, agent: string, messaging: boolean) {
     defineTool({
       name: "release",
       label: "release",
-      description: "Release a file you claimed.",
+      description: describe("release", "Release a file you claimed."),
       parameters: path,
       async execute(_id, { path }) {
         board.release(agent, normalize(path));

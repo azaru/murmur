@@ -8,6 +8,5 @@
   "model": "gpt-6-luna",
   "thinking": "medium",
   "budgetTokens": 1500000,
-  "timeoutMinutes": 15,
-  "messaging": true
+  "timeoutMinutes": 15
 }

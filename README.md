@@ -17,7 +17,7 @@ docker run --rm -v "$PWD/runs:/murmur/runs" -v "$PWD/examples:/murmur/examples:r
   -v "$HOME/.murmur-pi:/root/.pi/agent" murmur run examples/hello.json
 ```
 
-A task file sets `goal`, `done` (definition of done), `check` (acceptance command), optional `project` (folder copied into the workspace), `agents` (1–12), `provider`, `model`, `thinking`, `budgetUsd` and/or `budgetTokens`, `timeoutMinutes` and `messaging` (default true). Each run writes `runs/<id>/workspace/`, `events.jsonl` (full trace) and `result.json` (status, end reason, check output, cost, tokens, per-agent data). With OAuth subscriptions the reported cost may be 0 or a catalog estimate; use `budgetTokens`.
+A task file sets `goal`, `done` (definition of done), `check` (acceptance command), optional `project` (folder copied into the workspace), `agents` (1–12), `provider`, `model`, `thinking`, `budgetUsd` and/or `budgetTokens`, `timeoutMinutes` and an optional `profile`. A profile (see `src/profile.ts` for the defaults) holds everything an experiment may tune: `messaging`, the `briefing`/`teamBriefing` templates, `steer` and `wake` texts, `systemPromptAppend`, `toolDescriptions`, the built-in `tools` and `spawnGapSeconds`; `profiles/no-messaging.json` is the control arm. Each run writes `runs/<id>/workspace/`, `events.jsonl` (full trace) and `result.json` (status, end reason, check output, cost, tokens, per-agent data). With OAuth subscriptions the reported cost may be 0 or a catalog estimate; use `budgetTokens`.
 
 ## Design
 
@@ -28,6 +28,6 @@ A task file sets `goal`, `done` (definition of done), `check` (acceptance comman
 - Every briefing carries a verifiable definition of done and an explicit way to give up (`done`).
 - The swarm ends when all are done, when nobody works and nobody has unread mail, or on budget/timeout.
 - The acceptance check always runs at the end; the trace records posts, tool calls, usage and done reasons.
-- `messaging: false` registers only `done`: the control condition for measuring the board's value.
+- A profile with `messaging: false` registers only `done`: the control condition for measuring the board's value.
 - Agents are isolated from your Pi extensions, skills, settings and context files.
 - It refuses to run outside a sandbox unless told `--unsafe`. Under ~600 lines, on purpose.

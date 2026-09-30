@@ -21,11 +21,14 @@ function validate(raw: any, base: string): Task {
   if (raw.budgetUsd === undefined && raw.budgetTokens === undefined) errors.push("set budgetUsd and/or budgetTokens");
   if (!(typeof raw.timeoutMinutes === "number" && raw.timeoutMinutes > 0)) errors.push("timeoutMinutes must be a positive number");
   if (raw.thinking !== undefined && typeof raw.thinking !== "string") errors.push("thinking must be a string");
-  if (raw.messaging !== undefined && typeof raw.messaging !== "boolean") errors.push("messaging must be a boolean");
-  const project = typeof raw.project === "string" ? resolve(base, raw.project) : undefined;
-  if (raw.project !== undefined && !(project && existsSync(project))) errors.push("project must be an existing folder");
+  if (raw.messaging !== undefined) errors.push("messaging moved to the profile: set it in a profile file and point `profile` at it");
+  const [project, profile] = ["project", "profile"].map(key => {
+    const path = typeof raw[key] === "string" ? resolve(base, raw[key]) : undefined;
+    if (raw[key] !== undefined && !(path && existsSync(path))) errors.push(`${key} must be an existing path`);
+    return path;
+  });
   if (errors.length) fail(`invalid task file:\n- ${errors.join("\n- ")}`);
-  return { ...raw, project, messaging: raw.messaging ?? true };
+  return { ...raw, project, profile };
 }
 
 const args = process.argv.slice(2);
