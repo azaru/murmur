@@ -10,12 +10,12 @@
 
 ## 2. Hito 2 — 3 agents talking
 
-- [ ] 2.1 Add `post`, `inbox`, `team`, `budget`, `claim`, `release` to `src/board.ts` per the coordination-board spec, registered only when `messaging` is true; verify `tsc --noEmit` passes and that `run_start` lists only `done` when the hello example is re-run with `messaging: false` (all seven tools in the 2.4 run)
-- [ ] 2.2 Add the single steer on new messages (reset by `inbox`) and the idle-agent wake + re-prompt loop with `quiescent` end detection in `src/swarm.ts`; log `post`, `steer` and `wake` events; verify `tsc --noEmit` passes
-- [ ] 2.3 Extend the briefing with teammates and short coordination-tool instructions (omitted when `messaging: false`); verify by reading the briefing logged in `run_start` for both messaging settings
-- [ ] 2.4 Add `examples/trio/` (a small Python project with three missing modules and a provided unittest file) and `examples/trio.json` (3 agents, `messaging: true`, check `python3 -m unittest -q`); run it and verify `events.jsonl` shows posts from at least two agents, `inbox` calls that read them, and a check result in `result.json`
-- [ ] 2.5 Write `README.md` (what it is, how to run locally/Docker, design ideas in ~10 lines, OAuth cost-0 caveat); verify `wc -l src/*.ts` totals under ~600
-- [ ] 2.6 Commit hito 2 in small English commits and stop for review
+- [x] 2.1 Add `post`, `inbox`, `team`, `budget`, `claim`, `release` to `src/board.ts` per the coordination-board spec, registered only when `messaging` is true; verify `tsc --noEmit` passes and that `run_start` lists only `done` when the hello example is re-run with `messaging: false` (all seven tools in the 2.4 run)
+- [x] 2.2 Add the single steer on new messages (reset by `inbox`) and the idle-agent wake + re-prompt loop with `quiescent` end detection in `src/swarm.ts`; log `post`, `steer` and `wake` events; verify `tsc --noEmit` passes
+- [x] 2.3 Extend the briefing with teammates and short coordination-tool instructions (omitted when `messaging: false`); verify by reading the briefing logged in `run_start` for both messaging settings
+- [x] 2.4 Add `examples/trio/` (a small Python project with three missing modules and a provided unittest file) and `examples/trio.json` (3 agents, `messaging: true`, check `python3 -m unittest -q`); run it and verify `events.jsonl` shows posts from at least two agents, `inbox` calls that read them, and a check result in `result.json`
+- [x] 2.5 Write `README.md` (what it is, how to run locally/Docker, design ideas in ~10 lines, OAuth cost-0 caveat); verify `wc -l src/*.ts` totals under ~600
+- [x] 2.6 Commit hito 2 in small English commits and stop for review
 
 ## 3. Hito 3 — swarmtest adapter
 
