@@ -44,10 +44,9 @@ try {
 const task = validate(raw, dirname(resolve(file)));
 const stamp = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
 const runDir = join("runs", `${stamp.slice(0, 8)}-${stamp.slice(8)}-${randomBytes(2).toString("hex")}`);
-console.log(`murmur: run ${runDir}`);
 try {
   const result = await runSwarm(task, { runDir });
-  console.log(`murmur: ${result.status} (${result.reason}), ${result.tokens} tokens, $${result.costUsd.toFixed(4)}`);
+  console.log(`murmur: ${runDir}: ${result.status} (${result.reason}), ${result.tokens} tokens, $${result.costUsd.toFixed(4)}`);
   process.exit(result.status === "passed" ? 0 : 1);
 } catch (error) {
   fail(String(error instanceof Error ? error.message : error));
