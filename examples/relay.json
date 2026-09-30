@@ -1,0 +1,11 @@
+{
+  "goal": "Two agents relay a secret. wren: pick a random 6-digit number and share it only by posting it on the board; never write it to any file. finch: create answer.txt containing exactly the number wren posts, and nothing else. finch cannot guess the number; it must wait for wren's post: if the number is not on the board yet, end your turn without calling done; you will be woken when a message arrives.",
+  "done": "answer.txt contains exactly the 6-digit number that wren posted on the board.",
+  "check": "grep -Eqx '[0-9]{6}' answer.txt",
+  "agents": 2,
+  "provider": "openai-codex",
+  "model": "gpt-6-luna",
+  "thinking": "medium",
+  "budgetTokens": 300000,
+  "timeoutMinutes": 5
+}
