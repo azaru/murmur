@@ -13,6 +13,7 @@ export type Task = {
   goal: string; done: string; check: string; project?: string;
   agents: number; provider: string; model: string; thinking?: string;
   budgetUsd?: number; budgetTokens?: number; timeoutMinutes: number; profile?: string;
+  checks?: string[]; // per-part checks of a batch: each counts as a check run, and help follows the part an agent last checked
 };
 export type RunOptions = { runDir: string; workspace?: string; authPath?: string; checkTimeoutMs?: number };
 export type EndReason = "all_done" | "quiescent" | "budget" | "timeout" | "error";
@@ -76,31 +77,35 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   board.lease = profile.claimLease * 1000;
   const seen = new Map<string, string>(); // agent and path -> content digest it last read or wrote
   const digest = (path: string) => (existsSync(path) ? createHash("sha1").update(readFileSync(path)).digest("hex") : "");
-  const evidence = new Map<string, { calls: number; firstGreen?: number; green?: boolean; stuck?: number }>(); // per seat, reset by a relay
-  let lastCheck: { ok: boolean; tail: string } | undefined; // the latest acceptance-check run, by anyone
-  // A command runs the check when the check starts a statement (after time/timeout/env/VAR= wrappers) outside quotes and nothing
+  const evidence = new Map<string, { calls: number; firstGreen?: number; green?: boolean; stuck?: number; part?: string }>(); // per seat, reset by a relay
+  const status = new Map<string, { ok: boolean; tail: string }>(); // latest run of each check, by anyone
+  // A command runs a check when the check starts a statement (after time/timeout/env/VAR= wrappers) outside quotes and nothing
   // after it can mask its exit status. A check that itself contains quotes falls back to plain containment.
   const unquote = (text: string) => text.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
-  const checkAt = new RegExp(`(?:^|[;&|(\\n])\\s*(?:(?:time|timeout\\s+\\S+|env|\\w+=\\S*)\\s+)*${unquote(task.check).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=$|[\\s;&|)<>])([^]*)`);
-  const runsCheck = (command: string) => { const match = unquote(command).match(checkAt);
-    return /['"]/.test(task.check) ? command.includes(task.check) : !!match && !/[;|\n]/.test(match[1].trim()); };
-  const help = (name: string, what: string) => (log("help", { agent: name, what }), board.post(name, `(sent by murmur) ${name} ${what}. ${lastCheck
-    ? `The check's latest run failed:\n${lastCheck.tail}` : "Nobody has run the acceptance check yet."}\nIf you can spare the time, offer help on the board or take a look.`, "help"));
+  const checks = [...(task.checks ?? []), task.check].map(check => {
+    const at = new RegExp(`(?:^|[;&|(\\n])\\s*(?:(?:time|timeout\\s+\\S+|env|\\w+=\\S*)\\s+)*${unquote(check).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=$|[\\s;&|)<>])([^]*)`);
+    return { check, runs: (command: string) => { const match = unquote(command).match(at);
+      return /['"]/.test(check) ? command.includes(check) : !!match && !/[;|\n]/.test(match[1].trim()); } };
+  });
+  const help = (name: string, what: string, part: string) => (log("help", { agent: name, what, part }), board.post(name, `(sent by murmur) ${name} ${what}${task.checks ? ` (${part})` : ""}. ${status.get(part)
+    ? `The check's latest run failed:\n${status.get(part)!.tail}` : "Nobody has run the acceptance check yet."}\nIf you can spare the time, offer help on the board or take a look.`, "help"));
   // With delivery "attach", unread posts and notices ride on the agent's next tool result instead of costing a turn.
   const attach = (name: string, event: ToolResultEvent) => {
     const output = event.content.map(c => (c.type === "text" ? c.text : "")).join("");
-    const ranCheck = (event.toolName === "bash" || event.toolName === "finding") && runsCheck(String(event.input.command));
+    const ran = event.toolName === "bash" || event.toolName === "finding" ? checks.find(c => c.runs(String(event.input.command)))?.check : undefined;
+    const ranCheck = ran !== undefined;
     const failed = event.isError || /exited with code [1-9]/.test(output);
     const tail = output.split("\n").filter(l => l.trim() && !l.startsWith("Command exited")).slice(-3).join("\n");
     const seat = evidence.get(name) ?? { calls: 0 };
     evidence.set(name, seat);
     const work = !BOARD_TOOLS.includes(event.toolName);
     if (work) seat.calls += 1;
-    if (ranCheck) seat.green = !failed, lastCheck = { ok: !failed, tail };
+    if (ran) seat.green = !failed, seat.part = ran, status.set(ran, { ok: !failed, tail });
+    const part = seat.part ?? task.check;
     if (ranCheck && !failed) seat.firstGreen ??= seat.calls;
-    if (lastCheck?.ok) seat.stuck = 0;
-    else if (profile.helpAfter && work && (seat.stuck = (seat.stuck ?? 0) + 1) === profile.helpAfter) help(name, `has made ${profile.helpAfter} tool calls while the acceptance check is failing or not yet run`);
-    if (profile.helpAfter && event.toolName === "done" && output.startsWith("You are done") && !lastCheck?.ok) help(name, `finished without a passing acceptance check, saying: "${event.input.reason}"`);
+    if (status.get(part)?.ok) seat.stuck = 0;
+    else if (profile.helpAfter && work && (seat.stuck = (seat.stuck ?? 0) + 1) === profile.helpAfter) help(name, `has made ${profile.helpAfter} tool calls while the acceptance check is failing or not yet run`, part);
+    if (profile.helpAfter && event.toolName === "done" && output.startsWith("You are done") && !status.get(part)?.ok) help(name, `finished without a passing acceptance check, saying: "${event.input.reason}"`, part);
     if (profile.staleGuard && ["read", "write", "edit"].includes(event.toolName) && !event.isError) {
       const path = resolve(workspace, String(event.input.path));
       seen.set(`${name}:${path}`, digest(path));

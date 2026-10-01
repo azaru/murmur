@@ -23,14 +23,7 @@ export class Board {
   /** How long a claim lives without its holder touching the path, in ms; 0 means it never lapses. */
   lease = 0;
 
-  private log: Log;
-  private notify: (member: Member) => void;
-  budget: () => string;
-
-  constructor(names: string[], log: Log, notify: (member: Member) => void, budget: () => string) {
-    this.log = log;
-    this.notify = notify;
-    this.budget = budget;
+  constructor(names: string[], private log: Log, private notify: (member: Member) => void, public budget: () => string) {
     for (const name of names) this.members.set(name, { name, working: true, read: 0, nudged: false, revivals: 0, notices: [] }); // working until its first turn ends
   }
 

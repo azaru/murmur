@@ -21,6 +21,7 @@ function validate(raw: any, base: string): Task {
   if (raw.budgetUsd === undefined && raw.budgetTokens === undefined) errors.push("set budgetUsd and/or budgetTokens");
   if (!(typeof raw.timeoutMinutes === "number" && raw.timeoutMinutes > 0)) errors.push("timeoutMinutes must be a positive number");
   if (raw.thinking !== undefined && typeof raw.thinking !== "string") errors.push("thinking must be a string");
+  if (raw.checks !== undefined && !(Array.isArray(raw.checks) && raw.checks.every((c: unknown) => typeof c === "string" && c.trim()))) errors.push("checks must be a list of commands");
   if (raw.messaging !== undefined) errors.push("messaging moved to the profile: set it in a profile file and point `profile` at it");
   const [project, profile] = ["project", "profile"].map(key => {
     const path = typeof raw[key] === "string" ? resolve(base, raw[key]) : undefined;
