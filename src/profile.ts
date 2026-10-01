@@ -40,19 +40,24 @@ Start by reading your inbox and posting what you will work on. When told you hav
   revive: 0,
   /** done is refused while the agent has unread messages or the acceptance check fails. */
   doneGate: false,
-  /** How posts reach a busy agent: "steer" interrupts it with a new turn; "attach" appends them to its next
-   * tool result; "pull" leaves them on the board until it calls inbox. */
+  /** How posts reach a busy agent: "steer" interrupts it; "attach" appends them to its next tool result; "pull" waits for inbox. */
   delivery: "steer" as "steer" | "attach" | "pull",
   /** Share each agent's file writes and acceptance-check runs with teammates; needs delivery "attach". */
   notices: false,
-  /** Refuse a write onto an existing non-empty file that looks like only part of it (starts indented, or is shorter
-   * and starts differently): it is almost always a continuation that would erase what the agent wrote before. */
+  /** Refuse a write that looks like only part of an existing file (starts indented, or is shorter and starts differently). */
   writeGuard: false,
-  /** Seconds a claim lives without its holder writing the file; above 0, write and edit on a file another agent
-   * claims are refused. 0 keeps claims advisory. */
+  /** Above 0, claims block other agents' write/edit and lapse after this many seconds without the holder writing. */
   claimLease: 0,
   /** Refuse a write onto a file that changed since this agent last read or wrote it. */
   staleGuard: false,
+  /** Tool calls required after an agent's first passing check before done; its latest check must pass too. 0 is off. */
+  doneAfterGreen: 0,
+  /** Append the minutes left before the timeout to every tool result. */
+  clock: false,
+  /** How many fresh instances may take over each agent's seat after it calls done (a context reset, not a revival). */
+  relay: 0,
+  /** Tokens per turn above which an agent with relays left is asked to write its handoff and call done. 0 is off. */
+  relayContext: 0,
   /** Board tools offered when messaging is on; done is always offered. */
   boardTools: BOARD_TOOLS,
 };
@@ -73,6 +78,10 @@ const ProfileSchema = Type.Object({
   writeGuard: Type.Optional(Type.Boolean()),
   claimLease: Type.Optional(Type.Number({ minimum: 0 })),
   staleGuard: Type.Optional(Type.Boolean()),
+  doneAfterGreen: Type.Optional(Type.Integer({ minimum: 0 })),
+  clock: Type.Optional(Type.Boolean()),
+  relay: Type.Optional(Type.Integer({ minimum: 0 })),
+  relayContext: Type.Optional(Type.Integer({ minimum: 0 })),
   boardTools: Type.Optional(Type.Array(Type.String())),
 }, { additionalProperties: false });
 

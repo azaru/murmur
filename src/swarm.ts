@@ -7,7 +7,7 @@ import {
   getAgentDir, isToolCallEventType, ModelRuntime, SessionManager, SettingsManager, type ToolCallEvent, type ToolResultEvent,
 } from "@earendil-works/pi-coding-agent";
 import { Board, boardTools, formatMessages, type Member } from "./board.ts";
-import { loadProfile, type Profile, render } from "./profile.ts";
+import { BOARD_TOOLS, loadProfile, type Profile, render } from "./profile.ts";
 
 export type Task = {
   goal: string; done: string; check: string; project?: string;
@@ -37,24 +37,23 @@ export async function runSwarm(task: Task, opts: RunOptions) {
 
   const names = NAMES.slice(0, task.agents);
   let agents: Agent[] = [];
+  const retired: { name: string; session: AgentSession }[] = []; // sessions replaced by a relay
   let reason: EndReason | undefined;
 
   const totals = () => {
     const usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
     let cost = 0, tokens = 0;
-    for (const { session } of agents) {
-      const stats = session.getSessionStats();
-      cost += stats.cost;
-      tokens += stats.tokens.total;
+    for (const stats of [...agents, ...retired].map(a => a.session.getSessionStats())) {
+      cost += stats.cost, tokens += stats.tokens.total;
       for (const key of Object.keys(usage) as (keyof typeof usage)[]) usage[key] += stats.tokens[key];
     }
     return { cost, tokens, usage };
   };
+  const minutesLeft = () => Math.max(0, task.timeoutMinutes - (Date.now() - started) / 60_000).toFixed(1);
   const budgetText = () => {
     const { cost, tokens } = totals();
     const left = [task.budgetUsd && `$${(task.budgetUsd - cost).toFixed(4)}`, task.budgetTokens && `${task.budgetTokens - tokens} tokens`];
-    const minutes = Math.max(0, task.timeoutMinutes - (Date.now() - started) / 60_000).toFixed(1);
-    return `Spent $${cost.toFixed(4)} and ${tokens} tokens. Remaining: ${left.filter(Boolean).join(", ") || "no limit"}; ${minutes} minutes before timeout.`;
+    return `Spent $${cost.toFixed(4)} and ${tokens} tokens. Remaining: ${left.filter(Boolean).join(", ") || "no limit"}; ${minutesLeft()} minutes before timeout.`;
   };
   // A {messages} placeholder delivers the unread posts inline and marks them read.
   const withMessages = (template: string, name: string) =>
@@ -77,29 +76,38 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   board.lease = profile.claimLease * 1000;
   const seen = new Map<string, string>(); // agent and path -> content digest it last read or wrote
   const digest = (path: string) => (existsSync(path) ? createHash("sha1").update(readFileSync(path)).digest("hex") : "");
+  const evidence = new Map<string, { calls: number; firstGreen?: number; green?: boolean }>(); // per seat, reset by a relay
   // With delivery "attach", unread posts and notices ride on the agent's next tool result instead of costing a turn.
   const attach = (name: string, event: ToolResultEvent) => {
+    const output = event.content.map(c => (c.type === "text" ? c.text : "")).join("");
+    const ranCheck = event.toolName === "bash" && String(event.input.command).includes(task.check);
+    const failed = event.isError || /exited with code [1-9]/.test(output);
+    const seat = evidence.get(name) ?? { calls: 0 };
+    evidence.set(name, seat);
+    if (!BOARD_TOOLS.includes(event.toolName)) seat.calls += 1;
+    if (ranCheck) seat.green = !failed;
+    if (ranCheck && !failed) seat.firstGreen ??= seat.calls;
     if (profile.staleGuard && ["read", "write", "edit"].includes(event.toolName) && !event.isError) {
       const path = resolve(workspace, String(event.input.path));
       seen.set(`${name}:${path}`, digest(path));
     }
     if (profile.notices) {
-      const output = event.content.map(c => (c.type === "text" ? c.text : "")).join("");
       if ((event.toolName === "write" || event.toolName === "edit") && !event.isError) {
         board.notice(name, `${name} ${event.toolName === "write" ? "wrote" : "edited"} ${event.input.path}`);
-      } else if (event.toolName === "bash" && String(event.input.command).includes(task.check)) {
-        const failed = event.isError || /exited with code [1-9]/.test(output);
+      } else if (ranCheck) {
         board.notice(name, `${name} ran the acceptance check: ${failed ? `FAIL\n${output.split("\n").filter(l => l.trim() && !l.startsWith("Command exited")).slice(-3).join("\n")}` : "PASS"}`);
       }
     }
-    if (profile.delivery !== "attach") return;
-    const member = board.members.get(name)!;
-    const notices = member.notices.splice(0);
-    const messages = board.unread(name).length ? board.inbox(name) : [];
-    if (!notices.length && !messages.length) return;
-    log("attach", { agent: name, messages: messages.length, notices: notices.length });
-    const text = ["New on the board:", ...notices.map(n => `- ${n}`), formatMessages(messages)].filter(Boolean).join("\n");
-    return { content: [...event.content, { type: "text" as const, text: `\n\n${text}` }] };
+    const lines: string[] = [];
+    const notices = profile.delivery === "attach" ? board.members.get(name)!.notices.splice(0) : [];
+    const messages = profile.delivery === "attach" && board.unread(name).length ? board.inbox(name) : [];
+    if (notices.length || messages.length) {
+      log("attach", { agent: name, messages: messages.length, notices: notices.length });
+      lines.push("New on the board:", ...notices.map(n => `- ${n}`), formatMessages(messages));
+    }
+    if (profile.clock) lines.push(`[${minutesLeft()} minutes left before the timeout]`);
+    const text = lines.filter(Boolean).join("\n");
+    return text ? { content: [...event.content, { type: "text" as const, text: `\n\n${text}` }] } : undefined;
   };
   const end = (why: EndReason) => {
     if (reason) return;
@@ -110,6 +118,13 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     for (const { session } of agents) session.abort().catch(() => {});
   };
   const guard = (name: string, event: ToolCallEvent) => {
+    const seat = evidence.get(name) ?? { calls: 0 };
+    if (event.toolName === "done" && profile.doneAfterGreen && !(seat.green && seat.calls - seat.firstGreen! >= profile.doneAfterGreen)) {
+      log("done_refused", { agent: name, ...seat });
+      return { block: true, reason: seat.firstGreen === undefined || !seat.green
+        ? "Refused: the acceptance check must pass, run by you, before you finish. If the goal truly cannot be reached, end your turn without calling done."
+        : `Refused: the acceptance check is only a sample. Spend at least ${profile.doneAfterGreen - (seat.calls - seat.firstGreen!)} more tool calls verifying clauses it does not cover (write tests for them, run them, fix what fails), run the check again, then finish.` };
+    }
     const write = isToolCallEventType("write", event);
     if (!write && !isToolCallEventType("edit", event)) return;
     const path = resolve(workspace, event.input.path), key = normalize(relative(workspace, path));
@@ -140,8 +155,9 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     if (members.every(m => m.doneReason !== undefined)) end("all_done");
     else if (members.every(m => m.doneReason !== undefined || !board.unread(m.name).length)) end("quiescent");
   };
-  const runAgent = async ({ name, session, briefing }: Agent, index: number) => {
-    const member = board.members.get(name)!;
+  const runAgent = async (agent: Agent, index: number) => {
+    const { name, briefing } = agent, member = board.members.get(name)!;
+    let relays = 0;
     if (index && profile.spawnGapSeconds) {
       // Staggered start; end() cuts the wait short through wake.
       await new Promise<void>(resolve => {
@@ -154,12 +170,19 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     let prompt = briefing;
     while (true) {
       member.working = true;
-      try {
-        await session.prompt(prompt);
-      } catch (error) {
-        log("error", { agent: name, message: String(error) });
-      }
+      await agent.session.prompt(prompt).catch(error => log("error", { agent: name, message: String(error) }));
       member.working = false;
+      if (!reason && member.doneReason !== undefined && relays < profile.relay) {
+        // A fresh instance takes the seat: same name and board history, empty context.
+        relays += 1;
+        retired.push({ name, session: agent.session });
+        agent.session = await open(name);
+        evidence.delete(name);
+        log("relay", { agent: name, relay: relays, reason: member.doneReason });
+        prompt = `${briefing}\n\nYou are a fresh instance taking over ${name}'s seat. The previous instance finished saying: "${member.doneReason}". Its handoff notes, if it wrote any, are in NOTES-${name}.md. Do not assume the goal is met: check the work against the spec yourself, fix what is wrong or missing, and call done only after verifying it.`;
+        member.doneReason = undefined;
+        continue;
+      }
       if (reason || (member.doneReason !== undefined && member.revivals >= profile.revive)) break;
       if (!board.unread(name).length || member.doneReason !== undefined) {
         evaluate();
@@ -179,50 +202,54 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     evaluate();
   };
 
+  const open = async (name: string) => {
+    const loader = new DefaultResourceLoader({
+      cwd: workspace, agentDir: getAgentDir(),
+      noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
+      appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
+      extensionFactories: profile.delivery === "attach" || profile.notices || profile.writeGuard || profile.claimLease || profile.staleGuard
+        || profile.doneAfterGreen || profile.clock ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
+    });
+    await loader.reload();
+    const verify = async () => {
+      const check = await runCheck(task.check, workspace, Math.min(opts.checkTimeoutMs ?? 10 * 60_000, 5 * 60_000));
+      log("done_check", { agent: name, exitCode: check.exitCode, timedOut: check.timedOut });
+      return { ok: check.exitCode === 0, output: check.output };
+    };
+    const tools = boardTools(board, name, profile, verify);
+    const { session } = await createAgentSession({
+      cwd: workspace, modelRuntime: runtime, model,
+      thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],
+      resourceLoader: loader, settingsManager: SettingsManager.inMemory({ steeringMode: "all" }), // queued steers arrive together
+      sessionManager: SessionManager.inMemory(workspace),
+      tools: [...profile.tools, ...tools.map(t => t.name)], customTools: tools,
+    });
+    if (task.thinking && session.thinkingLevel !== task.thinking) {
+      throw new Error(`${task.model} ran with thinking ${session.thinkingLevel}, not ${task.thinking}`);
+    }
+    let handoff = false; // asked this instance to hand off its long context
+    session.subscribe(event => {
+      if (event.type === "tool_execution_start") log("tool", { agent: name, tool: event.toolName, args: event.args });
+      if (event.type === "message_end" && event.message.role === "assistant") {
+        const { input, output, totalTokens, cost } = event.message.usage;
+        log("usage", { agent: name, input, output, total: totalTokens, cost: cost.total });
+        setImmediate(checkBudget); // session stats include this message only after listeners run
+        const relaysLeft = retired.filter(r => r.name === name).length < profile.relay;
+        if (profile.relayContext && totalTokens > profile.relayContext && relaysLeft && !handoff && session.isStreaming) {
+          handoff = true;
+          log("handoff", { agent: name, tokens: totalTokens });
+          session.steer(`Your context has grown long. Write your handoff in NOTES-${name}.md (what works, what fails, what is next), then call done; a fresh instance of you will continue from those notes.`).catch(() => {});
+        }
+      }
+    });
+    return session;
+  };
+
   const timer = setTimeout(() => end("timeout"), task.timeoutMinutes * 60_000);
   try {
-    agents = await Promise.all(names.map(async name => {
-      const loader = new DefaultResourceLoader({
-        cwd: workspace, agentDir: getAgentDir(),
-        noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
-        appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
-        extensionFactories: profile.delivery === "attach" || profile.notices || profile.writeGuard || profile.claimLease || profile.staleGuard
-          ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
-      });
-      await loader.reload();
-      const verify = async () => {
-        const check = await runCheck(task.check, workspace, Math.min(opts.checkTimeoutMs ?? 10 * 60_000, 5 * 60_000));
-        log("done_check", { agent: name, exitCode: check.exitCode, timedOut: check.timedOut });
-        return { ok: check.exitCode === 0, output: check.output };
-      };
-      const tools = boardTools(board, name, profile, verify);
-      const { session } = await createAgentSession({
-        cwd: workspace, modelRuntime: runtime, model,
-        thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],
-        resourceLoader: loader, settingsManager: SettingsManager.inMemory({ steeringMode: "all" }), // queued steers arrive together
-        sessionManager: SessionManager.inMemory(workspace),
-        tools: [...profile.tools, ...tools.map(t => t.name)], customTools: tools,
-      });
-      if (task.thinking && session.thinkingLevel !== task.thinking) {
-        throw new Error(`${task.model} ran with thinking ${session.thinkingLevel}, not ${task.thinking}`);
-      }
-      session.subscribe(event => {
-        if (event.type === "tool_execution_start") log("tool", { agent: name, tool: event.toolName, args: event.args });
-        if (event.type === "message_end" && event.message.role === "assistant") {
-          const { input, output, totalTokens, cost } = event.message.usage;
-          log("usage", { agent: name, input, output, total: totalTokens, cost: cost.total });
-          setImmediate(checkBudget); // session stats include this message only after listeners run
-        }
-      });
-      return { name, session, briefing: briefing(task, profile, name, names) };
-    }));
-    log("run_start", {
-      task, profile, workspace,
-      agents: agents.map(a => ({
-        name: a.name, model: a.session.model?.id, thinking: a.session.thinkingLevel,
-        tools: a.session.getActiveToolNames(), briefing: a.briefing,
-      })),
-    });
+    agents = await Promise.all(names.map(async name => ({ name, session: await open(name), briefing: briefing(task, profile, name, names) })));
+    log("run_start", { task, profile, workspace, agents: agents.map(({ name, session, briefing }) => ({
+      name, model: session.model?.id, thinking: session.thinkingLevel, tools: session.getActiveToolNames(), briefing })) });
     await Promise.all(agents.map((agent, index) => runAgent(agent, index)));
   } catch (error) {
     log("error", { message: String(error) });
@@ -237,12 +264,15 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     status: check.exitCode === 0 ? "passed" : "failed",
     reason, check, costUsd: cost, tokens, usage, durationMs: Date.now() - started,
     agents: [...board.members.values()].map(m => {
-      const stats = agents.find(a => a.name === m.name)?.session.getSessionStats();
-      return { name: m.name, done: m.doneReason !== undefined, doneReason: m.doneReason, costUsd: stats?.cost ?? 0, tokens: stats?.tokens.total ?? 0 };
+      const stats = [...agents, ...retired].filter(a => a.name === m.name).map(a => a.session.getSessionStats());
+      return { name: m.name, done: m.doneReason !== undefined, doneReason: m.doneReason, relays: stats.length - 1,
+        costUsd: stats.reduce((sum, s) => sum + s.cost, 0), tokens: stats.reduce((sum, s) => sum + s.tokens.total, 0) };
     }),
   };
-  for (const { name, session } of agents) {
-    writeFileSync(join(opts.runDir, `${name}.messages.json`), JSON.stringify(session.messages, null, 1) + "\n");
+  for (const [i, { name, session }] of [...retired, ...agents].entries()) {
+    const earlier = retired.slice(0, i).filter(r => r.name === name).length; // relayed instances get a numbered transcript
+    const file = i < retired.length ? `${name}.${earlier + 1}.messages.json` : `${name}.messages.json`;
+    writeFileSync(join(opts.runDir, file), JSON.stringify(session.messages, null, 1) + "\n");
     session.dispose();
   }
   writeFileSync(join(opts.runDir, "result.json"), JSON.stringify(result, null, 2) + "\n");
@@ -261,13 +291,8 @@ function runCheck(command: string, cwd: string, timeoutMs: number) {
   return new Promise<{ exitCode: number | null; output: string; timedOut: boolean }>(resolve => {
     const child = spawn("sh", ["-c", command], { cwd, detached: true });
     let output = "", timedOut = false;
-    const add = (chunk: Buffer) => { output = (output + chunk).slice(-OUTPUT_LIMIT); };
-    child.stdout.on("data", add);
-    child.stderr.on("data", add);
-    const timer = setTimeout(() => {
-      timedOut = true;
-      try { process.kill(-child.pid!, "SIGKILL"); } catch {}
-    }, timeoutMs);
+    for (const stream of [child.stdout, child.stderr]) stream.on("data", (chunk: Buffer) => { output = (output + chunk).slice(-OUTPUT_LIMIT); });
+    const timer = setTimeout(() => { timedOut = true; try { process.kill(-child.pid!, "SIGKILL"); } catch {} }, timeoutMs);
     child.on("error", error => { output += String(error); });
     child.on("close", exitCode => { clearTimeout(timer); resolve({ exitCode, output, timedOut }); });
   });

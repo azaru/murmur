@@ -1,0 +1,10 @@
+{
+  "delivery": "attach",
+  "teamBriefing": "\nTeammates: {teammates}. You all share this folder and this goal; nobody is in charge.\nCoordinate on the shared board:\n- post(text, thread?) sends a message to every teammate. New posts from teammates appear at the end of your tool results; you do not need to call inbox.\n- team() shows who is working, idle or done and which files they claim; budget() shows the shared spend.\n- claim(path) / release(path) announce which file you are editing (advisory; claim fails if someone else holds it).\nStart by posting what you will work on.\n",
+  "writeGuard": true,
+  "relay": 2,
+  "relayContext": 30000,
+  "toolDescriptions": {
+    "done": "Finish your work in the swarm. Call it when the definition of done is met, or to give up with the reason why the goal cannot be reached. Before calling it, write your handoff in NOTES-<your name>.md: what works, what fails or is unverified, and what to do next; a fresh instance of you may continue from it."
+  }
+}

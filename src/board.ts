@@ -96,38 +96,28 @@ const reply = (text: string) => ({ content: [{ type: "text" as const, text }], d
 /** Coordination tools for one agent; only `done` when messaging is off. */
 export function boardTools(board: Board, agent: string, { messaging, toolDescriptions, roles, doneGate, boardTools: offered }: Profile, verify: Verify) {
   const describe = (name: string, text: string) => toolDescriptions[name] ?? text;
-  const done = defineTool({
-    name: "done",
-    label: "done",
-    description: describe("done", "Finish your work in the swarm. Call it when the definition of done is met, or to give up with the reason why the goal cannot be reached."),
+  const tool = (name: string, text: string) => ({ name, label: name, description: describe(name, text) });
+  const done = defineTool({ ...tool("done", "Finish your work in the swarm. Call it when the definition of done is met, or to give up with the reason why the goal cannot be reached."),
     parameters: Type.Object({ reason: Type.String({ description: "Why you are finishing" }) }),
     async execute(_id, { reason }) {
-      if (doneGate) {
-        const unread = board.unread(agent).length;
-        if (unread) return reply(`Not done: you have ${unread} unread message(s); read them first.`);
-        const check = await verify();
-        if (!check.ok) return reply(`Not done: the acceptance check fails:\n${check.output.slice(-1500)}`);
-      }
+      const unread = doneGate ? board.unread(agent).length : 0;
+      if (unread) return reply(`Not done: you have ${unread} unread message(s); read them first.`);
+      const check = doneGate ? await verify() : { ok: true, output: "" };
+      if (!check.ok) return reply(`Not done: the acceptance check fails:\n${check.output.slice(-1500)}`);
       board.done(agent, reason);
       return reply("You are done. End your turn now.");
-    },
-  });
+    } });
   if (!messaging) return [done];
   const menu = Object.keys(roles);
-  const role = defineTool({
-    name: "role",
-    label: "role",
-    description: describe("role", `Take a role from the menu, or switch to another one: returns its instructions and tells the team. Roles: ${menu.join(", ")}.`),
+  const role = defineTool({ ...tool("role", `Take a role from the menu, or switch to another one: returns its instructions and tells the team. Roles: ${menu.join(", ")}.`),
     parameters: Type.Object({ name: Type.String() }),
     async execute(_id, { name }) {
       if (!roles[name]) throw new Error(`unknown role ${name} (roles: ${menu.join(", ")})`);
       board.members.get(agent)!.role = name;
       board.post(agent, `I take the role ${name}.`);
       return reply(roles[name].instructions);
-    },
-  });
+    } });
   const path = Type.Object({ path: Type.String({ description: "File path relative to the working directory" }) });
-  const tool = (name: string, text: string) => ({ name, label: name, description: describe(name, text) });
   return [
     defineTool({ ...tool("post", "Post a message to every teammate on the shared board. Use an optional thread label to group a conversation."),
       parameters: Type.Object({ text: Type.String(), thread: Type.Optional(Type.String()) }),
