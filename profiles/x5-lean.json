@@ -1,0 +1,9 @@
+{
+  "delivery": "attach",
+  "boardTools": [
+    "post",
+    "claim",
+    "release"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}. You all share this folder and this goal; nobody is in charge.\nCoordinate on the shared board:\n- post(text, thread?) sends a message to every teammate. New posts from teammates appear at the end of your tool results, so there is nothing to poll.\n- claim(path) / release(path) announce which file you are editing (advisory; claim fails if someone else holds it).\nStart by posting what you will work on.\n"
+}

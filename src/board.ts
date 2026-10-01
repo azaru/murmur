@@ -86,7 +86,7 @@ export class Board {
 const reply = (text: string) => ({ content: [{ type: "text" as const, text }], details: {} });
 
 /** Coordination tools for one agent; only `done` when messaging is off. */
-export function boardTools(board: Board, agent: string, { messaging, toolDescriptions, roles, doneGate }: Profile, verify: Verify) {
+export function boardTools(board: Board, agent: string, { messaging, toolDescriptions, roles, doneGate, boardTools: offered }: Profile, verify: Verify) {
   const describe = (name: string, text: string) => toolDescriptions[name] ?? text;
   const done = defineTool({
     name: "done",
@@ -181,5 +181,5 @@ export function boardTools(board: Board, agent: string, { messaging, toolDescrip
     }),
     ...(menu.length ? [role] : []),
     done,
-  ];
+  ].filter(tool => tool === done || offered.includes(tool.name));
 }

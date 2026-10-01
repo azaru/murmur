@@ -45,6 +45,11 @@ Start by reading your inbox and posting what you will work on. When told you hav
   delivery: "steer" as "steer" | "attach" | "pull",
   /** Share each agent's file writes and acceptance-check runs with teammates; needs delivery "attach". */
   notices: false,
+  /** Refuse a write that starts indented onto an existing non-empty file: it is almost always a continuation
+   * that would erase what the agent wrote before. */
+  writeGuard: false,
+  /** Board tools offered when messaging is on; done is always offered. */
+  boardTools: BOARD_TOOLS,
 };
 export type Profile = typeof DEFAULT_PROFILE;
 
@@ -60,6 +65,8 @@ const ProfileSchema = Type.Object({
   doneGate: Type.Optional(Type.Boolean()),
   delivery: Type.Optional(Type.Union([Type.Literal("steer"), Type.Literal("attach"), Type.Literal("pull")])),
   notices: Type.Optional(Type.Boolean()),
+  writeGuard: Type.Optional(Type.Boolean()),
+  boardTools: Type.Optional(Type.Array(Type.String())),
 }, { additionalProperties: false });
 
 export function loadProfile(path?: string): Profile {
@@ -72,6 +79,8 @@ export function loadProfile(path?: string): Profile {
   }
   const badTool = raw.tools?.find((t: string) => !BUILTIN_TOOLS.includes(t));
   if (badTool) throw new Error(`profile ${path}: unknown tool ${badTool} (allowed: ${BUILTIN_TOOLS.join(", ")})`);
+  const badBoardTool = raw.boardTools?.find((t: string) => !BOARD_TOOLS.includes(t));
+  if (badBoardTool) throw new Error(`profile ${path}: unknown board tool ${badBoardTool} (allowed: ${BOARD_TOOLS.join(", ")})`);
   const badDescription = Object.keys(raw.toolDescriptions ?? {}).find(t => !BOARD_TOOLS.includes(t));
   if (badDescription) throw new Error(`profile ${path}: toolDescriptions.${badDescription} is not a board tool`);
   return { ...DEFAULT_PROFILE, ...raw };

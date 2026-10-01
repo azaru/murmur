@@ -1,9 +1,9 @@
 import { spawn } from "node:child_process";
-import { appendFileSync, cpSync, mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { appendFileSync, cpSync, existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import {
   type AgentSession, type CreateAgentSessionOptions, createAgentSession, DefaultResourceLoader,
-  getAgentDir, ModelRuntime, SessionManager, SettingsManager, type ToolResultEvent,
+  getAgentDir, isToolCallEventType, ModelRuntime, SessionManager, SettingsManager, type ToolCallEvent, type ToolResultEvent,
 } from "@earendil-works/pi-coding-agent";
 import { Board, boardTools, formatMessages, type Member } from "./board.ts";
 import { loadProfile, type Profile, render } from "./profile.ts";
@@ -101,6 +101,13 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     log("abort", { reason: why });
     for (const { session } of agents) session.abort().catch(() => {});
   };
+  const guard = (event: ToolCallEvent) => {
+    if (!profile.writeGuard || !isToolCallEventType("write", event) || !/^\s/.test(event.input.content)) return;
+    const path = resolve(workspace, event.input.path);
+    if (!existsSync(path) || !statSync(path).size) return;
+    log("write_refused", { path: event.input.path });
+    return { block: true, reason: "Refused: write replaces the whole file, and this content starts indented, so it looks like the continuation of a file you already wrote; writing it would erase what is there. Add it with edit, or write the complete file in one call." };
+  };
   const checkBudget = () => {
     const { cost, tokens } = totals();
     if ((task.budgetUsd && cost > task.budgetUsd) || (task.budgetTokens && tokens > task.budgetTokens)) end("budget");
@@ -158,7 +165,8 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         cwd: workspace, agentDir: getAgentDir(),
         noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
         appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
-        extensionFactories: profile.delivery === "attach" || profile.notices ? [pi => { pi.on("tool_result", event => attach(name, event)); }] : [],
+        extensionFactories: profile.delivery === "attach" || profile.notices || profile.writeGuard
+          ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", guard); }] : [],
       });
       await loader.reload();
       const verify = async () => {
