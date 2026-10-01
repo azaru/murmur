@@ -148,7 +148,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       const { session } = await createAgentSession({
         cwd: workspace, modelRuntime: runtime, model,
         thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],
-        resourceLoader: loader, settingsManager: SettingsManager.inMemory(),
+        resourceLoader: loader, settingsManager: SettingsManager.inMemory({ steeringMode: "all" }), // queued steers arrive together
         sessionManager: SessionManager.inMemory(workspace),
         tools: [...profile.tools, ...tools.map(t => t.name)], customTools: tools,
       });
