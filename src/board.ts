@@ -18,7 +18,9 @@ export const formatMessages = (messages: Message[]) =>
 export class Board {
   members = new Map<string, Member>();
   messages: Message[] = [];
-  claims = new Map<string, string>();
+  claims = new Map<string, { agent: string; at: number }>();
+  /** How long a claim lives without its holder touching the path, in ms; 0 means it never lapses. */
+  lease = 0;
 
   private log: Log;
   private notify: (member: Member) => void;
@@ -58,26 +60,32 @@ export class Board {
   }
 
   claim(agent: string, path: string) {
-    const holder = this.claims.get(path);
+    const holder = this.holder(path);
     if (holder && holder !== agent) throw new Error(`${path} is claimed by ${holder}`);
-    this.claims.set(path, agent);
+    this.claims.set(path, { agent, at: Date.now() });
   }
 
   release(agent: string, path: string) {
-    if (this.claims.get(path) !== agent) throw new Error(`you do not hold ${path}`);
+    if (this.holder(path) !== agent) throw new Error(`you do not hold ${path}`);
     this.claims.delete(path);
+  }
+
+  holder(path: string) {
+    const claim = this.claims.get(path);
+    if (claim && this.lease && Date.now() - claim.at > this.lease) this.claims.delete(path);
+    return this.claims.get(path)?.agent;
   }
 
   done(agent: string, reason: string) {
     this.members.get(agent)!.doneReason = reason;
-    for (const [path, holder] of this.claims) if (holder === agent) this.claims.delete(path);
+    for (const [path, claim] of this.claims) if (claim.agent === agent) this.claims.delete(path);
     this.log("done", { agent, reason });
   }
 
   team(agent: string) {
     return [...this.members.values()].map(m => {
       const state = m.doneReason !== undefined ? `done (${m.doneReason})` : m.working ? "working" : "idle";
-      const claims = [...this.claims].filter(([, holder]) => holder === m.name).map(([path]) => path);
+      const claims = [...this.claims.keys()].filter(path => this.holder(path) === m.name);
       return `${m.name}${m.name === agent ? " (you)" : ""}: ${state}${m.role ? `; role ${m.role}` : ""}${claims.length ? `; claims ${claims.join(", ")}` : ""}`;
     }).join("\n");
   }
@@ -119,66 +127,21 @@ export function boardTools(board: Board, agent: string, { messaging, toolDescrip
     },
   });
   const path = Type.Object({ path: Type.String({ description: "File path relative to the working directory" }) });
+  const tool = (name: string, text: string) => ({ name, label: name, description: describe(name, text) });
   return [
-    defineTool({
-      name: "post",
-      label: "post",
-      description: describe("post", "Post a message to every teammate on the shared board. Use an optional thread label to group a conversation."),
+    defineTool({ ...tool("post", "Post a message to every teammate on the shared board. Use an optional thread label to group a conversation."),
       parameters: Type.Object({ text: Type.String(), thread: Type.Optional(Type.String()) }),
-      async execute(_id, { text, thread }) {
-        board.post(agent, text, thread);
-        return reply("Posted.");
-      },
-    }),
-    defineTool({
-      name: "inbox",
-      label: "inbox",
-      description: describe("inbox", "Read the board messages from teammates that you have not read yet."),
-      parameters: Type.Object({}),
-      async execute() {
-        const messages = board.inbox(agent);
-        if (!messages.length) return reply("No new messages.");
-        return reply(formatMessages(messages));
-      },
-    }),
-    defineTool({
-      name: "team",
-      label: "team",
-      description: describe("team", "Show every agent's state (working, idle or done with its reason) and the files it claims."),
-      parameters: Type.Object({}),
-      async execute() {
-        return reply(board.team(agent));
-      },
-    }),
-    defineTool({
-      name: "budget",
-      label: "budget",
-      description: describe("budget", "Show the swarm's shared spend and what remains of its budget."),
-      parameters: Type.Object({}),
-      async execute() {
-        return reply(board.budget());
-      },
-    }),
-    defineTool({
-      name: "claim",
-      label: "claim",
-      description: describe("claim", "Announce that you are editing a file. Fails if another agent holds it. Advisory only: it does not lock the file."),
-      parameters: path,
-      async execute(_id, { path }) {
-        board.claim(agent, normalize(path));
-        return reply(`You hold ${normalize(path)}.`);
-      },
-    }),
-    defineTool({
-      name: "release",
-      label: "release",
-      description: describe("release", "Release a file you claimed."),
-      parameters: path,
-      async execute(_id, { path }) {
-        board.release(agent, normalize(path));
-        return reply(`Released ${normalize(path)}.`);
-      },
-    }),
+      async execute(_id, { text, thread }) { board.post(agent, text, thread); return reply("Posted."); } }),
+    defineTool({ ...tool("inbox", "Read the board messages from teammates that you have not read yet."), parameters: Type.Object({}),
+      async execute() { const messages = board.inbox(agent); return reply(messages.length ? formatMessages(messages) : "No new messages."); } }),
+    defineTool({ ...tool("team", "Show every agent's state (working, idle or done with its reason) and the files it claims."),
+      parameters: Type.Object({}), async execute() { return reply(board.team(agent)); } }),
+    defineTool({ ...tool("budget", "Show the swarm's shared spend and what remains of its budget."),
+      parameters: Type.Object({}), async execute() { return reply(board.budget()); } }),
+    defineTool({ ...tool("claim", "Announce that you are editing a file. Fails if another agent holds it. Advisory only: it does not lock the file."),
+      parameters: path, async execute(_id, { path }) { board.claim(agent, normalize(path)); return reply(`You hold ${normalize(path)}.`); } }),
+    defineTool({ ...tool("release", "Release a file you claimed."),
+      parameters: path, async execute(_id, { path }) { board.release(agent, normalize(path)); return reply(`Released ${normalize(path)}.`); } }),
     ...(menu.length ? [role] : []),
     done,
   ].filter(tool => tool === done || offered.includes(tool.name));

@@ -1,0 +1,10 @@
+{
+  "delivery": "attach",
+  "teamBriefing": "\nTeammates: {teammates}. You all share this folder and this goal; nobody is in charge.\nCoordinate on the shared board:\n- post(text, thread?) sends a message to every teammate. New posts from teammates appear at the end of your tool results; you do not need to call inbox.\n- team() shows who is working, idle or done and which files they claim; budget() shows the shared spend.\n- claim(path) reserves a file for you: while you hold it, teammates' write and edit on it are refused. The claim renews each time you write the file and lapses after 2 minutes without you writing it, or when you call done; release(path) frees it earlier. Claim only while you are actively changing a file.\nStart by posting what you will work on.\n",
+  "writeGuard": true,
+  "claimLease": 120,
+  "toolDescriptions": {
+    "claim": "Reserve a file you are about to change: teammates cannot write or edit it while you hold it. It renews each time you write it and lapses after 2 minutes without you writing it. Fails if another agent holds it.",
+    "release": "Free a file you claimed so teammates can change it."
+  }
+}

@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
-import { appendFileSync, cpSync, existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { createHash } from "node:crypto";
+import { appendFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join, normalize, relative, resolve } from "node:path";
 import {
   type AgentSession, type CreateAgentSessionOptions, createAgentSession, DefaultResourceLoader,
   getAgentDir, isToolCallEventType, ModelRuntime, SessionManager, SettingsManager, type ToolCallEvent, type ToolResultEvent,
@@ -73,8 +74,15 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     session.steer(text).catch(() => {});
   };
   const board = new Board(names, log, notify, budgetText);
+  board.lease = profile.claimLease * 1000;
+  const seen = new Map<string, string>(); // agent and path -> content digest it last read or wrote
+  const digest = (path: string) => (existsSync(path) ? createHash("sha1").update(readFileSync(path)).digest("hex") : "");
   // With delivery "attach", unread posts and notices ride on the agent's next tool result instead of costing a turn.
   const attach = (name: string, event: ToolResultEvent) => {
+    if (profile.staleGuard && ["read", "write", "edit"].includes(event.toolName) && !event.isError) {
+      const path = resolve(workspace, String(event.input.path));
+      seen.set(`${name}:${path}`, digest(path));
+    }
     if (profile.notices) {
       const output = event.content.map(c => (c.type === "text" ? c.text : "")).join("");
       if ((event.toolName === "write" || event.toolName === "edit") && !event.isError) {
@@ -101,12 +109,25 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     log("abort", { reason: why });
     for (const { session } of agents) session.abort().catch(() => {});
   };
-  const guard = (event: ToolCallEvent) => {
-    if (!profile.writeGuard || !isToolCallEventType("write", event) || !/^\s/.test(event.input.content)) return;
-    const path = resolve(workspace, event.input.path);
-    if (!existsSync(path) || !statSync(path).size) return;
-    log("write_refused", { path: event.input.path });
-    return { block: true, reason: "Refused: write replaces the whole file, and this content starts indented, so it looks like the continuation of a file you already wrote; writing it would erase what is there. Add it with edit, or write the complete file in one call." };
+  const guard = (name: string, event: ToolCallEvent) => {
+    const write = isToolCallEventType("write", event);
+    if (!write && !isToolCallEventType("edit", event)) return;
+    const path = resolve(workspace, event.input.path), key = normalize(relative(workspace, path));
+    const refuse = (reason: string) => (log("write_refused", { agent: name, path: key, reason }), { block: true, reason: `Refused: ${reason}` });
+    const holder = profile.claimLease ? board.holder(key) : undefined;
+    if (holder && holder !== name) {
+      return refuse(`${key} is claimed by ${holder}. Ask on the board, work on another part, or wait: the claim lapses after ${profile.claimLease} s without ${holder} writing it.`);
+    }
+    if (holder) board.claim(name, key); // writing your own claimed file renews it
+    const old = write && existsSync(path) ? readFileSync(path, "utf8") : "";
+    if (!old) return;
+    if (profile.staleGuard && seen.get(`${name}:${path}`) !== digest(path)) {
+      return refuse(`${key} changed since you last read or wrote it, so this write would erase someone's work. Read it again and use edit, or write it again from the current version.`);
+    }
+    const content = (event.input as { content: string }).content, first = (text: string) => text.split("\n").find(line => line.trim()) ?? "";
+    if (profile.writeGuard && (/^\s/.test(content) || (content.length < old.length && first(content) !== first(old)))) {
+      return refuse("write replaces the whole file, and this content looks like only part of it (it starts indented, or it is shorter than the file and starts differently), so it would erase what is there. Add it with edit, or write the complete file in one call; to really replace the file with something shorter, delete it first.");
+    }
   };
   const checkBudget = () => {
     const { cost, tokens } = totals();
@@ -165,8 +186,8 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         cwd: workspace, agentDir: getAgentDir(),
         noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
         appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
-        extensionFactories: profile.delivery === "attach" || profile.notices || profile.writeGuard
-          ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", guard); }] : [],
+        extensionFactories: profile.delivery === "attach" || profile.notices || profile.writeGuard || profile.claimLease || profile.staleGuard
+          ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
       });
       await loader.reload();
       const verify = async () => {

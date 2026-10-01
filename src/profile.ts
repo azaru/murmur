@@ -45,9 +45,14 @@ Start by reading your inbox and posting what you will work on. When told you hav
   delivery: "steer" as "steer" | "attach" | "pull",
   /** Share each agent's file writes and acceptance-check runs with teammates; needs delivery "attach". */
   notices: false,
-  /** Refuse a write that starts indented onto an existing non-empty file: it is almost always a continuation
-   * that would erase what the agent wrote before. */
+  /** Refuse a write onto an existing non-empty file that looks like only part of it (starts indented, or is shorter
+   * and starts differently): it is almost always a continuation that would erase what the agent wrote before. */
   writeGuard: false,
+  /** Seconds a claim lives without its holder writing the file; above 0, write and edit on a file another agent
+   * claims are refused. 0 keeps claims advisory. */
+  claimLease: 0,
+  /** Refuse a write onto a file that changed since this agent last read or wrote it. */
+  staleGuard: false,
   /** Board tools offered when messaging is on; done is always offered. */
   boardTools: BOARD_TOOLS,
 };
@@ -66,6 +71,8 @@ const ProfileSchema = Type.Object({
   delivery: Type.Optional(Type.Union([Type.Literal("steer"), Type.Literal("attach"), Type.Literal("pull")])),
   notices: Type.Optional(Type.Boolean()),
   writeGuard: Type.Optional(Type.Boolean()),
+  claimLease: Type.Optional(Type.Number({ minimum: 0 })),
+  staleGuard: Type.Optional(Type.Boolean()),
   boardTools: Type.Optional(Type.Array(Type.String())),
 }, { additionalProperties: false });
 

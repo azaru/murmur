@@ -1,0 +1,10 @@
+{
+  "delivery": "attach",
+  "teamBriefing": "\nTeammates: {teammates}. You all share this folder and this goal; nobody is in charge.\nCoordinate on the shared board:\n- post(text, thread?) sends a message to every teammate. New posts from teammates appear at the end of your tool results; you do not need to call inbox.\n- team() shows who is working, idle or done and which files they claim; budget() shows the shared spend.\n- claim(part) / release(part) announce which part of the task you take: pass a short label for a part of the spec (for example a contract section, a family of rules or a component), not a file. Split the work by what the spec asks for, so that every part has someone and nobody does the same part twice; claim fails if someone else holds that part. Several of you may work in the same file: change only your part, with edit.\nStart by posting what you will work on.\n",
+  "writeGuard": true,
+  "toolDescriptions": {
+    "claim": "Take a part of the task: pass a short label for it (a contract section, a family of rules, a component) as path. Fails if another agent holds that part. Advisory: it does not lock any file.",
+    "release": "Give back a part of the task you claimed.",
+    "team": "Show every agent's state (working, idle or done with its reason) and the parts of the task it claims."
+  }
+}
