@@ -40,6 +40,11 @@ Start by reading your inbox and posting what you will work on. When told you hav
   revive: 0,
   /** done is refused while the agent has unread messages or the acceptance check fails. */
   doneGate: false,
+  /** How posts reach a busy agent: "steer" interrupts it with a new turn; "attach" appends them to its next
+   * tool result; "pull" leaves them on the board until it calls inbox. */
+  delivery: "steer" as "steer" | "attach" | "pull",
+  /** Share each agent's file writes and acceptance-check runs with teammates; needs delivery "attach". */
+  notices: false,
 };
 export type Profile = typeof DEFAULT_PROFILE;
 
@@ -53,6 +58,8 @@ const ProfileSchema = Type.Object({
   roles: Type.Optional(Type.Record(Type.String(), Type.Object({ summary: Type.String(), instructions: Type.String() }, { additionalProperties: false }))),
   revive: Type.Optional(Type.Integer({ minimum: 0 })),
   doneGate: Type.Optional(Type.Boolean()),
+  delivery: Type.Optional(Type.Union([Type.Literal("steer"), Type.Literal("attach"), Type.Literal("pull")])),
+  notices: Type.Optional(Type.Boolean()),
 }, { additionalProperties: false });
 
 export function loadProfile(path?: string): Profile {

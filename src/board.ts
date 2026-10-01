@@ -6,7 +6,7 @@ import type { Profile } from "./profile.ts";
 export type Log = (type: string, data?: Record<string, unknown>) => void;
 export type Member = {
   name: string; working: boolean; doneReason?: string; role?: string;
-  read: number; nudged: boolean; revivals: number; wake?: () => void;
+  read: number; nudged: boolean; revivals: number; wake?: () => void; notices: string[];
 };
 type Message = { from: string; thread?: string; text: string };
 export type Verify = () => Promise<{ ok: boolean; output: string }>;
@@ -28,7 +28,7 @@ export class Board {
     this.log = log;
     this.notify = notify;
     this.budget = budget;
-    for (const name of names) this.members.set(name, { name, working: true, read: 0, nudged: false, revivals: 0 }); // working until its first turn ends
+    for (const name of names) this.members.set(name, { name, working: true, read: 0, nudged: false, revivals: 0, notices: [] }); // working until its first turn ends
   }
 
   unread(agent: string) {
@@ -41,6 +41,12 @@ export class Board {
     for (const member of this.members.values()) {
       if (member.name !== from) this.notify(member);
     }
+  }
+
+  /** A fact about one agent's work for the others; never wakes or steers anyone. */
+  notice(from: string, text: string) {
+    this.log("notice", { agent: from, text });
+    for (const member of this.members.values()) if (member.name !== from) member.notices.push(text);
   }
 
   inbox(agent: string) {

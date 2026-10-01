@@ -3,7 +3,7 @@ import { appendFileSync, cpSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   type AgentSession, type CreateAgentSessionOptions, createAgentSession, DefaultResourceLoader,
-  getAgentDir, ModelRuntime, SessionManager, SettingsManager,
+  getAgentDir, ModelRuntime, SessionManager, SettingsManager, type ToolResultEvent,
 } from "@earendil-works/pi-coding-agent";
 import { Board, boardTools, formatMessages, type Member } from "./board.ts";
 import { loadProfile, type Profile, render } from "./profile.ts";
@@ -64,6 +64,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     if (member.doneReason !== undefined && member.revivals >= profile.revive) return;
     const session = agents.find(a => a.name === member.name)?.session;
     if (!member.working) return member.wake?.();
+    if (profile.delivery !== "steer") return; // attached to its next tool result, or left for it to pull
     const inline = profile.steer.includes("{messages}");
     if (!session?.isStreaming || (member.nudged && !inline)) return;
     const text = withMessages(profile.steer, member.name);
@@ -72,6 +73,26 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     session.steer(text).catch(() => {});
   };
   const board = new Board(names, log, notify, budgetText);
+  // With delivery "attach", unread posts and notices ride on the agent's next tool result instead of costing a turn.
+  const attach = (name: string, event: ToolResultEvent) => {
+    if (profile.notices) {
+      const output = event.content.map(c => (c.type === "text" ? c.text : "")).join("");
+      if ((event.toolName === "write" || event.toolName === "edit") && !event.isError) {
+        board.notice(name, `${name} ${event.toolName === "write" ? "wrote" : "edited"} ${event.input.path}`);
+      } else if (event.toolName === "bash" && String(event.input.command).includes(task.check)) {
+        const failed = event.isError || /exited with code [1-9]/.test(output);
+        board.notice(name, `${name} ran the acceptance check: ${failed ? `FAIL\n${output.split("\n").filter(l => l.trim() && !l.startsWith("Command exited")).slice(-3).join("\n")}` : "PASS"}`);
+      }
+    }
+    if (profile.delivery !== "attach") return;
+    const member = board.members.get(name)!;
+    const notices = member.notices.splice(0);
+    const messages = board.unread(name).length ? board.inbox(name) : [];
+    if (!notices.length && !messages.length) return;
+    log("attach", { agent: name, messages: messages.length, notices: notices.length });
+    const text = ["New on the board:", ...notices.map(n => `- ${n}`), formatMessages(messages)].filter(Boolean).join("\n");
+    return { content: [...event.content, { type: "text" as const, text: `\n\n${text}` }] };
+  };
   const end = (why: EndReason) => {
     if (reason) return;
     reason = why;
@@ -137,6 +158,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         cwd: workspace, agentDir: getAgentDir(),
         noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
         appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
+        extensionFactories: profile.delivery === "attach" || profile.notices ? [pi => { pi.on("tool_result", event => attach(name, event)); }] : [],
       });
       await loader.reload();
       const verify = async () => {
