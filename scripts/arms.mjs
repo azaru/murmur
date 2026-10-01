@@ -6,8 +6,10 @@ import { join } from "node:path";
 const args = process.argv.slice(2);
 const option = name => { const i = args.indexOf(name); return i >= 0 ? args.splice(i, 2)[1] : undefined; };
 const [armA, armB] = [option("--a"), option("--b")];
+const across = args.includes("--across");
+if (across) args.splice(args.indexOf("--across"), 1);
 if (!armA || !armB || !args.length) {
-  console.error("usage: node scripts/arms.mjs <campaign-dir>... --a <arm> --b <arm>\n  arm labels as in report.md, e.g. murmur/n=3 or murmur[profiles/no-messaging.json]/n=3");
+  console.error("usage: node scripts/arms.mjs <campaign-dir>... --a <arm> --b <arm> [--across]\n  --across pairs runs of the same task and repetition from different campaigns (one campaign per run)\n  arm labels as in report.md, e.g. murmur/n=3 or murmur[profiles/no-messaging.json]/n=3");
   process.exit(1);
 }
 
@@ -17,12 +19,12 @@ const runs = args.flatMap(dir => readdirSync(dir)
   .filter(name => name.startsWith("run-") && existsSync(join(dir, name, "record.json")))
   .map(name => ({ campaign: dir, ...JSON.parse(readFileSync(join(dir, name, "record.json"), "utf8")) })));
 
-// Pair runs of the same campaign, task and repetition.
+// Pair runs of the same campaign (or any campaign with --across), task and repetition.
 const pairs = new Map();
 for (const run of runs) {
   const side = label(run) === armA ? "a" : label(run) === armB ? "b" : undefined;
   if (!side) continue;
-  const key = `${run.campaign}|${run.task}|${run.repetition}`;
+  const key = `${across ? "" : run.campaign}|${run.task}|${run.repetition}`;
   pairs.set(key, { ...pairs.get(key), task: run.task, [side]: run });
 }
 
