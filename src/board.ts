@@ -10,6 +10,7 @@ export type Member = {
 };
 type Message = { from: string; thread?: string; text: string };
 export type Verify = () => Promise<{ ok: boolean; output: string }>;
+export type Run = (command: string) => Promise<{ exitCode: number | null; output: string }>;
 
 export const formatMessages = (messages: Message[]) =>
   messages.map(m => `${m.thread ? `[${m.thread}] ` : ""}${m.from}: ${m.text}`).join("\n\n");
@@ -94,7 +95,7 @@ export class Board {
 const reply = (text: string) => ({ content: [{ type: "text" as const, text }], details: {} });
 
 /** Coordination tools for one agent; only `done` when messaging is off. */
-export function boardTools(board: Board, agent: string, { messaging, toolDescriptions, roles, doneGate, boardTools: offered }: Profile, verify: Verify) {
+export function boardTools(board: Board, agent: string, { messaging, toolDescriptions, roles, doneGate, findings, boardTools: offered }: Profile, verify: Verify, run: Run) {
   const describe = (name: string, text: string) => toolDescriptions[name] ?? text;
   const tool = (name: string, text: string) => ({ name, label: name, description: describe(name, text) });
   const done = defineTool({ ...tool("done", "Finish your work in the swarm. Call it when the definition of done is met, or to give up with the reason why the goal cannot be reached."),
@@ -117,6 +118,13 @@ export function boardTools(board: Board, agent: string, { messaging, toolDescrip
       board.post(agent, `I take the role ${name}.`);
       return reply(roles[name].instructions);
     } });
+  const finding = defineTool({ ...tool("finding", "Share something you verified: murmur runs the command in the shared folder and posts your claim to every teammate with the command's real exit code and output."),
+    parameters: Type.Object({ text: Type.String({ description: "What you found" }), command: Type.String({ description: "A shell command whose output shows it" }) }),
+    async execute(_id, { text, command }) {
+      const { exitCode, output } = await run(command);
+      board.post(agent, `${text}\n$ ${command}\n[exit ${exitCode}]\n${output.slice(-1500)}`, "finding");
+      return reply(`Posted. Command exited with code ${exitCode ?? "124 (timed out)"}\n${output.slice(-1500)}`); // read like bash by the check tracker
+    } });
   const path = Type.Object({ path: Type.String({ description: "File path relative to the working directory" }) });
   return [
     defineTool({ ...tool("post", "Post a message to every teammate on the shared board. Use an optional thread label to group a conversation."),
@@ -133,6 +141,7 @@ export function boardTools(board: Board, agent: string, { messaging, toolDescrip
     defineTool({ ...tool("release", "Release a file you claimed."),
       parameters: path, async execute(_id, { path }) { board.release(agent, normalize(path)); return reply(`Released ${normalize(path)}.`); } }),
     ...(menu.length ? [role] : []),
+    ...(findings ? [finding] : []),
     done,
   ].filter(tool => tool === done || offered.includes(tool.name));
 }

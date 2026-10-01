@@ -76,17 +76,31 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   board.lease = profile.claimLease * 1000;
   const seen = new Map<string, string>(); // agent and path -> content digest it last read or wrote
   const digest = (path: string) => (existsSync(path) ? createHash("sha1").update(readFileSync(path)).digest("hex") : "");
-  const evidence = new Map<string, { calls: number; firstGreen?: number; green?: boolean }>(); // per seat, reset by a relay
+  const evidence = new Map<string, { calls: number; firstGreen?: number; green?: boolean; stuck?: number }>(); // per seat, reset by a relay
+  let lastCheck: { ok: boolean; tail: string } | undefined; // the latest acceptance-check run, by anyone
+  // A command runs the check when the check starts a statement (after time/timeout/env/VAR= wrappers) outside quotes and nothing
+  // after it can mask its exit status. A check that itself contains quotes falls back to plain containment.
+  const unquote = (text: string) => text.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+  const checkAt = new RegExp(`(?:^|[;&|(\\n])\\s*(?:(?:time|timeout\\s+\\S+|env|\\w+=\\S*)\\s+)*${unquote(task.check).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=$|[\\s;&|)<>])([^]*)`);
+  const runsCheck = (command: string) => { const match = unquote(command).match(checkAt);
+    return /['"]/.test(task.check) ? command.includes(task.check) : !!match && !/[;|\n]/.test(match[1].trim()); };
+  const help = (name: string, what: string) => (log("help", { agent: name, what }), board.post(name, `(sent by murmur) ${name} ${what}. ${lastCheck
+    ? `The check's latest run failed:\n${lastCheck.tail}` : "Nobody has run the acceptance check yet."}\nIf you can spare the time, offer help on the board or take a look.`, "help"));
   // With delivery "attach", unread posts and notices ride on the agent's next tool result instead of costing a turn.
   const attach = (name: string, event: ToolResultEvent) => {
     const output = event.content.map(c => (c.type === "text" ? c.text : "")).join("");
-    const ranCheck = event.toolName === "bash" && String(event.input.command).includes(task.check);
+    const ranCheck = (event.toolName === "bash" || event.toolName === "finding") && runsCheck(String(event.input.command));
     const failed = event.isError || /exited with code [1-9]/.test(output);
+    const tail = output.split("\n").filter(l => l.trim() && !l.startsWith("Command exited")).slice(-3).join("\n");
     const seat = evidence.get(name) ?? { calls: 0 };
     evidence.set(name, seat);
-    if (!BOARD_TOOLS.includes(event.toolName)) seat.calls += 1;
-    if (ranCheck) seat.green = !failed;
+    const work = !BOARD_TOOLS.includes(event.toolName);
+    if (work) seat.calls += 1;
+    if (ranCheck) seat.green = !failed, lastCheck = { ok: !failed, tail };
     if (ranCheck && !failed) seat.firstGreen ??= seat.calls;
+    if (lastCheck?.ok) seat.stuck = 0;
+    else if (profile.helpAfter && work && (seat.stuck = (seat.stuck ?? 0) + 1) === profile.helpAfter) help(name, `has made ${profile.helpAfter} tool calls while the acceptance check is failing or not yet run`);
+    if (profile.helpAfter && event.toolName === "done" && output.startsWith("You are done") && !lastCheck?.ok) help(name, `finished without a passing acceptance check, saying: "${event.input.reason}"`);
     if (profile.staleGuard && ["read", "write", "edit"].includes(event.toolName) && !event.isError) {
       const path = resolve(workspace, String(event.input.path));
       seen.set(`${name}:${path}`, digest(path));
@@ -95,7 +109,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       if ((event.toolName === "write" || event.toolName === "edit") && !event.isError) {
         board.notice(name, `${name} ${event.toolName === "write" ? "wrote" : "edited"} ${event.input.path}`);
       } else if (ranCheck) {
-        board.notice(name, `${name} ran the acceptance check: ${failed ? `FAIL\n${output.split("\n").filter(l => l.trim() && !l.startsWith("Command exited")).slice(-3).join("\n")}` : "PASS"}`);
+        board.notice(name, `${name} ran the acceptance check: ${failed ? `FAIL\n${tail}` : "PASS"}`);
       }
     }
     const lines: string[] = [];
@@ -177,6 +191,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         relays += 1;
         retired.push({ name, session: agent.session });
         agent.session = await open(name);
+        if (reason) break; // the swarm ended while the new session was opening
         evidence.delete(name);
         log("relay", { agent: name, relay: relays, reason: member.doneReason });
         prompt = `${briefing}\n\nYou are a fresh instance taking over ${name}'s seat. The previous instance finished saying: "${member.doneReason}". Its handoff notes, if it wrote any, are in NOTES-${name}.md. Do not assume the goal is met: check the work against the spec yourself, fix what is wrong or missing, and call done only after verifying it.`;
@@ -208,7 +223,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
       appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
       extensionFactories: profile.delivery === "attach" || profile.notices || profile.writeGuard || profile.claimLease || profile.staleGuard
-        || profile.doneAfterGreen || profile.clock ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
+        || profile.doneAfterGreen || profile.clock || profile.helpAfter ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
     });
     await loader.reload();
     const verify = async () => {
@@ -216,7 +231,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       log("done_check", { agent: name, exitCode: check.exitCode, timedOut: check.timedOut });
       return { ok: check.exitCode === 0, output: check.output };
     };
-    const tools = boardTools(board, name, profile, verify);
+    const tools = boardTools(board, name, profile, verify, command => runCheck(command, workspace, 2 * 60_000));
     const { session } = await createAgentSession({
       cwd: workspace, modelRuntime: runtime, model,
       thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],

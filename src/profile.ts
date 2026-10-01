@@ -3,7 +3,7 @@ import { Type } from "typebox";
 import { Errors } from "typebox/value";
 
 export const BUILTIN_TOOLS = ["read", "bash", "edit", "write", "grep", "find", "ls"];
-export const BOARD_TOOLS = ["post", "inbox", "team", "budget", "claim", "release", "role", "done"];
+export const BOARD_TOOLS = ["post", "inbox", "team", "budget", "claim", "release", "role", "finding", "done"];
 
 /** Everything about how murmur behaves that an experiment may change. */
 export const DEFAULT_PROFILE = {
@@ -34,55 +34,34 @@ Start by reading your inbox and posting what you will work on. When told you hav
   toolDescriptions: {} as Record<string, string>,
   tools: ["read", "bash", "edit", "write"],
   spawnGapSeconds: 0,
-  /** Menu agents may pick from with role(name); empty means no role tool. Never assigned. */
-  roles: {} as Record<string, { summary: string; instructions: string }>,
-  /** How many times a new post may wake an agent that already called done. */
-  revive: 0,
-  /** done is refused while the agent has unread messages or the acceptance check fails. */
-  doneGate: false,
-  /** How posts reach a busy agent: "steer" interrupts it; "attach" appends them to its next tool result; "pull" waits for inbox. */
-  delivery: "steer" as "steer" | "attach" | "pull",
-  /** Share each agent's file writes and acceptance-check runs with teammates; needs delivery "attach". */
-  notices: false,
-  /** Refuse a write that looks like only part of an existing file (starts indented, or is shorter and starts differently). */
-  writeGuard: false,
-  /** Above 0, claims block other agents' write/edit and lapse after this many seconds without the holder writing. */
-  claimLease: 0,
-  /** Refuse a write onto a file that changed since this agent last read or wrote it. */
-  staleGuard: false,
-  /** Tool calls required after an agent's first passing check before done; its latest check must pass too. 0 is off. */
-  doneAfterGreen: 0,
-  /** Append the minutes left before the timeout to every tool result. */
-  clock: false,
-  /** How many fresh instances may take over each agent's seat after it calls done (a context reset, not a revival). */
-  relay: 0,
-  /** Tokens per turn above which an agent with relays left is asked to write its handoff and call done. 0 is off. */
-  relayContext: 0,
-  /** Board tools offered when messaging is on; done is always offered. */
-  boardTools: BOARD_TOOLS,
+  /** Menu agents may pick from with role(name); empty means no role tool. Never assigned. */ roles: {} as Record<string, { summary: string; instructions: string }>,
+  /** How many times a new post may wake an agent that already called done. */ revive: 0,
+  /** done is refused while the agent has unread messages or the acceptance check fails. */ doneGate: false,
+  /** How posts reach a busy agent: "steer" interrupts it; "attach" appends them to its next tool result; "pull" waits for inbox. */ delivery: "steer" as "steer" | "attach" | "pull",
+  /** Share each agent's file writes and acceptance-check runs with teammates; needs delivery "attach". */ notices: false,
+  /** Refuse a write that looks like only part of an existing file (starts indented, or is shorter and starts differently). */ writeGuard: false,
+  /** Above 0, claims block other agents' write/edit and lapse after this many seconds without the holder writing. */ claimLease: 0,
+  /** Refuse a write onto a file that changed since this agent last read or wrote it. */ staleGuard: false,
+  /** Tool calls required after an agent's first passing check before done; its latest check must pass too. 0 is off. */ doneAfterGreen: 0,
+  /** Append the minutes left before the timeout to every tool result. */ clock: false,
+  /** How many fresh instances may take over each agent's seat after it calls done (a context reset, not a revival). */ relay: 0,
+  /** Tokens per turn above which an agent with relays left is asked to write its handoff and call done. 0 is off. */ relayContext: 0,
+  /** Offer finding(text, command): murmur runs the command and posts the claim with its real exit code and output. */ findings: false,
+  /** Tool calls an agent makes while the acceptance check fails or has not run before the board hears it may need help; also posts when one finishes without a pass. 0 is off. */ helpAfter: 0,
+  /** Board tools offered when messaging is on; done is always offered. */ boardTools: BOARD_TOOLS,
 };
 export type Profile = typeof DEFAULT_PROFILE;
 
-const text = Type.Optional(Type.String());
+const text = Type.Optional(Type.String()), flag = Type.Optional(Type.Boolean()), count = Type.Optional(Type.Integer({ minimum: 0 }));
 const ProfileSchema = Type.Object({
-  messaging: Type.Optional(Type.Boolean()),
   briefing: text, teamBriefing: text, steer: text, wake: text, systemPromptAppend: text,
+  messaging: flag, doneGate: flag, notices: flag, writeGuard: flag, staleGuard: flag, clock: flag, findings: flag,
+  revive: count, doneAfterGreen: count, relay: count, relayContext: count, helpAfter: count,
+  spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })), claimLease: Type.Optional(Type.Number({ minimum: 0 })),
   toolDescriptions: Type.Optional(Type.Record(Type.String(), Type.String())),
-  tools: Type.Optional(Type.Array(Type.String())),
-  spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })),
+  tools: Type.Optional(Type.Array(Type.String())), boardTools: Type.Optional(Type.Array(Type.String())),
   roles: Type.Optional(Type.Record(Type.String(), Type.Object({ summary: Type.String(), instructions: Type.String() }, { additionalProperties: false }))),
-  revive: Type.Optional(Type.Integer({ minimum: 0 })),
-  doneGate: Type.Optional(Type.Boolean()),
   delivery: Type.Optional(Type.Union([Type.Literal("steer"), Type.Literal("attach"), Type.Literal("pull")])),
-  notices: Type.Optional(Type.Boolean()),
-  writeGuard: Type.Optional(Type.Boolean()),
-  claimLease: Type.Optional(Type.Number({ minimum: 0 })),
-  staleGuard: Type.Optional(Type.Boolean()),
-  doneAfterGreen: Type.Optional(Type.Integer({ minimum: 0 })),
-  clock: Type.Optional(Type.Boolean()),
-  relay: Type.Optional(Type.Integer({ minimum: 0 })),
-  relayContext: Type.Optional(Type.Integer({ minimum: 0 })),
-  boardTools: Type.Optional(Type.Array(Type.String())),
 }, { additionalProperties: false });
 
 export function loadProfile(path?: string): Profile {
