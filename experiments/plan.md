@@ -577,6 +577,55 @@ Driver `experiments/criba8b-lanes.mjs <stage> <lane>`, c4g-clock n=1 only, k=3, 
 - **Next:** comparison A on panel V (c4g-clock n=1 against a 4-agent swarm with a clock, same 6M, k=3), and the swarm comparison on panel D. Each gets its own pre-registration.
 
 
+## Round 9: the swarm against the single agent on panels D and V (fixed before measuring, 2026-10-02 16:55; the user approved the plan)
+
+Question: with the panels from round 8, does a non-hierarchical swarm beat c4g-clock n=1 at the same time and token budget? The two panels test different routes. In V (volume) one context with the whole project gets expensive and runs out of tokens. In D (difficulty) the single agent stops on a green check with time and tokens left.
+
+**Harness facts that shaped the design** (verified in `../swarmtest` before writing this):
+- every campaign must list an n=1 competitor (`config.py`);
+- a murmur run that ends by budget or timeout reports `usage_complete: false`, and the runner then stops the campaign (`usage_unknown_or_cleanup_unconfirmed`, as in both capped ospec calibration campaigns);
+- `make_plan` shuffles the competitors with `Random(seed)`. The order below was checked with `swarmtest plan` on the real configs.
+
+**New profiles** (existing levers only, so no new-mechanism smoke is required):
+- `v-swarm-clock`: c4g-clock (same norms, write guard and clock) plus messaging with `delivery: attach`, board tools post, team, claim and release, and a menu norm. The menu: pick a section of the change's `tasks.md` that nobody holds, `claim("tasks.md#<number>")`, post what you will build, take sections others depend on first, and take another unclaimed section when yours is done. Nothing assigns sections. Smoke on a scripted 3-section task (3 agents, 0.21M tokens, passed): the briefing renders, `tasks.md#N` claims work, and agents resolve contention on the board.
+- `x1g-select-clock`: x1g-select (parallel attempts, selected by execution) plus `clock`.
+
+### V: volume (comparison A)
+
+- **Tasks:** ospec_green, ospec_brown (from `staging/`). Their fingerprints are unchanged since the calibration (`f439d64f…` and `83ecd447…`).
+- **Arms:** S4 = v-swarm-clock n=4 against C1 = c4g-clock n=1. Both get 6M tokens per run, shared by the whole swarm, and 30 effective minutes (`timeout_seconds` 1920). k=3.
+- **Solo arm reused (a deliberate deviation from same-campaign pairing):** C1 is the round 8 calibration (seed 20261033, 6 runs, 2026-10-02 13:00–13:50), not repeated. Pairing inside a campaign is impossible here, because whichever arm runs first hits the cap and stops the campaign, so a repeated C1 would also sit in separate campaigns and buy no pairing in time. The cost is that the two arms ran at different hours with different seeds.
+- **Execution:** `experiments/criba9-lanes.mjs V <lane>`, seed 20261035, one campaign per project × repetition, competitors `[v-swarm-clock n=4, c4g-clock n=1]` with `--limit 1`. With this seed only the swarm runs; the n=1 entry is listed because swarmtest requires one. Every V campaign is expected to end with `usage_unknown_or_cleanup_unconfirmed`.
+- **Rule** (per-project means from `record.json`):
+  - **the swarm wins on V** if S4 − C1 ≥ +0.05 on the mean of the two projects and S4 wins on both;
+  - **it loses** if S4 − C1 ≤ −0.05 and it loses on both;
+  - otherwise **not decided**.
+  - Capped runs count with their score, which is a floor.
+- **Attribution (fixed now):** a V win is credited to coordination only if the traces show agents using teammates' work: importing or calling modules a teammate wrote, acting on a post, or fixing a teammate's section after reading it. Otherwise it is credited to smaller contexts and parallelism. Descriptive measures: tokens per call and cache-read share, against C1's; board share of tokens; claims per agent and claim conflicts; sections left unclaimed at the end; overwrites of a teammate's file.
+
+### D: difficulty
+
+- **Tasks:** constrained_planning_hard (cph), opt_roster2, opt_shop2, opt_packing2.
+- **Arms:** S3 = x1g-select-clock n=3 against C1 = c4g-clock n=1. Both get 3M per run (shared by the swarm) and the swarmtest default of 1200 s, 18 effective minutes. k=3.
+- **Solo arm repeated, paired:** each campaign is `[x1g-select-clock n=3, c4g-clock n=1]` with seed 20261034. With this seed C1 runs first, then S3, so a swarm run that hits the cap or the timeout never costs the paired solo run. C1 is cheap here (0.06–1.8M per run in rounds 7–8). The calibration runs are reported only as descriptive (pooled C1, k=6).
+- **Execution:** `experiments/criba9-lanes.mjs D <lane>`.
+- **Rule** (per-task means of the paired runs):
+  - **the swarm wins on D** if S3 − C1 ≥ +0.05 on the mean of the four tasks and S3 wins at least 3 of 4 tasks;
+  - **it loses** if S3 − C1 ≤ −0.05 and it loses at least 3 of 4;
+  - otherwise **not decided**.
+  - Capped runs count with their score, and an arm with ≥ 1/3 capped runs is flagged. opt_packing2 is bimodal for C1 (0.14 / 0.87 / 0.19 in calibration); the per-task table will say so.
+- **Descriptive:** whether S3 actually builds separate attempts and selects by execution (`SCORES.md`, installs), calls after the first green per arm, tokens per arm.
+
+### Not in this round
+
+- **6C** (a quality-stall signal for the single agent on panel D) is deferred. `src/` is at 603 lines, already at the ceiling, so a new lever needs compaction plus a smoke, and neither comparison here depends on it. It will be proposed after D's result.
+
+### Load, lanes and budget
+
+- **Lanes:** at most 3 in total, as in round 8 (D's graders run solvers on a wall clock, and V's grader allows 20 s per scenario). Two V lanes and one D lane at the start. When V is done, two more D lanes start. Load at launch is recorded in the registry. Machine load before launch was ~6–7, from interactive apps, with no offline job running.
+- **Budget:** V swarm 6 × 6M = **36M**. D: C1 12 × ~0.3M ≈ 4M, and S3 12 × ~1.5–3M ≈ 18–36M. **Total ~60M** (upper bound ~76M).
+
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
