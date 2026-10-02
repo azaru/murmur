@@ -577,7 +577,7 @@ Driver `experiments/criba8b-lanes.mjs <stage> <lane>`, c4g-clock n=1 only, k=3, 
 - **Next:** comparison A on panel V (c4g-clock n=1 against a 4-agent swarm with a clock, same 6M, k=3), and the swarm comparison on panel D. Each gets its own pre-registration.
 
 
-## Round 9: the swarm against the single agent on panels D and V (fixed before measuring, 2026-10-02 16:55; the user approved the plan)
+## Round 9: the swarm against the single agent on panels D and V (fixed before measuring, 2026-10-02 16:45, commit `3ea1d8d`; the header first said 16:55 by mistake; the user approved the plan)
 
 Question: with the panels from round 8, does a non-hierarchical swarm beat c4g-clock n=1 at the same time and token budget? The two panels test different routes. In V (volume) one context with the whole project gets expensive and runs out of tokens. In D (difficulty) the single agent stops on a green check with time and tokens left.
 
@@ -626,6 +626,23 @@ Question: with the panels from round 8, does a non-hierarchical swarm beat c4g-c
 - **Budget:** V swarm 6 × 6M = **36M**. D: C1 12 × ~0.3M ≈ 4M, and S3 12 × ~1.5–3M ≈ 18–36M. **Total ~60M** (upper bound ~76M).
 
 
+### Round 9 V result and rule applied (2026-10-02 17:20; launched 16:45 with 2 V lanes and 1 D lane, load 7.3, code `3ea1d8d`)
+
+6 campaigns `20261002T144540Z-2fd46338` → `20261002T150244Z-59dbbe1c` (seed 20261035), all exit 0 and all stopped by `usage_unknown_or_cleanup_unconfirmed` as expected, 36.1M tokens. C1 is the round 8 calibration (seed 20261033).
+
+| project | S4 v-swarm-clock n=4 | S4 mean | C1 c4g-clock n=1 | C1 mean | S4 − C1 |
+|---|---|---:|---|---:|---:|
+| ospec_green | 0.201 / 0.298 / 0.000 | 0.166 | 0.519 / 0.391 / 0.468 | 0.459 | −0.293 |
+| ospec_brown | 0.462 / 0.372 / 0.401 | 0.412 | 0.422 / 0.473 / 0.449 | 0.448 | −0.036 |
+
+- **Rule applied: the swarm loses on V** (mean delta −0.16, it loses both projects). All 12 runs end by the 6M budget, so every score is a floor. S4 spends its 6M in 6–9 of 30 minutes, C1 in 12–23.
+- **Findings from the transcripts** (subagent analysis, `reports/2026-10-02-round9-v-traces.md`, model output; the green r2 cause was verified by hand):
+  - **Green r2 scores 0.0 from one name mismatch.** `stockroom/__init__.py` imports `CustomerMixin`, while `customers.py` defines `CustomersMixin`, so all 260 scenarios fail with ImportError. Two agents took customers within 25 s, and the second rewrote the file with `write`. The budget ran out 5 s later, before anyone re-ran the check [verified].
+  - **Contexts were smaller, but the swarm spent the saving on more calls.** S4 makes 247–277 calls per run at 15–29k tokens each, against C1's 91–125 calls at 48–67k. Board-only turns take 14–46% of S4's tokens (mean ~30%), and each agent re-reads the specs (4–8 `spec.md` reads per agent). The context-size advantage expected in the pre-registration exists, and coordination overhead and duplicated reading consume it.
+  - **Breadth, not correctness, is what S4 loses on green.** Where S4 built a capability, it scores like C1. Orders, purchasing, returns, reports, shipping, price lists and promotions never exist in any S4 green run. 31–35 of 48 sections are never claimed. On brown, whose modules are separable, S4 ties C1 within 0.04 (32–34 versus 31–33 capabilities above 0).
+  - **Integration through one shared `__init__.py` is the weak point.** Agents compose the class from mixins in that one file and ask its holder to add theirs (~15 "add X to the MRO" posts per green run). Three agents wrote modules before the foundation existed. In two green runs the foundation was never released, and its holder became the only integrator.
+  - **Attribution:** there is constant use of teammates' work, through posted interfaces and the shared `__init__.py`, so coordination happened. It cost more than it returned.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -670,3 +687,4 @@ Question: with the panels from round 8, does a non-hierarchical swarm beat c4g-c
 | 2026-10-02 | round 8 calibration (36 campaigns `20261002T111710Z-c227adf3` → `20261002T115022Z-b1ddf99d`, seed 20261030, code `6e586ac`) | c4g-clock, Pi (n=1, k=3) | opt_shop2, opt_roster2, opt_packing2, plan_timetable, pred_demand, opt_routing × 3 | 6.4M | clock: roster2 0.403 in band; routing 0.620, pred 0.633 above; shop2 0.175, packing2 0.215, timetable 0.218 below | panel D = cph, opt_roster2; remedy (large visible instance) for the three below |
 | 2026-10-02 | round 8 stage remedy (9 campaigns `20261002T124256Z-cdc442e1` → `20261002T125232Z-a2671488`, seed 20261032, code `0097a51`) | c4g-clock n=1 | opt_shop2, opt_packing2, plan_timetable × 3 (after the large-visible-instance remedy) | 2.0M | shop2 0.306, packing2 0.402, timetable 0.272 | shop2 and packing2 enter panel D; timetable dropped |
 | 2026-10-02 | round 8 stage ospec (6 campaigns `20261002T130021Z-d3c30e94` → `20261002T132336Z-6d8ed73d`, seed 20261033, 6M and 30 min per run) | c4g-clock n=1 | ospec_green, ospec_brown × 3 (after the ~4x scale-up and the review fixes) | 36.2M | green 0.459, brown 0.448; all 6 end by budget at 12–23 min | both enter panel V |
+| 2026-10-02 | round 9 V (6 campaigns `20261002T144540Z-2fd46338` → `20261002T150244Z-59dbbe1c`, seed 20261035, 6M and 30 min per run, code `3ea1d8d`) | v-swarm-clock n=4 (C1 = round 8 calibration, reused) | ospec_green, ospec_brown × 3 | 36.1M | S4 green 0.166 vs 0.459, brown 0.412 vs 0.448 | swarm loses on V |
