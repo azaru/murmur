@@ -7,7 +7,7 @@ import {
   getAgentDir, isToolCallEventType, ModelRuntime, SessionManager, SettingsManager, type ToolCallEvent, type ToolResultEvent,
 } from "@earendil-works/pi-coding-agent";
 import { Board, boardTools, formatMessages, type Member } from "./board.ts";
-import { BOARD_TOOLS, loadProfile, type Profile, render } from "./profile.ts";
+import { KNOWN_BOARD_TOOLS, loadProfile, type Profile, render } from "./profile.ts";
 
 export type Task = {
   goal: string; done: string; check: string; project?: string;
@@ -75,6 +75,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   };
   const board = new Board(names, log, notify, budgetText);
   board.lease = profile.claimLease * 1000;
+  board.threaded = profile.threads;
   const seen = new Map<string, string>(); // agent and path -> content digest it last read or wrote
   const digest = (path: string) => (existsSync(path) ? createHash("sha1").update(readFileSync(path)).digest("hex") : "");
   const evidence = new Map<string, { calls: number; firstGreen?: number; green?: boolean; stuck?: number; part?: string }>(); // per seat, reset by a relay
@@ -98,7 +99,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     const tail = output.split("\n").filter(l => l.trim() && !l.startsWith("Command exited")).slice(-3).join("\n");
     const seat = evidence.get(name) ?? { calls: 0 };
     evidence.set(name, seat);
-    const work = !BOARD_TOOLS.includes(event.toolName);
+    const work = !KNOWN_BOARD_TOOLS.includes(event.toolName);
     if (work) seat.calls += 1;
     if (ran) seat.green = !failed, seat.part = ran, status.set(ran, { ok: !failed, tail });
     const part = seat.part ?? task.check;

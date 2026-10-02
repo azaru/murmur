@@ -82,6 +82,7 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
   - `systemPromptAppend` and `toolDescriptions`.
 - **Agents and tools:**
   - `messaging`: board on or off;
+  - `threads`: a threaded board (`thread_new`, `thread_list`, `thread_read`, `reply`) in place of `post`; agents receive only the threads they follow, plus an announcement of each new thread;
   - `tools`: built-in tools;
   - `boardTools`: which coordination tools to offer;
   - `spawnGapSeconds`: staggered entry;
@@ -126,4 +127,4 @@ With OAuth subscriptions the reported cost may be 0 or a catalog estimate, so us
 - The acceptance check always runs at the end; the trace records posts, tool calls, usage and done reasons.
 - A profile with `messaging: false` registers only `done`: the control condition for measuring the board's value.
 - Agents are isolated from your Pi extensions, skills, settings and context files.
-- It refuses to run outside a sandbox unless told `--unsafe`. Under ~600 lines, on purpose.
+- It refuses to run outside a sandbox unless told `--unsafe`. Small on purpose: a few hundred lines per file.

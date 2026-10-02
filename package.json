@@ -6,7 +6,8 @@
   "description": "Minimal agent swarm: Pi agents sharing one folder and one message board",
   "scripts": {
     "murmur": "tsx src/cli.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
   },
   "engines": {
     "node": ">=22.12"

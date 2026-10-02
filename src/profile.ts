@@ -4,6 +4,9 @@ import { Errors } from "typebox/value";
 
 export const BUILTIN_TOOLS = ["read", "bash", "edit", "write", "grep", "find", "ls"];
 export const BOARD_TOOLS = ["post", "inbox", "team", "budget", "claim", "release", "role", "finding", "done"];
+/** Offered instead of post when `threads` is on. */
+export const THREAD_TOOLS = ["thread_new", "thread_list", "thread_read", "reply"];
+export const KNOWN_BOARD_TOOLS = [...BOARD_TOOLS, ...THREAD_TOOLS];
 
 /** Everything about how murmur behaves that an experiment may change. */
 export const DEFAULT_PROFILE = {
@@ -49,13 +52,14 @@ Start by reading your inbox and posting what you will work on. When told you hav
   /** Offer finding(text, command): murmur runs the command and posts the claim with its real exit code and output. */ findings: false,
   /** Tool calls an agent makes while the acceptance check fails or has not run before the board hears it may need help; also posts when one finishes without a pass. 0 is off. */ helpAfter: 0,
   /** Board tools offered when messaging is on; done is always offered. */ boardTools: BOARD_TOOLS,
+  /** Threaded board: agents open threads with thread_new and answer with reply instead of using post. Agents only receive the threads they follow (opened, replied to or read), plus a one-line announcement of each new thread. Offer the thread tools through boardTools. */ threads: false,
 };
 export type Profile = typeof DEFAULT_PROFILE;
 
 const text = Type.Optional(Type.String()), flag = Type.Optional(Type.Boolean()), count = Type.Optional(Type.Integer({ minimum: 0 }));
 const ProfileSchema = Type.Object({
   briefing: text, teamBriefing: text, steer: text, wake: text, systemPromptAppend: text,
-  messaging: flag, doneGate: flag, notices: flag, writeGuard: flag, staleGuard: flag, clock: flag, findings: flag,
+  messaging: flag, threads: flag, doneGate: flag, notices: flag, writeGuard: flag, staleGuard: flag, clock: flag, findings: flag,
   revive: count, doneAfterGreen: count, relay: count, relayContext: count, helpAfter: count,
   spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })), claimLease: Type.Optional(Type.Number({ minimum: 0 })),
   toolDescriptions: Type.Optional(Type.Record(Type.String(), Type.String())),
@@ -74,11 +78,14 @@ export function loadProfile(path?: string): Profile {
   }
   const badTool = raw.tools?.find((t: string) => !BUILTIN_TOOLS.includes(t));
   if (badTool) throw new Error(`profile ${path}: unknown tool ${badTool} (allowed: ${BUILTIN_TOOLS.join(", ")})`);
-  const badBoardTool = raw.boardTools?.find((t: string) => !BOARD_TOOLS.includes(t));
-  if (badBoardTool) throw new Error(`profile ${path}: unknown board tool ${badBoardTool} (allowed: ${BOARD_TOOLS.join(", ")})`);
-  const badDescription = Object.keys(raw.toolDescriptions ?? {}).find(t => !BOARD_TOOLS.includes(t));
+  const badBoardTool = raw.boardTools?.find((t: string) => !KNOWN_BOARD_TOOLS.includes(t));
+  if (badBoardTool) throw new Error(`profile ${path}: unknown board tool ${badBoardTool} (allowed: ${KNOWN_BOARD_TOOLS.join(", ")})`);
+  const badDescription = Object.keys(raw.toolDescriptions ?? {}).find(t => !KNOWN_BOARD_TOOLS.includes(t));
   if (badDescription) throw new Error(`profile ${path}: toolDescriptions.${badDescription} is not a board tool`);
-  return { ...DEFAULT_PROFILE, ...raw };
+  const profile = { ...DEFAULT_PROFILE, ...raw };
+  if (profile.threads && profile.boardTools.includes("post")) throw new Error(`profile ${path}: with threads, boardTools cannot offer post (use thread_new and reply)`);
+  if (profile.threads && profile.messaging && !THREAD_TOOLS.every(t => profile.boardTools.includes(t))) throw new Error(`profile ${path}: with threads, boardTools must offer ${THREAD_TOOLS.join(", ")}`);
+  return profile;
 }
 
 /** Fills {key} placeholders in one pass, so substituted text is never re-expanded. */

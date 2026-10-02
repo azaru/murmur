@@ -9,7 +9,7 @@ if (!dirs.length) {
   process.exit(1);
 }
 
-const BOARD = new Set(["post", "inbox", "team", "budget", "claim", "release", "role", "finding", "done"]);
+const BOARD = new Set(["post", "inbox", "team", "budget", "claim", "release", "role", "finding", "done", "thread_new", "thread_list", "thread_read", "reply"]);
 const json = path => JSON.parse(readFileSync(path, "utf8"));
 const text = message => (Array.isArray(message.content) ? message.content : [{ type: "text", text: message.content }])
   .filter(c => c.type === "text").map(c => c.text).join(" ");

@@ -8,7 +8,7 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 
 ## Layout
 
-- `src/` (~600 lines, hard ceiling ~600): `swarm.ts` (run loop, sessions, hooks, relays), `board.ts` (board state and coordination tools), `profile.ts` (every tunable lever and its default), `cli.ts`.
+- `src/` (small on purpose; see "Rules for changing murmur"): `swarm.ts` (run loop, sessions, hooks, relays), `board.ts` (board state and coordination tools), `profile.ts` (every tunable lever and its default), `cli.ts`.
 - `profiles/*.json`: one file per experimental arm. `no-messaging.json` is the control.
 - `scripts/arms.mjs`: paired comparison of two arms inside the same swarmtest campaign(s). `scripts/traces.mjs`: per-agent behaviour table (calls, board share, checks, calls after the first green, overwrites, steers) and why each agent stopped.
 - `examples/`: tiny task files for smoke tests (`trio.json` with 3 agents is the usual one).
@@ -28,7 +28,7 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 - **New levers default to off** and must leave existing profiles' behaviour unchanged (for example, register Pi hooks only when a lever needs them). Document each lever in `src/profile.ts` and in README.md's profile sentence.
 - **Campaigns run murmur straight from `src/`.** While any campaign is running (`pgrep -fl swarmtest`), edit a copy under `tmp/claude-<task>/src`, typecheck it there, smoke-test it from the copy (`npx tsx tmp/claude-<task>/src/cli.ts run ...`), and only then copy the files over `src/` in one step.
 - Smoke-test every new mechanism with a cheap scripted task that forces the behaviour (see the write-guard and claim tests in the history), plus one default-profile run to check nothing regressed.
-- Stay under ~600 lines in `src/`. If a change does not fit, compact existing code without changing behaviour, and say so in the commit.
+- Keep `src/` small and readable, but code quality comes before line count: the old ~600-line figure is a warning to review the design, not a limit that forbids a lever. Never compact code into something harder to read just to save lines; if a file grows past the point where it reads well, split it.
 - Code, comments and commit messages in English. Commits go to `main`, ending with the Co-Authored-By line. Never commit in `../swarmtest`.
 - Temporary files only in `tmp/claude-<task>/` inside the project, and delete them when done (also delete the `runs/` dirs of smoke tests).
 
