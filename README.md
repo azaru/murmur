@@ -33,7 +33,7 @@ Not yet, and the evidence points away from it. Six rounds, ~255M tokens and ~300
 | Longer analyses: adversarial review, methodology and trace audits, DeepSWE diagnosis, incident-inspired theories, task families | [experiments/reports/](experiments/reports/) |
 | One row per graded run (247 swarmtest runs), and per-batch results | [experiments/rows/runs.json](experiments/rows/runs.json), `experiments/batch/*/batch-result.json` |
 | Per-agent behaviour tables (calls, board share, calls after green, why each agent stopped) | `experiments/criba*-traces.md`, [experiments/batch/traces.md](experiments/batch/traces.md) |
-| Raw agent transcripts and event traces (23 MB archive, not in git) | [archive/MANIFEST.md](archive/MANIFEST.md) |
+| Raw agent transcripts and event traces (23 MB, attached to a release) | [release `data-2026-10-02`](https://github.com/azaru/murmur/releases/tag/data-2026-10-02), described in [archive/MANIFEST.md](archive/MANIFEST.md) |
 | Every experimental arm | [profiles/](profiles/) |
 
 Method in one paragraph:
