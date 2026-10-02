@@ -237,7 +237,7 @@ For each experiment: whether its question or theory was written down before meas
 - the F1a–c screens were not pre-registered separately;
 - the code version per run was not recorded before `46e756b`;
 - raw agent transcripts and workspaces are not in git (size); they are packed in a 23 MB archive described in [`archive/MANIFEST.md`](../archive/MANIFEST.md);
-- the `fam_*` and `opt_*` task sources live uncommitted in `../swarmtest/staging/`.
+- the `fam_*` and `opt_*` task sources live in the separate swarmtest repository (`staging/`, commit `34c8385`), which has no public remote yet.
 
 ## Where the data is
 
