@@ -668,7 +668,7 @@ B = ended by the 3M budget (score is a floor).
 
 **Deviation: code changed mid-round.** At 17:45 another session of the user's edited `src/` (the `threads` lever, committed afterwards as `89478ef`) while D campaigns were running from `src/`. Runs started after 17:45 (roster2 r2, shop2 r2 and packing2 r2, all from 17:51) loaded the new code. With `threads` off the flat board is equivalent: `post` and its notifications follow the same path, which I checked in the diff, and the default-profile regression smoke passed. The runs are kept.
 
-## Round 10: the quality signal, swarm size, back to basics and a cheaper V swarm (fixed before measuring, 2026-10-02 19:05; the user approved the plan and asked to add n=2 and n=10 and to include 10C)
+## Round 10: the quality signal, swarm size, back to basics and a cheaper V swarm (fixed before measuring, 2026-10-02 18:52; the user approved the plan and asked to add n=2 and n=10 and to include 10C)
 
 Motivation (round 9 transcripts):
 - On panel D the swarm's one clear win (packing2, +0.27) came from diversity plus a number printed by the check: a score on an instance as large as the hidden ones, r = 0.94 with the hidden grade. The single agent stops on green with that number at ~0.15. Until the single agent is given the same number and a norm to use it, the win cannot be credited to the swarm.
