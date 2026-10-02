@@ -1,0 +1,19 @@
+{
+  "lot": "L3",
+  "arm": "E",
+  "rep": 1,
+  "image": "murmur-batch:a5a95a58e2",
+  "profile": "b-swarm",
+  "scores": {
+    "opt_routing": 0.020422,
+    "opt_shop": 0.632256,
+    "opt_packing": 0.479979,
+    "opt_roster": 0.589762
+  },
+  "mean": 0.43060475,
+  "tokens": 416630,
+  "reasons": [
+    "all_done"
+  ],
+  "minutes": 2.0603333333333333
+}

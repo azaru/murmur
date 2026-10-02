@@ -1,0 +1,19 @@
+{
+  "lot": "L1",
+  "arm": "R",
+  "rep": 1,
+  "image": "murmur-batch:a5a95a58e2",
+  "profile": "b-realloc",
+  "scores": {
+    "information_extraction_hard": 0.012163,
+    "durable_workflow_engine": 0.5384615384615384,
+    "ledger_reconciliation_hard": 1,
+    "information_extraction_hard2": 0.169849
+  },
+  "mean": 0.4301183846153846,
+  "tokens": 1425486,
+  "reasons": [
+    "quiescent"
+  ],
+  "minutes": 4.390016666666667
+}

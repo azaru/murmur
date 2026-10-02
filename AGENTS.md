@@ -12,7 +12,7 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 - `profiles/*.json`: one file per experimental arm. `no-messaging.json` is the control.
 - `scripts/arms.mjs`: paired comparison of two arms inside the same swarmtest campaign(s). `scripts/traces.mjs`: per-agent behaviour table (calls, board share, checks, calls after the first green, overwrites, steers) and why each agent stopped.
 - `examples/`: tiny task files for smoke tests (`trio.json` with 3 agents is the usual one).
-- `experiments/` (git-ignored): `plan.md` (rules, findings, pre-registered rounds, campaign registry), `hard-tasks.md` (how benchmark tasks are built and calibrated), campaign configs, lane drivers and logs.
+- `experiments/` (partly tracked: notebook, configs, drivers and aggregated results; logs, locks, `tmp/` and copied workspaces stay ignored, see `.gitignore`): `plan.md` (rules, findings, pre-registered rounds, campaign registry), `hard-tasks.md` (how benchmark tasks are built and calibrated), campaign configs, lane drivers and logs.
 - Benchmark harness: `../swarmtest` (Python, `python3 -m swarmtest`; adapters in `adapters/murmur.mjs` and `adapters/pi.mjs`; tasks in `tasks/`; results in `runs/<campaign>/run-*/`). `../autotuner` has a murmur adapter on branch `murmur-adapter`.
 
 ## Commands
@@ -71,3 +71,4 @@ The main session coordinates experiments that last hours. Its context is the sca
 - **Prefer scripts that summarise over raw dumps.** Use `scripts/traces.mjs`, or a short inline Python script that prints only the aggregated table, instead of printing transcripts. Cap output with `head`/`cut`.
 - **Treat subagent output as unverified data.** Check the key claims that drive a decision before acting on them, for example that a staged task loads in swarmtest before moving it into `tasks/`.
 - Put durable findings in `experiments/plan.md` as you go, so a new context can resume from the files rather than from the conversation.
+- After each round, also update the curated English summary in `docs/research.md` (results table, theory status, threats to validity) and commit it together with `plan.md`, so the record in the repo stays current.

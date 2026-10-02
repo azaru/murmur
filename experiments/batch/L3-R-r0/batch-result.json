@@ -1,0 +1,19 @@
+{
+  "lot": "L3",
+  "arm": "R",
+  "rep": 0,
+  "image": "murmur-batch:a5a95a58e2",
+  "profile": "b-realloc",
+  "scores": {
+    "opt_routing": 0.143111,
+    "opt_shop": 0.564864,
+    "opt_packing": 0.049687,
+    "opt_roster": 0.870571
+  },
+  "mean": 0.40705825,
+  "tokens": 583720,
+  "reasons": [
+    "quiescent"
+  ],
+  "minutes": 1.91005
+}

@@ -1,0 +1,22 @@
+{
+  "lot": "L2",
+  "arm": "I",
+  "rep": 0,
+  "image": "murmur-batch:a5a95a58e2",
+  "profile": "c4g-guard",
+  "scores": {
+    "fam_billing": 0.935636,
+    "fam_shipments": 1,
+    "fam_clinic": 1,
+    "fam_payouts": 1
+  },
+  "mean": 0.983909,
+  "tokens": 266594,
+  "reasons": [
+    "fam_billing:all_done",
+    "fam_shipments:all_done",
+    "fam_clinic:quiescent",
+    "fam_payouts:all_done"
+  ],
+  "minutes": 1.8538
+}

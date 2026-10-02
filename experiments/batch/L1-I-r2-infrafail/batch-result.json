@@ -1,0 +1,22 @@
+{
+  "lot": "L1",
+  "arm": "I",
+  "rep": 2,
+  "image": "murmur-batch:a5a95a58e2",
+  "profile": "c4g-guard",
+  "scores": {
+    "information_extraction_hard": 0.552464,
+    "durable_workflow_engine": 0,
+    "ledger_reconciliation_hard": 1,
+    "information_extraction_hard2": 0.130579
+  },
+  "mean": 0.42076075,
+  "tokens": 1355202,
+  "reasons": [
+    "information_extraction_hard:all_done",
+    "durable_workflow_engine:no result",
+    "ledger_reconciliation_hard:all_done",
+    "information_extraction_hard2:quiescent"
+  ],
+  "minutes": 28.04575
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "projects": {
+    "arcswarm": "/Users/azaru/Documents/projects/arcswarm",
+    "miniswarm": "/Users/azaru/Documents/projects/miniswarm",
+    "swarm": "/Users/azaru/Documents/projects/swarm",
+    "murmur": "/Users/azaru/Documents/projects/murmur"
+  },
+  "competitors": [
+    {
+      "system": "pi",
+      "agents": 1
+    },
+    {
+      "system": "murmur",
+      "agents": 3,
+      "variant": "profiles/no-messaging.json"
+    }
+  ],
+  "repetitions": 1,
+  "seed": 20261006,
+  "provider": "openai-codex",
+  "model": "gpt-6-luna",
+  "reasoning": "medium",
+  "token_budget": 3000000,
+  "timeout_seconds": 1200,
+  "spawn_gap_seconds": 0,
+  "tasks": "/Users/azaru/Documents/projects/swarmtest/tasks",
+  "runs": "/Users/azaru/Documents/projects/swarmtest/runs"
+}

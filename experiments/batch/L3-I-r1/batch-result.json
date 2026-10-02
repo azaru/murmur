@@ -1,0 +1,22 @@
+{
+  "lot": "L3",
+  "arm": "I",
+  "rep": 1,
+  "image": "murmur-batch:a5a95a58e2",
+  "profile": "c4g-guard",
+  "scores": {
+    "opt_routing": 0.503838,
+    "opt_shop": 0.580722,
+    "opt_packing": 0.355511,
+    "opt_roster": 0.453981
+  },
+  "mean": 0.473513,
+  "tokens": 249588,
+  "reasons": [
+    "opt_routing:all_done",
+    "opt_shop:all_done",
+    "opt_packing:all_done",
+    "opt_roster:all_done"
+  ],
+  "minutes": 1.9763833333333334
+}

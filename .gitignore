@@ -1,3 +1,17 @@
 node_modules/
 runs/
-experiments/
+# Experiments: track the notebook, drivers, campaign configs and aggregated results; keep logs, locks,
+# scratch dirs and copied workspaces/transcripts (tens of MB per round) out of git.
+experiments/**
+!experiments/**/
+!experiments/*.md
+!experiments/*.json
+!experiments/*.mjs
+!experiments/*.txt
+!experiments/levers/*.md
+!experiments/criba*/*.json
+!experiments/criba*/*.sh
+!experiments/batch/*.mjs
+!experiments/batch/*.sh
+!experiments/batch/*/batch-result.json
+experiments/tmp/

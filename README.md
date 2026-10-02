@@ -31,3 +31,7 @@ A task file sets `goal`, `done` (definition of done), `check` (acceptance comman
 - A profile with `messaging: false` registers only `done`: the control condition for measuring the board's value.
 - Agents are isolated from your Pi extensions, skills, settings and context files.
 - It refuses to run outside a sandbox unless told `--unsafe`. Under ~600 lines, on purpose.
+
+## Research
+
+Every experiment run with murmur so far — questions, pre-registered rules, results, theories tested and what is wrong with the evidence — is in [docs/research.md](docs/research.md). Short version: no swarm configuration has yet beaten a well-instructed single agent that keeps working; the raw lab notebook is [experiments/plan.md](experiments/plan.md).
