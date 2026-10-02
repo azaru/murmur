@@ -6,7 +6,7 @@
 
 ## Findings so far (2026-10-02)
 
-No. Nine rounds, ~385M tokens and ~420 graded runs on hidden-test benchmarks (model `openai-codex/gpt-6-luna`) point the same way: for this model and these tasks, a single agent that keeps working matches or beats every swarm configuration tried.
+No. Ten rounds, ~456M tokens and ~450 graded runs on hidden-test benchmarks (model `openai-codex/gpt-6-luna`) point the same way: for this model and these tasks, a single agent that keeps working matches or beats every swarm configuration tried.
 
 - **Persistence of one agent beats coordination of several.**
   - A single murmur agent with short lessons beats Pi by about +0.25 at ~0.35M tokens.
@@ -22,7 +22,7 @@ No. Nine rounds, ~385M tokens and ~420 graded runs on hidden-test benchmarks (mo
   - they break a shared file with a chunked `write`;
   - they yield to a teammate ("X owns the file").
   - Coordination-only turns take 31–62% of a swarm's tokens.
-- **Still open:** most benchmark tasks saturate for the clock agent. Round 8 rebuilt the panel: four planning and optimisation tasks where it scores 0.3–0.5 because it stops on a green check, and two medium OpenSpec projects (greenfield and brownfield, 3–5k lines) where it runs out of tokens at about 0.45. Whether a swarm beats it on these is the next test.
+- **Swarms against the clock agent where it has headroom (round 9):** on two 3–5k-line OpenSpec projects that exhaust one agent's tokens, a 4-agent swarm with the same tokens loses (−0.16): it spends them twice as fast on board turns and integration. On four optimisation tasks where the agent stops on a green check, parallel attempts with selection tie (−0.004) at 4x the tokens. They win clearly only where the check prints a number that predicts the hidden grade (+0.27).
 
 ## The research record
 

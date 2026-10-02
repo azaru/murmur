@@ -643,6 +643,31 @@ Question: with the panels from round 8, does a non-hierarchical swarm beat c4g-c
   - **Integration through one shared `__init__.py` is the weak point.** Agents compose the class from mixins in that one file and ask its holder to add theirs (~15 "add X to the MRO" posts per green run). Three agents wrote modules before the foundation existed. In two green runs the foundation was never released, and its holder became the only integrator.
   - **Attribution:** there is constant use of teammates' work, through posted interfaces and the shared `__init__.py`, so coordination happened. It cost more than it returned.
 
+### Round 9 D result and rule applied (2026-10-02 18:25; 1 D lane from 16:45, 3 lanes from 17:12)
+
+12 campaigns `20261002T144550Z-2b1171ae` → `20261002T160742Z-bd8122ed` (seed 20261034), all exit 0, **34.7M tokens**. The paired C1 run completed in all 12 campaigns. Four S3 runs ended by budget or timeout, and their campaigns stopped after the S3 run as planned, costing nothing else.
+
+| task | C1 c4g-clock n=1 | C1 mean | S3 x1g-select-clock n=3 | S3 mean | S3 − C1 |
+|---|---|---:|---|---:|---:|
+| cph | 0.354 / 0.502 / 0.449 | 0.435 | 0.334 B / 0.414 / 0.300 B | 0.349 | −0.086 |
+| opt_packing2 | 0.520 / 0.456 / 0.917 | 0.631 | 0.864 / 0.914 / 0.916 | 0.898 | **+0.267** |
+| opt_roster2 | 0.167 / 0.768 / 0.574 | 0.503 | 0.553 / 0.013 / 0.284 B | 0.283 | −0.220 |
+| opt_shop2 | 0.158 / 0.444 / 0.249 | 0.284 | 0.369 / 0.105 B / 0.446 | 0.307 | +0.023 |
+
+B = ended by the 3M budget (score is a floor).
+
+- **Rule applied: not decided.** The mean delta is −0.004, and S3 wins 2 tasks and loses 2.
+- **S3 has 4 of 12 runs capped (≥ 1/3), so it is flagged.** It spends 1.6–3.0M per run, against C1's 0.1–1.2M, three to twenty times as much. On equal tokens spent the comparison is even less favourable to the swarm.
+- **opt_packing2 is the one clear win, and it is a variance win.** C1 is bimodal again (0.46–0.52, or 0.92). S3 lands on the good mode every time (0.86–0.92), because one of three independent attempts finds it and the selection installs it. On roster2 the same machinery picked badly once (0.013).
+- **Pooled C1** (descriptive, calibration plus this round, k=6): cph 0.454, roster2 0.453, shop2 0.295, packing2 0.517.
+- **Findings from the transcripts** (subagent analysis, `reports/2026-10-02-round9-d-traces.md`, model output; it regraded every optimisation attempt with the task's grader, and the installed attempt reproduces `record.json` within 0.004):
+  - **S3 follows the method in form.** Every run builds 3 attempts, writes 2–4 probes and a `SCORES.md`, and installs a selection. The probes mostly check feasibility, format and determinism, and pass on every attempt, so the real selection signal is the public check's numbers. Cross-review caught real bugs three times.
+  - **packing2 wins by diversity plus a predictive number.** Only 3 of 9 S3 attempts reach ≥ 0.9, each by a different agent, which is about C1's good-mode rate of 1/3. The check also prints a score S on `instance_large.json` (informational only). It predicts the hidden grade far better than the visible score (r = 0.94 against 0.67 over packing2 and shop2, both arms). C1 stops on the first green with that large S at 0.174 / 0.146 / 0.993, and its hidden scores are 0.52 / 0.46 / 0.92 [verified]. S3 selected on that number and kept improving after green: a fee bug and a relocation bug were fixed, and a 0.50 install was replaced by a 0.92 one.
+  - **Where there is no size-aware number, selection fails.** roster2 and cph print no large-instance score. On roster2, S3 selected on visible cost and installed a solver whose iteration count shrinks with size (0.013). In another roster2 run the agreed fix (0.537 in an attempt) never reached the installed file before the budget ran out. Determinism probes pushed agents from wall-clock deadlines to fixed iteration counts that do not scale. cph fails identically in both arms (an invalid fallback plan on medium to xl_dense instances), with no signal in the public check.
+  - **Cost.** S3 averages 2.30M per run against C1's 0.58M. S3 spends 30% of turn tokens on the board and 26% on probes and scoring, against C1's 6% and 3%. 53% of S3's tokens go before the first `SCORES.md`.
+
+**Deviation: code changed mid-round.** At 17:45 another session of the user's edited `src/` (the `threads` lever, committed afterwards as `89478ef`) while D campaigns were running from `src/`. Runs started after 17:45 (roster2 r2, shop2 r2 and packing2 r2, all from 17:51) loaded the new code. With `threads` off the flat board is equivalent: `post` and its notifications follow the same path, which I checked in the diff, and the default-profile regression smoke passed. The runs are kept.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -688,3 +713,4 @@ Question: with the panels from round 8, does a non-hierarchical swarm beat c4g-c
 | 2026-10-02 | round 8 stage remedy (9 campaigns `20261002T124256Z-cdc442e1` → `20261002T125232Z-a2671488`, seed 20261032, code `0097a51`) | c4g-clock n=1 | opt_shop2, opt_packing2, plan_timetable × 3 (after the large-visible-instance remedy) | 2.0M | shop2 0.306, packing2 0.402, timetable 0.272 | shop2 and packing2 enter panel D; timetable dropped |
 | 2026-10-02 | round 8 stage ospec (6 campaigns `20261002T130021Z-d3c30e94` → `20261002T132336Z-6d8ed73d`, seed 20261033, 6M and 30 min per run) | c4g-clock n=1 | ospec_green, ospec_brown × 3 (after the ~4x scale-up and the review fixes) | 36.2M | green 0.459, brown 0.448; all 6 end by budget at 12–23 min | both enter panel V |
 | 2026-10-02 | round 9 V (6 campaigns `20261002T144540Z-2fd46338` → `20261002T150244Z-59dbbe1c`, seed 20261035, 6M and 30 min per run, code `3ea1d8d`) | v-swarm-clock n=4 (C1 = round 8 calibration, reused) | ospec_green, ospec_brown × 3 | 36.1M | S4 green 0.166 vs 0.459, brown 0.412 vs 0.448 | swarm loses on V |
+| 2026-10-02 | round 9 D (12 campaigns `20261002T144550Z-2b1171ae` → `20261002T160742Z-bd8122ed`, seed 20261034, code `3ea1d8d`; 3 of 12 runs on `89478ef`, equivalent with threads off) | x1g-select-clock n=3 vs c4g-clock n=1 (paired) | cph, opt_roster2, opt_shop2, opt_packing2 × 3 | 34.7M | S3 − C1: cph −0.09, packing2 +0.27, roster2 −0.22, shop2 +0.02; mean −0.004; S3 capped 4/12 | not decided |
