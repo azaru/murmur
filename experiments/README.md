@@ -19,6 +19,7 @@ Everything needed to audit or rerun murmur's experiments. Start with the summary
 | Round 7 | 10-02 | recalibrate the task panel against c4g-clock (difficulty and volume regimes) | "Round 7" | `criba7/`, [`criba7-lanes.mjs`](criba7-lanes.mjs); `batch/lane.sh L3 <image> "IC"`, `batch/lane.sh L1 <image> "O"` | [`rows/runs.json`](rows/runs.json) (seed 20261025), `batch/{L3-IC,L1-O}-r<rep>/batch-result.json` | [`criba7-traces.md`](criba7-traces.md), [`batch/traces.md`](batch/traces.md) ("Round 7") |
 | Round 8 | 10-02 | expand panel D (5 new staged tasks, one remedy) and build panel V (OpenSpec projects) | "Round 8" | `criba8/`, [`criba8-lanes.mjs`](criba8-lanes.mjs), [`criba8b-lanes.mjs`](criba8b-lanes.mjs) | [`rows/runs.json`](rows/runs.json) (seeds 20261030–20261033) | [`criba8-traces.md`](criba8-traces.md), [`criba8b-traces.md`](criba8b-traces.md), [`reports/2026-10-02-panel8-build.md`](reports/2026-10-02-panel8-build.md) |
 | Round 9 | 10-02 | the swarm against c4g-clock: 4-agent section swarm on panel V, parallel attempts on panel D | "Round 9" | `criba9/`, [`criba9-lanes.mjs`](criba9-lanes.mjs); profiles `v-swarm-clock`, `x1g-select-clock` | [`rows/runs.json`](rows/runs.json) (seeds 20261034, 20261035) | [`round9-traces.md`](round9-traces.md), [`reports/2026-10-02-round9-v-traces.md`](reports/2026-10-02-round9-v-traces.md), [`reports/2026-10-02-round9-d-traces.md`](reports/2026-10-02-round9-d-traces.md) |
+| Round 10 | 10-02 | does the swarm add anything once the single agent gets the quality signal (10A), swarm size n=2/3/10, a bare post-only board (10B), a cheaper threaded V swarm (10C) | "Round 10" | `criba10/`, [`criba10-lanes.mjs`](criba10-lanes.mjs); profiles `c4g-signal`, `x1g-select-signal`, `b0-basic`, `ti-swarm-clock` | [`rows/runs.json`](rows/runs.json) (seeds 20261036–20261040) | [`round10-traces.md`](round10-traces.md), [`reports/2026-10-02-round10-d-traces.md`](reports/2026-10-02-round10-d-traces.md), [`reports/2026-10-02-round10-b0-traces.md`](reports/2026-10-02-round10-b0-traces.md), [`reports/2026-10-02-round10-v-traces.md`](reports/2026-10-02-round10-v-traces.md) |
 
 ## By kind
 
@@ -30,13 +31,14 @@ Everything needed to audit or rerun murmur's experiments. Start with the summary
   - `2026-10-01-task-families.md`: the `fam_*` and `opt_*` task families, their validation and calibration.
   - `2026-10-02-panel8-build.md`: the round 8 tasks, their validation, the ambiguity review and the OpenSpec pilot.
   - `2026-10-02-round9-v-traces.md`, `2026-10-02-round9-d-traces.md`: why the swarm lost on panel V and tied on panel D.
+  - `2026-10-02-round10-d-traces.md`, `2026-10-02-round10-b0-traces.md`, `2026-10-02-round10-v-traces.md`: whether the single agent uses the printed score, how the n=2/3/10 swarms select, what the bare board does, and why the threaded V swarm was not cheaper.
   - `2026-10-02-astra-swarm-ideas.md`: the ExploitGym and Astra swarm sources and the ideas drawn from them.
   - `2026-10-02-video-S2sjyokoxeE-review.md`: the video review behind the `threads` lever.
   - `2026-10-02-round6-traces.md`: why the agent without a clock stops, what the clock agent does with the time, and coordination in the 6B batches.
 - **Per-run data:**
-  - [`rows/runs.json`](rows/runs.json): every swarmtest run since 09-30, 327 rows. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+  - [`rows/runs.json`](rows/runs.json): every swarmtest run since 09-30, 441 rows. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
   - `batch/*/batch-result.json`: one per batch.
-- **Per-agent behaviour:** `criba{1,2,3,5,6,7,8}-traces.md`, from `scripts/traces.mjs`; [`batch/traces.md`](batch/traces.md) for the batches.
+- **Per-agent behaviour:** `criba{1,2,3,5,6,7,8}-traces.md`, `round{9,10}-traces.md`, from `scripts/traces.mjs`; [`batch/traces.md`](batch/traces.md) for the batches.
 - **Campaign configs:** `*.json` here and in `criba*/`. They are swarmtest configs: competitors, seed, repetitions and token budget. Drivers are `*-lanes.mjs` and `criba1-driver*.mjs`.
 - **Raw agent transcripts:** not in git; see [`../archive/MANIFEST.md`](../archive/MANIFEST.md).
 

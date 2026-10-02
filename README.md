@@ -6,7 +6,7 @@
 
 ## Findings so far (2026-10-02)
 
-No. Ten rounds, ~456M tokens and ~450 graded runs on hidden-test benchmarks (model `openai-codex/gpt-6-luna`) point the same way: for this model and these tasks, a single agent that keeps working matches or beats every swarm configuration tried.
+No. Eleven rounds, ~585M tokens and ~560 graded runs on hidden-test benchmarks (model `openai-codex/gpt-6-luna`) point the same way: for this model and these tasks, a single agent that keeps working matches or beats every swarm configuration tried.
 
 - **Persistence of one agent beats coordination of several.**
   - A single murmur agent with short lessons beats Pi by about +0.25 at ~0.35M tokens.
@@ -23,6 +23,11 @@ No. Ten rounds, ~456M tokens and ~450 graded runs on hidden-test benchmarks (mod
   - they yield to a teammate ("X owns the file").
   - Coordination-only turns take 31–62% of a swarm's tokens.
 - **Swarms against the clock agent where it has headroom (round 9):** on two 3–5k-line OpenSpec projects that exhaust one agent's tokens, a 4-agent swarm with the same tokens loses (−0.16): it spends them twice as fast on board turns and integration. On four optimisation tasks where the agent stops on a green check, parallel attempts with selection tie (−0.004) at 4x the tokens. They win clearly only where the check prints a number that predicts the hidden grade (+0.27).
+- **Round 10 checked that win, and it does not hold against a single agent that keeps going.**
+  - Telling the single agent that the printed score is the target does not stop it from ending on the first green check at a low score.
+  - In the same campaigns, the plain clock agent matches the 3-agent swarm on that task (0.72 vs 0.68) at a sixth of the tokens.
+  - At a fixed token budget, smaller swarms do better: n=2 0.69, n=3 0.58, n=10 0.50.
+  - A bare post-only board ties the single agent (−0.006), and a threaded board does not make the volume swarm cheaper (36% of tokens still on the board).
 
 ## The research record
 
@@ -32,7 +37,7 @@ No. Ten rounds, ~456M tokens and ~450 graded runs on hidden-test benchmarks (mod
 | Index of all experiment material, by round and by kind | [experiments/README.md](experiments/README.md) |
 | Lab notebook: pre-registrations written before each round, rules as applied, findings, campaign registry | [experiments/plan.md](experiments/plan.md) |
 | Longer analyses: adversarial review, methodology and trace audits, DeepSWE diagnosis, incident-inspired theories, task families | [experiments/reports/](experiments/reports/) |
-| One row per graded run (247 swarmtest runs), and per-batch results | [experiments/rows/runs.json](experiments/rows/runs.json), `experiments/batch/*/batch-result.json` |
+| One row per graded run (441 swarmtest runs), and per-batch results | [experiments/rows/runs.json](experiments/rows/runs.json), `experiments/batch/*/batch-result.json` |
 | Per-agent behaviour tables (calls, board share, calls after green, why each agent stopped) | `experiments/criba*-traces.md`, [experiments/batch/traces.md](experiments/batch/traces.md) |
 | Raw agent transcripts and event traces (23 MB, attached to a release) | [release `data-2026-10-02`](https://github.com/azaru/murmur/releases/tag/data-2026-10-02), described in [archive/MANIFEST.md](archive/MANIFEST.md) |
 | Every experimental arm | [profiles/](profiles/) |

@@ -2,12 +2,12 @@
 
 This is the curated record of every experiment run with murmur so far: the question, what was tried, what came out, which theories held and which did not, and what is wrong with the evidence. The raw lab notebook, with every pre-registration written before its round was measured, is [`experiments/plan.md`](../experiments/plan.md); longer analyses are in [`experiments/reports/`](../experiments/reports/). Numbers here are copied from them, and each one can be traced to a run in [`experiments/rows/runs.json`](../experiments/rows/runs.json).
 
-**Status (2026-10-02, after round 8): the evidence answers the question negatively for the tasks tested.** No swarm configuration has met the success criterion. Round 6 confirmed that the strongest results come from a *single* agent that keeps working: a one-line clock explains the best single agent, and once isolated agents get the same clock, the swarm's only win disappears. What remains open is whether coordination helps on tasks where a persistent single agent still has headroom. Rounds 7 and 8 rebuilt the panel around the clock agent: four planning and optimisation tasks where it stops on a green check short of the quality ceiling (panel D), and two medium OpenSpec projects where it runs out of tokens at about 0.45 (panel V).
+**Status (2026-10-02, after round 10): the evidence answers the question negatively for the tasks tested.** No swarm configuration has met the success criterion. Round 6 confirmed that the strongest results come from a *single* agent that keeps working: a one-line clock explains the best single agent, and once isolated agents get the same clock, the swarm's only win disappears. What remains open is whether coordination helps on tasks where a persistent single agent still has headroom. Rounds 7 and 8 rebuilt the panel around the clock agent: four planning and optimisation tasks where it stops on a green check short of the quality ceiling (panel D), and two medium OpenSpec projects where it runs out of tokens at about 0.45 (panel V). Rounds 9 and 10 put swarms against it on that panel: they lose on V, and on D they win only on one task, packing2, where the single agent sometimes stops early on a low score. A plain single agent that does not stop early matches them.
 
 ## TL;DR
 
 - The pre-registered criterion (beat Pi n=1 in two independent confirmation campaigns on a held-out task set) has **never been tested**: no candidate earned a confirmation run.
-- Across ~456M tokens and ten rounds, the most reliable lever is **persistence of one agent**:
+- Across ~585M tokens and eleven rounds, the most reliable lever is **persistence of one agent**:
   - a single murmur agent with short lessons (c4n1) beats Pi by about +0.25 at ~0.35M tokens;
   - a single agent with relays beats every 3-agent arm on the same tasks;
   - **a single agent with a visible clock (c4g-clock) scores 0.997** on ieh, ieh2 and ledger, against 0.434 for the same agent without it (round 6A, k=3). Without the clock the agent gives up on a red check after 2–5 of its 18 minutes; with it, it keeps working for 9–14.
@@ -16,6 +16,11 @@ This is the curated record of every experiment run with murmur so far: the quest
   - the one positive swarm result (batches of tasks with a board, L1, +0.17) was **induced persistence**: with a clock on both sides, the swarm scores 0.921 and isolated agents 0.925 (round 6B).
 - **The tasks now saturate** for the clock agent (0.93–1.0 on all but ieh2), so the rounds so far cannot show a coordination benefit where a persistent agent still has headroom. After rounds 7 and 8 the panel holds four difficulty-limited tasks (the agent stops on a green check with time and tokens left) and two volume-limited OpenSpec projects (it runs out of tokens at about 0.45).
 - **Round 9 put swarms against the clock agent on that panel.** On the volume projects a 4-agent swarm **loses** (−0.16), burning the shared 6M twice as fast on board turns and integration. On the difficulty tasks parallel attempts with selection are **not decided** (−0.004, 2 wins and 2 losses) at 4x the tokens. They win clearly only where the check prints a number that predicts the hidden grade.
+- **Round 10 tested that number, swarm size, a bare board and a cheaper V swarm.**
+  - A text norm ("the printed score is the target") does **not** make the single agent use the score. It still ends on the first green at a low score in 5 of 9 packing2 runs.
+  - Against that weakened control, parallel attempts "add" by the pre-registered rule. But the plain clock agent in the same campaigns scores as well on packing2 (0.719 against 0.679), at a sixth of the tokens.
+  - At a fixed 3M, smaller swarms do better: n=2 0.69, n=3 0.58, n=10 0.50 on the two tasks with a score. n=10 runs out of tokens after one draft per agent.
+  - A post-only board with a one-line briefing (B0) ties the single agent (−0.006). A threaded board with an integration rule (TI) does not make the V swarm cheaper: board-only turns still take 36% of its tokens.
 - The dominant failure modes are **stopping early**, **breaking a shared file**, and **yielding to a teammate** ("X owns the file, I'll review").
   - Work done after the first green check predicts the score (Spearman 0.72–0.80 on multi-file tasks).
   - 31–62% of a swarm's tokens go to coordination-only turns.
@@ -270,6 +275,37 @@ New tasks were built in `staging/` by subagents, checked by read-only ambiguity 
   - On roster2 and cph there is no such number. S3 selected on the visible cost and once installed a solver that does not scale (0.013).
 - Analyses: `experiments/reports/2026-10-02-round9-v-traces.md`, `experiments/reports/2026-10-02-round9-d-traces.md`; per-agent table `experiments/round9-traces.md`.
 
+### Round 10: the quality signal, swarm size, a bare board and a cheaper V swarm (128.6M tokens, code `9d1180b`)
+
+Panel D (opt_packing2, opt_shop2, opt_roster2; 3M and 18 min per run, k=3, paired in the same campaigns). packing2 and shop2 print a score on an instance as large as the hidden ones; roster2 prints one only for its small visible instance. New profiles, built from existing levers:
+- **C1s** (`c4g-signal`): the clock agent plus a norm that makes the printed score the target, not the exit code.
+- **S2s, S3s, S10s** (`x1g-select-signal`): parallel attempts, selected by the printed score, with the same norm.
+- **B0** (`b0-basic`): the clock agent plus a post-only board and a one-line briefing.
+- **TI** (`ti-swarm-clock`): a threaded board plus an integration rule, on panel V.
+
+| comparison | packing2 | shop2 | roster2 | rule |
+|---|---:|---:|---:|---|
+| S3s − C1s (10A primary) | +0.460 | +0.085 | −0.031 | **adds**, by the letter; S3s capped 7/9 |
+| C1s − C1 (10A secondary) | −0.500 | +0.099 | +0.288 | the norm **does not help** |
+| S3s − C1 (descriptive) | −0.040 | +0.184 | +0.257 | — |
+| S2s − C1s (size) | +0.571 | −0.026 | −0.198 | not decided; capped 3/9 |
+| S10s − C1s (size) | −0.028 | −0.057 | +0.107 | not decided; capped 9/9 |
+| B0 − C1 (10B) | +0.087 | −0.032 | −0.074 | **not decided** (mean −0.006), as predicted |
+
+Panel V, ospec_brown (6M and 30 min): TI scores 0.416, against C1 0.448 (round 8) and S4 0.412 (round 9). **V is parked.**
+
+- **The control collapsed, so the primary does not mean what it was meant to.** The norm in text did not stop early exits. 5 of 9 C1s packing2 runs ended within 3 minutes on the first green, with the large-instance score at 0.11–0.21, and the agent wrote that the check "passes for both the visible and large instances". The plain clock agent in the same campaigns scored 0.719 on packing2, above S3s's 0.679, at about a sixth of the tokens.
+- **Size, at a fixed 3M.** On the two tasks with a score, the mean is n=2 0.687, n=3 0.580 and n=10 0.498. Swarm tokens per run are 2.1M, 2.8M and 3.0M.
+  - n=10 gets about one first draft per agent before the cap, which it hits at 4–6 of 18 minutes. In 3 of 9 runs the cap also left a better attempt uninstalled.
+  - n=2 reached packing2's good mode in 3 of 3 runs, and installed its best attempt in 9 of 9. The transcripts show one agent posting the key idea within 2–4 minutes, the only peer adopting it, and both iterating after green.
+- **Selection is only as good as the number.** On roster2 the swarms selected on the small visible instance and installed solvers that degrade with size. One S2s solver scores 0 on the largest hidden instance.
+  - The large-instance score itself is load-sensitive. One end-of-run check printed 0.152, while the hidden grade was 0.819 and a quiet regrade gave 0.933.
+- **B0 (the incident's basics) adds nothing measurable.** Three agents edit one `solve.py` and use the board for results and cross-checks, at 2–7x the single agent's tokens.
+  - Its packing2 edge cannot be separated from more total work.
+  - In its one capped run, the board converged on a harmful change: fixed iteration budgets in place of a time limit. S fell from 0.52 to 0.35, and nobody reverted it.
+- **TI did not cut coordination cost.** Board-only turns took 35.6% of its tokens, against S4's 27.8% by the same script; the target was under 10%. The integration rule did prevent broken imports. Coverage stayed at 33 of 41 capabilities.
+- Analyses: `experiments/reports/2026-10-02-round10-{d,b0,v}-traces.md`; per-agent table `experiments/round10-traces.md`.
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -286,9 +322,13 @@ New tasks were built in `staging/` by subagents, checked by read-only ambiguity 
 | Verified findings (knowledge sharing) | 5A, 5B | **Not supported**: barely used, negative point estimate |
 | Help-when-stuck signals | 5A, 5B, 6B | Keep agents working on tasks with a red check; no gain against a persistent single agent |
 | Re-allocating effort across tasks | 5B, 6B | **Refuted on its own** (R < I); with a board its L1 win disappears once isolated agents get a clock (EC − IC = −0.005) |
-| The swarm beats a same-prompt single agent | criba 1, 5A, 6B, 9 | **Not supported**, now also where the clock agent has headroom: it loses on volume (V, −0.16) and is not decided on difficulty (D, −0.004 at 4x tokens) |
+| The swarm beats a same-prompt single agent | criba 1, 5A, 6B, 9, 10 | **Not supported**, now also where the clock agent has headroom: it loses on volume (V, −0.16; a threaded variant does no better) and is not decided on difficulty (D, −0.004 at 4x tokens). In round 10 it beats only a single agent that stops early; the plain clock agent in the same campaigns matches it on packing2 |
 | Smaller contexts let a swarm cover a large project on the same tokens | 9 (V) | **Refuted as built**: contexts were 2–3x smaller, but more calls, board turns and duplicated spec reading consumed the saving |
-| Parallel attempts escape a bimodal single agent | 9 (D) | **Supported only with a predictive selection signal** (packing2 +0.27); without one, selection picks a solver that does not scale |
+| Parallel attempts escape a bimodal single agent | 9, 10 (D) | **Supported only with a predictive selection signal**, and only against a single agent that stops early: on packing2 n=2 reached the good mode 3 of 3, but the plain clock agent in round 10's S3 campaigns matched n=3 (0.719 vs 0.679). Without a size-aware number, selection picks a solver that does not scale |
+| A text norm makes the single agent use a printed quality score | 10A | **Refuted**: C1s still ends on the first green at a low score (5 of 9 packing2 runs within 3 minutes); C1s − C1 = −0.20 on the signal tasks |
+| Larger swarms do better at the same tokens | 10 (size) | **Refuted at 3M**: n=2 0.69 > n=3 0.58 > n=10 0.50 on the signal tasks; n=10 hits the cap after one draft per agent |
+| murmur's scaffolding hides a swarm benefit (bare board, Astra/ExploitGym style) | 10B | **Not supported**: a post-only board with a one-line briefing ties the single agent (−0.006) at ~4x tokens |
+| A threaded board and an integration rule make a V swarm cheaper | 10C | **Refuted**: board-only turns 35.6% of tokens (S4 27.8%); integration breakage avoided, score unchanged (0.416) |
 
 ## Cross-cutting findings
 
@@ -302,6 +342,9 @@ New tasks were built in `staging/` by subagents, checked by read-only ambiguity 
 - **Ceiling.** With the clock, ieh, ledger and durable score 0.93–1.0 for the single agent. Round 6B cannot show a coordination benefit that would need headroom; it shows only that the clock closes round 5B's gap.
 - **Reused runs.** Round 6A's c4g-evidence figures on ieh and ieh2 are round 5A's runs (another day; same code path, pre-registered). The main contrast (clock − guard) uses only fresh runs; "the clock explains c4g-evidence" uses them, and the fresh c4g-evidence runs on ledger (0.967) agree.
 - **Reused control (round 9 V).** The solo arm is the round 8 calibration: same task fingerprints and code path, but another hour and seed.
+- **Collapsed control (round 10A).** The primary comparison's control (C1s) underperformed the plain clock agent on packing2 by 0.50, so the rule's "adds" verdict measures the swarm against an agent that stopped early, not against the strong single agent.
+- **Load-sensitive signal.** The large-instance score comes from a time-bounded solver run. Under 3 lanes, one end-of-run check printed 0.152 where a quiet regrade gave 0.933 (hidden 0.819). Agents selecting or stopping on that number saw noise.
+- **Regrades during live campaigns (round 10).** An analysis subagent ran 137 public checks (sequential, `nice -n 15`) between about 19:07 and 19:50 UTC, while B0 and the first S2 campaigns ran, so wall-clock graders and in-run checks may have been slightly slowed. The runs are kept.
 - **Code changed mid-round (round 9 D).** The `threads` lever landed in `src/` at 17:45 while D campaigns ran from `src/`; three runs loaded it. With `threads` off the flat board is equivalent (diff and default-profile smoke).
 - **Small k.** Most comparisons use k=2–3 on 2–4 tasks, while one task's noise spans 0.0–0.75 for Pi. Bootstrap CIs over 3–4 task deltas mostly reflect which tasks were sampled.
 - **Capped runs are floors.** Many swarm runs hit 3M; their score is truncated, and a capped run stops its swarmtest campaign.
@@ -313,12 +356,13 @@ New tasks were built in `staging/` by subagents, checked by read-only ambiguity 
 
 ## What would change the picture next
 
-Round 9 ran items 1 and 2 of the previous list: on panel V the swarm loses, and on panel D it is not decided. What is left:
+Round 9 ran items 1 and 2 of the previous list, and round 10 ran items 1–3 (signal, cheaper V swarm, bare board). What is left:
 
-1. **A selection signal for the swarm, and the same signal for the single agent.** packing2 shows parallel attempts win when the check prints a number that predicts the hidden grade, while the single agent stops on green with that number at ~0.15. The fair test gives both arms the number and a norm to use it. If the single agent then reaches the good mode too, the swarm adds only diversity, at 4x the tokens.
-2. **A cheaper swarm on volume.** Board turns (~30% of tokens), duplicated spec reading and one shared integration file sank panel V. Candidates: a threaded board (`threads`), an integration convention that does not route through one file, fewer agents.
-3. **Back to the incident's basics.** The ExploitGym swarm had a message-only board across hundreds of different tasks, and RL-trained cooperation. The Astra swarm's measured benefit is speed at more tokens, not quality (`reports/2026-10-02-astra-swarm-ideas.md`). A stripped board (post only, one-line briefing) removes the objection that murmur's scaffolding hides a benefit.
-4. **Why the clock works**, and **a promotion benchmark with partial credit**, as before.
+1. **A mechanical gate on the score instead of a text norm.** The single agent read the large-instance score and stopped anyway. The next fair test enforces it for both arms, for example by refusing `done` while the score is still improving or before a minimum number of attempts. Only then does "the swarm adds something beyond persistence" have a strong control.
+2. **n=2 against that gated single agent, with a compute-matched control.** n=2 was the best swarm (packing2 0.904 in 3 of 3). The transcripts credit it to one idea spreading over the board plus iteration after green. A single agent with the same tokens (relays or a longer gate) separates that from more total work.
+3. **A quieter signal.** The large-instance score is time-bounded and noisy under load, so agents selecting or stopping on it saw noise. A fixed-work score, or fewer concurrent lanes, removes that.
+4. **Panel V stays parked.** Its cost is turns × context (~24k tokens per turn). A threaded board did not cut turns, so only a design that removes coordination turns altogether is worth another V round.
+5. **Why the clock works**, and **a promotion benchmark with partial credit**, as before.
 
 ## Record completeness
 
@@ -338,6 +382,7 @@ For each experiment: whether its question or theory was written down before meas
 | Round 6 (6A, 6B) | yes, committed before launch (`d9a7510`) | `criba6-lanes.mjs`, `batch/run-batch.mjs`, `batch/lane.sh` | `rows/runs.json` (seed 20261020), `criba6-traces.md`, `batch/L1-{IC,EC}-r*/batch-result.json`, `batch/traces.md` | yes, `plan.md` and `reports/2026-10-02-round6-traces.md` | yes |
 | Round 7 (calibration) | yes, committed before launch (`011fb28`) | `criba7-lanes.mjs`, `batch/run-batch.mjs` (arm O), `batch/lane.sh` | `rows/runs.json` (seed 20261025), `criba7-traces.md`, `batch/{L3-IC,L1-O}-r*/batch-result.json`, `batch/traces.md` | yes, in `plan.md` | yes |
 | Round 8 (panel expansion) | yes, committed before each stage (`6e586ac`, `0097a51`) | `criba8-lanes.mjs`, `criba8b-lanes.mjs` | `rows/runs.json` (seeds 20261030, 20261032, 20261033), `criba8-traces.md`, `criba8b-traces.md` | yes, `reports/2026-10-02-panel8-build.md` | yes |
+| Round 10 (signal, size, bare board, cheaper V swarm) | yes, committed before launch (`fb8e16f`, timestamp fixed in `9d1180b`) | `criba10-lanes.mjs`, `criba10/` | `rows/runs.json` (seeds 20261036–20261040), `round10-traces.md` | yes, `reports/2026-10-02-round10-{d,b0,v}-traces.md` | yes |
 | Round 9 (swarm vs clock agent, D and V) | yes, committed before launch (`3ea1d8d`) | `criba9-lanes.mjs`, `criba9/` | `rows/runs.json` (seeds 20261034, 20261035), `round9-traces.md` | yes, `reports/2026-10-02-round9-{v,d}-traces.md`, `reports/2026-10-02-astra-swarm-ideas.md` | yes |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
@@ -345,7 +390,7 @@ For each experiment: whether its question or theory was written down before meas
 - pre-registrations were not version-controlled before commit `138a4d7`, so their timestamps are self-reported;
 - the F1a–c screens were not pre-registered separately;
 - the code version per run was not recorded before `46e756b`;
-- raw agent transcripts and workspaces are not in git (size); they are packed in a 23 MB archive described in [`archive/MANIFEST.md`](../archive/MANIFEST.md); round 6's raw runs are not in it yet and will go into the next archive;
+- raw agent transcripts and workspaces are not in git (size); they are packed in a 23 MB archive described in [`archive/MANIFEST.md`](../archive/MANIFEST.md); the raw runs of rounds 6–10 (from campaign `20261002T063615Z-10df4893` on) are not in it yet and will go into the next archive;
 - the `fam_*` and `opt_*` task sources live in the separate swarmtest repository (`staging/`, commit `34c8385`), which has no public remote yet.
 
 ## Where the data is
@@ -360,9 +405,10 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the incident-inspired theories and how they fared;
   - the round 6 transcript analyses (the clock, and coordination in the batches);
   - the construction and calibration of the task families;
-  - the round 9 transcript analyses (panels V and D) and the review of the Astra/ExploitGym swarm sources.
-- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (327 runs in 184 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
-- `experiments/criba{1,2,3,5,6,7,8}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
+  - the round 9 transcript analyses (panels V and D) and the review of the Astra/ExploitGym swarm sources;
+  - the round 10 transcript analyses (panel D with the signal and swarm size, the bare board B0, and the threaded V swarm TI).
+- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (441 runs in 241 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).

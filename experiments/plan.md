@@ -709,6 +709,55 @@ packing2 and shop2 print the large-instance score ("signal tasks"); roster2 does
 
 **Budget (estimate):** S3 stage ~34M (C1 0.5 + C1s ~1 + S3s ~2.3 per campaign), S2 ~24M, S10 ~36M, B0 ~27M, V ~18M. **Total ~140M**, upper bound ~155M if every swarm run hits its cap.
 
+### Round 10 result and rule applied (2026-10-02 22:30; launched 18:53 with 3 lanes, load ~5.5, code `9d1180b`, `src/` unchanged since 17:45)
+
+39 campaigns, all exit 0, **128.6M tokens** (estimate ~140M). Per stage: S3 9 campaigns `20261002T165303Z-00d0c849` → `20261002T182954Z-f4db5fa7` (35.9M); S2 9 `20261002T192127Z-b2d51c69` → `20261002T200521Z-0b133e12` (23.3M); S10 9 `20261002T171902Z-54fb30cf` → `20261002T183722Z-e32a4ae8` (29.6M); B0 9 `20261002T184552Z-9f7c1abc` → `20261002T191921Z-3583a47a` (21.7M); V 3 `20261002T165259Z-e530e637` → `20261002T171010Z-0af634f7` (18.1M). Every planned run was recorded: the swarm always ran last, so the 23 campaigns that stopped with `usage_unknown_or_cleanup_unconfirmed` lost nothing. `campaign.json` marks the murmur tree dirty only because `experiments/criba10/` was untracked.
+
+Hidden-grade scores per repetition (B = ended by the 3M or 6M budget, a floor):
+
+| stage | task | single agent(s) | swarm | swarm tokens/run |
+|---|---|---|---|---:|
+| S3 | packing2 | C1 0.866 / 0.467 / 0.823 (0.719); C1s 0.086 / 0.302 / 0.269 (0.219) | S3s 0.819 / 0.335 B / 0.885 (0.679) | 2.59M |
+| S3 | shop2 | C1 0.742 / 0.029 / 0.116 (0.296); C1s 0.421 / 0.133 / 0.631 (0.395) | S3s 0.365 B / 0.457 B / 0.619 B (0.480) | 3.01M |
+| S3 | roster2 | C1 0.673 / 0.075 / 0.094 (0.281); C1s 0.028 / 0.751 / 0.927 (0.569) | S3s 0.576 B / 0.517 B / 0.521 B (0.538) | 3.02M |
+| S2 | packing2 | C1s 0.118 / 0.709 / 0.172 (0.333) | S2s 0.914 / 0.904 / 0.892 (0.904) | 1.65M |
+| S2 | shop2 | C1s 0.806 / 0.394 / 0.287 (0.496) | S2s 0.280 B / 0.598 / 0.534 (0.470) | 2.50M |
+| S2 | roster2 | C1s 0.564 / 0.564 / 0.549 (0.559) | S2s 0.272 B / 0.527 B / 0.284 (0.361) | 2.45M |
+| S10 | packing2 | C1s 0.829 / 0.906 / 0.138 (0.624) | S10s 0.780 B / 0.143 B / 0.863 B (0.596) | 3.01M |
+| S10 | shop2 | C1s 0.329 / 0.512 / 0.529 (0.457) | S10s 0.282 B / 0.605 B / 0.312 B (0.400) | 3.02M |
+| S10 | roster2 | C1s 0.178 / 0.701 / 0.022 (0.300) | S10s 0.518 B / 0.584 B / 0.118 B (0.407) | 3.02M |
+| B0 | packing2 | C1 0.702 / 0.817 / 0.884 (0.801) | B0 0.913 / 0.870 / 0.881 (0.888) | 2.08M |
+| B0 | shop2 | C1 0.152 / 0.575 / 0.286 (0.338) | B0 0.435 / 0.147 B / 0.338 (0.306) | 2.07M |
+| B0 | roster2 | C1 0.076 / 0.486 / 0.501 (0.354) | B0 0.030 / 0.180 / 0.630 (0.280) | 1.72M |
+| V | ospec_brown | C1 0.448 (round 8, reused); S4 0.412 (round 9, reused) | TI 0.403 B / 0.422 B / 0.421 B (0.416) | 6.03M |
+
+Single agents spend 0.2–1.1M per run (C1s 0.21–1.11M, C1 0.26–0.57M by task mean).
+
+**Rules applied, as written:**
+- **10A primary: the swarm adds** by the letter. S3s − C1s = +0.460 (packing2) and +0.085 (shop2), mean +0.272, S3s wins both. **Flagged:** 7 of 9 S3s runs hit the 3M cap. Attribution clause: C1s (0.219) < S3s − 0.05 on packing2, so by the letter the packing2 win is not credited to the signal.
+  - **Qualification, in the same breath:** the control collapsed. The text norm did not make C1s use the score: 2 of 3 C1s packing2 runs in these campaigns stopped on the first green after 3 minutes at large S 0.11 and 0.21. The plain C1 in the same campaigns scored 0.719 on packing2, above S3s (0.679). Against C1, S3s − C1 is −0.040 (packing2) and +0.184 (shop2), at 6x the tokens. The primary does not show that the swarm adds anything a single agent that keeps working would not get.
+- **10A secondary: the norm does not help.** C1s − C1 = −0.500 (packing2) and +0.099 (shop2), mean −0.200. The roster2 prediction (|C1s − C1| < 0.05) **missed**: +0.288. Pooled descriptive means: C1s (k=9) packing2 0.392, shop2 0.449, roster2 0.476; C1 (k=6, S3 and B0 campaigns) packing2 0.760, shop2 0.317, roster2 0.318. With per-run spreads of 0.03–0.93, the sign flips between tasks are within noise; what is clear is that the norm in text did not stop early exits.
+- **Size, each swarm against the C1s of its own campaigns, signal tasks:**
+  - S2s: +0.571 (packing2), −0.026 (shop2), mean +0.272, wins 1 of 2: **not decided**. Flagged (3 of 9 capped, exactly 1/3).
+  - S3s: **adds** (above).
+  - S10s: −0.028, −0.057, mean −0.043, loses both but the mean is above −0.05: **not decided**. Flagged (9 of 9 capped, all at 4.4–6.4 of 18 minutes).
+  - Size curve (signal-task mean; swarm / its own C1s / swarm tokens per run): n=2 0.687 / 0.415 / 2.08M; n=3 0.580 / 0.307 / 2.80M; n=10 0.498 / 0.541 / 3.02M. Score falls with n at a fixed 3M. n=2 lands on packing2's good mode 3 of 3.
+- **10B: not decided** (the prediction held). B0 − C1 = +0.087 (packing2), −0.032 (shop2), −0.074 (roster2), mean −0.006, B0 wins 1 of 3. 1 of 9 B0 runs capped (not flagged). B0 spends ~2.0M against C1's ~0.45M.
+- **10C: V is parked.** TI − C1 = 0.416 − 0.448 = −0.032 (TI − S4 = +0.004). Mechanism target missed: board-only turns take **35.6%** of TI's tokens (40.8 / 36.1 / 30.0%), against S4's 27.8% by the same script, and the target was < 10%.
+
+**Findings from the transcripts** (subagent analyses, model output: `reports/2026-10-02-round10-d-traces.md`, `-b0-traces.md`, `-v-traces.md`; hand-verified claims are listed in each report's header):
+- **The text norm is inert at the moment that matters.** C1s reads the large-instance S and ends anyway: "`npm run test` passes for both the visible and large instances" at S 0.107, 3 minutes in [verified]. 11 of 18 C1s runs ended within 5 minutes. When C1s did keep going (shop2, one packing2 run), it iterated against S but plateaued. The hidden grade tracks the last S it saw.
+- **Selection works when the swarm gets to install; budget and pool limit it.** The installed attempt had the best regraded S (within 0.05) in 12 of 18 S3s/S10s runs. S3s failed when every attempt was weak (one packing2 run: all four attempts at S 0.15–0.25). S10s ran out of 3M mid-selection, leaving a clearly better attempt uninstalled in 3 of 9 runs.
+- **n=10 at ~0.3M per agent buys one first draft each.** About 28–32 calls per agent, 13–27% of calls on the board, almost no iteration. The result is a max-of-10 draw on first drafts, near C1s's level.
+- **The large-instance S is load-sensitive.** In S3s packing2 r0, the end-of-run acceptance check printed large S = 0.152 (7.2 s), while the hidden grade was 0.819 and a quiet regrade gave 0.933 [verified]. Under 3 lanes, a time-bounded solver can print a misleading S; the signal itself is noisy under load.
+- **n=2 is the best swarm here, and its packing2 win looks like transmission plus iteration.** Both agents reach large S ≥ 0.95 in all three packing2 runs, so this is not pool diversity: one agent posts the category-first insight within 2–4 minutes ("category-first ordering improved … large from 129941 to 102308" [verified]), the only peer adopts it, and both keep iterating after green (22–60 more calls) without hitting the cap. The installed attempt was the best in 9 of 9 S2s runs. On roster2 (no large-instance score) S2s selected on the small visible instance and installed solvers that degrade with size (one scores 0 on the 160-employee hidden instance), 0.36 against C1s 0.56. C1s packing2 in the S2 campaigns again stopped within 3 minutes at S 0.15–0.18 in 2 of 3 runs; over all 9 C1s packing2 runs, 5 stopped within 3 minutes at S ≤ 0.21.
+- **B0 does not split work.** All agents edit one `solve.py`, the board is used for results and cross-checking (~10 posts per agent, ~22% of tokens in post-only turns), and agents adopt and verify teammates' findings. The packing2 edge cannot be separated from more total work (2–7x the tokens). In the capped shop2 run, the board converged on a bad move: an agent argued that wall-clock stopping breaks determinism, the team switched to fixed iteration budgets, and S fell from 0.52 to 0.35 (large S 0.083) with no revert [verified: the final `solve.py` has fixed `anneal_trials=9000 if N < 500 else 1700` and no clock].
+- **TI's integration norm prevented breakage, but the board was not cheaper.** No capability scored 0 from an integration fault, the package auto-loads `ext_*.py` modules (it already did in the base project), and coverage stayed at 33 of 41 capabilities, like S4 and C1. Cost is turns × context (~24k tokens per turn, 93% cache reads), and threads added claim/team/reply/read turns rather than removing them. Agents read threads; there was no polling loop.
+
+**Deviations and infrastructure:**
+- **Regrades during live campaigns.** The panel D analysis subagent ran 137 public checks (sequential, `nice -n 15`) between about 19:07 and 19:50 UTC, while B0 r1–r2 and the first S2 campaigns ran. Their graders and in-run checks are wall-clock based, so those runs may have been slightly slowed. The B0 report also found load-driven budget cuts in the capped shop2 run (`20261002T190159Z-488ba77b`, 19:02–19:13 UTC), which falls inside that window. The runs are kept; the effect cannot be separated after the fact.
+- My background wait hit the tool's 2-hour limit and was replaced by a re-armed monitor. Nothing was missed: all three lanes logged "no work left" and every campaign exited 0.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -755,3 +804,8 @@ packing2 and shop2 print the large-instance score ("signal tasks"); roster2 does
 | 2026-10-02 | round 8 stage ospec (6 campaigns `20261002T130021Z-d3c30e94` → `20261002T132336Z-6d8ed73d`, seed 20261033, 6M and 30 min per run) | c4g-clock n=1 | ospec_green, ospec_brown × 3 (after the ~4x scale-up and the review fixes) | 36.2M | green 0.459, brown 0.448; all 6 end by budget at 12–23 min | both enter panel V |
 | 2026-10-02 | round 9 V (6 campaigns `20261002T144540Z-2fd46338` → `20261002T150244Z-59dbbe1c`, seed 20261035, 6M and 30 min per run, code `3ea1d8d`) | v-swarm-clock n=4 (C1 = round 8 calibration, reused) | ospec_green, ospec_brown × 3 | 36.1M | S4 green 0.166 vs 0.459, brown 0.412 vs 0.448 | swarm loses on V |
 | 2026-10-02 | round 9 D (12 campaigns `20261002T144550Z-2b1171ae` → `20261002T160742Z-bd8122ed`, seed 20261034, code `3ea1d8d`; 3 of 12 runs on `89478ef`, equivalent with threads off) | x1g-select-clock n=3 vs c4g-clock n=1 (paired) | cph, opt_roster2, opt_shop2, opt_packing2 × 3 | 34.7M | S3 − C1: cph −0.09, packing2 +0.27, roster2 −0.22, shop2 +0.02; mean −0.004; S3 capped 4/12 | not decided |
+| 2026-10-02 | round 10 S3 (9 campaigns `20261002T165303Z-00d0c849` → `20261002T182954Z-f4db5fa7`, seed 20261036, code `9d1180b`) | C1s c4g-signal, C1 c4g-clock (n=1), S3s x1g-select-signal n=3 (paired) | opt_packing2, opt_shop2, opt_roster2 × 3 | 35.9M | S3s − C1s +0.46 / +0.09 (roster2 −0.03); C1s − C1 −0.50 / +0.10 (roster2 +0.29); S3s capped 7/9 | 10A primary: adds by the letter, but C1 (no norm) 0.719 ≥ S3s 0.679 on packing2; the norm does not help |
+| 2026-10-02 | round 10 S2 (9 campaigns `20261002T192127Z-b2d51c69` → `20261002T200521Z-0b133e12`, seed 20261037) | C1s, S2s x1g-select-signal n=2 | same × 3 | 23.3M | S2s − C1s +0.57 / −0.03 (roster2 −0.20); packing2 0.904 in 3 of 3; capped 3/9 | size n=2: not decided |
+| 2026-10-02 | round 10 S10 (9 campaigns `20261002T171902Z-54fb30cf` → `20261002T183722Z-e32a4ae8`, seed 20261038) | C1s, S10s x1g-select-signal n=10 | same × 3 | 29.6M | S10s − C1s −0.03 / −0.06 (roster2 +0.11); all 9 capped at 4.4–6.4 min | size n=10: not decided |
+| 2026-10-02 | round 10 B0 (9 campaigns `20261002T184552Z-9f7c1abc` → `20261002T191921Z-3583a47a`, seed 20261039) | C1 c4g-clock, B0 b0-basic n=3 (post-only board) | same × 3 | 21.7M | B0 − C1 +0.09 / −0.03 / −0.07, mean −0.006 | 10B not decided (as predicted) |
+| 2026-10-02 | round 10 V (3 campaigns `20261002T165259Z-e530e637` → `20261002T171010Z-0af634f7`, seed 20261040, 6M and 30 min) | TI ti-swarm-clock n=4 (C1 round 8 and S4 round 9 reused) | ospec_brown × 3 | 18.1M | TI 0.416 vs C1 0.448, S4 0.412; board-only turns 35.6% of tokens (target < 10%) | 10C: V parked |
