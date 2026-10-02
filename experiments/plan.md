@@ -379,7 +379,7 @@ A stuck signal based on quality for optimisation tasks (L3, `staging/opt_*`), be
 - 6B: IC 3 batches × ~4–6M ≈ 15M; EC 3 × ~6M ≈ 18M (E hit 6M in 2 of 3 batches). **≈ 33M** (upper bound 36M).
 - **Total ≈ 66–68M**, upper bound ~77M. Re-running E1 on ieh and ieh2 instead of reusing it would add ~15M.
 
-### Round 6 result and rule applied (2026-10-02 10:00; launched 08:36 with the user's OK, code `d9a7510`, `src/` hash `a5a95a58e2`)
+### Round 6 result and rule applied (2026-10-02 09:35; launched 08:36 with the user's OK, code `d9a7510`, `src/` hash `a5a95a58e2`)
 
 Before 6B, a smoke of the IC path on lot S (bug_fixing + data_analysis): two containers, c4g-clock, 1.0 / 1.0, 97k tokens, clock lines present in the transcripts. All 21 6A campaigns and all 6 6B batches finished with exit 0; no infrastructure failure. Spend: 6A 26.5M, 6B 32.2M, smoke 0.1M, **58.8M** in total (estimate 66–68M).
 
@@ -415,6 +415,34 @@ Before 6B, a smoke of the IC path on lot S (bug_fixing + data_analysis): two con
   - **One plausible case of useful coordination:** in EC r0, wren posted a diagnosed regex bug in ieh2's `extract.py` and made the one-line fix; ieh2 scored 0.918 (not verified against the grader). Against it, IC r1 reached 0.973 on ieh2 with no help. The shared pool let EC's ieh2 holder spend more than 1.5M (lark: 2.16M in r2), and it still did not beat IC on average beyond noise (0.80 vs 0.75, IC spans 0.38–0.97).
 - **Ceiling (threat to validity, stated here because it limits the conclusion):** with the clock, L1 is near saturated for both arms (0.93–1.0 on three of four tasks). 6B shows that the clock closes 5B's gap; it cannot show that coordination never helps, because on these tasks there is almost no headroom left for it. ieh2 is the only task with room (0.75 / 0.80).
 - **Conclusion of round 6:** both pre-registered questions favour the persistent single agent. For this model and these tasks, a single agent that is shown the clock matches or beats every swarm configuration tried, and the swarm's earlier wins are explained by persistence. The next step (agreed with the user on 2026-10-02) is to recalibrate the task panel against c4g-clock, in two separate regimes: tasks limited by difficulty at equal time and tokens, and tasks limited by volume within the time limit.
+
+## Round 7: recalibration against c4g-clock (fixed before measuring, 2026-10-02 09:45)
+
+Motivation: after round 6 the tasks saturate for the strong single agent (c4g-clock 0.93–1.0 on ieh, ieh2, ledger and durable), so no swarm can show a benefit on them. With the user's approval (2026-10-02), the calibration reference is now c4g-clock with a band of 0.3–0.6 and k=3 (`hard-tasks.md`), in two regimes reported separately. Round 7 only calibrates; it compares no swarm arm.
+
+**6C** (quality-based stuck signal for optimisation tasks) is **deferred**: it would be measured on L3, and L3 first needs to be calibrated against the clock agent here. It gets its own pre-registration if L3 lands in the band.
+
+**Code:** `src/` unchanged (hash `a5a95a58e2`, image `murmur-batch:a5a95a58e2`). New in the batch driver: arm **O**, one c4g-clock agent over all M tasks of a lot with the same M × B tokens (the shared-folder branch with `agents: 1`). Smoke on lot S before the first O batch.
+
+### D: difficulty-limited (same time and tokens as every arm)
+
+- **swarmtest:** c4g-clock n=1, k=3, on `constrained_planning_hard` (cph; c4n1 0.40, Pi 0.35) and `feature_implementation_hard` v4 (fih; c4g-guard 0.79, Pi 0.38). Driver `experiments/criba7-lanes.mjs`, one campaign per task × repetition with `repetitions: 1`, seed 20261025, base `criba3.json` (3M cap, 20 min), 3 lanes.
+- **Not re-run, decided from existing clock data:** ieh 0.999, ieh2 0.990, ledger 1.000 (6A) and durable 0.988 (6B IC, at 1.5M): all saturated, out of panel D.
+- **Batch L3** (`opt_*`, open-ended, scored against best-known): arm IC (c4g-clock isolated, 1.5M per task, 20 min), k=3, via `lane.sh L3 <image> "IC"`. The per-task score is the calibration unit. Note: in 6B the 1.5M per-agent cap, not the clock, stopped half of the IC agents; it is kept at 1.5M so that L3 stays comparable with 5B and with any later swarm arm on 6M.
+- **Rule per task:** c4g-clock mean in [0.3, 0.6] → enters panel D. Above 0.6 → saturated; it stays out until a harder version is built (a separate round). Below 0.3 → the remedies of `hard-tasks.md` (clarify the contract or move information into the public check), then recalibrate.
+
+### V: volume-limited (more work than one agent can do in the time limit)
+
+- **Batch L1 with arm O:** one c4g-clock agent over ieh, durable, ledger and ieh2, 6M tokens, 20 min, k=3, via `lane.sh L1 <image> "O"`.
+- **Rule:** lot L1 enters panel V if O's batch mean is in [0.3, 0.6] **and** the limit is volume: every O batch ends by timeout or budget (not by done or quiescent), with at least one task folder below 0.5. Above 0.6 → the lot is too small for one agent; the next step is a lot of 6–8 tasks (a separate round). Below 0.3 → a lot of 3 tasks.
+- **Descriptive only, not a test:** O against 6B's IC (0.925) and EC (0.921), all at 6M per batch, is a first, cross-day look at parallelism (4 agents) versus one agent at equal tokens. The comparison that would count is pre-registered in a later round, with all arms on the same day.
+
+### Budget (estimate)
+
+- D swarmtest: 6 runs × ~2–3M ≈ 12–18M.
+- D L3 IC: 3 batches × ~2–6M (I used 0.24M per batch without a clock; the cap is 6M) ≈ 6–18M.
+- V L1 O: 3 batches × ~4–6M ≈ 12–18M, plus the O smoke on lot S (~0.1M).
+- **Total ≈ 30–54M, central estimate ~40M.**
 
 ## Campaign registry
 

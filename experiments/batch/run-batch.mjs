@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// Rounds 5B and 6B: one batch of tasks for one arm. Agents and tokens scale with the batch: isolated arms (I, IC) run one
+// Rounds 5B to 7: one batch of tasks for one arm. Agents and tokens scale with the batch: isolated arms (I, IC) run one
 // single agent per task with B tokens each; shared arms (R, E, EC) run M agents over all M tasks with M x B tokens
-// shared. Each murmur run happens in Docker with only its own folder mounted (graders and other runs stay out of reach);
-// grading happens afterwards on the host with swarmtest's own grader.
+// shared; arm O runs one single agent over all M tasks with the same M x B tokens. Each murmur run happens in Docker
+// with only its own folder mounted (graders and other runs stay out of reach); grading happens afterwards on the host
+// with swarmtest's own grader.
 //   node run-batch.mjs <lot> <arm> <rep> <image>      e.g. node run-batch.mjs L2 E 0 murmur-batch:a5a95a58e2
 import { spawn, spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -18,12 +19,12 @@ const LOTS = {
   L3: ["opt_routing", "opt_shop", "opt_packing", "opt_roster"].map(id => [id, join(swarmtest, "staging", id)]),
   L2: ["fam_billing", "fam_shipments", "fam_clinic", "fam_payouts"].map(id => [id, join(swarmtest, "staging", id)]),
 };
-const PROFILES = { I: "c4g-guard", R: "b-realloc", E: "b-swarm", IC: "c4g-clock", EC: "b-swarm-clock" };
+const PROFILES = { I: "c4g-guard", R: "b-realloc", E: "b-swarm", IC: "c4g-clock", EC: "b-swarm-clock", O: "c4g-clock" };
 const ISOLATED = ["I", "IC"];
 const B = 1_500_000, MINUTES = 20;
 const DONE = "Everything the goal asks for is implemented in the working directory and the acceptance check exits 0.";
 if (!LOTS[lot] || !PROFILES[arm] || !/^\d+$/.test(rep ?? "") || !image) {
-  console.error("usage: node run-batch.mjs <S|L1|L2|L3> <I|R|E|IC|EC> <rep> <image>");
+  console.error("usage: node run-batch.mjs <S|L1|L2|L3> <I|R|E|IC|EC|O> <rep> <image>");
   process.exit(1);
 }
 const tasks = LOTS[lot].map(([id, dir]) => ({ id, dir, ...JSON.parse(readFileSync(join(dir, "task.json"), "utf8")) }));
@@ -97,7 +98,7 @@ if (ISOLATED.includes(arm)) {
     reasons.push(`${task.id}:${result?.reason ?? "no result"}`);
   }
 } else {
-  // M agents over all M tasks, one subfolder per task, each with its own check; M x B tokens shared.
+  // M agents (one for arm O) over all M tasks, one subfolder per task, each with its own check; M x B tokens shared.
   const unit = join(out, "batch"), ws = join(unit, "ws");
   mkdirSync(ws, { recursive: true });
   for (const task of tasks) {
@@ -111,7 +112,7 @@ if (ISOLATED.includes(arm)) {
     tasks.map(t => `- ${t.id}: npm run test:${t.id}`).join("\n")}\nWork inside the task subfolders and leave check-all.sh and the top package.json as they are. Every task counts the same.`;
   cpSync(profile, join(unit, "profile.json"));
   writeFileSync(join(unit, "task.json"), JSON.stringify({ ...base, goal, done: "Every task is implemented in its subfolder and its acceptance check exits 0.",
-    check: "npm run test", checks: tasks.map(t => `npm run test:${t.id}`), project: "ws", agents: tasks.length, budgetTokens: B * tasks.length }, null, 2));
+    check: "npm run test", checks: tasks.map(t => `npm run test:${t.id}`), project: "ws", agents: arm === "O" ? 1 : tasks.length, budgetTokens: B * tasks.length }, null, 2));
   const { runDir, result } = await container(unit, `mb-${lot}-${arm}-r${rep}`);
   for (const task of tasks) scores[task.id] = runDir ? grade(task, join(runDir, "workspace", task.id)).score : 0;
   tokens = result?.tokens ?? 0;
