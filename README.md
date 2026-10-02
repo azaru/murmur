@@ -59,7 +59,60 @@ docker run --rm -v "$PWD/runs:/murmur/runs" -v "$PWD/examples:/murmur/examples:r
   -v "$HOME/.murmur-pi:/root/.pi/agent" murmur run examples/hello.json
 ```
 
-A task file sets `goal`, `done` (definition of done), `check` (acceptance command), optional `project` (folder copied into the workspace), `agents` (1–12), `provider`, `model`, `thinking`, `budgetUsd` and/or `budgetTokens`, `timeoutMinutes`, an optional `profile`, and optional `checks` (one acceptance command per part, for batches of tasks). A profile (see `src/profile.ts` for the defaults) holds everything an experiment may tune: `messaging`, the `briefing`/`teamBriefing` templates, `steer` and `wake` texts, `systemPromptAppend`, `toolDescriptions`, the built-in `tools`, `spawnGapSeconds`, and `delivery`/`notices` (with `delivery: "attach"` new posts, and with `notices` each teammate's edits and check runs, are appended to an agent's next tool result instead of steering it into a new turn; with `delivery: "pull"` they wait until the agent calls `inbox`), `boardTools` (which coordination tools to offer) `writeGuard` (refuse a `write` that looks like only part of an existing file, the usual sign of a continuation that would erase it), `claimLease` (claims block teammates' writes and lapse after that many seconds without the holder writing) `staleGuard` (refuse a `write` onto a file that changed since the agent last read or wrote it), `doneAfterGreen` (tool calls required after an agent's first passing check before `done`), `clock` (minutes left appended to tool results), `relay`/`relayContext` (after `done`, or when its turns grow past that many tokens, a fresh instance with empty context takes over the agent's seat), `findings` (a `finding(text, command)` tool whose post carries the command's real exit code and output) and `helpAfter` (after that many tool calls while the acceptance check fails or has not run, or when an agent finishes without a pass, murmur posts that it may need help); `profiles/no-messaging.json` is the control arm. Each run writes `runs/<id>/workspace/`, `events.jsonl` (full trace) and `result.json` (status, end reason, check output, cost, tokens, per-agent data). With OAuth subscriptions the reported cost may be 0 or a catalog estimate; use `budgetTokens`.
+#### Task file
+
+| Field | Meaning |
+|---|---|
+| `goal`, `done`, `check` | The goal, the definition of done, and the acceptance command, which must exit 0 |
+| `project` | Optional folder copied into the workspace |
+| `agents` | 1–12 |
+| `provider`, `model`, `thinking` | The Pi model to run |
+| `budgetUsd` and/or `budgetTokens`, `timeoutMinutes` | Limits for the whole swarm |
+| `profile` | Optional path to a profile (below) |
+| `checks` | Optional, one acceptance command per part, for batches of tasks |
+
+#### Profile
+
+A profile holds everything an experiment may tune; the defaults are in `src/profile.ts`. `profiles/no-messaging.json` is the control arm.
+
+- **Prompts:**
+  - `briefing` and `teamBriefing` templates;
+  - `steer` and `wake` texts;
+  - `systemPromptAppend` and `toolDescriptions`.
+- **Agents and tools:**
+  - `messaging`: board on or off;
+  - `tools`: built-in tools;
+  - `boardTools`: which coordination tools to offer;
+  - `spawnGapSeconds`: staggered entry;
+  - `roles`: a menu agents pick from, never assigned.
+- **Delivery of posts:**
+  - `delivery`: `"steer"` interrupts a busy agent; `"attach"` appends new posts to its next tool result; `"pull"` waits until it calls `inbox`;
+  - `notices`: shares each teammate's edits and check runs (needs `"attach"`).
+- **Write safety:**
+  - `writeGuard`: refuses a `write` that looks like only part of an existing file;
+  - `claimLease`: claims block teammates' writes and lapse after that many seconds without a write;
+  - `staleGuard`: refuses a `write` onto a file that changed since the agent last read it.
+- **Finishing:**
+  - `revive`: how many times a new post may wake an agent that already called `done`;
+  - `doneGate`: no `done` with unread posts or a failing check;
+  - `doneAfterGreen`: tool calls required after the first passing check;
+  - `clock`: minutes left appended to tool results.
+- **Fresh context:**
+  - `relay`: a new instance takes over the seat after `done`;
+  - `relayContext`: or once turns grow past that many tokens.
+- **Coordination signals:**
+  - `findings`: a `finding(text, command)` tool whose post carries the command's real output;
+  - `helpAfter`: after that many calls with a red or unrun check, or a `done` without a pass, murmur posts that the agent may need help.
+
+#### Output
+
+Each run writes `runs/<id>/` with:
+- `workspace/`;
+- `events.jsonl`, the full trace;
+- `result.json`, with status, end reason, check output, cost, tokens and per-agent data;
+- one transcript per agent.
+
+With OAuth subscriptions the reported cost may be 0 or a catalog estimate, so use `budgetTokens`.
 
 ### Design
 
