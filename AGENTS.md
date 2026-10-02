@@ -43,6 +43,20 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 - **Benchmark tasks:** build new tasks in `../swarmtest/staging/<id>/`, never directly in `tasks/`. swarmtest loads every directory in `tasks/` when a campaign starts, and a half-built task makes every new campaign fail. Validate with a private symlinked view of `tasks/`, then `mv` the finished task in. Calibrate against Pi (k=3) and against the strong single agent c4n1 (k=3, band 0.3–0.6). Rules are in `experiments/hard-tasks.md`.
 - **Check that traces are saved before a campaign:** Pi in `state/messages.json`, murmur in `state/murmur/` (`events.jsonl`, `result.json`, `<agent>[.N].messages.json`).
 
+## Keeping the research record
+
+This repository is shown primarily as research. Every experiment must leave a complete, public record in git, written in English. A round is not finished until all of this is committed.
+
+- **Before launching:** commit the pre-registration in `experiments/plan.md` (question, arms, tasks, k, budget, decision rule), together with the new profiles and drivers. The commit is what dates the pre-registration.
+- **After the round:**
+  - **Notebook:** in `experiments/plan.md`, apply the rule as written, add the findings drawn from the transcripts, and add a registry row with the campaign ids, tokens and the code commit. Note any deviation or infrastructure failure, and how it was handled.
+  - **Per-run data:** regenerate `experiments/rows/runs.json` with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`. Write a per-agent table with `node scripts/traces.mjs` to `experiments/<round>-traces.md`. For non-swarmtest runs (such as batches), save a per-run result file and a summary of the coordination events.
+  - **Analyses:** save every long analysis that drove a decision to `experiments/reports/YYYY-MM-DD-<topic>.md`. That includes reviews, subagent audits, task-family builds and calibrations. Label model output as such, and mark the claims you verified by hand.
+  - **Summary:** update `docs/research.md`: the round's section with its results table and the rule as applied, the theory-status table, threats to validity, the record-completeness table, and "Where the data is".
+  - **Index and README:** add the round's row to the index in `experiments/README.md`. Update "Findings so far" in `README.md` when the headline changes.
+  - **Raw transcripts:** after a set of rounds, pack the new raw runs into a new `archive/murmur-raw-runs-<date>.tar.xz`, agents' data only. Search for the real credentials and for token patterns first, then record the contents, size and SHA-256 in `archive/MANIFEST.md`. The archive itself stays out of git.
+- **Check before committing:** run `git add -n experiments` and confirm that every new file you meant to keep is tracked. `.gitignore` only lets through the notebook, configs, drivers, traces, reports, rows and batch results, so a new kind of file may need a new `!` rule. Keep logs, locks, `tmp/` and copied workspaces out.
+
 ## What the data says so far (details in `experiments/plan.md`)
 
 - A single agent stops early. Work done after the first green check is the best predictor of score (Spearman 0.72–0.80 on multi-file and planning tasks). A single agent with short lessons (c4n1) already beats Pi by about +0.25 at ~0.3M tokens.
@@ -71,4 +85,3 @@ The main session coordinates experiments that last hours. Its context is the sca
 - **Prefer scripts that summarise over raw dumps.** Use `scripts/traces.mjs`, or a short inline Python script that prints only the aggregated table, instead of printing transcripts. Cap output with `head`/`cut`.
 - **Treat subagent output as unverified data.** Check the key claims that drive a decision before acting on them, for example that a staged task loads in swarmtest before moving it into `tasks/`.
 - Put durable findings in `experiments/plan.md` as you go, so a new context can resume from the files rather than from the conversation.
-- After each round, also update the curated English summary in `docs/research.md` (results table, theory status, threats to validity) and commit it together with `plan.md`, so the record in the repo stays current.
