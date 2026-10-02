@@ -1,6 +1,6 @@
 # Research log: can a non-hierarchical swarm beat a single agent?
 
-This is the curated record of every experiment run with murmur so far: the question, what was tried, what came out, which theories held and which did not, and what is wrong with the evidence. The raw lab notebook, with every pre-registration written before its round was measured, is [`experiments/plan.md`](../experiments/plan.md) (Spanish). Numbers here are copied from it.
+This is the curated record of every experiment run with murmur so far: the question, what was tried, what came out, which theories held and which did not, and what is wrong with the evidence. The raw lab notebook, with every pre-registration written before its round was measured, is [`experiments/plan.md`](../experiments/plan.md); longer analyses are in [`experiments/reports/`](../experiments/reports/). Numbers here are copied from them, and each one can be traced to a run in [`experiments/rows/runs.json`](../experiments/rows/runs.json).
 
 **Status (2026-10-02): not on track.** No swarm configuration has met the success criterion, and the strongest results so far come from a *single* agent that keeps working, not from agents coordinating. The research question is still open, but the evidence points away from the original hypothesis.
 
@@ -215,15 +215,46 @@ Round 5 tested those mechanisms in a benign, sandboxed setting, as two sub-round
 
 If (1) and (2) both favour persistent single agents, the honest conclusion is that, for this model and these tasks, a well-instructed single agent that does not stop beats a non-hierarchical swarm, and the project should report that.
 
+## Record completeness
+
+For each experiment: whether its question or theory was written down before measuring (pre-registration), its setup (configs and drivers), its per-run results, its analysis, and its decision.
+
+| Experiment | Pre-registered | Setup | Per-run results | Analysis | Decision |
+|---|---|---|---|---|---|
+| F0 levers | design notes (`experiments/levers/`) | yes | smoke rows in `plan.md` | — | yes |
+| F1 pilot and F1a–c screens | F1 yes; **F1a–c screens no** | `experiments/f1*.json` | `rows/runs.json` | findings in `plan.md` | yes |
+| Task calibrations | rules in `hard-tasks.md` | `experiments/calib-*.json` | `rows/runs.json` | `plan.md` registry | yes |
+| Criba 1 | yes | yes | `criba1-rows.json`, `rows/runs.json`, `criba1-traces.md` | yes | yes (one arm added mid-round, logged) |
+| Criba 2 | yes | yes | `criba12-rows.json`, `rows/runs.json`, `criba2-traces.md` | yes | yes |
+| Criba 3 | yes | yes | `rows/runs.json`, `criba3-traces.md` | yes | yes |
+| Adversarial review | — | — | — | `reports/2026-10-01-adversarial-review.md`, `reports/2026-10-01-review-subagent-reports.md` | led to the n=1 rule and round 5 |
+| Round 5A | yes (merged with round 4) | yes | `rows/runs.json`, `criba5-traces.md` | yes | yes |
+| Round 5B | yes | `batch/run-batch.mjs`, `lane.sh` | `batch/*/batch-result.json`, `batch/traces.md` | yes, plus `reports/2026-10-01-incident-theories.md` | yes |
+| Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
+
+**Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
+- pre-registrations were not version-controlled before commit `138a4d7`, so their timestamps are self-reported;
+- the F1a–c screens were not pre-registered separately;
+- the code version per run was not recorded before `46e756b`;
+- raw transcripts and workspaces are not in the repo (size);
+- the `fam_*` and `opt_*` task sources live uncommitted in `../swarmtest/staging/`.
+
 ## Where the data is
 
-- [`experiments/plan.md`](../experiments/plan.md): the lab notebook (Spanish) with every pre-registration, rule applied, finding, and the campaign registry, including campaign ids.
-- `experiments/*.json`, `experiments/criba*/`: swarmtest campaign configs. `experiments/*-lanes.mjs`: the parallel lane drivers.
-- `experiments/criba1-rows.json`, `criba12-rows.json`, `criba1-traces.md`: aggregated per-run tables for cribas 1–2.
-- `experiments/batch/run-batch.mjs`, `lane.sh` and `*/batch-result.json`: the round 5B driver and the per-batch results.
+- [`experiments/plan.md`](../experiments/plan.md): the lab notebook. It holds every pre-registration, rule applied, finding, and the campaign registry, including campaign ids.
+- [`experiments/reports/`](../experiments/reports/): longer analyses:
+  - the adversarial review and the subagent audits behind it;
+  - the DeepSWE diagnosis;
+  - the incident-inspired theories and how they fared;
+  - the construction and calibration of the task families.
+- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (247 runs in 104 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+- `experiments/criba{1,2,3,5}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
+- `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
+- `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
+- `experiments/batch/`: the round 5B driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).
 - `profiles/`: every arm. `src/`: murmur itself. The commit history shows when each lever was added.
 - **Not in this repo:**
-  - raw runs (transcripts, events, workspaces) live in `../swarmtest/runs/<campaign>/` and in `experiments/batch/*/` locally, at tens of MB per round;
-  - the task families built for round 5 are in `../swarmtest/staging/` (`fam_*`, `opt_*`).
+  - raw runs (transcripts, events, workspaces) live in `../swarmtest/runs/<campaign>/` and locally in `experiments/batch/*/`, at tens of MB per round;
+  - the task families built for round 5 are in `../swarmtest/staging/`.
 
-Reproduce a round: run the driver named in its `plan.md` entry, for example `node experiments/criba5-lanes.mjs <lane>` or `sh experiments/batch/lane.sh L1 <image>`. Then aggregate with `node scripts/traces.mjs <campaign-dir>...`, or read `batch-result.json`.
+To reproduce a round, run the driver named in its `plan.md` entry, for example `node experiments/criba5-lanes.mjs <lane>` or `sh experiments/batch/lane.sh L1 <image>`. Then aggregate with `node scripts/traces.mjs <campaign-dir>...`, `node scripts/rows.mjs`, or the `batch-result.json` files.

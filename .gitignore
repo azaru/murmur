@@ -14,4 +14,7 @@ experiments/**
 !experiments/batch/*.mjs
 !experiments/batch/*.sh
 !experiments/batch/*/batch-result.json
+!experiments/batch/*.md
+!experiments/rows/*.json
+!experiments/reports/*.md
 experiments/tmp/

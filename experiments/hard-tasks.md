@@ -1,68 +1,68 @@
-# Tareas endurecidas para swarmtest (opción B)
+# Hardened tasks for swarmtest (option B)
 
-Objetivo: tareas donde Pi n=1 (gpt-6-luna, medium) saque 0,25–0,75 de media, con puntuación continua, para que haya margen en el que comparar sistemas. Se calibran solo contra Pi; murmur no se mira hasta que la tarea está fijada.
+Goal: tasks where Pi n=1 (gpt-6-luna, medium) averages 0.25–0.75, with continuous scoring, so there is headroom to compare systems. They are calibrated against Pi only; murmur is not looked at until the task is fixed.
 
-## Reglas comunes
+## Common rules
 
-- Ids nuevos `<original>_hard`, misma `category`; las originales no se tocan. Nada de commits en swarmtest.
-- Prompt neutro: sin texto de rosters, propietarios ni "solo".
-- Grader con referencia: los casos ocultos son entradas; lo esperado se obtiene ejecutando `solution/` en el mismo grader (no se escriben salidas a mano, así contrato, solución y casos no se desalinean). Checks con `weight`; score = peso ganado / peso posible; `passed` = todos los checks. Timeout por caso (SIGALRM) y < 60 s en total.
-- Cada check oculto sale de una frase del contrato. Si Pi falla un check en todos los runs y no hay frase clara detrás, es un bug del contrato, no dificultad.
-- Mezcla de formas: no todas deben ser paquetes que se reparten por ficheros (eso favorecería a un enjambre por construcción).
-- Validación sin modelo: `solution/` saca 1,0; el workspace inicial < 0,1; `public_check.py` pasa con la solución y falla con el workspace inicial, y su docstring dice que el grader es más amplio; grader determinista en dos ejecuciones; `workspace/` no revela casos ocultos; generadores con semilla en `holdout/`; los tests de swarmtest siguen con los mismos 4 fallos.
-- Revisión de ambigüedad: un agente de solo lectura deriva tests desde el contrato y señala cláusulas que no puede concretar, antes de gastar en Pi.
+- New ids `<original>_hard`, same `category`; the originals are not touched. No commits in swarmtest.
+- Neutral prompt: no roster text, owners or "solo".
+- Grader with a reference: the hidden cases are inputs; the expected output is obtained by running `solution/` in the same grader (no outputs are written by hand, so contract, solution and cases do not drift apart). Checks carry a `weight`; score = weight earned / weight possible; `passed` = all checks. Timeout per case (SIGALRM) and < 60 s in total.
+- Each hidden check comes from one sentence of the contract. If Pi fails a check in every run and there is no clear sentence behind it, it is a contract bug, not difficulty.
+- Mix of shapes: not all of them should be packages that get split by files (that would favour a swarm by construction).
+- Validation without a model: `solution/` scores 1.0; the initial workspace < 0.1; `public_check.py` passes with the solution and fails with the initial workspace, and its docstring says the grader is broader; grader deterministic across two runs; `workspace/` does not reveal hidden cases; seeded generators in `holdout/`; the swarmtest tests still have the same 4 failures.
+- Ambiguity review: a read-only agent derives tests from the contract and flags clauses it cannot make concrete, before spending on Pi.
 
-## Protocolo de calibración (fijado antes de medir)
+## Calibration protocol (fixed before measuring)
 
-- Solo Pi n=1, k=3 por iteración (el ruido de Pi en `durable` va de 0,24 a 0,96).
-- Banda 0,25–0,75 de media.
-- > 0,75: añadir familias de cláusulas nuevas (no casos trampa). < 0,25: aclarar el contrato o pasar un ejemplo a `public_check.py`.
-- Cada iteración se anota en el registro de `plan.md`.
-- **Cambio del 2026-10-01 (aprobado por el usuario):** las tareas de segunda generación (`*_hard2`) se calibran además contra una referencia fuerte de un solo agente, murmur n=1 con `profiles/c4-lessons.json` (c4n1), con k=2 y una banda de 0,3–0,6. Motivo: los mejores brazos de 3 agentes saturan las tareas calibradas solo contra Pi (0,91–1,0 en ieh y durable) y ya no se pueden ordenar entre sí. Pi sigue calibrándose con k=3 como referencia de "supera a Pi", sin límite inferior de banda. Los candidatos de 3 agentes siguen sin mirarse hasta que la tarea está fijada.
-- Referencia de escala: `durable` (contrato de 16 KB, ~60 KB de solución, 334 checks) es la única tarea conocida dentro de la banda (~0,59).
+- Only Pi n=1, k=3 per iteration (Pi's noise on `durable` ranges from 0.24 to 0.96).
+- Band 0.25–0.75 on average.
+- > 0.75: add new families of clauses (not trap cases). < 0.25: clarify the contract or move an example into `public_check.py`.
+- Each iteration is recorded in the registry in `plan.md`.
+- **Change of 2026-10-01 (approved by the user):** second-generation tasks (`*_hard2`) are also calibrated against a strong single-agent reference, murmur n=1 with `profiles/c4-lessons.json` (c4n1), with k=2 and a band of 0.3–0.6. Reason: the best 3-agent arms saturate the tasks calibrated against Pi only (0.91–1.0 on ieh and durable) and can no longer be ordered among themselves. Pi is still calibrated with k=3 as the "beats Pi" reference, with no lower band limit. The 3-agent candidates are still not looked at until the task is fixed.
+- Scale reference: `durable` (16 KB contract, ~60 KB solution, 334 checks) is the only known task inside the band (~0.59).
 
-## Piloto: `data_analysis_hard`
+## Pilot: `data_analysis_hard`
 
-Forma: un solo script (`analyze.py`) que produce un JSON de respuestas. No se reparte de forma natural por ficheros (contrapeso a las tareas de paquete).
+Shape: a single script (`analyze.py`) that produces a JSON of answers. It does not split naturally by files (a counterweight to the package tasks).
 
 - **Workspace**
-  - `data/`: `orders.csv` (~3.000 filas), `refunds.csv`, `fx_rates.csv`, `products.csv`, `customers.csv`.
-  - `QUESTIONS.md` (el contrato, ~8–12 KB): ~20 métricas con definición exacta.
-  - `public_check.py`: ejecuta `analyze.py` sobre los datos visibles y comprueba el esquema y 3 respuestas.
+  - `data/`: `orders.csv` (~3,000 rows), `refunds.csv`, `fx_rates.csv`, `products.csv`, `customers.csv`.
+  - `QUESTIONS.md` (the contract, ~8–12 KB): ~20 metrics with an exact definition.
+  - `public_check.py`: runs `analyze.py` on the visible data and checks the schema and 3 answers.
   - `package.json`.
-- **Interfaz:** `python3 analyze.py <data_dir> <output.json>`, solo biblioteca estándar.
-- **Dificultad, toda explícita en el contrato**
-  - Fechas con zona horaria a mes UTC.
-  - Conversión de divisa con el tipo del día del pedido; si falta, el del último día anterior disponible.
-  - Pedidos duplicados: se queda la versión con `updated_at` más reciente.
-  - Pedidos cancelados excluidos.
-  - Reembolsos parciales y totales, imputados al mes del reembolso.
-  - Cadenas de renombrado de SKU (`replaced_by`).
-  - Clientes duplicados por email con mayúsculas o espacios.
-  - Redondeo half-up solo al final.
-  - Top-N con desempates.
-  - Cohortes de retención.
-  - Mediana y percentiles.
-  - Reparto por día de la semana.
+- **Interface:** `python3 analyze.py <data_dir> <output.json>`, standard library only.
+- **Difficulty, all explicit in the contract**
+  - Timezone-aware dates converted to a UTC month.
+  - Currency conversion at the rate of the order day; if missing, the one from the last earlier day available.
+  - Duplicate orders: keep the version with the most recent `updated_at`.
+  - Cancelled orders excluded.
+  - Partial and full refunds, attributed to the month of the refund.
+  - SKU rename chains (`replaced_by`).
+  - Customers duplicated by email with different case or whitespace.
+  - Half-up rounding only at the end.
+  - Top-N with tie-breaks.
+  - Retention cohorts.
+  - Median and percentiles.
+  - Breakdown by day of the week.
 - **Grader**
-  - Ejecuta el `analyze.py` del candidato y el de `solution/` sobre 4 datasets ocultos que genera `holdout/generate.py` con distintas semillas y mezclas de casos raros.
-  - Un check por métrica y dataset, con peso.
-  - Salida inválida para un dataset: 0 en ese dataset.
-- **Dial de dificultad:** número de métricas y de reglas de limpieza, y cuántas reglas solo se notan en los datos ocultos (pero siempre escritas en el contrato).
+  - Runs the candidate's `analyze.py` and the one in `solution/` on 4 hidden datasets generated by `holdout/generate.py` with different seeds and mixes of rare cases.
+  - One check per metric and dataset, with a weight.
+  - Invalid output for a dataset: 0 on that dataset.
+- **Difficulty dial:** number of metrics and cleaning rules, and how many rules only show up in the hidden data (but are always written in the contract).
 
-## Bocetos (se escriben después del piloto)
+## Sketches (written after the pilot)
 
-- **`feature_implementation_hard`:** librería de asignación de inventario ampliada.
-  - Lotes con caducidad (FEFO), varios almacenes con envíos partidos según reglas.
-  - Reservas con TTL y comandos idempotentes, políticas de backorder.
-  - Libro de movimientos con replay y auditoría.
-  - Paquete Python de varios módulos, ~150 casos ocultos.
-- **`information_extraction_hard`:** 100–150 documentos sintéticos (hilos de email, chats, facturas en texto) → `records.json` según `SCHEMA.md`.
-  - Normalización de fechas, importes y nombres.
-  - Correcciones posteriores en un hilo que sustituyen a datos anteriores, deduplicación.
-  - Exige un `extract.py` que el grader ejecuta sobre corpus ocultos generados con las mismas plantillas.
-- **`constrained_planning_hard`:** un planificador que produce `plan.json` para una instancia de horarios.
-  - Personas, salas, ventanas, precedencias, habilidades y preferencias blandas.
-  - El grader lo ejecuta en instancias ocultas.
-  - Score: restricciones duras cumplidas como compuerta, más el objetivo frente al de la referencia.
-  - Una sola salida.
+- **`feature_implementation_hard`:** extended inventory allocation library.
+  - Batches with expiry (FEFO), several warehouses with split shipments according to rules.
+  - Reservations with TTL and idempotent commands, backorder policies.
+  - Movement ledger with replay and audit.
+  - Multi-module Python package, ~150 hidden cases.
+- **`information_extraction_hard`:** 100–150 synthetic documents (email threads, chats, invoices as text) → `records.json` according to `SCHEMA.md`.
+  - Normalisation of dates, amounts and names.
+  - Later corrections in a thread that replace earlier data, deduplication.
+  - Requires an `extract.py` that the grader runs on hidden corpora generated from the same templates.
+- **`constrained_planning_hard`:** a planner that produces `plan.json` for a scheduling instance.
+  - People, rooms, windows, precedences, skills and soft preferences.
+  - The grader runs it on hidden instances.
+  - Score: hard constraints satisfied as a gate, plus the objective against the reference's.
+  - A single output.

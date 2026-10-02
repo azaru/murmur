@@ -1,362 +1,362 @@
-# Plan de experimentos: murmur vs Pi
+# Experiment plan: murmur vs Pi
 
-Objetivo: una configuración de murmur que supere a Pi n=1 (mismo modelo: `openai-codex/gpt-6-luna`, thinking `medium`) de forma consistente. Se prueba de todo con perfiles, sin OpenSpec. Cuando algo dé señal, se fija con un change de OpenSpec, por ejemplo convirtiendo un perfil ganador en el comportamiento por defecto.
+Goal: a murmur configuration that beats Pi n=1 (same model: `openai-codex/gpt-6-luna`, thinking `medium`) consistently. Everything is tried through profiles, without OpenSpec. When something shows signal, it is fixed with an OpenSpec change, for example by turning a winning profile into the default behaviour.
 
-Requisito previo: las palancas (perfiles, variantes en swarmtest, adapter de autotuner, `scripts/arms.mjs`), implementadas sin OpenSpec; notas de diseño y pasos en `experiments/levers/`.
+Prerequisite: the levers (profiles, variants in swarmtest, autotuner adapter, `scripts/arms.mjs`), implemented without OpenSpec; design notes and steps in `experiments/levers/`.
 
-## Regla de diseño de candidatos
+## Candidate design rule
 
-Nada jerárquico: el sistema nunca asigna roles ni reparte el trabajo. Sí puede ofrecer un menú de roles (con instrucciones propias que el agente lee al elegir), escalonar las entradas para que cada uno elija y anuncie su rol antes de que entre el siguiente, y dar herramientas, señales y condiciones de fin que ayuden a autodescubrir qué hace falta. Quién hace qué lo deciden los agentes, y pueden cambiar de rol.
+Nothing hierarchical: the system never assigns roles or splits the work. It may offer a role menu (with its own instructions that the agent reads when choosing), stagger the entries so that each agent chooses and announces its role before the next one enters, and provide tools, signals and finishing conditions that help agents discover for themselves what is needed. Who does what is decided by the agents, and they can change roles.
 
-## Criterio de "supera a Pi de forma consistente" (fijado antes de medir)
+## Criterion for "consistently beats Pi" (fixed before measuring)
 
-- **Conjunto de confirmación.** Nunca se usa para decidir candidatos. Lo forman:
-  - las 18 tareas `validation_pool` del agentic-canary;
-  - las 8 tareas de swarmtest (abajo), con repeticiones nuevas y otra semilla.
-  - `holdout_final` queda reservado; solo se usaría una vez, con `holdout --i-am-releasing`.
-- **Reglas.** Hacen falta dos campañas de confirmación independientes y cada una debe cumplir:
-  - delta medio pareado por tarea (score de murmur − score de Pi) > 0, con el extremo inferior del IC bootstrap al 90 % > 0;
-  - murmur gana más tareas de las que pierde;
-  - la tasa de timeouts y fallos no supera la de Pi en más de 10 puntos.
-- **Coste.** Los tokens se registran pero no deciden; cada run tiene un tope de 1,5M.
+- **Confirmation set.** Never used to decide candidates. It consists of:
+  - the 18 `validation_pool` tasks of the agentic-canary;
+  - the 8 swarmtest tasks (below), with new repetitions and another seed.
+  - `holdout_final` stays reserved; it would only be used once, with `holdout --i-am-releasing`.
+- **Rules.** Two independent confirmation campaigns are needed and each must satisfy:
+  - mean paired delta per task (murmur score − Pi score) > 0, with the lower end of the 90 % bootstrap CI > 0;
+  - murmur wins more tasks than it loses;
+  - the rate of timeouts and failures does not exceed Pi's by more than 10 points.
+- **Cost.** Tokens are recorded but do not decide; each run has a cap of 1.5M.
 
-## Ruido conocido
+## Known noise
 
-- Pi n=1 en `durable_workflow_engine`, con el mismo adapter, dio 0,67 / 0,90 / 0,65 / 0,49 y una media de 0,51 en 3 runs.
-- Conclusión: un run no ordena nada. Siempre k≥2, comparación pareada por tarea y decisión sobre la media por tarea.
+- Pi n=1 on `durable_workflow_engine`, with the same adapter, gave 0.67 / 0.90 / 0.65 / 0.49 and a mean of 0.51 over 3 runs.
+- Conclusion: one run orders nothing. Always k≥2, paired comparison per task and a decision on the per-task mean.
 
-## Fases
+## Phases
 
-### F0: palancas (sin OpenSpec; ver `experiments/levers/`) — HECHO 2026-09-30
-Solo smoke runs; menos de 1M tokens.
+### F0: levers (without OpenSpec; see `experiments/levers/`) — DONE 2026-09-30
+Smoke runs only; under 1M tokens.
 
-### F1: piloto en swarmtest, ¿aporta el tablero? (tope 20M tokens)
-- **Tareas (8):** `bug_fixing`, `complex_workflow_engine`, `constrained_planning`, `data_analysis`, `durable_workflow_engine`, `feature_implementation`, `incremental_workflow_engine`, `information_extraction`. Se excluyen `document_synthesis` y `live_web_research`, que requieren revisión humana.
-- **Brazos:** `pi/n=1`, `murmur/n=1`, `murmur/n=3` y `murmur[profiles/no-messaging.json]/n=3`, con k=2. Son 64 runs.
-- **Parámetros:** `token_budget` 1,5M por run, `timeout_seconds` 1200, `--max-total-tokens 20000000`. Estimación: 8–12M.
-- **Decisión sobre el tablero** (`scripts/arms.mjs`, n3 con mensajes vs n3 sin mensajes):
-  - aporta si el delta medio es ≥ +0,05 y gana en ≥ 5 de 8 tareas;
-  - no aporta si el delta medio es ≤ 0;
-  - en otro caso es inconclusivo y se hacen k=2 más.
-- **Además, de forma descriptiva:** la distancia actual entre murmur n=1 y n=3 y Pi.
+### F1: pilot in swarmtest, does the board contribute? (cap 20M tokens)
+- **Tasks (8):** `bug_fixing`, `complex_workflow_engine`, `constrained_planning`, `data_analysis`, `durable_workflow_engine`, `feature_implementation`, `incremental_workflow_engine`, `information_extraction`. `document_synthesis` and `live_web_research` are excluded, since they require human review.
+- **Arms:** `pi/n=1`, `murmur/n=1`, `murmur/n=3` and `murmur[profiles/no-messaging.json]/n=3`, with k=2. That is 64 runs.
+- **Parameters:** `token_budget` 1.5M per run, `timeout_seconds` 1200, `--max-total-tokens 20000000`. Estimate: 8–12M.
+- **Decision on the board** (`scripts/arms.mjs`, n3 with messages vs n3 without messages):
+  - it contributes if the mean delta is ≥ +0.05 and it wins on ≥ 5 of 8 tasks;
+  - it does not contribute if the mean delta is ≤ 0;
+  - otherwise it is inconclusive and k=2 more are run.
+- **Also, descriptively:** the current distance between murmur n=1 and n=3 and Pi.
 
-### F2: autotuner, línea base exploratoria
-- Murmur con la mejor configuración de F1 contra Pi en el panel de 12 tareas del canary (split train, tareas activas), con k=2. Estimación: 3–8M.
-- Es exploratorio porque el canary está calibrado para Pi `gpt-5.6-luna`.
-- Hay que revisar el timeout de 480 s por tarea para murmur n≥3.
+### F2: autotuner, exploratory baseline
+- Murmur with the best F1 configuration against Pi on the canary's 12-task panel (train split, active tasks), with k=2. Estimate: 3–8M.
+- It is exploratory because the canary is calibrated for Pi `gpt-5.6-luna`.
+- The 480 s per-task timeout must be reviewed for murmur n≥3.
 
-### F3: bucle de afinado (panel del canary)
-- **Candidato:** un fichero `profiles/<id>.json` más su config de autotuner. Nunca se edita un perfil en su sitio: cada candidato nuevo es un fichero nuevo. Autotuner no ve el contenido del perfil en su caché ni en el control de versión, así que editarlo en su sitio mezclaría resultados sin avisar.
-- **Evaluación:** gate conservador 12×2 contra la línea base de murmur (en caché). Si promueve, pasa a ser la nueva línea base; si rechaza, se registra y se descarta.
-- **Tandas:** de 3 a 5 candidatos, con una estimación de tokens aprobada antes de lanzarlas. Cada candidato cuesta unos 2–7M.
-- **Seguimiento:** cada 3 promociones, comparación exploratoria contra Pi en el panel.
+### F3: tuning loop (canary panel)
+- **Candidate:** a `profiles/<id>.json` file plus its autotuner config. A profile is never edited in place: each new candidate is a new file. Autotuner does not see the profile's content in its cache or in version control, so editing it in place would silently mix results.
+- **Evaluation:** conservative 12×2 gate against the murmur baseline (cached). If it promotes, it becomes the new baseline; if it rejects, it is recorded and discarded.
+- **Batches:** 3 to 5 candidates, with a token estimate approved before launching them. Each candidate costs about 2–7M.
+- **Follow-up:** every 3 promotions, an exploratory comparison against Pi on the panel.
 
-### F4: confirmación
-- Cuando el panel muestre murmur ≥ Pi, se lanzan las dos campañas de confirmación.
-- Si pasan, se abre un change de OpenSpec para fijar el perfil ganador.
-- Si no pasan, se anota como posible sobreajuste y se vuelve a F3.
+### F4: confirmation
+- When the panel shows murmur ≥ Pi, the two confirmation campaigns are launched.
+- If they pass, an OpenSpec change is opened to fix the winning profile.
+- If they do not pass, it is noted as possible overfitting and we go back to F3.
 
-## Backlog inicial de hipótesis (palanca → idea)
+## Initial hypothesis backlog (lever → idea)
 
-1. `messaging`: ¿el tablero aporta frente a trabajar en silencio? (F1)
-2. `agents`: comparar N = 2, 3 y 5.
-3. `spawnGapSeconds`: 0 frente a 20–30 s, para que el primero explore y publique un plan antes de que entren los demás.
-4. `briefing`: pedir al primero en entrar que reparta el trabajo por el tablero, y a los demás que esperen el plan o lo contesten.
-5. `systemPromptAppend`: normas de convivencia del enjambre (reclamar antes de editar, publicar hallazgos y resultados de tests).
-6. `tools`: añadir `grep`, `find` y `ls`.
-7. `thinking`: medium frente a high.
-8. Textos de `steer` y `wake` más directivos: resumir el mensaje nuevo y decir qué hacer.
-9. `toolDescriptions`: que `post` anime a compartir resultados de tests y que `done` exija haber corrido el check después del último cambio de un compañero.
-10. `done` del briefing más estricto: no terminar si otro compañero sigue trabajando en el mismo archivo.
+1. `messaging`: does the board contribute compared with working in silence? (F1)
+2. `agents`: compare N = 2, 3 and 5.
+3. `spawnGapSeconds`: 0 versus 20–30 s, so that the first agent explores and posts a plan before the others enter.
+4. `briefing`: ask the first agent to enter to split the work through the board, and the others to wait for the plan or answer it.
+5. `systemPromptAppend`: swarm coexistence norms (claim before editing, post findings and test results).
+6. `tools`: add `grep`, `find` and `ls`.
+7. `thinking`: medium versus high.
+8. More directive `steer` and `wake` texts: summarise the new message and say what to do.
+9. `toolDescriptions`: make `post` encourage sharing test results and make `done` require having run the check after a teammate's last change.
+10. Stricter briefing `done`: do not finish if another teammate is still working on the same file.
 
-## Ideas abiertas (se amplían con cada análisis de transcripciones)
+## Open ideas (extended with each transcript analysis)
 
-Solo dos principios: no jerárquico y autogestionado. Todo lo demás es probable.
+Only two principles: non-hierarchical and self-managed. Everything else is fair game.
 
-- Menú de roles que cada agente elige y cambia (herramienta `role(nombre)` que devuelve instrucciones del rol, lo anuncia y lo muestra en `team`).
-- Entrada escalonada para que cada uno elija y anuncie antes de que entre el siguiente; agente "ojo fresco" que entra tarde sin historial.
-- Checklist del contrato en un fichero compartido (`SWARM.md`) que todos mantienen.
-- Suite de tests del enjambre (`swarm_tests/`) que cualquiera amplía; `done` exige que pase.
-- Aviso automático de ediciones en el tablero (resumen por ventana de tiempo).
-- Fin por consenso con época: cualquier edición invalida los `done` anteriores y despierta a quien terminó.
-- Despertar a quien lleva N s parado para que busque huecos; estado periódico de una línea.
-- `budget()` con tiempo restante.
-- Diversidad de agentes (thinking distinto por agente).
-- Pedir un compañero con contexto limpio o retirarse.
-- Lecciones genéricas en el prompt de sistema, sacadas de las transcripciones.
+- Role menu that each agent chooses and changes (tool `role(name)` that returns the role's instructions, announces it and shows it in `team`).
+- Staggered entry so that each agent chooses and announces before the next one enters; a "fresh eye" agent that enters late with no history.
+- Contract checklist in a shared file (`SWARM.md`) that everyone maintains.
+- Swarm test suite (`swarm_tests/`) that anyone can extend; `done` requires it to pass.
+- Automatic notice of edits on the board (summary per time window).
+- Ending by consensus with an epoch: any edit invalidates earlier `done` calls and wakes whoever finished.
+- Wake whoever has been idle for N s so they look for gaps; periodic one-line status.
+- `budget()` with remaining time.
+- Agent diversity (different thinking per agent).
+- Ask for a teammate with a clean context or step aside.
+- Generic lessons in the system prompt, drawn from the transcripts.
 
-### Hallazgos F1a/F1b (transcripciones) e ideas que salen de ellos
+### Findings F1a/F1b (transcripts) and the ideas that come from them
 
-- Todos (Pi y murmur) paran en cuanto `npm run test` pasa, usando ~11 % del tiempo y 8–43 % de tokens; varios `done` admiten el hueco ("replay validation is not complete"). El único 0,987 salió de un agente que, tras el verde, contrastó el código con el contrato y escribió checkpoints forjados para romperlo.
-  → Norma: el check es una muestra; el contrato es lo que cuenta; usar el tiempo sobrante para romper el trabajo propio y ajeno. Mostrar tiempo y presupuesto restantes.
-- Un hallazgo tardío se pierde: los posts a agentes `done` no los despiertan y nadie reabre el trabajo.
-  → `done` revocable: una edición o un post posterior despierta a los que terminaron; `done` rechazado con mensajes sin leer o con el check en rojo tras el último cambio.
-- Sin tablero hay sobrescrituras (18 writes sobre 5 ficheros; bugs de un solo autor que pisa a otros). Con tablero no, pero no mejora la calidad: 61 % de las tool calls son coordinación (inbox, acks, "I'll take X").
-  → Meter el texto de los mensajes nuevos en el steer (sin viaje a `inbox`); `post` solo para decisiones, interfaces, fallos y bloqueos; aviso automático de claims y ediciones.
-- El texto ArcSwarm de las tareas ("The solo Pi run implements all modules itself") hace que cada agente se crea el único.
-  → Línea en el prompt: el texto de la tarea puede hablar de otros arneses; tú eres uno de N iguales.
-- `claim("bindings.py")` y `claim("workflow_engine/bindings.py")` no colisionan; `engine.py` quedó sin dueño 70 s.
-  → Canonizar rutas; `team()` lista lo que nadie ha cogido.
-- `budgetTokens` cuenta cache_read: sondear quema presupuesto sin trabajo real.
-- Control extra: sin mensajes pero sabiendo que hay compañeros, para separar comunicación de conciencia del equipo.
+- Everyone (Pi and murmur) stops as soon as `npm run test` passes, using ~11 % of the time and 8–43 % of tokens; several `done` calls admit the gap ("replay validation is not complete"). The only 0.987 came from an agent that, after the green, compared the code against the contract and wrote forged checkpoints to break it.
+  → Norm: the check is a sample; the contract is what counts; use the spare time to break your own and others' work. Show remaining time and budget.
+- A late finding is lost: posts to `done` agents do not wake them and nobody reopens the work.
+  → Revocable `done`: a later edit or post wakes those who finished; `done` is rejected with unread messages or with the check red after the last change.
+- Without a board there are overwrites (18 writes over 5 files; bugs from a single author stepping on others). With a board there are not, but quality does not improve: 61 % of tool calls are coordination (inbox, acks, "I'll take X").
+  → Put the text of new messages into the steer (no trip to `inbox`); `post` only for decisions, interfaces, failures and blockers; automatic notice of claims and edits.
+- The ArcSwarm text of the tasks ("The solo Pi run implements all modules itself") makes each agent believe it is the only one.
+  → Line in the prompt: the task text may talk about other harnesses; you are one of N equals.
+- `claim("bindings.py")` and `claim("workflow_engine/bindings.py")` do not collide; `engine.py` was left without an owner for 70 s.
+  → Canonicalise paths; `team()` lists what nobody has taken.
+- `budgetTokens` counts cache_read: probing burns budget without real work.
+- Extra control: no messages but knowing there are teammates, to separate communication from team awareness.
 
-### Ideas "out of the box" (2026-10-01; revisión bibliográfica más datos propios)
+### "Out of the box" ideas (2026-10-01; literature review plus our own data)
 
-Datos propios que las enmarcan:
-- El contexto se triplica a lo largo de un run (de ~6k a ~19k tokens por turno) y la segunda mitad de los turnos se lleva el 66 % del gasto.
-- c5 casi no usa sus intentos privados: crea `attempts/` en cph y en uno de los dos runs de ieh; en durable y fih reparte el trabajo. Su ventaja se debe en parte a las normas de c1.
+Our own data that frame them:
+- Context triples over a run (from ~6k to ~19k tokens per turn) and the second half of the turns takes 66 % of the spend.
+- c5 barely uses its private attempts: it creates `attempts/` in cph and in one of the two ieh runs; in durable and fih it splits the work. Its advantage is partly due to c1's norms.
 
 Ideas:
-1. **Selección por ejecución** (CodeT, S*, CodeMonkeys). Intentos independientes; cada agente escribe sondas derivadas del contrato, se ejecutan todos los intentos contra todas las sondas, se publica una matriz de resultados y se instala el intento con más acuerdo. Las dos o tres sondas que separan a los candidatos las escribe alguien que no es autor de ninguno de ellos.
-2. **`done` con evidencia y reloj visible.** No se puede terminar sin N acciones de verificación posteriores al último verde o sin una lista de cláusulas marcada; el tiempo y los tokens restantes llegan con los resultados de las herramientas (SWE-Marathon y MAST: parada prematura y verificación pobre entre los fallos principales).
-3. **Relevos con contexto limpio** (Anthropic, Cursor, Carlini, Fail-Fast Restart-Smart). Cuando un agente hace `done` o supera K turnos, escribe `NOTES.md` y otro agente nuevo del mismo nombre continúa con contexto limpio, hasta agotar tiempo o presupuesto. Ataca a la vez el coste (contexto creciente) y el abandono temprano. Sirve también de control con cómputo equiparado: n=1 con relevos.
-4. **Menú de estrategias elegidas** (Self-MoA y diversidad de personalidad). Cada agente elige una estrategia distinta (test-first, contrato a checklist, de abajo arriba). Solo compensa si después hay selección por ejecución; se mide el mejor de 3, no solo el elegido.
-5. **Polinización cruzada tras la selección** (AlphaEvolve, SWE-Replay). Los no elegidos llevan al ganador las cláusulas donde su intento puntúa mejor, con aceptación solo por tests.
-6. **Fases en silencio** (pizarra o estigmergia). Tablero solo en las fronteras de fase. Cursor ve que los pares planos evitan lo difícil, y nuestro "ceder el fichero" es lo mismo, así que ceder se prohíbe explícitamente: quien encuentra un defecto lo arregla en su copia y publica el parche.
-- **Control que falta:** un agente solo con 3 veces el presupuesto. En nuestro caso no basta subir el tope, porque c4n1 no llega a gastarlo (para antes); el control justo es n=1 con relevos (idea 3).
+1. **Selection by execution** (CodeT, S*, CodeMonkeys). Independent attempts; each agent writes probes derived from the contract, all attempts are run against all probes, a results matrix is published and the attempt with the most agreement is installed. The two or three probes that separate the candidates are written by someone who is not the author of any of them.
+2. **`done` with evidence and a visible clock.** One cannot finish without N verification actions after the last green or without a marked clause list; remaining time and tokens arrive with the tool results (SWE-Marathon and MAST: premature stopping and poor verification among the main failures).
+3. **Relays with clean context** (Anthropic, Cursor, Carlini, Fail-Fast Restart-Smart). When an agent does `done` or exceeds K turns, it writes `NOTES.md` and a new agent with the same name continues with clean context, until time or budget runs out. It attacks both cost (growing context) and early abandonment at once. It also serves as a compute-matched control: n=1 with relays.
+4. **Menu of chosen strategies** (Self-MoA and personality diversity). Each agent chooses a different strategy (test-first, contract to checklist, bottom-up). It only pays off if execution selection follows; the best of 3 is measured, not just the chosen one.
+5. **Cross-pollination after selection** (AlphaEvolve, SWE-Replay). The unchosen bring to the winner the clauses where their attempt scores better, with acceptance by tests only.
+6. **Phases in silence** (blackboard or stigmergy). Board only at phase boundaries. Cursor sees that flat peers avoid what is hard, and our "yielding the file" is the same thing, so yielding is explicitly forbidden: whoever finds a defect fixes it in their copy and posts the patch.
+- **Missing control:** a single agent with 3 times the budget. In our case raising the cap is not enough, because c4n1 does not get to spend it (it stops earlier); the fair control is n=1 with relays (idea 3).
 
-### Hallazgos de la criba 3 (trazas de 15 campañas; recuentos de events.jsonl y traces.mjs, más lectura de unos pocos runs)
+### Findings of Criba 3 (screen 3; traces of 15 campaigns; counts from events.jsonl and traces.mjs, plus reading a few runs)
 
-- **El fichero roto casi desapareció.** Hubo 6 sobrescrituras en total, como mucho una por run, y ningún run quedó con el fichero roto sin arreglar. `writeGuard` rechazó 12 escrituras parciales, stale 10 y lock 6 (todas en `50117473/0006`). Con el guard, A, B y C ya no tienen nada que arreglar, y por eso no aportan.
-- **El fallo dominante pasa a ser ceder y parar pronto:**
-  - **ieh (un solo fichero):** en los brazos n=3 suele haber un implementador y 1–2 "revisores" que hacen `done` con "X owns extract.py". En parts es extremo (`cc8a515c/0002`, 0,00 en 66 s): los tres reclaman partes que no son implementación (auditoría o normalización), sueltan "extract.py implementation", y los tres hacen `done` con el stub intacto. En fih y durable las partes son módulos reales y parts funciona (1,0 y 0,88–0,96).
-  - **durable:** guard pierde 0,36 en las dos repeticiones por las mismas familias (checkpoint, replay y foreach-resume), porque para nada más salir el verde: 2/2/2 llamadas tras el verde en `/0007`. lock y parts siguen 7–27 llamadas y pierden solo 17–90 puntos. El check público no cubre esas familias, así que lo que decide es seguir trabajando después del verde, no el mecanismo de ficheros.
-  - **c4g en ieh:** todos los runs que llegan a verde sacan ≥ 0,90, y los que paran en rojo 0,27–0,53, rindiéndose con un caso testarudo (CS-11073).
-  - **lock en fih:** 0,73 dos veces con los mismos checks fallidos (fuzz, ValueError en el primer `add_lot`). Es una mala lectura compartida del contrato, no un bloqueo.
-- **Llamadas tras el primer verde (media de los agentes que llegan a verde):** c4g 3,9, stale 3,8, guard 9,3, parts 10,0, lock 10,9 y c5 15,3. Agentes que no corren ningún check: guard 6 de 24, stale 7 de 18, lock y parts 3 de 18, c5 1 de 18.
-- **Coste:** los turnos que solo usan herramientas del tablero se llevan ~31–45 % de los tokens en n=3, frente a ~9 % en c4g. De los runs cortados a 3M, dos estaban avanzando (stale ieh y c5 ieh 0,97). Uno de guard en fih sacó 1,0 y siguió verificando hasta el tope. Uno de c5 en ieh (`ea037e72/0002`, 0,54) entró en bucle: 184 llamadas, 49 `inbox`, 32 `post`, 5 ediciones y ningún verde.
-- **Consecuencia para la ronda 4:** las palancas ya preparadas (evidencia en `done` con reloj, relevos con contexto limpio y selección por ejecución) atacan justo estos fallos. Ceder sin implementar con el check en rojo debería no valer como motivo de `done`.
+- **The broken file almost disappeared.** There were 6 overwrites in total, at most one per run, and no run was left with the file broken and unfixed. `writeGuard` rejected 12 partial writes, stale 10 and lock 6 (all in `50117473/0006`). With the guard, A, B and C have nothing left to fix, and that is why they contribute nothing.
+- **The dominant failure becomes yielding and stopping early:**
+  - **ieh (a single file):** in the n=3 arms there is usually one implementer and 1–2 "reviewers" who do `done` with "X owns extract.py". In parts it is extreme (`cc8a515c/0002`, 0.00 in 66 s): all three claim parts that are not implementation (audit or normalisation), drop "extract.py implementation", and all three do `done` with the stub intact. In fih and durable the parts are real modules and parts works (1.0 and 0.88–0.96).
+  - **durable:** guard loses 0.36 in both repetitions on the same families (checkpoint, replay and foreach-resume), because nothing else comes out once green: 2/2/2 calls after the green in `/0007`. lock and parts keep going 7–27 calls and lose only 17–90 points. The public check does not cover those families, so what decides is continuing to work after the green, not the file mechanism.
+  - **c4g in ieh:** all runs that reach green score ≥ 0.90, and those that stop on red score 0.27–0.53, giving up on a stubborn case (CS-11073).
+  - **lock in fih:** 0.73 twice with the same failed checks (fuzz, ValueError on the first `add_lot`). It is a shared misreading of the contract, not a blockage.
+- **Calls after the first green (mean over agents that reach green):** c4g 3.9, stale 3.8, guard 9.3, parts 10.0, lock 10.9 and c5 15.3. Agents that run no check: guard 6 of 24, stale 7 of 18, lock and parts 3 of 18, c5 1 of 18.
+- **Cost:** turns that only use board tools take ~31–45 % of tokens in n=3, versus ~9 % in c4g. Of the runs cut at 3M, two were making progress (stale ieh and c5 ieh 0.97). One guard run in fih scored 1.0 and kept verifying up to the cap. One c5 run in ieh (`ea037e72/0002`, 0.54) went into a loop: 184 calls, 49 `inbox`, 32 `post`, 5 edits and no green.
+- **Consequence for round 4:** the levers already prepared (evidence in `done` with a clock, relays with clean context and selection by execution) target exactly these failures. Yielding without implementing with the check red should not count as a reason for `done`.
 
-### Hallazgos de la criba 2 (réplica contra c4n1; `criba12-rows.json` junta las dos cribas)
+### Findings of Criba 2 (replication against c4n1; `criba12-rows.json` joins the two screens)
 
-- **Regla aplicada:** pasa un brazo con Δ medio frente a c4n1 ≥ +0,05 y que gane en ≥ 3 de 4 tareas. **c5 pasa:** +0,22 frente a c4n1, gana 4 de 4 tareas, +0,42 frente a Pi, 2,49M de media. c1 no pasa (+0,09 pero solo gana 2 de 4) y x1 tampoco (−0,04, gana 1 de 4).
-- **Por qué gana c5:** cada agente trabaja en su propia copia (`attempts/<nombre>/`), así que nadie pisa el fichero de otro. En ieh saca 0,97 y 0,90. En la réplica, c1 y x1 sacan 0,00 en ieh:
-  - x1: un agente sobrescribe `extract.py` con un trozo de continuación y los tres se rinden a los 4 minutos;
-  - c1: se le acaba el tope de 3M a mitad de una edición y el fichero queda con un paréntesis sin cerrar.
-- **El fallo dominante en las tareas de un solo fichero es el fichero compartido roto, seguido de abandono.** Ya van 4 de 6 brazos de 3 agentes con 0,00 en ieh (x2, c6, c1, x1). Lo arreglan dos mecanismos distintos: el aislamiento (c5) y `writeGuard` (todavía sin medir).
-- **c4n1 se confirma como referencia fuerte y barata:** ieh 0,67, cph 0,40, durable 0,59 y fih 0,83 (Pi en fih: 0,29 en calibración), con 0,25M de media.
-- **Techo:** c1, x1 y c5 sacan 0,92–0,99 en durable; c1 y c5 sacan 1,0 en fih con k=1. La saturación por arriba se confirma; de ahí `information_extraction_hard2`.
-- **Coste de la criba 2:** 26,0M. Tres runs cortados por el tope: c5 en durable y c1 en ieh y en cph.
+- **Rule applied:** an arm passes with a mean Δ against c4n1 ≥ +0.05 and winning on ≥ 3 of 4 tasks. **c5 passes:** +0.22 against c4n1, wins 4 of 4 tasks, +0.42 against Pi, 2.49M on average. c1 does not pass (+0.09 but wins only 2 of 4) and neither does x1 (−0.04, wins 1 of 4).
+- **Why c5 wins:** each agent works in its own copy (`attempts/<name>/`), so nobody overwrites another's file. In ieh it scores 0.97 and 0.90. In the replication, c1 and x1 score 0.00 in ieh:
+  - x1: one agent overwrites `extract.py` with a continuation chunk and all three give up after 4 minutes;
+  - c1: it runs out of the 3M cap in the middle of an edit and the file is left with an unclosed parenthesis.
+- **The dominant failure in single-file tasks is the broken shared file, followed by abandonment.** Already 4 of 6 three-agent arms have 0.00 in ieh (x2, c6, c1, x1). Two different mechanisms fix it: isolation (c5) and `writeGuard` (not yet measured).
+- **c4n1 is confirmed as a strong, cheap reference:** ieh 0.67, cph 0.40, durable 0.59 and fih 0.83 (Pi in fih: 0.29 in calibration), with 0.25M on average.
+- **Ceiling:** c1, x1 and c5 score 0.92–0.99 in durable; c1 and c5 score 1.0 in fih with k=1. Saturation from above is confirmed; hence `information_extraction_hard2`.
+- **Cost of Criba 2:** 26.0M. Three runs cut by the cap: c5 in durable and c1 in ieh and in cph.
 
-### Hallazgos de la criba 1 (74 runs, k=1 por brazo; tablas en `experiments/criba1-rows.json` y `criba1-traces.md`)
+### Findings of Criba 1 (74 runs, k=1 per arm; tables in `experiments/criba1-rows.json` and `criba1-traces.md`)
 
-- **Lo más limpio: c4n1.** Un solo agente murmur con las lecciones de c4 saca +0,245 frente a Pi en las tres tareas, con 0,36M. El brazo por defecto n=3 saca +0,10 con 1,19M, y c4 n=3 +0,22 con 2,43M (cortado dos veces). Con el mismo prompt, pasar de 1 a 3 agentes no añadió nada y costó 7 veces más. Casi toda la ventaja sobre Pi viene de "no parar con el check en rojo", no de tener compañeros. La comparación que importa a partir de ahora es murmur n=3 frente a murmur n=1 con el mismo prompt.
-- **Seguir trabajando después del verde predice el score** en tareas multi-fichero y de planificación (Spearman entre llamadas tras el primer verde y score: 0,80 en durable, 0,72 en cph). En la tarea de un solo fichero no (0,16 en ieh); allí lo que falla es la colisión.
-- **Escritura en trozos que se pisa, dentro del enjambre:** 8 de 39 runs de murmur. Es fatal cuando nadie lo arregla. En ieh, x2 y c6 (coordinación por ficheros, sin tablero) sacan 0,00: un agente sobrescribe `extract.py` con un trozo de continuación y los tres se rinden a los 3–5 minutos de 20, dejándoselo a otro. Saber que hay compañeros sin tener canal lleva a ceder, no a arreglar. En durable, que es multi-fichero, c6 saca 0,90. La lección de c4 no evitó la sobrescritura.
-- **x1 (attach):** quitó los steers (0 frente a 12), pero no ahorra: 1,37M frente a 1,19M. Los agentes siguen llamando a `inbox` (5–12) y a `team` (9–11), y publican más (13–27). El canal cambió, el hábito no; habría que quitar esas herramientas. La predicción de −30–50 % de tokens queda refutada. El score sale mejor que el brazo por defecto, pero se apoya en durable (0,99 frente a 0,18).
-- **x3 (avisos automáticos) es peor que x1 en las tres tareas:** refutado con k=1. **x4 (tablero voluntario)** saca +0,21 con 0,91M; frente al brazo por defecto es más barato y algo mejor.
-- **El 0,18 del brazo por defecto en durable es atípico.** En F1 ese brazo sacó 0,99 y 0,59. Cualquier "X supera al brazo por defecto" que dependa de durable con k=1 se apoya en ese run.
-- **cph apenas discrimina:** 8 de 11 runs de Pi y 8 de 13 de murmur caen exactamente en 0,37. Solo c3 (0,50) y c5 (0,43) superan esa meseta, y en los dos todos los agentes acaban con el check en verde.
-- **Tope de 3M:** 10 de 39 runs de murmur lo alcanzan (c2 tres veces; c1, c3, c4 y c5 dos). En esos runs el 3,0M es un suelo, no un coste, y el score está truncado.
-- **Concurrencia (3 carriles):** no hay ningún timeout del grader en 74 runs.
-- **`arms.mjs --across` no sirve con un Pi por campaña:** todos los Pi colapsan en la clave `|task|1`. Para esta criba hay que comparar con la media de Pi por tarea (Pi n=11–13 por tarea).
-- **Coste:** 65,2M en total (murmur 59,1M, Pi 6,1M), frente a los 26M estimados al principio y ~40M después. Se debe a que hay 13 brazos, a los brazos pesados que tocan el tope y a llevar Pi en cada campaña.
+- **Cleanest result: c4n1.** A single murmur agent with c4's lessons scores +0.245 against Pi on the three tasks, with 0.36M. The default n=3 arm scores +0.10 with 1.19M, and c4 n=3 +0.22 with 2.43M (cut twice). With the same prompt, going from 1 to 3 agents added nothing and cost 7 times more. Almost all of the advantage over Pi comes from "do not stop with the check red", not from having teammates. The comparison that matters from now on is murmur n=3 versus murmur n=1 with the same prompt.
+- **Continuing to work after the green predicts the score** in multi-file and planning tasks (Spearman between calls after the first green and score: 0.80 in durable, 0.72 in cph). In the single-file task it does not (0.16 in ieh); there what fails is collision.
+- **Chunked writes that overwrite each other, inside the swarm:** 8 of 39 murmur runs. It is fatal when nobody fixes it. In ieh, x2 and c6 (file-based coordination, no board) score 0.00: one agent overwrites `extract.py` with a continuation chunk and all three give up after 3–5 minutes out of 20, leaving it to someone else. Knowing there are teammates without having a channel leads to yielding, not fixing. In durable, which is multi-file, c6 scores 0.90. c4's lesson did not prevent the overwrite.
+- **x1 (attach):** it removed the steers (0 versus 12), but it does not save anything: 1.37M versus 1.19M. Agents still call `inbox` (5–12) and `team` (9–11), and post more (13–27). The channel changed, the habit did not; those tools would have to be removed. The prediction of −30–50 % of tokens is refuted. The score comes out better than the default arm, but it rests on durable (0.99 versus 0.18).
+- **x3 (automatic notices) is worse than x1 on all three tasks:** refuted with k=1. **x4 (voluntary board)** scores +0.21 with 0.91M; against the default arm it is cheaper and somewhat better.
+- **The default arm's 0.18 in durable is atypical.** In F1 that arm scored 0.99 and 0.59. Any "X beats the default arm" that depends on durable with k=1 rests on that run.
+- **cph barely discriminates:** 8 of 11 Pi runs and 8 of 13 murmur runs land exactly at 0.37. Only c3 (0.50) and c5 (0.43) exceed that plateau, and in both all agents end with the check green.
+- **3M cap:** 10 of 39 murmur runs reach it (c2 three times; c1, c3, c4 and c5 twice). In those runs the 3.0M is a floor, not a cost, and the score is truncated.
+- **Concurrency (3 lanes):** there is no grader timeout in 74 runs.
+- **`arms.mjs --across` does not work with one Pi per campaign:** all the Pi runs collapse onto the key `|task|1`. For this screen one has to compare against the mean Pi per task (Pi n=11–13 per task).
+- **Cost:** 65.2M in total (murmur 59.1M, Pi 6.1M), versus the 26M estimated at the start and ~40M afterwards. It is due to there being 13 arms, to heavy arms that hit the cap and to carrying Pi in every campaign.
 
-### Hallazgos de las calibraciones de tareas hard (transcripciones de Pi, 24 runs)
+### Findings of the hard-task calibrations (Pi transcripts, 24 runs)
 
-- **Escritura por trozos que se pisa.** Pi escribe ~5–7 KB por `write`. Si el fichero no cabe, manda un segundo `write` que es la continuación (empieza con `def …` indentado o `# aggregation`) y sustituye al primero. Pasa en 7 runs: fih v2 r3, v3 r3, v4 r1 y r2, dah v1 r1, dah v2 r1 y r2. Seis de los siete sacan < 0,1; el otro (dah v2 r2) lo arregla reescribiendo y saca 1,0. La solución de fih tiene `service.py` de 27,8 KB: el salto v1 (0,87) → v2–v4 (0,05–0,40) lo explica sobre todo el tamaño del fichero mayor, no la dificultad del contrato.
-- **Abandono temprano.** Pi corre el check 1–4 veces y para; 19 de 24 runs terminan admitiendo que falla o está incompleto.
-- **Cuando no se rompe, la dificultad es real.** fih v4 r3 (0,68) aprueba todas las familias simples y falla `fuzz_long`, `fuzz_ops`, `replay_v2` y `replay_forged`, que son interacciones, igual que en v1.
-- **Bimodalidad.** fih v4 y dah v2 tienen dos modos: (a) paquete o script roto por la sobrescritura, seguido de abandono; (b) trabajo completo con fallos en interacciones (fih) o techo de 1,0 (dah).
-  → Idea: lección genérica en `systemPromptAppend`: `write` sustituye el fichero entero; los ficheros largos se construyen por módulos o añadiendo con `edit`; con el check en rojo se sigue, no se para. Ayudaría también a n=1, así que para atribuir el efecto al enjambre hace falta un brazo murmur n=1 con la misma lección.
+- **Chunked writes that overwrite each other.** Pi writes ~5–7 KB per `write`. If the file does not fit, it sends a second `write` that is the continuation (it starts with an indented `def …` or `# aggregation`) and replaces the first. It happens in 7 runs: fih v2 r3, v3 r3, v4 r1 and r2, dah v1 r1, dah v2 r1 and r2. Six of the seven score < 0.1; the other (dah v2 r2) fixes it by rewriting and scores 1.0. The fih solution has a 27.8 KB `service.py`: the jump v1 (0.87) → v2–v4 (0.05–0.40) is explained mostly by the size of the largest file, not by the difficulty of the contract.
+- **Early abandonment.** Pi runs the check 1–4 times and stops; 19 of 24 runs end by admitting that it fails or is incomplete.
+- **When it does not break, the difficulty is real.** fih v4 r3 (0.68) passes all the simple families and fails `fuzz_long`, `fuzz_ops`, `replay_v2` and `replay_forged`, which are interactions, as in v1.
+- **Bimodality.** fih v4 and dah v2 have two modes: (a) package or script broken by the overwrite, followed by abandonment; (b) complete work with failures on interactions (fih) or a ceiling of 1.0 (dah).
+  → Idea: a generic lesson in `systemPromptAppend`: `write` replaces the whole file; long files are built by modules or by appending with `edit`; with the check red you continue, you do not stop. It would also help n=1, so to attribute the effect to the swarm a murmur n=1 arm with the same lesson is needed.
 
-## Criba 1 (fijada antes de medir, 2026-10-01)
+## Criba 1 (screen 1; fixed before measuring, 2026-10-01)
 
-- **Tareas:** las tres continuas y calibradas: `information_extraction_hard` (Pi 0,58), `constrained_planning_hard` (0,32) y `durable_workflow_engine` (~0,59). `feature_implementation_hard` v4 (0,29) y `data_analysis_hard` v2 (0,48) se quedan como están y no entran en la criba. Son bimodales: rotura por escritura en trozos y abandono.
-- **Brazos (k=1):** pi n=1; murmur n=3 por defecto; no-messaging n=3; c1, c2 y c3 n=3; `c4-lessons` (c1 más lecciones: `write` sustituye el fichero y no se para con el check en rojo) en n=3 y en n=1. El de n=1 separa el efecto de la lección del efecto del enjambre.
-- **Ejecución:** `experiments/criba1.json`. Una campaña por tarea, para que un corte por presupuesto solo afecte a esa tarea. La semilla 20261006 deja c3 para el final. Tope de 3M por run y 20M por campaña. Estimación: ~26M en total.
-- **Cambio a mitad (2026-10-01 12:50).** c4 n=3 agotó los 3M en ieh (2,8M de cache read) y swarmtest paró la campaña después de 2/8 runs. A partir de ahí, cada brazo que falta corre en su propia campaña junto a un run de Pi (`experiments/criba1-driver.mjs`; swarmtest exige un brazo de un agente). Así un corte solo afecta a esa pareja y Pi acumula k≈8 por tarea. Se añade **c5** (`c5-attempts`): c1 + intentos en paralelo. Si el entregable es un solo fichero, cada agente hace su intento completo en `attempts/<nombre>/`, se instala el mejor y se sigue mejorando entre todos. Sale de las transcripciones: en cph y en ieh, dos de tres agentes ceden el fichero y llaman a `done` como "revisores". `arms.mjs --across` empareja runs de distintas campañas por tarea.
-- **Objetivo con tres patas (2026-10-01):** (1) subir el score, (2) una comunicación que sirva a ese score y (3) bajar el coste en tokens. Datos a mitad de criba: en ieh, sin mensajes da 0,92 con 0,71M y el brazo por defecto 0,87 con 1,69M. Los turnos que solo coordinan se llevan el 33–62 % de los tokens y el cache read es > 85 %. El coste lo marcan los turnos, no lo que escriben los agentes.
-- **Segunda tanda: mecanismos distintos para el mismo objetivo** (comunicación útil a menos coste; `criba1-driver2.mjs`, corre después de la primera; Pi en cada campaña):
-  - **x1 `x1-attach`** (canal sin turnos): los posts nuevos se pegan al resultado de la siguiente herramienta (`delivery: "attach"`); no hay steers ni hace falta `inbox`. Se compara con el brazo por defecto. Predicción: score igual y −30–50 % de tokens.
-  - **x2 `x2-files`** (estigmergia): sin tablero. Los agentes saben que tienen compañeros y coordinan por ficheros: `SWARM.md` como cuaderno compartido y `swarm_tests/`. Se compara con no-messaging (coste) y con el brazo por defecto (score).
-  - **x3 `x3-notices`** (hechos automáticos): x1 más avisos que genera el sistema (quién escribe o edita qué fichero, cada check con PASS/FAIL), y `post` restringido a fallos con repro, interfaces y bloqueos. Se compara con x1. Predicción: menos posts, menos solapes y score ≥ x1.
-  - **c5** (diversidad en vez de conversación; ya está en la primera tanda): intentos en paralelo y selección.
-  - **x4 `x4-pull`** (tablero voluntario): hay tablero pero nadie interrumpe ni pega mensajes a los resultados (`delivery: "pull"`). El prompt pide mirar `inbox` y `team` antes de cada trabajo y publicar al acabarlo qué se hizo, qué se encontró y qué falta. Un agente que termina su turno con mensajes sin leer sigue recibiendo el `wake` de siempre. Se compara con el brazo por defecto (steer) y con x1 (attach). Predicción: menos turnos de coordinación que el brazo por defecto. El riesgo es que los hallazgos lleguen tarde.
-  - **c6 `c6-silent-norms`** (control): las normas de c1 con la coordinación por ficheros de x2 y sin tablero. Separa el efecto de las normas del efecto del tablero en el 1,0 de c1.
-  - **Ejecución en paralelo (13:47):** los dos drivers secuenciales se sustituyen por `criba1-lanes.mjs`, con 3 carriles en paralelo. Cada carril coge la siguiente combinación tarea × brazo que no esté hecha ni bloqueada (bloqueo en `criba1/locks/`). Los runs ya hechos se encuentran por la semilla de la criba. El run de cph de no-messaging que estaba en marcha sigue hasta acabar y queda bloqueado. Riesgo: con carga, los checks de rendimiento del grader podrían salir peor; si aparecen timeouts raros, hay que mirarlo.
-  - Para comparar coste: tokens totales, turnos y tokens sin caché (input + output), con `traces.mjs` y los eventos `usage`.
-- **Regla:** pasan a k=2 los 1–2 brazos de murmur con mejor delta medio frente a Pi en las tres tareas, siempre que sea > 0. La comparación descriptiva n=3 con mensajes frente a sin mensajes, y c4 n=3 frente a c4 n=1, sirve para mejorar el messaging, no para decidir.
+- **Tasks:** the three continuous, calibrated ones: `information_extraction_hard` (Pi 0.58), `constrained_planning_hard` (0.32) and `durable_workflow_engine` (~0.59). `feature_implementation_hard` v4 (0.29) and `data_analysis_hard` v2 (0.48) stay as they are and do not enter the screen. They are bimodal: breakage from chunked writes and abandonment.
+- **Arms (k=1):** pi n=1; murmur n=3 default; no-messaging n=3; c1, c2 and c3 n=3; `c4-lessons` (c1 plus lessons: `write` replaces the file and do not stop with the check red) at n=3 and n=1. The n=1 arm separates the effect of the lesson from the effect of the swarm.
+- **Execution:** `experiments/criba1.json`. One campaign per task, so that a cut by budget only affects that task. Seed 20261006 leaves c3 for last. Cap of 3M per run and 20M per campaign. Estimate: ~26M in total.
+- **Mid-way change (2026-10-01 12:50).** c4 n=3 used up the 3M in ieh (2.8M of cache read) and swarmtest stopped the campaign after 2/8 runs. From then on, each missing arm runs in its own campaign next to a Pi run (`experiments/criba1-driver.mjs`; swarmtest requires a one-agent arm). That way a cut only affects that pair and Pi accumulates k≈8 per task. **c5** (`c5-attempts`) is added: c1 plus parallel attempts. If the deliverable is a single file, each agent makes its complete attempt in `attempts/<name>/`, the best one is installed and everyone keeps improving it together. It comes from the transcripts: in cph and in ieh, two of three agents yield the file and call `done` as "reviewers". `arms.mjs --across` pairs runs from different campaigns by task.
+- **Three-legged objective (2026-10-01):** (1) raise the score, (2) communication that serves that score and (3) lower the cost in tokens. Data mid-screen: in ieh, no messages gives 0.92 with 0.71M and the default arm 0.87 with 1.69M. Turns that only coordinate take 33–62 % of tokens and cache read is > 85 %. The cost is set by the turns, not by what the agents write.
+- **Second batch: different mechanisms for the same objective** (useful communication at lower cost; `criba1-driver2.mjs`, runs after the first; Pi in each campaign):
+  - **x1 `x1-attach`** (channel without turns): new posts are attached to the result of the next tool (`delivery: "attach"`); there are no steers and `inbox` is not needed. It is compared with the default arm. Prediction: same score and −30–50 % of tokens.
+  - **x2 `x2-files`** (stigmergy): no board. Agents know they have teammates and coordinate through files: `SWARM.md` as a shared notebook and `swarm_tests/`. It is compared with no-messaging (cost) and with the default arm (score).
+  - **x3 `x3-notices`** (automatic facts): x1 plus notices generated by the system (who writes or edits which file, each check with PASS/FAIL), and `post` restricted to failures with a repro, interfaces and blockers. It is compared with x1. Prediction: fewer posts, fewer overlaps and score ≥ x1.
+  - **c5** (diversity instead of conversation; already in the first batch): parallel attempts and selection.
+  - **x4 `x4-pull`** (voluntary board): there is a board but nobody interrupts or attaches messages to results (`delivery: "pull"`). The prompt asks to look at `inbox` and `team` before each piece of work and to post when finished what was done, what was found and what is missing. An agent that ends its turn with unread messages still gets the usual `wake`. It is compared with the default arm (steer) and with x1 (attach). Prediction: fewer coordination turns than the default arm. The risk is that findings arrive late.
+  - **c6 `c6-silent-norms`** (control): c1's norms with x2's file-based coordination and no board. It separates the effect of the norms from the effect of the board in c1's 1.0.
+  - **Parallel execution (13:47):** the two sequential drivers are replaced by `criba1-lanes.mjs`, with 3 lanes in parallel. Each lane takes the next task × arm combination that is neither done nor locked (lock in `criba1/locks/`). Runs already done are found by the screen's seed. The no-messaging cph run that was in progress continues until it finishes and stays locked. Risk: under load, the grader's performance checks could come out worse; if odd timeouts appear, it has to be looked at.
+  - To compare cost: total tokens, turns and non-cached tokens (input + output), with `traces.mjs` and the `usage` events.
+- **Rule:** the 1–2 murmur arms with the best mean delta against Pi on the three tasks go to k=2, provided it is > 0. The descriptive comparison n=3 with messages versus without messages, and c4 n=3 versus c4 n=1, serves to improve the messaging, not to decide.
 
-## Criba 2: réplica (fijada antes de medir, 2026-10-01 16:20)
+## Criba 2: replication (fixed before measuring, 2026-10-01 16:20)
 
-- **Pregunta:** ¿un brazo de 3 agentes supera a un solo agente con el mismo nivel de prompt (c4n1)?
-- **Brazos:** c1, x1 y c5. Cada campaña lleva c4n1 junto al brazo de 3 agentes; no hace falta más Pi, que ya tiene k=11–13 por tarea.
-- **Tareas:** ieh, cph y durable (con la criba 1 quedan en k=2), más `feature_implementation_hard` v4 (k=1), porque tiene margen: incluso el mejor run de Pi falla fuzz y replay.
-- **Ejecución:** `experiments/criba2-lanes.mjs`, 3 carriles, semilla 20261007, tope 3M por run. Estimación: ~25M.
-- **Regla:** un brazo supera a c4n1 si el Δ medio por tarea (media del brazo − media de c4n1, juntando criba 1 y 2) es ≥ +0,05 y gana en ≥ 3 de las 4 tareas. Se registra también Δ frente a la media de Pi y el coste. c1, x1 y c5 no se ordenan entre sí en durable ni en ieh, porque están en el techo (0,91–1,0).
-- **Saturación, cambio de calibración aprobado (2026-10-01):** las tareas `*_hard2` se calibran contra Pi (k=3) y contra c4n1 (k=2, banda 0,3–0,6); detalle en `hard-tasks.md`. La primera es `information_extraction_hard2`, en construcción con un subagente.
-- **Problema abierto: saturación.** La calibración usó a Pi como referencia y los brazos buenos tocan el techo en durable e ieh. Para ordenar candidatos hacen falta tareas con margen por encima de c4n1.
+- **Question:** does a 3-agent arm beat a single agent with the same prompt level (c4n1)?
+- **Arms:** c1, x1 and c5. Each campaign carries c4n1 next to the 3-agent arm; no more Pi is needed, since it already has k=11–13 per task.
+- **Tasks:** ieh, cph and durable (with Criba 1 they end up at k=2), plus `feature_implementation_hard` v4 (k=1), because it has headroom: even Pi's best run fails fuzz and replay.
+- **Execution:** `experiments/criba2-lanes.mjs`, 3 lanes, seed 20261007, cap 3M per run. Estimate: ~25M.
+- **Rule:** an arm beats c4n1 if the mean Δ per task (arm mean − c4n1 mean, pooling Criba 1 and 2) is ≥ +0.05 and it wins on ≥ 3 of the 4 tasks. Δ against the Pi mean and the cost are also recorded. c1, x1 and c5 are not ordered among themselves in durable or ieh, because they are at the ceiling (0.91–1.0).
+- **Saturation, calibration change approved (2026-10-01):** the `*_hard2` tasks are calibrated against Pi (k=3) and against c4n1 (k=2, band 0.3–0.6); details in `hard-tasks.md`. The first is `information_extraction_hard2`, under construction with a subagent.
+- **Open problem: saturation.** The calibration used Pi as the reference and the good arms touch the ceiling in durable and ieh. To order candidates, tasks with headroom above c4n1 are needed.
 
-## Criba 3: mecanismos contra el fichero roto (fijada antes de medir, 2026-10-01 17:30)
+## Criba 3: mechanisms against the broken file (fixed before measuring, 2026-10-01 17:30)
 
-- **Pregunta:** qué mecanismo evita el fichero compartido roto (y el abandono que viene después) sin pagar el coste de c5.
-- **Brazos (n=3 salvo el control):**
-  - c4g-guard: c4n1 con `writeGuard`; es el control de un solo agente.
-  - x1g-guard: x1 con `writeGuard`, elegido por el usuario.
-  - x1g-lock (A): x1g con claims que bloquean y caducan a los 120 s sin escribir.
-  - x1g-stale (B): x1g con control de versiones; se rechaza un `write` sobre un fichero que cambió desde que el agente lo leyó.
-  - x1g-parts (C): x1g con claims sobre partes de la tarea en lugar de ficheros.
-  - c5: ganador de la criba 2, como referencia.
-- **Tareas:** ieh v1, fih v4 y durable (control multi-fichero), con k=2. cph queda fuera: meseta en 0,37.
-- **Ejecución:** `experiments/criba3-lanes.mjs`, 3 carriles, semilla 20261012, tope de 3M por run. Las cuatro variantes de x1g comparten campaña con c4g (x1 nunca llegó al tope); c5 va aparte, también con c4g. Estimación: ~48M.
-- **Regla:**
-  - un brazo n=3 es candidato si su media supera a la de c4g en ≥ +0,05 en el promedio de tareas y no saca ningún 0,00 en ieh;
-  - entre candidatos, mejor score por M de tokens;
-  - el mecanismo (A, B o C) aporta si supera a x1g-guard en ≥ +0,05 sin subir los tokens más de un 30 %.
-- **Incidencia (17:40):** x1g-guard agota los 3M en fih (con score 1,0) y swarmtest para la campaña agrupada después del primer run. La suposición de que x1 no llega al tope era falsa en fih. Lo que falta se relanza con una campaña por brazo (`criba3-lanes.mjs <carril> --per-arm <tarea>`). La campaña agrupada de ieh también se cortó (5 de 10 runs) y a las 18:02 se lanzó su pasada por brazo (carril 5). La agrupada de durable terminó entera (10 de 10). Las de c5 se cortaron en ieh (2 runs) y en durable (3 runs) porque c5 llega al tope. A c5 le faltan repeticiones en esas dos tareas, y `--per-arm` no lo incluye: hay que relanzarlo con una campaña por repetición (repetitions 1), para que un corte no se lleve el resto.
-- **Recarga (18:31–18:43).** c5 en durable ya tenía k=2: el corte de `e7029fb2` se llevó la segunda repetición de c4g, no la de c5. Solo faltaba c5 en ieh, y se lanzó una campaña con `repetitions: 1` (`criba3/c5-ieh-r1.json`, `ea037e72`): 0,54, otra vez cortada a 3M. `--per-arm` no completa lo que falta, sino que añade 2 repeticiones por brazo, así que fih x1g-guard queda con k=3 y c4g con k=3–7 por tarea. Para ieh lock, stale y parts (les faltaba 1 run a cada uno) se reservaron sus locks y se lanzaron tres campañas de 1 repetición (`criba3/topup-ieh.sh`), con OK del usuario. La media de control de c4g usa todos sus runs por tarea. Gasto de la criba a las 18:30: 47,3M.
-- **Resultado y regla aplicada (19:00; media por tarea ieh / fih / durable, tokens por run):**
-  - c4g-guard (control): 0,73 (k8) / 0,79 (k10) / 0,46 (k3), media 0,66, 0,37M.
-  - c5: 0,76 / 1,00 / 0,96, media 0,91 (+0,25 frente a c4g), 2,69M; 3 de 6 runs cortados a 3M; score/M 0,34.
-  - x1g-guard: 0,80 (k3) / 1,00 (k3) / 0,63, media 0,81 (+0,15), 1,52M; score/M 0,53.
-  - x1g-lock (A): 0,80 / 0,73 / 0,98, media 0,84 (+0,18), 1,39M; score/M 0,60.
-  - x1g-stale (B): 0,77 / 0,94 / 0,65, media 0,79 (+0,13), 1,31M; score/M 0,60.
-  - x1g-parts (C): 0,15 / 1,00 / 0,92, media 0,69 (+0,03), 0,98M; saca 0,00 en ieh: los tres agentes ceden la implementación en 1 minuto.
-  - **Candidatos:** c5, x1g-guard, x1g-lock y x1g-stale. parts no pasa: +0,03 y un 0,00 en ieh. **Mejor score/M entre candidatos:** lock y stale empatan (0,60), por delante de guard (0,53) y c5 (0,34).
-  - **Mecanismos:** ninguno supera a x1g-guard en ≥ +0,05 (lock +0,03, stale −0,02, parts −0,12). Por la regla, A, B y C no aportan. La ventaja de lock depende de durable (0,98 frente a 0,63, k=2), y en fih pierde (0,73 frente a 1,00).
-  - Gasto total: 59,1M en 15 campañas (estimación inicial 48M).
-- **Ronda 4, preparada (sin lanzar; fusionada en la ronda 5A el 2026-10-01 19:40):** palancas `relay`/`relayContext`, `doneAfterGreen` y `clock`, y los perfiles x1g-relay, c4g-relay (n=1, control con cómputo equiparado), x1g-evidence (15 llamadas tras el verde y reloj) y x1g-select (intentos en `attempts/`, sondas por agente, matriz intento × sonda en SCORES.md, instalar el mejor, portar lo que falte). Prueba de humo: el relevo encontró y arregló un bug real que la primera instancia dio por bueno.
-- **En paralelo:** `ledger_reconciliation_hard`, una tarea pequeña solo con las familias del ledger, para resolver la saturación.
+- **Question:** which mechanism prevents the broken shared file (and the abandonment that follows) without paying c5's cost.
+- **Arms (n=3 except the control):**
+  - c4g-guard: c4n1 with `writeGuard`; it is the single-agent control.
+  - x1g-guard: x1 with `writeGuard`, chosen by the user.
+  - x1g-lock (A): x1g with claims that block and expire after 120 s without writing.
+  - x1g-stale (B): x1g with version control; a `write` on a file that changed since the agent read it is rejected.
+  - x1g-parts (C): x1g with claims on parts of the task instead of files.
+  - c5: winner of Criba 2, as a reference.
+- **Tasks:** ieh v1, fih v4 and durable (multi-file control), with k=2. cph is left out: plateau at 0.37.
+- **Execution:** `experiments/criba3-lanes.mjs`, 3 lanes, seed 20261012, cap of 3M per run. The four x1g variants share a campaign with c4g (x1 never reached the cap); c5 goes separately, also with c4g. Estimate: ~48M.
+- **Rule:**
+  - an n=3 arm is a candidate if its mean exceeds c4g's by ≥ +0.05 on the task average and it scores no 0.00 in ieh;
+  - among candidates, best score per M of tokens;
+  - the mechanism (A, B or C) contributes if it beats x1g-guard by ≥ +0.05 without raising tokens by more than 30 %.
+- **Incident (17:40):** x1g-guard uses up the 3M in fih (with score 1.0) and swarmtest stops the grouped campaign after the first run. The assumption that x1 does not reach the cap was false in fih. What is missing is relaunched with one campaign per arm (`criba3-lanes.mjs <lane> --per-arm <task>`). The grouped ieh campaign was also cut (5 of 10 runs) and at 18:02 its per-arm pass was launched (lane 5). The grouped durable one finished entirely (10 of 10). The c5 ones were cut in ieh (2 runs) and in durable (3 runs) because c5 reaches the cap. c5 is missing repetitions in those two tasks, and `--per-arm` does not include it: it has to be relaunched with one campaign per repetition (repetitions 1), so that a cut does not take the rest with it.
+- **Reload (18:31–18:43).** c5 in durable already had k=2: the cut of `e7029fb2` took away c4g's second repetition, not c5's. Only c5 in ieh was missing, and a campaign with `repetitions: 1` was launched (`criba3/c5-ieh-r1.json`, `ea037e72`): 0.54, cut at 3M again. `--per-arm` does not complete what is missing, but adds 2 repetitions per arm, so fih x1g-guard ends up with k=3 and c4g with k=3–7 per task. For ieh lock, stale and parts (each was missing 1 run) their locks were reserved and three 1-repetition campaigns were launched (`criba3/topup-ieh.sh`), with the user's OK. The c4g control mean uses all its runs per task. Spend of the screen at 18:30: 47.3M.
+- **Result and rule applied (19:00; mean per task ieh / fih / durable, tokens per run):**
+  - c4g-guard (control): 0.73 (k8) / 0.79 (k10) / 0.46 (k3), mean 0.66, 0.37M.
+  - c5: 0.76 / 1.00 / 0.96, mean 0.91 (+0.25 against c4g), 2.69M; 3 of 6 runs cut at 3M; score/M 0.34.
+  - x1g-guard: 0.80 (k3) / 1.00 (k3) / 0.63, mean 0.81 (+0.15), 1.52M; score/M 0.53.
+  - x1g-lock (A): 0.80 / 0.73 / 0.98, mean 0.84 (+0.18), 1.39M; score/M 0.60.
+  - x1g-stale (B): 0.77 / 0.94 / 0.65, mean 0.79 (+0.13), 1.31M; score/M 0.60.
+  - x1g-parts (C): 0.15 / 1.00 / 0.92, mean 0.69 (+0.03), 0.98M; scores 0.00 in ieh: the three agents yield the implementation within 1 minute.
+  - **Candidates:** c5, x1g-guard, x1g-lock and x1g-stale. parts does not pass: +0.03 and a 0.00 in ieh. **Best score/M among candidates:** lock and stale tie (0.60), ahead of guard (0.53) and c5 (0.34).
+  - **Mechanisms:** none beats x1g-guard by ≥ +0.05 (lock +0.03, stale −0.02, parts −0.12). By the rule, A, B and C do not contribute. lock's advantage depends on durable (0.98 versus 0.63, k=2), and in fih it loses (0.73 versus 1.00).
+  - Total spend: 59.1M in 15 campaigns (initial estimate 48M).
+- **Round 4, prepared (not launched; merged into round 5A on 2026-10-01 19:40):** levers `relay`/`relayContext`, `doneAfterGreen` and `clock`, and the profiles x1g-relay, c4g-relay (n=1, compute-matched control), x1g-evidence (15 calls after the green and a clock) and x1g-select (attempts in `attempts/`, probes per agent, attempt × probe matrix in SCORES.md, install the best, port what is missing). Smoke test: the relay found and fixed a real bug that the first instance had accepted.
+- **In parallel:** `ledger_reconciliation_hard`, a small task with only the ledger families, to address saturation.
 
-### Hallazgos de la revisión adversarial (2026-10-01 19:00; código, SDK de Pi y 302 runs)
+### Findings of the adversarial review (2026-10-01 19:00; code, Pi SDK and 302 runs)
 
-- **Falta la comparación que decide la tesis:** el mismo perfil a n=3 frente a n=1. La única pareja (c4 n=3 k=1 frente a c4n1 k=3) empata. Las palancas recientes (relay, doneAfterGreen, clock) también sirven a n=1. **Regla nueva:** cada perfil candidato corre también a n=1, con el mismo fichero y en la misma campaña.
-- **Predicado del check (arreglado en `src/`):** antes, cualquier bash que contuviera el comando contaba como check. Daba falsos verdes en menciones entre comillas (`echo '... npm run test ...' >> SWARM.md`: 6 de 171 primeros verdes) y con el estado de salida enmascarado (`check; cp ...`: 1 confirmado). Ahora el check tiene que abrir una sentencia fuera de comillas y no puede ir seguido de `|`, `;` ni `||`. `traces.mjs` mantiene el predicado antiguo, así que los números históricos no cambian; el Spearman 0,72–0,80 aguanta (≤ 6 % de primeros verdes dudosos).
-- **`arms.mjs` sesgado contra brazos caros:** un run que toca el tope para la campaña antes de que corra su pareja, y `arms.mjs` descarta la pareja incompleta como "skipped". Las tablas de las cribas usan medias agrupadas de Pi y no les afecta.
-- **`/tmp` compartido entre carriles:** 212 llamadas escriben en `/tmp` con nombres fijos (`/tmp/wrenplan.json`), y los nombres de agente son los mismos en todos los runs. Puede haber contaminación entre runs concurrentes; sin verificar.
-- **Pendientes, sin arreglar:**
-  - si `end()` llega durante `open()`, un relevo arranca una sesión sin abortar, así que el presupuesto no es un tope duro en los brazos con relay;
-  - `done` no devuelve `terminate: true` (14 agentes siguieron actuando tras `done`; 2 editaron);
-  - no se registra la versión del código en cada run;
-  - los graders son alcanzables desde el workspace (`../../../tasks/<t>/grader.py`) con bash sin sandbox (0 accesos observados).
-- **DeepSWE:** ver la fila del registro. Además, la recompensa es binaria (`tests/test.sh`: 1 solo si pasan base y new), así que hace falta crédito parcial para que discrimine.
+- **The comparison that decides the thesis is missing:** the same profile at n=3 versus n=1. The only pair (c4 n=3 k=1 versus c4n1 k=3) ties. The recent levers (relay, doneAfterGreen, clock) also serve n=1. **New rule:** each candidate profile also runs at n=1, with the same file and in the same campaign.
+- **Check predicate (fixed in `src/`):** before, any bash containing the command counted as a check. It gave false greens on quoted mentions (`echo '... npm run test ...' >> SWARM.md`: 6 of 171 first greens) and with the exit status masked (`check; cp ...`: 1 confirmed). Now the check has to open a statement outside quotes and cannot be followed by `|`, `;` or `||`. `traces.mjs` keeps the old predicate, so the historical numbers do not change; the Spearman 0.72–0.80 holds (≤ 6 % doubtful first greens).
+- **`arms.mjs` biased against expensive arms:** a run that hits the cap stops the campaign before its pair runs, and `arms.mjs` discards the incomplete pair as "skipped". The screens' tables use pooled Pi means and are not affected.
+- **`/tmp` shared between lanes:** 212 calls write to `/tmp` with fixed names (`/tmp/wrenplan.json`), and agent names are the same in all runs. There may be contamination between concurrent runs; unverified.
+- **Pending, not fixed:**
+  - if `end()` arrives during `open()`, a relay starts a session without aborting, so the budget is not a hard cap in relay arms;
+  - `done` does not return `terminate: true` (14 agents kept acting after `done`; 2 edited);
+  - the code version is not recorded in each run;
+  - the graders are reachable from the workspace (`../../../tasks/<t>/grader.py`) with unsandboxed bash (0 accesses observed).
+- **DeepSWE:** see the registry row. Also, the reward is binary (`tests/test.sh`: 1 only if base and new pass), so partial credit is needed for it to discriminate.
 
-## Ronda 5: coordinación (fijada antes de medir, 2026-10-01 19:11)
+## Round 5: coordination (fixed before measuring, 2026-10-01 19:11)
 
-Motivación: el enjambre del incidente de OpenAI de julio de 2026 ganó al juntar descubrimientos entre agentes con tareas distintas, al reasignar esfuerzo hacia los atascados y al pedir ayuda cuando se atascaba. No ganó repartiéndose un solo fichero. Aquí se prueban esas dos vías por separado. La ronda absorbe x1g-select de la ronda 4.
+Motivation: the swarm in OpenAI's July 2026 incident won by pooling discoveries between agents with different tasks, by reassigning effort toward the stuck ones and by asking for help when stuck. It did not win by splitting a single file. Here those two routes are tested separately. The round absorbs x1g-select from round 4.
 
-**Palancas nuevas** (desactivadas por defecto; smoke en el registro):
-- `findings`: herramienta `finding(text, command)`. murmur ejecuta el comando y publica la afirmación con su salida y su código de salida reales.
-- `helpAfter`: tras N llamadas con el check en rojo o sin ejecutar, y cuando un agente acaba sin pase, murmur publica en el tablón que puede necesitar ayuda.
+**New levers** (off by default; smoke in the registry):
+- `findings`: tool `finding(text, command)`. murmur runs the command and posts the claim with its real output and exit code.
+- `helpAfter`: after N calls with the check red or not run, and when an agent finishes without a pass, murmur posts on the board that it may need help.
 
-### A: dentro de una tarea, fusionada con la ronda 4 (fijada antes de medir, 2026-10-01 19:40, código `46e756b`)
+### A: within a task, merged with round 4 (fixed before measuring, 2026-10-01 19:40, code `46e756b`)
 
-Fusiona la ronda 4 que propuso el análisis de la criba 3 con la 5A. La criba 3 deja dos fallos: **ceder** (agentes que hacen `done` con "X owns extract.py") y **parar en cuanto sale el verde** (durable: 2/2/2 llamadas tras el verde). El fichero roto ya está resuelto con el guard.
+It merges round 4, which the Criba 3 analysis proposed, with 5A. Criba 3 leaves two failures: **yielding** (agents that do `done` with "X owns extract.py") and **stopping as soon as the green appears** (durable: 2/2/2 calls after the green). The broken file is already solved with the guard.
 
-- **Teoría principal: coordinación frente a cómputo.** Tareas ieh v1 e `information_extraction_hard2` (las dos con margen; durable no entra porque select y c5 ya sacan ~0,96 ahí), k=3.
-  - S3 = x1g-select n=3 (cada agente construye su intento: ataca el ceder);
-  - S3c = x1g-coord n=3 (S3 + `findings` + `helpAfter: 25` + "un mensaje es información, no una orden");
-  - R4 = c4g-relay4 n=1 (c4g-relay con 4 relevos en vez de 2, para que pueda gastar ~2M frente a los ~2,7M de S3).
-- **Teoría secundaria: puerta de evidencia (lo que proponía la ronda 4).** Tareas ieh v1 y durable, k=2.
+- **Main theory: coordination versus compute.** Tasks ieh v1 and `information_extraction_hard2` (both with headroom; durable is not included because select and c5 already score ~0.96 there), k=3.
+  - S3 = x1g-select n=3 (each agent builds its own attempt: it attacks yielding);
+  - S3c = x1g-coord n=3 (S3 + `findings` + `helpAfter: 25` + "a message is information, not an order");
+  - R4 = c4g-relay4 n=1 (c4g-relay with 4 relays instead of 2, so that it can spend ~2M versus S3's ~2.7M).
+- **Secondary theory: evidence gate (what round 4 proposed).** Tasks ieh v1 and durable, k=2.
   - E3 = x1g-evidence n=3;
-  - E1 = c4g-evidence n=1 (c4g-guard + `doneAfterGreen: 15` + `clock`), que va además como agente único de relleno en todas las campañas de S3, S3c y E3.
-  - Referencias de la criba 3, sin repetir (su comportamiento no cambia con `46e756b`): x1g-guard y c4g-guard.
-- **Fuera:** x1g-relay (siempre toca el tope; la idea queda medida con R4) y cph (meseta en 0,37 para todos).
-- **Ejecución:** `experiments/criba5-lanes.mjs`, una campaña por tarea × brazo × repetición con `repetitions: 1`, semilla 20261015, tope de 3M por run. R4 va en campañas propias (si toca el tope solo se para a sí mismo). 3–4 carriles. **Lanzada 2026-10-01 19:23** (4 carriles, 22 campañas). swarmtest ejecuta el brazo n=3 antes que el relleno E1, así que si el n=3 toca el tope, E1 no corre en esa campaña (solo baja la k de E1). Estimación: S3 y S3c ~16M cada uno, R4 ~12M, E3 ~7M, relleno E1 ~8M: **~60M**.
-- **Regla (fijada antes de medir):**
-  - **la comunicación aporta** si S3c − S3 ≥ +0,05 en la media de ieh e ieh2 y gana en las dos, sin subir los tokens más de un 30 %;
-  - **el enjambre aporta** si el mejor de S3/S3c supera a R4 en ≥ +0,05 y gana en las dos tareas. Si R4 gasta menos de la mitad de tokens que ese brazo y pierde, la conclusión es "no decidido por cómputo", no "gana la coordinación";
-  - **la puerta aporta en el enjambre** si E3 supera a x1g-guard (criba 3) en ≥ +0,05 en la media de ieh y durable y no saca ningún 0,00 en ieh; **en un solo agente**, si E1 supera a c4g-guard (criba 3) en ≥ +0,05;
-  - los runs cortados a 3M cuentan con su score (es un suelo) y se marcan; si un brazo tiene ≥ 1/3 de runs cortados, se dice explícitamente al comparar.
-- **Riesgos a mirar en las trazas:** con la puerta, el que cede se queda parado hasta que alguien publica, y el rechazo le dice que acabe el turno sin `done`, lo que puede terminar en `quiescent` con trabajo a medias. Los turnos de solo tablero ya son el 31–45 % de los tokens en n=3: medir si `finding` los sube. A n=1, el prompt de x1g-* dice "Teammates: none"; no aplica aquí porque los controles n=1 son c4g-*.
-- **Descriptivo:** número de `finding` y de avisos de ayuda (eventos `help`, no `post`), si tras un aviso otro agente tocó la zona que fallaba, y las llamadas tras el primer verde por brazo.
+  - E1 = c4g-evidence n=1 (c4g-guard + `doneAfterGreen: 15` + `clock`), which also goes as the filler single agent in all the S3, S3c and E3 campaigns.
+  - References from Criba 3, not repeated (their behaviour does not change with `46e756b`): x1g-guard and c4g-guard.
+- **Out:** x1g-relay (always hits the cap; the idea stays measured with R4) and cph (plateau at 0.37 for everyone).
+- **Execution:** `experiments/criba5-lanes.mjs`, one campaign per task × arm × repetition with `repetitions: 1`, seed 20261015, cap of 3M per run. R4 goes in its own campaigns (if it hits the cap it only stops itself). 3–4 lanes. **Launched 2026-10-01 19:23** (4 lanes, 22 campaigns). swarmtest runs the n=3 arm before the E1 filler, so if the n=3 hits the cap, E1 does not run in that campaign (only E1's k goes down). Estimate: S3 and S3c ~16M each, R4 ~12M, E3 ~7M, E1 filler ~8M: **~60M**.
+- **Rule (fixed before measuring):**
+  - **communication contributes** if S3c − S3 ≥ +0.05 in the mean of ieh and ieh2 and it wins on both, without raising tokens by more than 30 %;
+  - **the swarm contributes** if the better of S3/S3c beats R4 by ≥ +0.05 and wins on both tasks. If R4 spends less than half the tokens of that arm and loses, the conclusion is "not decided because of compute", not "coordination wins";
+  - **the gate contributes in the swarm** if E3 beats x1g-guard (Criba 3) by ≥ +0.05 in the mean of ieh and durable and scores no 0.00 in ieh; **in a single agent**, if E1 beats c4g-guard (Criba 3) by ≥ +0.05;
+  - runs cut at 3M count with their score (it is a floor) and are marked; if an arm has ≥ 1/3 of its runs cut, this is stated explicitly when comparing.
+- **Risks to look at in the traces:** with the gate, the one who yields stays idle until someone posts, and the rejection tells them to end the turn without `done`, which can end in `quiescent` with work half done. Board-only turns are already 31–45 % of tokens at n=3: measure whether `finding` raises them. At n=1, the x1g-* prompt says "Teammates: none"; it does not apply here because the n=1 controls are c4g-*.
+- **Descriptive:** number of `finding` calls and help notices (`help` events, not `post`), whether after a notice another agent touched the area that was failing, and calls after the first green per arm.
 
-- **Resultado y regla aplicada (2026-10-01 22:00; medias por tarea, tokens por run, cortados a 3M):**
+- **Result and rule applied (2026-10-01 22:00; per-task means, tokens per run, cut at 3M):**
 
-  | brazo | ieh | ieh2 | durable | tokens/run | cortados |
+  | arm | ieh | ieh2 | durable | tokens/run | cut |
   |---|---|---|---|---|---|
-  | S3 x1g-select n=3 | 0,60 (k3) | 0,32 (k3) | — | 1,5 / 2,3M | 0 / 2 |
-  | S3c x1g-coord n=3 | 0,42 (k3) | 0,17 (k3) | — | 1,3 / 2,0M | 0 / 1 |
-  | R4 c4g-relay4 n=1 | 0,92 (k3) | 0,62 (k3) | — | 1,2 / 1,1M | 0 / 0 |
-  | E3 x1g-evidence n=3 | 0,36 (k2) | — | 0,99 (k2) | 3,0 / 2,9M | 2 / 1 |
-  | E1 c4g-evidence n=1 | **0,995 (k6)** | **0,99 (k3)** | sin datos | 2,1 / 3,0M | 0 / 3 |
+  | S3 x1g-select n=3 | 0.60 (k3) | 0.32 (k3) | — | 1.5 / 2.3M | 0 / 2 |
+  | S3c x1g-coord n=3 | 0.42 (k3) | 0.17 (k3) | — | 1.3 / 2.0M | 0 / 1 |
+  | R4 c4g-relay4 n=1 | 0.92 (k3) | 0.62 (k3) | — | 1.2 / 1.1M | 0 / 0 |
+  | E3 x1g-evidence n=3 | 0.36 (k2) | — | 0.99 (k2) | 3.0 / 2.9M | 2 / 1 |
+  | E1 c4g-evidence n=1 | **0.995 (k6)** | **0.99 (k3)** | no data | 2.1 / 3.0M | 0 / 3 |
 
-  - **La comunicación no aporta:** S3c − S3 = −0,18 en ieh y −0,15 en ieh2; pierde en las dos. Apenas usaron `finding` (4 veces en 6 runs); hubo 19 avisos de ayuda.
-  - **El enjambre no aporta:** el mejor n=3 (S3) queda 0,32 y 0,30 por debajo de R4, que además gasta menos tokens. Lo que se concluye es lo contrario: un agente solo con relevos gana al enjambre.
-  - **La puerta en el enjambre no aporta:** E3 en ieh/durable da 0,67 de media frente a 0,715 de x1g-guard (criba 3), y saca 0,03 en ieh.
-  - **En un solo agente, E1 supera a c4g-guard** (criba 3: ieh 0,73, k8) por +0,27 en ieh. En ieh2 saca 0,99, frente a 0,18 de c4n1 en la calibración. Cuesta 5–8 veces más tokens (los 3 runs de ieh2 llegan al tope sin llamar a `done`).
-  - **Atención, la causa no es la puerta:** E1 tiene **0 eventos `done_refused`**, así que la puerta nunca actuó. La otra diferencia con c4g-guard es `clock` (minutos que quedan, añadidos a cada resultado de herramienta). Hipótesis: el reloj hace que el agente siga trabajando porque ve que le sobra tiempo. Hace falta un brazo c4g-clock (solo el reloj) para separarlo.
-  - durable no tiene E1: los dos runs de E3 acabaron por timeout o presupuesto y swarmtest paró la campaña antes del relleno.
-- **Conclusión de la ronda A:** lo que más mueve la nota sigue siendo la persistencia de un solo agente (reloj o relevos), no la coordinación. Los brazos n=3 pierden incluso con el mismo prompt de partida.
+  - **Communication does not contribute:** S3c − S3 = −0.18 in ieh and −0.15 in ieh2; it loses on both. They barely used `finding` (4 times in 6 runs); there were 19 help notices.
+  - **The swarm does not contribute:** the best n=3 (S3) stays 0.32 and 0.30 below R4, which also spends fewer tokens. What follows is the opposite: a single agent with relays beats the swarm.
+  - **The gate in the swarm does not contribute:** E3 in ieh/durable gives a mean of 0.67 versus x1g-guard's 0.715 (Criba 3), and scores 0.03 in ieh.
+  - **In a single agent, E1 beats c4g-guard** (Criba 3: ieh 0.73, k8) by +0.27 in ieh. In ieh2 it scores 0.99, versus c4n1's 0.18 in calibration. It costs 5–8 times more tokens (the 3 ieh2 runs reach the cap without calling `done`).
+  - **Note, the cause is not the gate:** E1 has **0 `done_refused` events**, so the gate never acted. The other difference from c4g-guard is `clock` (minutes remaining, added to each tool result). Hypothesis: the clock keeps the agent working because it sees it has time to spare. A c4g-clock arm (clock only) is needed to separate it.
+  - durable has no E1: the two E3 runs ended by timeout or budget and swarmtest stopped the campaign before the filler.
+- **Conclusion of round A:** what moves the score most is still the persistence of a single agent (clock or relays), not coordination. The n=3 arms lose even with the same starting prompt.
 
-### B: varias tareas a la vez (lote)
+### B: several tasks at once (batch)
 
-- **Pregunta:** con M tareas a la vez y un presupuesto total fijo, ¿la coordinación mejora a agentes aislados con el mismo presupuesto?
-- **Brazos:**
-  - I (aislado): un agente fijo por tarea, sin tablón;
-  - R (reasignación): cada agente elige tarea con claim y, al terminar, pasa a otra sin resolver; sin mensajes;
-  - E (enjambre): R + tablón + `findings` + `helpAfter` + la línea de mensajes como datos.
-  - Nadie asigna tareas: en R y E las eligen los agentes.
-- **Lotes:**
-  - L1 con tareas existentes (ieh v1, durable, `ledger_reconciliation_hard`, ieh2). Son dispares, así que mide sobre todo la reasignación.
-  - L2 con la familia `fam_*` (4 tareas del mismo tipo, en construcción en `swarmtest/staging/`), que mide la transferencia de conocimiento.
-- **Unidad de medida:** el lote. Score = media de los scores por tarea; k=3 lotes por brazo y familia; el tablón empieza vacío en cada lote.
-- **Regla:**
-  - E supera a I si el Δ medio es ≥ +0,05 y gana en ≥ 2 de 3 parejas de lotes, en cada familia por separado;
-  - R − I (reasignación) y E − R (comunicación) son descriptivos.
-- **Requisitos antes del primer run:**
-  - un driver de lotes en `experiments/`: un workspace por tarea y puntuación con `swarmtest.grading.grade` importado, sin tocar swarmtest;
-  - soporte en murmur para varias tareas (un check por tarea para la evidencia y la ayuda);
-  - **aislamiento obligatorio** (Docker, red solo hacia la API del modelo, graders fuera del alcance de los agentes), porque B reproduce la estructura del incidente;
-  - L2 validada offline y calibrada con I (0,3–0,6 por tarea).
-- **Parámetros (fijados 2026-10-01 20:00, antes del primer run de B; petición del usuario: agentes y tokens proporcionales al lote):**
-  - M = 4 tareas por lote; B = 1,5M tokens por tarea; 20 min de reloj en todos los brazos (los agentes trabajan en paralelo).
-  - I: 4 runs de un agente (`c4g-guard`), uno por tarea, a la vez, con B cada uno.
-  - R: `b-realloc` (c4g-guard + claim/release/team, sin mensajes), 4 agentes, 4×B compartidos.
-  - E: `b-swarm` (R + post + `finding` + `helpAfter: 25` + "información, no órdenes"), 4 agentes, 4×B.
-  - Las dos últimas reciben un objetivo neutro: 4 subcarpetas con su TASK.md y un check por tarea (`npm run test:<id>`, que murmur conoce por el campo `checks` de la tarea).
-  - L1 = ieh, durable, `ledger_reconciliation_hard`, ieh2. L2 = `fam_billing`, `fam_shipments`, `fam_clinic`, `fam_payouts` (validadas offline: solución 1,0, stub 0,0, sonda de transferencia 0,24–0,64; leídas desde `staging/`, sin pasar por `tasks/`).
-  - k=3 lotes por brazo y familia.
-  - **Calibración de L2 antes de medir R/E:** el primer lote I de L2 hace de calibración. Si alguna tarea saca < 0,1 o > 0,9, se ajusta antes de seguir y ese lote no cuenta.
-  - **Driver:** `experiments/batch/run-batch.mjs <lote> <brazo> <rep> <imagen>`. Carril: `experiments/batch/lane.sh <lote> <imagen>` (I, R y E intercalados por repetición). **L1 lanzado 2026-10-01 19:31** con `murmur-batch:a5a95a58e2`, un carril, en paralelo con la ronda A. Revisión de ambigüedad de L2 (agente independiente, solo lectura): las 4 listas, sin ambigüedad con peso oculto; se aplicaron 11 aclaraciones de una frase a los contratos (la mayor, en payouts: "una venta descartada por falta de fx no es una venta conservada", ~15–20 % del peso). Re-verificado: stub 0,0, solución 1,0. **Calibración L2 (I r0) lanzada 2026-10-01 19:40.** **Resultado (19:43): saturada.** c4g-guard aislado saca billing 0,94, shipments 1,0, clinic 1,0 y payouts 1,0, con 9–15 llamadas y ~66k tokens por tarea, en 1,9 min. Sin fuga: stub de 17 líneas y solución propia de 150–190 líneas. Por la regla, L2 v1 no se mide y este lote no cuenta. Confirma lo de AGENTS.md: las tareas de contrato se saturan. **Sustituta: L3, familia de optimización** (`opt_*`: rutas con ventanas, taller, empaquetado, turnos; score = (naive − coste)/(naive − best_known), sin techo práctico), en construcción en `staging/` con un subagente. Encaja mejor con B: una tarea de optimización nunca está acabada, así que los agentes libres siempre pueden ayudar, y las técnicas de búsqueda se transfieren. Mismos parámetros que L1/L2, y se calibra igual (I r0; banda 0,1–0,9 por tarea). **L3 validada offline (20:15):** stub 0,0; greedy 0,26–0,37; solution/ 0,84–0,87 (lo verifiqué con `grade`); best_known sale del mismo SA con 10–100 veces más iteraciones, así que el margen real está entre 0,85 y 1,0 y un algoritmo mejor puede tocar 1,0. Sonda de transferencia: el esqueleto SA de rutas adaptado a empaquetado con ~30 líneas saca 0,89. Hay transferencia, y también riesgo de saturar cerca de 0,9. Límite de 10 s por instancia: sensible a la carga. **Calibración L3 (I r0) lanzada 20:16.** **Resultado:** routing 0,33, shop 0,81, packing 0,07, roster 0,89 (media 0,52; 0,25M tokens; 1,6 min; los 4 terminan con done). packing queda por debajo de 0,1, así que se aplica la regla. No es un defecto del contrato: la solución es factible en las 4 instancias y solo un 1–4 % mejor que naive (heurística de 64 líneas en 11 llamadas, y el agente para). Remedio de `hard-tasks.md` para tareas por debajo de banda (pasar información a `public_check`): en las 4 tareas, `npm run test` imprime también la puntuación de la instancia visible con la misma fórmula y un best_known propio. Pasa/falla no cambia. Este lote no cuenta; se recalibra con I r0 tras el cambio. **Recalibración (20:45):** routing 0,16, shop 0,35, packing 0,56, roster 0,89 (media 0,49; 0,25M; los 4 con done en 1,5 min). Las cuatro en banda, así que cuenta como I r0. Varianza alta entre las dos calibraciones (shop 0,81→0,35, packing 0,07→0,56), lo que justifica k=3. **Carril L3 lanzado 20:46** (`lane.sh L3`). **Fallo de infraestructura en L1 r2:** el contenedor de E r2 y el de durable en I r2 se mataron al llegar a 28 min sin resultado. Causa probable: el check final de la CLI (10 min) más carga alta; 20 + 10 pasaban del límite, y `runs/` solo se copiaba al terminar. Arreglo en el driver (21:50): `runSwarm` directo con 2 min de check final, `timeout` dentro del contenedor y copia de `runs/` siempre. Smoke S OK. E r2 e I r2 se repiten enteros (la decisión depende solo del fallo, no del score); los fallidos quedan en `*-infrafail`.
-- **Resultado L3 (k=3, regla aplicada 22:00):** I 0,526 (0,24M/lote), R 0,439 (0,48M), E 0,452 (0,51M). E − I = −0,07, pierde las 3 parejas: **E no supera a I en L3**. Descriptivo: R − I = −0,09, E − R = +0,01. **Hallazgo:** todos los brazos acaban en ~2 min con < 10 % del presupuesto. El check público pasa en cuanto se supera a naive, así que no hay avisos de ayuda ni motivo para reasignar: los mecanismos de B se activan con checks en rojo, y en optimización el check está verde enseguida. En routing, E saca 0,02–0,03 en 2 de 3 lotes (por mirar en las trazas: ¿salida infactible?).
-- **Resultado L1 (k=3, regla aplicada 22:40; r2 repetido tras el fallo de infraestructura):** I 0,419 (1,62M/lote), R 0,338 (1,49M), E 0,593 (4,94M). E − I por repetición: +0,41, +0,19, −0,08; media +0,17, gana 2 de 3. **E supera a I en L1.** Por tarea (E / I): ieh 0,73 / 0,78, ieh2 0,19 / 0,16, durable 0,64 / 0,53, ledger 0,81 / 0,22 (ledger es bimodal: persistir lleva a ~1,0). Descriptivo: R − I = −0,08; E − R = +0,26.
-- **Veredicto B por familia:** sí en L1 (tareas con check en rojo), no en L3 (optimización, check verde enseguida). **Mecanismo, según las trazas:** R y E reasignan igual (2–4 carpetas por agente). E se distingue por el tablón: ~5 avisos de ayuda y 10–18 posts por lote en L1, frente a 0–1 avisos en L3; `finding` 1–2 veces por lote. E gasta 3 veces más tokens que I con el mismo presupuesto disponible: los aislados paran y dejan el ~75 % sin usar. **Lectura:** la ventaja de E en L1 encaja con "el tablón mantiene a los agentes trabajando" (persistencia inducida por los demás), no con transferencia de conocimiento. El control que falta es I con persistencia propia (reloj), por lo que se vio en la ronda A.
-- **Dos trazas que matizan (22:50):**
-  - **routing en L3 E:** en r1 la solución es factible pero apenas mejora a naive (poco esfuerzo). En r2 la coordinación hace daño: robin escribe `solve.py`, lo libera, y 5 min después finch lo reescribe entero; el resultado es peor que naive en 2 instancias y pasa de 10 s en otra. Es el fallo de pisar el trabajo, ahora inducido por la reasignación. `writeGuard` no lo para porque es un fichero completo.
-  - **x1g-evidence en ieh (0,03 y 0,68):** 0 rechazos de la puerta y 0 `done`. Los 3 agentes agotan los 3M con un 39–47 % de llamadas al tablón (88 de trabajo en total). No es la trampa de la puerta: es sobrecoste de coordinación con agentes que no paran.
-- **Los tres mecanismos del incidente, contra los datos:**
-  - **ayuda al atascado:** solo se dispara con check en rojo (5 por lote en L1, 0–1 en L3, 19 en la ronda A); en L1 mantiene a los agentes trabajando;
-  - **reasignación:** ocurre igual en R y E, y por sí sola **resta** (R − I = −0,08 en L1 y −0,09 en L3), además de pisar trabajo;
-  - **transferencia de conocimiento:** no se observa (`finding` 1–2 veces por lote).
-- **Calibración del lenguaje:** "coord < select" es una estimación puntual negativa con k=3 y mucha varianza, no un efecto establecido; la regla falla igual. Lo robusto es que R4 > todos los n=3 en ieh (sus 3 runs ≥ 0,87). En L1, la repetición por infraestructura movió el resultado en contra de E (el I r2 fallido no cambia mucho; el E r2 repetido es su peor lote): E cumple la regla, pero la regla es débil (k=3, +0,17, 3 veces los tokens).
-- **Aislamiento real (más débil que lo pre-registrado; anotarlo al interpretar):**
-  - cada run va en Docker (`murmur-batch:<hash de src>`) y solo ve su carpeta, más una copia filtrada de las credenciales (solo `openai-codex`);
-  - los graders, las demás tareas y las demás ejecuciones quedan fuera de su alcance;
-  - la red **no** está restringida a la API del modelo;
-  - la puntuación se hace después, en el host, con `swarmtest.grading.grade`.
+- **Question:** with M tasks at once and a fixed total budget, does coordination improve on isolated agents with the same budget?
+- **Arms:**
+  - I (isolated): one fixed agent per task, no board;
+  - R (reassignment): each agent chooses a task with a claim and, when done, moves to another unsolved one; no messages;
+  - E (swarm): R + board + `findings` + `helpAfter` + the messages line as data.
+  - Nobody assigns tasks: in R and E the agents choose them.
+- **Batches:**
+  - L1 with existing tasks (ieh v1, durable, `ledger_reconciliation_hard`, ieh2). They are dissimilar, so it mostly measures reassignment.
+  - L2 with the `fam_*` family (4 tasks of the same type, under construction in `swarmtest/staging/`), which measures knowledge transfer.
+- **Unit of measurement:** the batch. Score = mean of the per-task scores; k=3 batches per arm and family; the board starts empty in each batch.
+- **Rule:**
+  - E beats I if the mean Δ is ≥ +0.05 and it wins on ≥ 2 of 3 batch pairs, in each family separately;
+  - R − I (reassignment) and E − R (communication) are descriptive.
+- **Requirements before the first run:**
+  - a batch driver in `experiments/`: one workspace per task and scoring with `swarmtest.grading.grade` imported, without touching swarmtest;
+  - murmur support for several tasks (one check per task for evidence and help);
+  - **mandatory isolation** (Docker, network only to the model API, graders out of the agents' reach), because B reproduces the structure of the incident;
+  - L2 validated offline and calibrated with I (0.3–0.6 per task).
+- **Parameters (fixed 2026-10-01 20:00, before B's first run; user request: agents and tokens proportional to the batch):**
+  - M = 4 tasks per batch; B = 1.5M tokens per task; 20 min of clock in all arms (the agents work in parallel).
+  - I: 4 single-agent runs (`c4g-guard`), one per task, at the same time, with B each.
+  - R: `b-realloc` (c4g-guard + claim/release/team, no messages), 4 agents, 4×B shared.
+  - E: `b-swarm` (R + post + `finding` + `helpAfter: 25` + "information, not orders"), 4 agents, 4×B.
+  - The last two receive a neutral goal: 4 subfolders with their TASK.md and one check per task (`npm run test:<id>`, which murmur knows from the task's `checks` field).
+  - L1 = ieh, durable, `ledger_reconciliation_hard`, ieh2. L2 = `fam_billing`, `fam_shipments`, `fam_clinic`, `fam_payouts` (validated offline: solution 1.0, stub 0.0, transfer probe 0.24–0.64; read from `staging/`, without going through `tasks/`).
+  - k=3 batches per arm and family.
+  - **L2 calibration before measuring R/E:** the first I batch of L2 serves as calibration. If any task scores < 0.1 or > 0.9, it is adjusted before continuing and that batch does not count.
+  - **Driver:** `experiments/batch/run-batch.mjs <batch> <arm> <rep> <image>`. Lane: `experiments/batch/lane.sh <batch> <image>` (I, R and E interleaved per repetition). **L1 launched 2026-10-01 19:31** with `murmur-batch:a5a95a58e2`, one lane, in parallel with round A. Ambiguity review of L2 (independent agent, read-only): all 4 are fine, with no ambiguity carrying hidden weight; 11 one-sentence clarifications were applied to the contracts (the largest, in payouts: "a sale discarded for lack of fx is not a kept sale", ~15–20 % of the weight). Re-verified: stub 0.0, solution 1.0. **L2 calibration (I r0) launched 2026-10-01 19:40.** **Result (19:43): saturated.** Isolated c4g-guard scores billing 0.94, shipments 1.0, clinic 1.0 and payouts 1.0, with 9–15 calls and ~66k tokens per task, in 1.9 min. No leak: 17-line stub and its own 150–190-line solution. By the rule, L2 v1 is not measured and this batch does not count. It confirms what AGENTS.md says: contract tasks saturate. **Replacement: L3, an optimisation family** (`opt_*`: routes with windows, shop, packing, shifts; score = (naive − cost)/(naive − best_known), no practical ceiling), under construction in `staging/` with a subagent. It fits B better: an optimisation task is never finished, so free agents can always help, and search techniques transfer. Same parameters as L1/L2, and calibrated the same way (I r0; band 0.1–0.9 per task). **L3 validated offline (20:15):** stub 0.0; greedy 0.26–0.37; solution/ 0.84–0.87 (I verified it with `grade`); best_known comes from the same SA with 10–100 times more iterations, so the real headroom is between 0.85 and 1.0 and a better algorithm can reach 1.0. Transfer probe: the routes SA skeleton adapted to packing with ~30 lines scores 0.89. There is transfer, and also a risk of saturating near 0.9. Limit of 10 s per instance: sensitive to load. **L3 calibration (I r0) launched 20:16.** **Result:** routing 0.33, shop 0.81, packing 0.07, roster 0.89 (mean 0.52; 0.25M tokens; 1.6 min; all 4 finish with done). packing falls below 0.1, so the rule is applied. It is not a contract defect: the solution is feasible on all 4 instances and only 1–4 % better than naive (a 64-line heuristic in 11 calls, and the agent stops). Remedy from `hard-tasks.md` for tasks below the band (move information into `public_check`): in all 4 tasks, `npm run test` also prints the score of the visible instance with the same formula and its own best_known. Pass/fail does not change. This batch does not count; it is recalibrated with I r0 after the change. **Recalibration (20:45):** routing 0.16, shop 0.35, packing 0.56, roster 0.89 (mean 0.49; 0.25M; all 4 with done in 1.5 min). All four in band, so it counts as I r0. High variance between the two calibrations (shop 0.81→0.35, packing 0.07→0.56), which justifies k=3. **L3 lane launched 20:46** (`lane.sh L3`). **Infrastructure failure in L1 r2:** the E r2 container and the durable one in I r2 were killed on reaching 28 min without a result. Probable cause: the CLI's final check (10 min) plus high load; 20 + 10 exceeded the limit, and `runs/` was only copied at the end. Fix in the driver (21:50): direct `runSwarm` with a 2 min final check, `timeout` inside the container and `runs/` always copied. Smoke S OK. E r2 and I r2 are repeated in full (the decision depends only on the failure, not on the score); the failed ones stay in `*-infrafail`.
+- **L3 result (k=3, rule applied 22:00):** I 0.526 (0.24M/batch), R 0.439 (0.48M), E 0.452 (0.51M). E − I = −0.07, loses all 3 pairs: **E does not beat I in L3**. Descriptive: R − I = −0.09, E − R = +0.01. **Finding:** all arms finish in ~2 min with < 10 % of the budget. The public check passes as soon as naive is exceeded, so there are no help notices and no reason to reassign: B's mechanisms activate with red checks, and in optimisation the check is green right away. In routing, E scores 0.02–0.03 in 2 of 3 batches (to look at in the traces: infeasible output?).
+- **L1 result (k=3, rule applied 22:40; r2 repeated after the infrastructure failure):** I 0.419 (1.62M/batch), R 0.338 (1.49M), E 0.593 (4.94M). E − I per repetition: +0.41, +0.19, −0.08; mean +0.17, wins 2 of 3. **E beats I in L1.** Per task (E / I): ieh 0.73 / 0.78, ieh2 0.19 / 0.16, durable 0.64 / 0.53, ledger 0.81 / 0.22 (ledger is bimodal: persisting leads to ~1.0). Descriptive: R − I = −0.08; E − R = +0.26.
+- **Verdict B by family:** yes in L1 (tasks with a red check), no in L3 (optimisation, check green right away). **Mechanism, according to the traces:** R and E reassign equally (2–4 folders per agent). E is distinguished by the board: ~5 help notices and 10–18 posts per batch in L1, versus 0–1 notices in L3; `finding` 1–2 times per batch. E spends 3 times more tokens than I with the same budget available: the isolated ones stop and leave ~75 % unused. **Reading:** E's advantage in L1 fits "the board keeps agents working" (persistence induced by the others), not knowledge transfer. The missing control is I with its own persistence (clock), given what was seen in round A.
+- **Two traces that qualify this (22:50):**
+  - **routing in L3 E:** in r1 the solution is feasible but barely improves on naive (little effort). In r2 coordination does harm: robin writes `solve.py`, releases it, and 5 min later finch rewrites it entirely; the result is worse than naive on 2 instances and exceeds 10 s on another. It is the failure of overwriting work, now induced by reassignment. `writeGuard` does not stop it because it is a complete file.
+  - **x1g-evidence in ieh (0.03 and 0.68):** 0 gate rejections and 0 `done`. The 3 agents use up the 3M with 39–47 % of calls on the board (88 work calls in total). It is not the gate's trap: it is coordination overhead with agents that do not stop.
+- **The three mechanisms of the incident, against the data:**
+  - **help for the stuck:** it only fires with a red check (5 per batch in L1, 0–1 in L3, 19 in round A); in L1 it keeps agents working;
+  - **reassignment:** it happens equally in R and E, and by itself it **subtracts** (R − I = −0.08 in L1 and −0.09 in L3), besides overwriting work;
+  - **knowledge transfer:** not observed (`finding` 1–2 times per batch).
+- **Calibration of the wording:** "coord < select" is a negative point estimate with k=3 and a lot of variance, not an established effect; the rule fails all the same. What is robust is that R4 > all the n=3 arms in ieh (its 3 runs ≥ 0.87). In L1, the repetition due to infrastructure moved the result against E (the failed I r2 does not change much; the repeated E r2 is its worst batch): E meets the rule, but the rule is weak (k=3, +0.17, 3 times the tokens).
+- **Real isolation (weaker than pre-registered; note it when interpreting):**
+  - each run goes in Docker (`murmur-batch:<src hash>`) and only sees its folder, plus a filtered copy of the credentials (`openai-codex` only);
+  - the graders, the other tasks and the other executions are out of its reach;
+  - the network is **not** restricted to the model API;
+  - scoring is done afterwards, on the host, with `swarmtest.grading.grade`.
 
-## Registro de campañas
+## Campaign registry
 
-| Fecha | Fase | Brazos | Tareas × k | Tokens | Resultado | Decisión |
+| Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
 |---|---|---|---|---:|---|---|
-| 2026-09-30 | smoke adapter | murmur n=3, n=1 | bug_fixing × 1 | 148k | 1,0 / 1,0 (grader oculto) | adapter válido |
-| 2026-09-30 | F0 smoke | relay n=2 (wake forzado) | relay × 1 | 37k | all_done, check OK | ruta idle→wake verificada |
-| 2026-09-30 | F0 smoke | quiet n=1 | hello × 1 | 1k | quiescent | fin por quiescencia verificado |
-| 2026-09-30 | F0 smoke | swarmtest murmur n=1 ± no-messaging | bug_fixing × 1 | 35k | 1,0 / 1,0 | variantes y hash de perfil OK |
-| 2026-09-30 | F0 smoke | autotuner murmur n=1 (Docker) | toy_001 × 1 | 17k | passed, patch limpio | adapter OK; toy da 10 s por tarea, usar timeoutMs propio |
-| 2026-09-30 | F1 (parada) | pi n=1, murmur n=1, n=3, n=3 sin mensajes | 8 × 2 (6/64 hechos) | ~0,5M | bug_fixing satura (1,0 todos); Pi durable 0,48 | parada: demasiados runs para buscar efectos gordos |
-| 2026-09-30 | F1a criba (`20260930T185151Z-58c677b9`) | pi n=1 vs murmur n=3 | 3 workflow × 1 | 2,73M | durable 0,05 → 0,99; incremental 0,83 → 0,95; complex 0,885 = 0,885 (mismos 3 casos fallidos); delta +0,35, IC90 [+0,04, +0,66]; tokens ×7,8 | señal por la regla (durable ≥ 0,85). Pi durable 0,05 = paró tras 9 llamadas sin tocar engine.py. En durable el prompt dice "The solo Pi run implements all modules itself": murmur lo leyó como un implementador + dos revisores |
-| 2026-09-30 | F1b (`20260930T193821Z-04146f7e`) | pi n=1, murmur n=3, murmur n=3 sin mensajes | 3 workflow × 1 | 3,87M | durable 0,44 / 0,59 / 0,65; incremental 0,918 / 0,962 / 0,887; complex 0,885 los tres (mismos 3 casos, igual que F1a: techo o contrato ambiguo). F1a+F1b pi vs murmur n=3: delta +0,21, IC90 [+0,03, +0,39], 2 ganadas 1 empate, tokens ×8,4. n3 vs sin mensajes: +0,006 [−0,04, +0,05] | el 0,987 de durable no se repite; el tablero no muestra efecto con k=1; complex no discrimina: fuera de las cribas. Transcripciones completas desde esta campaña |
-| 2026-09-30 | F1c (`20260930T211945Z-1ede12d2`, parada en 2/8) | pi n=1, murmur n=3 c1/c2/c3 | 2 × 1 | 1,59M | incremental: Pi 0,805; c3 0,962 cortado por presupuesto (1,5M, 1,33M de cache read; 41 steers, 4 revividos) | swarmtest para la campaña si un run acaba por presupuesto; se sube a 3M y se encolan steers en modo `all` |
-| 2026-10-01 | calibración (`20261001T064603Z-8fda3442`) | pi n=1, murmur n=3 | 4 tareas nuevas × 1 | ~0,7M | constrained_planning, data_analysis, feature_implementation, information_extraction: 1,0 en todo (Pi 10–20k tokens, 20–30 s) | saturadas. En swarmtest solo `durable` discrimina |
-| 2026-10-01 | DeepSWE (lectura de trazas, sin coste) | — | — | 0 | Pi 0/12: harness OK, para tras 4–15 turnos declarando trabajo incompleto; reward binario; ArcSwarm 9/12 bloqueado en arranque | sin señal hoy; usable con crédito parcial + adapter murmur para pier |
-| 2026-10-01 | calibración `data_analysis_hard` v1 (`20261001T075538Z-291d75ce`) | pi n=1 | 1 × 3 | 0,43M | 0,0 / 1,0 / 0,937 (el 0,0: Pi se rinde sin escribir salida) | demasiado fácil cuando Pi persiste → v2 con familias nuevas |
-| 2026-10-01 | calibración `feature_implementation_hard` v1 (`20261001T080642Z-ccca7e96`) | pi n=1 | 1 × 3 | 0,39M | 0,821 / 0,875 / 0,903 (media 0,866); falla sobre todo fuzz y replay (interacciones) | demasiado fácil → v2 con operaciones nuevas que interactúan y más peso en escenarios largos |
-| 2026-10-01 | calibración `data_analysis_hard` v2 (`20261001T081433Z-f7132825`) | pi n=1 | 1 × 3 | 0,47M | 0,04 / 1,0 / 0,413 (media 0,48). Los dos bajos: Pi se rinde tras 13 y 6 llamadas ("I wasn't able to complete", "the report is incomplete"); cuando persiste saca 1,0 | en banda por la media, pero bimodal: mide persistencia ante volumen, no razonamiento difícil; techo 1,0 para un sistema que persiste |
-| 2026-10-01 | calibración `information_extraction_hard` v1 (`20261001T082033Z-ee8d2860`) | pi n=1 | 1 × 3 | 1,16M | 0,679 / 0,296 / 0,765 (media 0,58), continuo; Pi para tras 12–20 llamadas con el check público aún en rojo | calibrada |
-| 2026-10-01 | calibración `constrained_planning_hard` v1 (`20261001T082842Z-5001af2c`) | pi n=1 | 1 × 3 | 0,29M | 0,391 / 0,361 / 0,202 (media 0,32), continuo; Pi para tras 8–11 llamadas sin plan factible y con el check público en rojo | calibrada (parte baja de la banda) |
-| 2026-10-01 | calibración `feature_implementation_hard` v2 (`20261001T084457Z-bf8603a4`) | pi n=1 | 1 × 3 | 0,46M | 0,096 / 0,268 / 0,055 (media 0,14); Pi se rinde tras 10–16 llamadas ("not complete") con un contrato de 28 KB | demasiado difícil → v3: quitar unidades y commit parcial, mantener traslados y recalls |
-| 2026-10-01 | calibración `feature_implementation_hard` v3 (`20261001T085954Z-91efd0c5`) | pi n=1 | 1 × 3 | 0,45M | 0,227 / 0,405 / 0,0 (media 0,21); contrato 25 KB; Pi se rinde tras 11–13 llamadas | justo bajo la banda → v4 sin recalls (~21 KB) |
-| 2026-10-01 | calibración `feature_implementation_hard` v4 (`20261001T091411Z-ba74e288`) | pi n=1 | 1 × 3 | 0,51M | 0,099 / 0,076 / 0,682 (media 0,29); contrato 21,9 KB; dos runs se rinden tras 13–14 llamadas con el paquete roto, uno persiste | en banda por poco, bimodal como data_analysis_hard |
-| 2026-10-01 | criba 1 (`20261001T101927Z-f44c2308` → `20261001T130110Z-80b74b2c`, semilla 20261006; un brazo + Pi por campaña desde las 12:46, 3 carriles desde las 13:47) | pi n=1 (k=11–13 por tarea); murmur n=3 por defecto, nomsg, c1–c6, x1–x4; c4 n=1 | 3 tareas (ieh, cph, durable) × 1 | 65,2M | Δ medio frente a la media de Pi (ieh 0,26, cph 0,35, durable 0,50): c5 +0,43 (2,46M), c1 +0,42 (2,04M), x1 +0,39 (1,37M), c3 +0,37 (2,56M), c2 +0,27, c4n1 +0,25 (0,36M), c4 +0,22, x4 +0,21 (0,91M), nomsg +0,21 (0,51M), x3 +0,15, por defecto +0,10 (1,19M), c6 +0,06, x2 −0,08. 10 de 39 runs de murmur cortados a 3M | la regla elige c5 y c1 para k=2; x1 está empatado dentro del ruido y es el más barato de los cuatro primeros; c4n1 es el control de atribución imprescindible. Pendiente de OK del usuario |
-| 2026-10-01 | criba 2, réplica (`20261001T141956Z-895b323f` → `20261001T144902Z-3b8cf33c`, semilla 20261007, 3 carriles; 9 campañas fallaron al arrancar por una tarea a medio construir en `tasks/` y se relanzaron) | c1, x1 y c5 (n=3), cada uno con c4n1 | ieh, cph, durable (k=2 con la criba 1) + fih v4 × 1 | 26,0M | Δ frente a c4n1: c5 +0,22 (gana 4 de 4), c1 +0,09 (2 de 4), x1 −0,04 (1 de 4). c1 y x1 sacan 0,00 en ieh por un fichero roto | pasa c5. Siguiente paso: mecanismos contra el fichero roto (aislamiento frente a `writeGuard`) y más barato que c5, sobre ieh2 cuando esté calibrada |
-| 2026-10-01 | calibración `information_extraction_hard2` v1 (`20261001T145854Z-eaf8ca35` Pi, `20261001T145858Z-d9c26c9f` c4n1) | pi n=1, c4n1 | 1 × 3 | ~2,3M | Pi 0,00 / 0,11 / 0,15 (media 0,09); c4n1 0,00 / 0,29 / 0,26 (media 0,18). Nadie suma ni un punto en las familias del ledger y ni siquiera se llega al nivel de ieh v1. El 0,00 de c4n1 es una sobrescritura accidental. Todos paran a los 3–6 min de 20 admitiendo que no han terminado. Contrato de 31,7 KB y solución de 34 KB en un fichero | demasiado difícil por volumen, no por razonamiento (lo mismo que fih v2–v4). Por debajo de la banda de c4n1 (0,3–0,6) |
-| 2026-10-01 | calibración `ledger_reconciliation_hard` v1 (`20261001T154556Z-815af3aa` Pi, `20261001T154559Z-2d624144` c4n1) | pi n=1, c4n1 | 1 × 3 | ~1,4M | Pi 0,88 / 0,22 / 0,26 (media 0,45); c4n1 1,00 / 0,32 / 0,99 (media 0,77). Bimodal: quien insiste llega a ~1,0 y quien para pronto se queda en ~0,25 | por encima de la banda de c4n1 (0,3–0,6). Sirve para separar Pi de un agente persistente, no para ordenar candidatos fuertes. Mismo patrón que el resto: las tareas de contrato se saturan en cuanto se insiste. cph es la única con margen abierto (meseta en 0,37 por factibilidad y escalones de calidad frente a la referencia) |
-| 2026-10-01 | criba 3, mecanismos contra el fichero roto (15 campañas `20261001T153217Z-2833b805` → `20261001T165207Z-cc8a515c`, semilla 20261012; agrupadas, luego por brazo, y recarga de 1 repetición) | c4g-guard n=1 (control, k=3–10 por tarea, media con todos sus runs); x1g-guard, x1g-lock, x1g-stale, x1g-parts y c5 (n=3) | ieh v1, fih v4 y durable × 2 (x1g-guard k=3 en ieh y fih) | 59,1M | media de las 3 tareas: c5 0,91 (2,69M), lock 0,84 (1,39M), guard 0,81 (1,52M), stale 0,79 (1,31M), parts 0,69 (0,98M; 0,00 en ieh), c4g 0,66 (0,37M). 5 runs cortados a 3M (c5 ×3: 2 en ieh y 1 en durable; guard en fih; stale en ieh) | candidatos: c5, guard, lock y stale; por score/M, lock = stale (0,60) > guard (0,53) > c5 (0,34). Ningún mecanismo supera a guard en +0,05, así que A, B y C no aportan por la regla. La base de la ronda 4 queda pendiente del OK del usuario |
-| 2026-10-01 | smoke ronda 5 (`runs/20261001-170848-f6f1`, `-0eda`) | murmur n=2 con `findings` + `helpAfter: 3` (guionizada); trio n=3 por defecto | smoke × 1, trio × 1 | 35k + 155k | `finding` publica `[exit 0]` con la salida real; ayuda a las 3 llamadas sin check y al hacer `done` sin pase, entregada por attach; trio pasa con all_done | palancas OK; predicado del check: 21/21 casos (falsos verdes reales, envoltorios `time`/`timeout`/`env`/`VAR=`, check con comillas → contención exacta) |
-| 2026-10-01 | smoke ronda 5b (`runs/20261001-171406-ebef`) | murmur n=2, el check ejecutado vía `finding` | smoke × 1 | 34k | sin avisos de ayuda: un check verde vía `finding` cuenta como ejecución del check | arreglo verificado (antes, x1g-coord habría pedido ayuda para agentes en verde) |
-| 2026-10-01 | smoke ronda 5B (lote S = bug_fixing + data_analysis, Docker `murmur-batch:a5a95a58e2`) | b-swarm (4→2 agentes), c4g-guard × 2 aislados; guionizada de `checks` con `helpAfter: 3` | 1 lote E, 1 lote I, 1 guionizada | 111k + 51k + 34k | E: 1,0/1,0, reparto por claim, quiescent; I: 1,0/1,0 en paralelo; aviso de ayuda con la parte (`test -f part_a.txt`) | driver y `checks` OK. Arreglo: `cpSync` de Node falla en montajes de macOS → el run va en el disco del contenedor y `runs/` se copia de vuelta |
-| 2026-10-01 | ronda 5A (22 campañas `20261001T172348Z-2db1b717` → `20261001T182345Z-f27c7ed5`, semilla 20261015, código `46e756b`) | x1g-select, x1g-coord, x1g-evidence (n=3); c4g-relay4, c4g-evidence (n=1) | ieh, ieh2 × 3; ieh, durable × 2 | 61,7M | coord < select (−0,15/−0,18); R4 > mejor n=3 (+0,3); E1 c4g-evidence 0,995 ieh (k6) / 0,99 ieh2 (k3) con 0 `done_refused` (¿el reloj?) | comunicación y enjambre no aportan; persistencia de un solo agente sí; probar c4g-clock |
-| 2026-10-01 | ronda 5B (Docker `murmur-batch:a5a95a58e2`, lotes de 4 tareas, 4 agentes, 4×1,5M) | I (c4g-guard ×4 aislados), R (b-realloc), E (b-swarm) | L1 × 3, L3 × 3 (+ calibraciones de L2, saturada, y L3) | 28,3M | L1: E 0,593 / I 0,419 / R 0,338 (E gana 2/3); L3: I 0,526 / E 0,452 / R 0,439 (todos paran a los ~2 min) | E supera a I solo donde el check está en rojo; falta el control I + reloj |
+| 2026-09-30 | smoke adapter | murmur n=3, n=1 | bug_fixing × 1 | 148k | 1.0 / 1.0 (hidden grader) | adapter valid |
+| 2026-09-30 | F0 smoke | relay n=2 (forced wake) | relay × 1 | 37k | all_done, check OK | idle→wake path verified |
+| 2026-09-30 | F0 smoke | quiet n=1 | hello × 1 | 1k | quiescent | end by quiescence verified |
+| 2026-09-30 | F0 smoke | swarmtest murmur n=1 ± no-messaging | bug_fixing × 1 | 35k | 1.0 / 1.0 | variants and profile hash OK |
+| 2026-09-30 | F0 smoke | autotuner murmur n=1 (Docker) | toy_001 × 1 | 17k | passed, clean patch | adapter OK; toy gives 10 s per task, use own timeoutMs |
+| 2026-09-30 | F1 (stopped) | pi n=1, murmur n=1, n=3, n=3 without messages | 8 × 2 (6/64 done) | ~0.5M | bug_fixing saturates (1.0 for all); Pi durable 0.48 | stopped: too many runs to look for big effects |
+| 2026-09-30 | F1a screen (`20260930T185151Z-58c677b9`) | pi n=1 vs murmur n=3 | 3 workflow × 1 | 2.73M | durable 0.05 → 0.99; incremental 0.83 → 0.95; complex 0.885 = 0.885 (same 3 failed cases); delta +0.35, CI90 [+0.04, +0.66]; tokens ×7.8 | signal by the rule (durable ≥ 0.85). Pi durable 0.05 = stopped after 9 calls without touching engine.py. In durable the prompt says "The solo Pi run implements all modules itself": murmur read it as one implementer + two reviewers |
+| 2026-09-30 | F1b (`20260930T193821Z-04146f7e`) | pi n=1, murmur n=3, murmur n=3 without messages | 3 workflow × 1 | 3.87M | durable 0.44 / 0.59 / 0.65; incremental 0.918 / 0.962 / 0.887; complex 0.885 all three (same 3 cases, as in F1a: ceiling or ambiguous contract). F1a+F1b pi vs murmur n=3: delta +0.21, CI90 [+0.03, +0.39], 2 won 1 tie, tokens ×8.4. n3 vs without messages: +0.006 [−0.04, +0.05] | the 0.987 in durable does not repeat; the board shows no effect with k=1; complex does not discriminate: out of the screens. Full transcripts from this campaign on |
+| 2026-09-30 | F1c (`20260930T211945Z-1ede12d2`, stopped at 2/8) | pi n=1, murmur n=3 c1/c2/c3 | 2 × 1 | 1.59M | incremental: Pi 0.805; c3 0.962 cut by budget (1.5M, 1.33M of cache read; 41 steers, 4 revived) | swarmtest stops the campaign if a run ends by budget; raised to 3M and steers are queued in `all` mode |
+| 2026-10-01 | calibration (`20261001T064603Z-8fda3442`) | pi n=1, murmur n=3 | 4 new tasks × 1 | ~0.7M | constrained_planning, data_analysis, feature_implementation, information_extraction: 1.0 on everything (Pi 10–20k tokens, 20–30 s) | saturated. In swarmtest only `durable` discriminates |
+| 2026-10-01 | DeepSWE (trace reading, no cost) | — | — | 0 | Pi 0/12: harness OK, stops after 4–15 turns declaring work incomplete; binary reward; ArcSwarm 9/12 blocked at startup | no signal today; usable with partial credit + murmur adapter for pier |
+| 2026-10-01 | calibration `data_analysis_hard` v1 (`20261001T075538Z-291d75ce`) | pi n=1 | 1 × 3 | 0.43M | 0.0 / 1.0 / 0.937 (the 0.0: Pi gives up without writing output) | too easy when Pi persists → v2 with new families |
+| 2026-10-01 | calibration `feature_implementation_hard` v1 (`20261001T080642Z-ccca7e96`) | pi n=1 | 1 × 3 | 0.39M | 0.821 / 0.875 / 0.903 (mean 0.866); fails mostly fuzz and replay (interactions) | too easy → v2 with new interacting operations and more weight on long scenarios |
+| 2026-10-01 | calibration `data_analysis_hard` v2 (`20261001T081433Z-f7132825`) | pi n=1 | 1 × 3 | 0.47M | 0.04 / 1.0 / 0.413 (mean 0.48). The two low ones: Pi gives up after 13 and 6 calls ("I wasn't able to complete", "the report is incomplete"); when it persists it scores 1.0 | in band by the mean, but bimodal: it measures persistence in the face of volume, not hard reasoning; ceiling 1.0 for a system that persists |
+| 2026-10-01 | calibration `information_extraction_hard` v1 (`20261001T082033Z-ee8d2860`) | pi n=1 | 1 × 3 | 1.16M | 0.679 / 0.296 / 0.765 (mean 0.58), continuous; Pi stops after 12–20 calls with the public check still red | calibrated |
+| 2026-10-01 | calibration `constrained_planning_hard` v1 (`20261001T082842Z-5001af2c`) | pi n=1 | 1 × 3 | 0.29M | 0.391 / 0.361 / 0.202 (mean 0.32), continuous; Pi stops after 8–11 calls without a feasible plan and with the public check red | calibrated (lower part of the band) |
+| 2026-10-01 | calibration `feature_implementation_hard` v2 (`20261001T084457Z-bf8603a4`) | pi n=1 | 1 × 3 | 0.46M | 0.096 / 0.268 / 0.055 (mean 0.14); Pi gives up after 10–16 calls ("not complete") with a 28 KB contract | too hard → v3: remove units and partial commit, keep transfers and recalls |
+| 2026-10-01 | calibration `feature_implementation_hard` v3 (`20261001T085954Z-91efd0c5`) | pi n=1 | 1 × 3 | 0.45M | 0.227 / 0.405 / 0.0 (mean 0.21); 25 KB contract; Pi gives up after 11–13 calls | just below the band → v4 without recalls (~21 KB) |
+| 2026-10-01 | calibration `feature_implementation_hard` v4 (`20261001T091411Z-ba74e288`) | pi n=1 | 1 × 3 | 0.51M | 0.099 / 0.076 / 0.682 (mean 0.29); 21.9 KB contract; two runs give up after 13–14 calls with the package broken, one persists | barely in band, bimodal like data_analysis_hard |
+| 2026-10-01 | criba 1 (`20261001T101927Z-f44c2308` → `20261001T130110Z-80b74b2c`, seed 20261006; one arm + Pi per campaign from 12:46, 3 lanes from 13:47) | pi n=1 (k=11–13 per task); murmur n=3 default, nomsg, c1–c6, x1–x4; c4 n=1 | 3 tasks (ieh, cph, durable) × 1 | 65.2M | mean Δ against the Pi mean (ieh 0.26, cph 0.35, durable 0.50): c5 +0.43 (2.46M), c1 +0.42 (2.04M), x1 +0.39 (1.37M), c3 +0.37 (2.56M), c2 +0.27, c4n1 +0.25 (0.36M), c4 +0.22, x4 +0.21 (0.91M), nomsg +0.21 (0.51M), x3 +0.15, default +0.10 (1.19M), c6 +0.06, x2 −0.08. 10 of 39 murmur runs cut at 3M | the rule picks c5 and c1 for k=2; x1 is tied within the noise and is the cheapest of the first four; c4n1 is the essential attribution control. Pending the user's OK |
+| 2026-10-01 | criba 2, replication (`20261001T141956Z-895b323f` → `20261001T144902Z-3b8cf33c`, seed 20261007, 3 lanes; 9 campaigns failed at startup because of a half-built task in `tasks/` and were relaunched) | c1, x1 and c5 (n=3), each with c4n1 | ieh, cph, durable (k=2 with criba 1) + fih v4 × 1 | 26.0M | Δ against c4n1: c5 +0.22 (wins 4 of 4), c1 +0.09 (2 of 4), x1 −0.04 (1 of 4). c1 and x1 score 0.00 in ieh because of a broken file | c5 passes. Next step: mechanisms against the broken file (isolation versus `writeGuard`) and cheaper than c5, on ieh2 when it is calibrated |
+| 2026-10-01 | calibration `information_extraction_hard2` v1 (`20261001T145854Z-eaf8ca35` Pi, `20261001T145858Z-d9c26c9f` c4n1) | pi n=1, c4n1 | 1 × 3 | ~2.3M | Pi 0.00 / 0.11 / 0.15 (mean 0.09); c4n1 0.00 / 0.29 / 0.26 (mean 0.18). Nobody scores even a point on the ledger families and the ieh v1 level is not even reached. The 0.00 of c4n1 is an accidental overwrite. Everyone stops at 3–6 min out of 20 admitting they have not finished. 31.7 KB contract and 34 KB solution in one file | too hard because of volume, not reasoning (same as fih v2–v4). Below c4n1's band (0.3–0.6) |
+| 2026-10-01 | calibration `ledger_reconciliation_hard` v1 (`20261001T154556Z-815af3aa` Pi, `20261001T154559Z-2d624144` c4n1) | pi n=1, c4n1 | 1 × 3 | ~1.4M | Pi 0.88 / 0.22 / 0.26 (mean 0.45); c4n1 1.00 / 0.32 / 0.99 (mean 0.77). Bimodal: whoever insists reaches ~1.0 and whoever stops early stays at ~0.25 | above c4n1's band (0.3–0.6). Useful to separate Pi from a persistent agent, not to order strong candidates. Same pattern as the rest: contract tasks saturate as soon as one insists. cph is the only one with open headroom (plateau at 0.37 due to feasibility and quality steps against the reference) |
+| 2026-10-01 | criba 3, mechanisms against the broken file (15 campaigns `20261001T153217Z-2833b805` → `20261001T165207Z-cc8a515c`, seed 20261012; grouped, then per arm, and 1-repetition reload) | c4g-guard n=1 (control, k=3–10 per task, mean with all its runs); x1g-guard, x1g-lock, x1g-stale, x1g-parts and c5 (n=3) | ieh v1, fih v4 and durable × 2 (x1g-guard k=3 in ieh and fih) | 59.1M | mean of the 3 tasks: c5 0.91 (2.69M), lock 0.84 (1.39M), guard 0.81 (1.52M), stale 0.79 (1.31M), parts 0.69 (0.98M; 0.00 in ieh), c4g 0.66 (0.37M). 5 runs cut at 3M (c5 ×3: 2 in ieh and 1 in durable; guard in fih; stale in ieh) | candidates: c5, guard, lock and stale; by score/M, lock = stale (0.60) > guard (0.53) > c5 (0.34). No mechanism beats guard by +0.05, so A, B and C do not contribute by the rule. The basis for round 4 is pending the user's OK |
+| 2026-10-01 | smoke round 5 (`runs/20261001-170848-f6f1`, `-0eda`) | murmur n=2 with `findings` + `helpAfter: 3` (scripted); trio n=3 default | smoke × 1, trio × 1 | 35k + 155k | `finding` posts `[exit 0]` with the real output; help at 3 calls without a check and when doing `done` without a pass, delivered by attach; trio passes with all_done | levers OK; check predicate: 21/21 cases (real false greens, `time`/`timeout`/`env`/`VAR=` wrappers, check with quotes → exact containment) |
+| 2026-10-01 | smoke round 5b (`runs/20261001-171406-ebef`) | murmur n=2, the check run via `finding` | smoke × 1 | 34k | no help notices: a green check via `finding` counts as running the check | fix verified (before, x1g-coord would have asked for help for agents that were green) |
+| 2026-10-01 | smoke round 5B (batch S = bug_fixing + data_analysis, Docker `murmur-batch:a5a95a58e2`) | b-swarm (4→2 agents), c4g-guard × 2 isolated; scripted from `checks` with `helpAfter: 3` | 1 batch E, 1 batch I, 1 scripted | 111k + 51k + 34k | E: 1.0/1.0, split by claim, quiescent; I: 1.0/1.0 in parallel; help notice with the part (`test -f part_a.txt`) | driver and `checks` OK. Fix: Node's `cpSync` fails on macOS mounts → the run goes on the container's disk and `runs/` is copied back |
+| 2026-10-01 | round 5A (22 campaigns `20261001T172348Z-2db1b717` → `20261001T182345Z-f27c7ed5`, seed 20261015, code `46e756b`) | x1g-select, x1g-coord, x1g-evidence (n=3); c4g-relay4, c4g-evidence (n=1) | ieh, ieh2 × 3; ieh, durable × 2 | 61.7M | coord < select (−0.15/−0.18); R4 > best n=3 (+0.3); E1 c4g-evidence 0.995 ieh (k6) / 0.99 ieh2 (k3) with 0 `done_refused` (the clock?) | communication and swarm do not contribute; single-agent persistence does; try c4g-clock |
+| 2026-10-01 | round 5B (Docker `murmur-batch:a5a95a58e2`, batches of 4 tasks, 4 agents, 4×1.5M) | I (c4g-guard ×4 isolated), R (b-realloc), E (b-swarm) | L1 × 3, L3 × 3 (+ calibrations of L2, saturated, and L3) | 28.3M | L1: E 0.593 / I 0.419 / R 0.338 (E wins 2/3); L3: I 0.526 / E 0.452 / R 0.439 (all stop at ~2 min) | E beats I only where the check is red; the I + clock control is missing |
