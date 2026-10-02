@@ -34,6 +34,7 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 
 ## Running experiments
 
+- **Start from the current evidence:** read the TL;DR of `docs/research.md` before designing a round. Results and findings belong there and in `experiments/plan.md`, never in this file, which holds only stable working rules.
 - **Pre-register before measuring:** write the round's question, arms, tasks, k, budget and decision rule in `experiments/plan.md` before launching. Afterwards, apply the rule as written, add a row to the campaign registry, and write findings from the transcripts.
 - **One run orders nothing.** Use k≥2 and compare per-task means. Pi's own noise on one task spans 0.0–0.75.
 - **A run that hits its token cap stops the whole swarmtest campaign** (no resume). Put arms that may hit the cap in their own campaign, or use the lane drivers' `--per-arm` second pass (`experiments/criba3-lanes.mjs`). The per-run cap is 3M tokens (`token_budget`), and cache reads count toward it.
@@ -56,13 +57,6 @@ This repository is shown primarily as research. Every experiment must leave a co
   - **Index and README:** add the round's row to the index in `experiments/README.md`. Update "Findings so far" in `README.md` when the headline changes.
   - **Raw transcripts:** after a set of rounds, pack the new raw runs into a new `archive/murmur-raw-runs-<date>.tar.xz`, agents' data only. Search for the real credentials and for token patterns first, then record the contents, size and SHA-256 in `archive/MANIFEST.md`. The archive itself stays out of git.
 - **Check before committing:** run `git add -n experiments` and confirm that every new file you meant to keep is tracked. `.gitignore` only lets through the notebook, configs, drivers, traces, reports, rows and batch results, so a new kind of file may need a new `!` rule. Keep logs, locks, `tmp/` and copied workspaces out.
-
-## What the data says so far (details in `experiments/plan.md`)
-
-- A single agent stops early. Work done after the first green check is the best predictor of score (Spearman 0.72–0.80 on multi-file and planning tasks). A single agent with short lessons (c4n1) already beats Pi by about +0.25 at ~0.3M tokens.
-- On single-file tasks, swarm arms fail by breaking the shared file: a chunked `write` overwrites it, or a run is cut mid-edit. Everyone then gives up or yields ("X owns the file, I'll review").
-- Over 85% of tokens are cache reads, so cost ≈ turns × context length. Context per turn triples during a run, and 33–62% of tokens go to coordination-only turns.
-- The best arms saturate the contract-style tasks near 1.0. Tasks made harder by sheer volume make everyone give up. Ranking strong arms needs tasks with open-ended headroom (optimisation objectives).
 
 ## Delegation: protect the main context
 
