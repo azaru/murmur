@@ -326,7 +326,7 @@ Panel V, ospec_brown (6M and 30 min): TI scores 0.416, against C1 0.448 (round 8
 | Smaller contexts let a swarm cover a large project on the same tokens | 9 (V) | **Refuted as built**: contexts were 2–3x smaller, but more calls, board turns and duplicated spec reading consumed the saving |
 | Parallel attempts escape a bimodal single agent | 9, 10 (D) | **Supported only with a predictive selection signal**, and only against a single agent that stops early: on packing2 n=2 reached the good mode 3 of 3, but the plain clock agent in round 10's S3 campaigns matched n=3 (0.719 vs 0.679). Without a size-aware number, selection picks a solver that does not scale |
 | A text norm makes the single agent use a printed quality score | 10A | **Refuted**: C1s still ends on the first green at a low score (5 of 9 packing2 runs within 3 minutes); C1s − C1 = −0.20 on the signal tasks |
-| Larger swarms do better at the same tokens | 10 (size) | **Refuted at 3M**: n=2 0.69 > n=3 0.58 > n=10 0.50 on the signal tasks; n=10 hits the cap after one draft per agent |
+| Larger swarms do better at the same tokens | 10 (size) | **Not supported at 3M** (descriptive, each n against its own C1s, k=3): n=2 0.69 > n=3 0.58 > n=10 0.50 on the signal tasks; rule verdicts not decided / adds / not decided; n=10 hits the cap after one draft per agent |
 | murmur's scaffolding hides a swarm benefit (bare board, Astra/ExploitGym style) | 10B | **Not supported**: a post-only board with a one-line briefing ties the single agent (−0.006) at ~4x tokens |
 | A threaded board and an integration rule make a V swarm cheaper | 10C | **Refuted**: board-only turns 35.6% of tokens (S4 27.8%); integration breakage avoided, score unchanged (0.416) |
 

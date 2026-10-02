@@ -6,7 +6,7 @@
 
 ## Findings so far (2026-10-02)
 
-No. Eleven rounds, ~585M tokens and ~560 graded runs on hidden-test benchmarks (model `openai-codex/gpt-6-luna`) point the same way: for this model and these tasks, a single agent that keeps working matches or beats every swarm configuration tried.
+No. Eleven rounds, ~585M tokens, 441 graded swarmtest runs and 34 task batches on hidden-test benchmarks (model `openai-codex/gpt-6-luna`) point the same way: for this model and these tasks, a single agent that keeps working matches or beats every swarm configuration tried.
 
 - **Persistence of one agent beats coordination of several.**
   - A single murmur agent with short lessons beats Pi by about +0.25 at ~0.35M tokens.
