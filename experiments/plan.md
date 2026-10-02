@@ -668,6 +668,47 @@ B = ended by the 3M budget (score is a floor).
 
 **Deviation: code changed mid-round.** At 17:45 another session of the user's edited `src/` (the `threads` lever, committed afterwards as `89478ef`) while D campaigns were running from `src/`. Runs started after 17:45 (roster2 r2, shop2 r2 and packing2 r2, all from 17:51) loaded the new code. With `threads` off the flat board is equivalent: `post` and its notifications follow the same path, which I checked in the diff, and the default-profile regression smoke passed. The runs are kept.
 
+## Round 10: the quality signal, swarm size, back to basics and a cheaper V swarm (fixed before measuring, 2026-10-02 19:05; the user approved the plan and asked to add n=2 and n=10 and to include 10C)
+
+Motivation (round 9 transcripts):
+- On panel D the swarm's one clear win (packing2, +0.27) came from diversity plus a number printed by the check: a score on an instance as large as the hidden ones, r = 0.94 with the hidden grade. The single agent stops on green with that number at ~0.15. Until the single agent is given the same number and a norm to use it, the win cannot be credited to the swarm.
+- On panel V the swarm lost on board overhead (~30% of tokens), breadth and one shared integration file.
+- The Astra/ExploitGym sources (`reports/2026-10-02-astra-swarm-ideas.md`) describe a message-only board with no scaffolding. That raises the objection that murmur's tools and norms hide a benefit.
+- The user also asked for larger swarms.
+
+**New profiles** (no new code; each smoked on a scripted task, runs deleted):
+- `c4g-signal` (C1s): c4g-clock plus a generic norm. When the acceptance check prints an informational quality score, it is the target, not the exit code: keep improving while it improves, and call done only when it stops improving after real attempts or time runs out. It is 6C in profile form. It names no task, file or threshold, so it is not tuning against the reference. Smoke: n=1 on a 40-element ordering task that prints a score; it reached S = 1.000, with 23k tokens.
+- `x1g-select-signal` (S2s, S3s, S10s): x1g-select-clock, where the selection installs the attempt with the best printed quality score among those that pass the probes, and the same norm applies. Smoke: n=10 on the same task, with 10 attempts, a `SCORES.md`, and 0.8M tokens on a trivial task.
+- `b0-basic` (B0): c4g-clock plus a post-only board (`delivery: attach`) and a one-line briefing ("equals, nobody in charge, post messages all, verify what you are told"). No claims, team, menu or method. Smoke: n=3 on a 3-section task, passed with 61k tokens and 0 posts.
+- `ti-swarm-clock` (TI): t-swarm-clock (threaded board) plus an integration norm. Never edit or rewrite a teammate's file. The foundation makes the package discover its modules (and skip any that fails to import). Run the check after every write. Smoke: n=3 on the 3-section task, passed with 0.34M tokens, 4 threads, 7 `thread_read` and 5 `thread_list`.
+
+**Harness:** `experiments/criba10-lanes.mjs <lane> <stage>...`, swarmtest defaults (3M, 1200 s) on D, 6M and 1920 s on V. One campaign per stage × task × repetition, k=3. Tasks are read from `staging/` through a private view. The competitor order per seed was checked with `make_plan`: every n=1 arm runs before the swarm, and on V the swarm runs alone (`--limit 1`).
+
+| stage | seed | campaign (run order) | tasks |
+|---|---|---|---|
+| S3 | 20261036 | C1s, C1, S3s (x1g-select-signal n=3) | packing2, shop2, roster2 |
+| S2 | 20261037 | C1s, S2s (n=2) | same |
+| S10 | 20261038 | C1s, S10s (n=10) | same |
+| B0 | 20261039 | C1, B0 (b0-basic n=3) | same |
+| V | 20261040 | TI (ti-swarm-clock n=4) alone | ospec_brown |
+
+packing2 and shop2 print the large-instance score ("signal tasks"); roster2 does not and is the no-signal contrast. cph is left out: both arms fail it identically, and its check gives no signal. Every swarm shares the same per-run tokens as the single agent (3M on D, so ~0.3M per agent at n=10).
+
+**Rules** (per-task means; capped runs count as floors, and an arm with ≥ 1/3 capped runs is flagged):
+- **10A, primary: does the swarm add anything once the single agent has the signal?** S3s − C1s, paired in the S3 campaigns, on the mean of packing2 and shop2. It **adds** if ≥ +0.05 and S3s wins both. It **does not** if ≤ −0.05 and S3s loses both. Otherwise **not decided**.
+  - Attribution: if C1s ≥ S3s − 0.05 on packing2, round 9's packing2 win is credited to the signal, not to the swarm.
+- **10A, secondary: does the norm alone move the single agent?** C1s − C1, paired in the S3 campaigns, on packing2 and shop2: **helps** if ≥ +0.05 on the mean and C1s wins both. Prediction for roster2: |C1s − C1| < 0.05, descriptive.
+- **Size:** S2s, S3s and S10s, each against the C1s of its own campaigns, on the signal tasks, with the same rule as the primary. The size curve (score and tokens against n) is descriptive. Pooled C1s (k=9 per task) is descriptive.
+- **10B, back to basics:** B0 − C1 over the three tasks. B0 **wins** if ≥ +0.05 on the mean and it wins at least 2 of 3. It **loses** if ≤ −0.05 and it loses at least 2 of 3. Otherwise **not decided**. Prediction: not decided. A null here answers the scaffolding objection.
+- **10C, cheaper V swarm:** TI against C1 on ospec_brown, reusing round 8's C1 (0.448, seed 20261033) and round 9's S4 (0.412, seed 20261035), the same reuse as round 9. TI **wins** if TI − C1 ≥ +0.05. Otherwise V is parked. Mechanism measure: coordination share of tokens from `traces.mjs` (which counts thread tools), target < 10% against S4's ~30%; `thread_list` and `thread_read` calls per agent, descriptive.
+
+**Lanes and load:** 3 lanes.
+- Lane 1 runs V, then S10 (only lane 1 takes S10, so two 10-agent swarms never run together), then helps with S3, B0 and S2.
+- Lanes 2 and 3 run S3, B0 and S2.
+- Load before launch was ~5.5, with no other job running.
+
+**Budget (estimate):** S3 stage ~34M (C1 0.5 + C1s ~1 + S3s ~2.3 per campaign), S2 ~24M, S10 ~36M, B0 ~27M, V ~18M. **Total ~140M**, upper bound ~155M if every swarm run hits its cap.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
