@@ -327,6 +327,58 @@ It merges round 4, which the Criba 3 analysis proposed, with 5A. Criba 3 leaves 
   - the network is **not** restricted to the model API;
   - scoring is done afterwards, on the host, with `swarmtest.grading.grade`.
 
+## Round 6: persistence versus coordination (fixed before measuring, 2026-10-02 08:35)
+
+Motivation: two results of round 5 may be persistence rather than the mechanism they were credited to. (1) c4g-evidence (n=1) scores 0.995 on ieh (k6) and 0.99 on ieh2 (k3), but its gate never refused a done (0 `done_refused`), so the likely ingredient is `clock`. (2) In L1 batches the swarm E beats isolated agents I by +0.17 (2 of 3), but it spends 3x the tokens, and the isolated agents stop early with ~75 % of their budget unused. Round 6 gives the single agents the clock and asks whether anything is left for coordination.
+
+No new lever: `clock` exists and is documented. The code is the current `src/` (hash `a5a95a58e2`, the same as the batch image). Two new profiles, each a new file:
+- `c4g-clock` = c4g-guard + `"clock": true`. It differs from c4g-evidence only by `doneAfterGreen: 15`.
+- `b-swarm-clock` = b-swarm + `"clock": true`.
+
+### 6A: is the clock the ingredient? (swarmtest, n=1 arms)
+
+- **Arms (all n=1):** C = c4g-clock; G = c4g-guard; E1 = c4g-evidence.
+- **Tasks:** ieh, ieh2, `ledger_reconciliation_hard`.
+- **k:** 3 fresh runs for C and G on all three tasks; 3 fresh runs for E1 on ledger only.
+- **Reuse of round 5A (explicit):** E1 on ieh and ieh2 reuses its round 5A runs (ieh k6, ieh2 k3, seed 20261015). Justification: the code path of an n=1 c4g-evidence run is unchanged since `46e756b` (the only change in `src/` since then, `6ce0bef`, adds per-part `checks` for batches and refactors the board constructor; with no `checks` and no `helpAfter` the behaviour is identical, and `guard`/`doneAfterGreen`/`clock` are untouched). Confound, to be stated with the result: those runs are from 2026-10-01, another day and another load. G's 8 criba 3 runs on ieh (mean 0.73) are context only; the rule uses G's fresh runs.
+- **Execution:** `experiments/criba6-lanes.mjs`, one campaign per task × arm × repetition with `repetitions: 1`, seed 20261020, base config `criba3.json` (cap 3M per run, 20 min), 21 campaigns, 4 lanes, repetitions interleaved across arms. Each campaign holds only its arm (all are single agents), so a capped run stops only itself.
+- **Rule (per-task means, primary statistic the mean over the 3 tasks; runs cut at 3M count with their score, which is a floor, and are marked; if an arm has ≥ 1/3 of its runs cut this is stated when comparing):**
+  - **the clock contributes** if C − G ≥ +0.05 in the 3-task mean and C wins ≥ 2 of 3 tasks;
+  - **the clock explains E1** if, in addition, E1 − C < +0.05 in the 3-task mean;
+  - **the gate adds something beyond the clock** if E1 − C ≥ +0.05 in the mean and E1 wins ≥ 2 of 3 tasks. This reading is only admissible if E1 has `done_refused` > 0 in the runs that make the difference; with 0 refusals C and E1 are the same treatment (the gate only acts on a done call), and the gap is reported as noise between days or between E1's reused and fresh runs;
+  - **the clock is not it** if C − G < +0.05 or C wins < 2 of 3 tasks.
+- **What is concluded in each case:**
+  - clock contributes and explains E1: the active ingredient of round 5A's best single agent is a visible clock, that is, induced persistence; c4g-clock replaces c4g-evidence as the strong single-agent reference;
+  - clock contributes, gate adds with refusals: both matter; the reference is c4g-evidence;
+  - clock is not it: E1's 5A result stays unexplained (the gate never fired), and it is treated as possibly a day effect until replicated;
+  - in every case tokens per run are reported next to the score (the criterion does not use them, but the claim "persistence wins" is a claim about spending the budget).
+- **Descriptive (from `scripts/traces.mjs` and `events.jsonl`):** `done_refused` per run, calls after the first green, minutes used, end reason (done, cap, timeout), tokens per run.
+- **Risk:** ledger is bimodal (~1.0 when the agent persists, ~0.25 when it stops), so k=3 on ledger can move the 3-task mean on its own. That is why the rule asks for the mean **and** ≥ 2 of 3 per-task wins. ieh2 clock runs are expected to hit the 3M cap (E1 hit it 3 of 3).
+
+### 6B: the fair batch control (Docker, L1)
+
+- **Arms:**
+  - IC: c4g-clock isolated, one agent per task with 1.5M each (the I arm of 5B with a clock);
+  - EC: b-swarm-clock, 4 agents over the 4 tasks with 6M shared (the E arm of 5B with a clock).
+- **Parameters, the same as 5B:** L1 (ieh, durable, ledger, ieh2), M = 4, B = 1.5M per task, 20 min, k=3 batches per arm, board empty in each batch, grading on the host with `swarmtest.grading.grade`.
+- **Execution:** `experiments/batch/lane.sh L1 murmur-batch:a5a95a58e2 "IC EC"` (IC and EC interleaved per repetition), one lane, in parallel with 6A. The image was checked against `src/` before the round (hash of the sorted contents of `src/`, `a5a95a58e2`, inside and outside the image). The driver sends IC through the isolated branch (one container per task), like I.
+- **Rule (the same shape as 5B):** EC beats IC if the mean Δ over the 3 batch pairs is ≥ +0.05 and EC wins ≥ 2 of 3 pairs.
+- **What is concluded in each case:**
+  - **EC does not beat IC:** E's advantage in 5B L1 was induced persistence, not coordination. With round 5A, the project reports that for this model and these tasks a single agent that persists is what wins;
+  - **EC beats IC:** coordination contributes something beyond a clock in L1. Report the token ratio EC/IC next to it. If IC still leaves more than half of its budget unused, the conclusion is qualified as "the board induces more persistence than the clock", and the traces decide whether there is cross-agent work (help notices followed by another agent's edits in the failing folder; folders edited by ≥ 2 agents) beyond each agent working longer.
+- **Descriptive only (different days):** IC − I(5B) is the clock's effect on isolated agents; EC − E(5B) is the clock's effect on the swarm. Per batch: tokens, unused budget, end reasons, help notices, posts, `finding` calls, folders per agent.
+- **Infrastructure failures:** a batch whose container dies without a result is repeated in full and the failed one is kept as `*-infrafail` (the decision depends only on the failure, as in 5B).
+
+### 6C (optional, not pre-registered yet)
+
+A stuck signal based on quality for optimisation tasks (L3, `staging/opt_*`), because `helpAfter` only fires with a red check. It needs a new lever, off by default, with its own smoke test. It is decided after 6A and 6B, depending on the budget left and on the user's OK, and gets its own pre-registration and commit before any run.
+
+### Budget (estimated before measuring, from round 5 costs)
+
+- 6A: C 9 runs ≈ 3 × 2.1M (ieh) + 3 × 3.0M (ieh2, capped) + 3 × ~2M (ledger) ≈ 21M; G 9 runs ≈ 5M; E1 on ledger 3 runs ≈ 6–9M. **≈ 33–35M** (upper bound ~41M if every clock run is capped).
+- 6B: IC 3 batches × ~4–6M ≈ 15M; EC 3 × ~6M ≈ 18M (E hit 6M in 2 of 3 batches). **≈ 33M** (upper bound 36M).
+- **Total ≈ 66–68M**, upper bound ~77M. Re-running E1 on ieh and ieh2 instead of reusing it would add ~15M.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

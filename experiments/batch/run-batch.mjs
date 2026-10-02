@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Round 5B: one batch of tasks for one arm. Agents and tokens scale with the batch: arm I runs one single agent per
-// task with B tokens each; arms R and E run M agents over all M tasks with M x B tokens shared. Each murmur run happens
-// in Docker with only its own folder mounted (graders and other runs stay out of reach); grading happens afterwards on
-// the host with swarmtest's own grader.
+// Rounds 5B and 6B: one batch of tasks for one arm. Agents and tokens scale with the batch: isolated arms (I, IC) run one
+// single agent per task with B tokens each; shared arms (R, E, EC) run M agents over all M tasks with M x B tokens
+// shared. Each murmur run happens in Docker with only its own folder mounted (graders and other runs stay out of reach);
+// grading happens afterwards on the host with swarmtest's own grader.
 //   node run-batch.mjs <lot> <arm> <rep> <image>      e.g. node run-batch.mjs L2 E 0 murmur-batch:a5a95a58e2
 import { spawn, spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -18,11 +18,12 @@ const LOTS = {
   L3: ["opt_routing", "opt_shop", "opt_packing", "opt_roster"].map(id => [id, join(swarmtest, "staging", id)]),
   L2: ["fam_billing", "fam_shipments", "fam_clinic", "fam_payouts"].map(id => [id, join(swarmtest, "staging", id)]),
 };
-const PROFILES = { I: "c4g-guard", R: "b-realloc", E: "b-swarm" };
+const PROFILES = { I: "c4g-guard", R: "b-realloc", E: "b-swarm", IC: "c4g-clock", EC: "b-swarm-clock" };
+const ISOLATED = ["I", "IC"];
 const B = 1_500_000, MINUTES = 20;
 const DONE = "Everything the goal asks for is implemented in the working directory and the acceptance check exits 0.";
 if (!LOTS[lot] || !PROFILES[arm] || !/^\d+$/.test(rep ?? "") || !image) {
-  console.error("usage: node run-batch.mjs <S|L1|L2|L3> <I|R|E> <rep> <image>");
+  console.error("usage: node run-batch.mjs <S|L1|L2|L3> <I|R|E|IC|EC> <rep> <image>");
   process.exit(1);
 }
 const tasks = LOTS[lot].map(([id, dir]) => ({ id, dir, ...JSON.parse(readFileSync(join(dir, "task.json"), "utf8")) }));
@@ -79,7 +80,7 @@ const started = Date.now();
 const scores = {};
 let tokens = 0, reasons = [];
 const profile = join(murmur, "profiles", `${PROFILES[arm]}.json`);
-if (arm === "I") {
+if (ISOLATED.includes(arm)) {
   // One single agent per task, all at once, each with its own budget.
   const results = await Promise.all(tasks.map(async (task, i) => {
     const unit = join(out, task.id);
