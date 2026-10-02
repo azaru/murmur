@@ -236,10 +236,13 @@ For each experiment: whether its question or theory was written down before meas
 - pre-registrations were not version-controlled before commit `138a4d7`, so their timestamps are self-reported;
 - the F1a–c screens were not pre-registered separately;
 - the code version per run was not recorded before `46e756b`;
-- raw transcripts and workspaces are not in the repo (size);
+- raw agent transcripts and workspaces are not in git (size); they are packed in a 23 MB archive described in [`archive/MANIFEST.md`](../archive/MANIFEST.md);
 - the `fam_*` and `opt_*` task sources live uncommitted in `../swarmtest/staging/`.
 
 ## Where the data is
+
+An index by round and by kind is in [`experiments/README.md`](../experiments/README.md).
+
 
 - [`experiments/plan.md`](../experiments/plan.md): the lab notebook. It holds every pre-registration, rule applied, finding, and the campaign registry, including campaign ids.
 - [`experiments/reports/`](../experiments/reports/): longer analyses:
@@ -254,7 +257,7 @@ For each experiment: whether its question or theory was written down before meas
 - `experiments/batch/`: the round 5B driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).
 - `profiles/`: every arm. `src/`: murmur itself. The commit history shows when each lever was added.
 - **Not in this repo:**
-  - raw runs (transcripts, events, workspaces) live in `../swarmtest/runs/<campaign>/` and locally in `experiments/batch/*/`, at tens of MB per round;
+  - raw runs (transcripts, events, workspaces) live in `../swarmtest/runs/<campaign>/` and locally in `experiments/batch/*/`. They are packed into one archive, with a checksum and its layout in [`archive/MANIFEST.md`](../archive/MANIFEST.md);
   - the task families built for round 5 are in `../swarmtest/staging/`.
 
 To reproduce a round, run the driver named in its `plan.md` entry, for example `node experiments/criba5-lanes.mjs <lane>` or `sh experiments/batch/lane.sh L1 <image>`. Then aggregate with `node scripts/traces.mjs <campaign-dir>...`, `node scripts/rows.mjs`, or the `batch-result.json` files.

@@ -18,3 +18,4 @@ experiments/**
 !experiments/rows/*.json
 !experiments/reports/*.md
 experiments/tmp/
+archive/*.tar.xz
