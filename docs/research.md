@@ -217,6 +217,23 @@ Calibration only, against the new reference (band 0.3–0.6, k=3), in two regime
 - **Volume-limited (one agent over the four L1 tasks, 6M, 20 min):** 0.839, above the band, so L1 is too small for the volume panel. The limit that binds is tokens, not time: one context holding four tasks costs ~45k tokens per call, and the budget runs out at 14–16 minutes. Durable gets the fewest calls and scores 0.53.
   - Descriptive only, across days: at the same 6M, four isolated agents (0.925) and the swarm (0.921) beat one agent by ~0.08–0.09, almost all of it on durable. The isolated arm has no board, so this is parallel contexts, not coordination.
 
+### Round 8: expanding the panel (in progress; 6.4M tokens so far, code `6e586ac`)
+
+Five new tasks were built in `staging/` (three harder optimisation tasks, an exam-timetabling task and a demand-forecasting task), checked by a read-only ambiguity review (one real contract error fixed), and calibrated against c4g-clock and Pi (k=3). Details in `experiments/reports/2026-10-02-panel8-build.md`.
+
+| task | c4g-clock | Pi | rule |
+|---|---:|---:|---|
+| opt_roster2 | 0.403 | 0.285 | in band → panel D |
+| opt_routing (re-measured in swarmtest) | 0.620 | 0.538 | above → out |
+| pred_demand | 0.633 | 0.579 | above → out |
+| opt_packing2 | 0.215 | 0.090 | below → remedy |
+| plan_timetable | 0.218 | 0.120 | below → remedy |
+| opt_shop2 | 0.175 | 0.342 | below → remedy |
+
+- **Panel D is now cph and opt_roster2.**
+- **The clock agent stops early on quality-limited tasks:** it uses 1–11 of 18 minutes and under 1.3M tokens, and it is no better than Pi on average here. Its solvers are tuned on a small visible instance and do not scale to the large hidden ones.
+- **Next:** the remedy is to show the score on a visible instance as large as the hidden ones, then recalibrate. OpenSpec projects for the volume regime are being scaled up after a pilot showed that one clock agent finishes them (0.97 and 0.998).
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -303,8 +320,8 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the incident-inspired theories and how they fared;
   - the round 6 transcript analyses (the clock, and coordination in the batches);
   - the construction and calibration of the task families.
-- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (274 runs in 131 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
-- `experiments/criba{1,2,3,5,6,7}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
+- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (312 runs in 169 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+- `experiments/criba{1,2,3,5,6,7,8}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).

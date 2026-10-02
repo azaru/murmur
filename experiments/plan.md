@@ -503,6 +503,27 @@ Motivation: after round 7, panel D (difficulty-limited, c4g-clock in 0.3–0.6) 
 - **Rule per task:** c4g-clock mean in [0.3, 0.6] → enters panel D. Above 0.6 → out (saturated for the reference). Below 0.3 → the `hard-tasks.md` remedies, then recalibrate. Pi is descriptive.
 - **Budget:** c4g-clock on the optimisation tasks of round 7 used 0.04–0.6M per task; on cph 0.3–1.8M. Estimate 6 tasks × 3 × (~0.8M clock + ~0.3M Pi) ≈ **~20M** (upper bound ~35M if pred_demand or plan_timetable keep the agent busy).
 
+### Round 8 result and rule applied (2026-10-02 13:56; launched 13:17 with the user's OK, code `6e586ac`)
+
+36 campaigns (`20261002T111710Z-c227adf3` → `20261002T115022Z-b1ddf99d`, seed 20261030), all exit 0, **6.4M tokens** (estimate ~20M: both arms stop early). The OpenSpec builder was running in the background with `nice` and at most 3 processes (load ~3–4 at launch).
+
+| task | c4g-clock runs | clock mean | Pi mean | clock tokens/run | rule |
+|---|---|---:|---:|---:|---|
+| opt_roster2 | 0.019 / 0.687 / 0.503 | **0.403** | 0.285 | 0.09–0.39M | **in band → panel D** |
+| opt_routing | 0.705 / 0.438 / 0.718 | 0.620 | 0.538 | 0.06–0.46M | above the band → out (0.534 in the batch harness, round 7) |
+| pred_demand | 0.409 / 0.742 / 0.747 | 0.633 | 0.579 | 0.56–1.25M | above the band → out |
+| opt_packing2 | 0.176 / 0.378 / 0.091 | 0.215 | 0.090 | 0.08–0.30M | below → remedy |
+| plan_timetable | 0.191 / 0.277 / 0.187 | 0.218 | 0.120 | 0.09–0.28M | below → remedy |
+| opt_shop2 | 0.263 / 0.103 / 0.159 | 0.175 | 0.342 | 0.08–0.15M | below → remedy |
+
+- **Panel D now:** cph (0.474, round 7) and opt_roster2 (0.403). opt_routing leaves it: its swarmtest mean (0.620) is just above the band. The band edges are noisy at k=3 (per-run spread up to 0.67 on roster2), but the rule is applied as written.
+- **Why the three tasks fall below the band** (per-instance grades in the records):
+  - the solutions are feasible but barely beat the baseline, and the score falls with instance size. On shop2 the clock agent's per-instance scores run from 0.29–0.39 on the smallest instance to 0.0–0.33 on the largest;
+  - only one run timed out (opt_packing2 clock r2: 3 of 4 instances over 10 s).
+  - The visible instance is much smaller than the hidden ones (packing2: 600 vs 1,200–3,000 items), so the agent tunes on a case that does not show its solver failing to scale.
+- **The clock agent stops early on these tasks, as in round 7:** 14–66 calls, 1.2–11 of 18 minutes, 0.06–1.25M of 3M tokens. It makes 2–55 calls after its first green; on the four optimisation tasks the median is 6–7. Pi is no worse on average here (shop2: Pi 0.342 vs clock 0.175). Persistence induced by the clock does not reach quality-limited tasks.
+- **Next, by the rule (`hard-tasks.md`, below the band):** move information into the public check. For shop2, packing2 and plan_timetable, `npm run test` will also report the score on a visible instance as large as the largest hidden one. Then recalibrate c4g-clock with k=3 (a separate step, pre-registered in its own commit).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -544,3 +565,4 @@ Motivation: after round 7, panel D (difficulty-limited, c4g-clock in 0.3–0.6) 
 | 2026-10-02 | round 7 D, batch L3 (Docker `murmur-batch:a5a95a58e2`) | IC (c4g-clock ×4 isolated, 1.5M each) | L3 × 3 | 2.1M | routing 0.534, shop 0.802, packing 0.686, roster 0.830 (mean 0.713); 4–5 min per batch | opt_routing enters panel D; the rest out |
 | 2026-10-02 | round 7 V, batch L1 (Docker `murmur-batch:a5a95a58e2`) | O (one c4g-clock over 4 tasks, 6M) | L1 × 3 | 18.1M | 0.873 / 0.906 / 0.738 (mean 0.839), all end by budget at 14–16 min | above band: L1 too small for panel V; next a 6–8 task lot |
 | 2026-10-02 | pilot OpenSpec (`20261002T100950Z-7e60e3ee`, `20261002T100950Z-9376b32b`, seed 20261031, configs `criba8/pilot-*.json`) | c4g-clock n=1 | ospec_green, ospec_brown × 1 | 4.6M | green 0.970 (12.3 min, done), brown 0.998 (9.3 min, capped at 3M) | both saturate; scale up ~4x before calibrating |
+| 2026-10-02 | round 8 calibration (36 campaigns `20261002T111710Z-c227adf3` → `20261002T115022Z-b1ddf99d`, seed 20261030, code `6e586ac`) | c4g-clock, Pi (n=1, k=3) | opt_shop2, opt_roster2, opt_packing2, plan_timetable, pred_demand, opt_routing × 3 | 6.4M | clock: roster2 0.403 in band; routing 0.620, pred 0.633 above; shop2 0.175, packing2 0.215, timetable 0.218 below | panel D = cph, opt_roster2; remedy (large visible instance) for the three below |
