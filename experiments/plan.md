@@ -476,6 +476,33 @@ Smoke of arm O on lot S: one agent (wren), 3M budget, clock lines present, 1.0 /
 - **The binding limit is tokens, not time:** the single agent spends its 6M in 120–139 calls and 14–16 minutes, about 45k tokens per call, because one context carries all four tasks (an isolated agent in 6B spent 17–26k per call). It spent most calls on ieh and ieh2 (66–98 of 120–139) and least on durable (22–27).
 - **Descriptive only (cross-day, as pre-registered):** at 6M per batch, one agent scores 0.839, four isolated agents 0.925 (6B IC) and the swarm 0.921 (6B EC). Four agents beat one by ~0.08–0.09, almost all of it on durable (0.53 vs 0.98–0.99), and the cause visible in the traces is context cost rather than coordination: IC has no board at all.
 
+## Round 8: expanding the panel (fixed before measuring, 2026-10-02 13:10; calibration only)
+
+Motivation: after round 7, panel D (difficulty-limited, c4g-clock in 0.3–0.6) holds only cph and opt_routing, too few to rank systems. The user asked to expand it (2026-10-02), and, in parallel, to build OpenSpec projects for a swarm-versus-single comparison in the volume regime (comparison A: both arms apply the same pre-written OpenSpec change).
+
+**New tasks** (built by subagents in `../swarmtest/staging/`, never in `tasks/`; validated offline; stub and solution scores re-verified by hand with `swarmtest.grading.grade`):
+
+| task | shape | stub | solution | probe ladder (subagent, not verified) |
+|---|---|---:|---:|---|
+| opt_shop2 | job shop, 45–85 jobs, weighted tardiness, stronger baseline | 0.0 | 0.743 | greedy 0.06, simple SA 0.38 |
+| opt_roster2 | rostering, 60–160 employees, stronger baseline | 0.0 | 0.920 | greedy 0.00, simple SA 0.62 |
+| opt_packing2 | vector bin packing, 1,200–3,000 items, 6 bin types | 0.0 | 0.674 | greedy 0.14, simple SA 0.62 |
+| plan_timetable | exam timetabling, 150–700 exams, hard + soft constraints | 0.0 | 0.776 | modest 0.16, generic SA 0.32, efficient SA 0.57 |
+| pred_demand | daily demand forecast, RMSLE against the oracle noise floor | 0.0 | 0.968 | store×item mean 0.19, log-linear 0.48, with interactions 0.58 |
+
+**OpenSpec projects, pilot** (one c4g-clock run each, 20 min and 3M, seed 20261031, configs `criba8/pilot-*.json`): ospec_green 0.970 (12.3 min, 1.56M, done) and ospec_brown 0.998 (9.3 min, capped at 3M). Both saturate, so by the user's instruction ("measure first, scale up if needed") they are being scaled up about 4x, to be calibrated with 30 min and 6M per run. Their calibration and the swarm comparison get their own pre-registration.
+
+**Ambiguity review** (read-only subagent, `reports/2026-10-02-panel8-build.md`): one real contract error, fixed before calibration. opt_packing2's contract said hidden instances have 400–1,000 items, and the generator makes 1,200–3,000 [verified]. Minor one-sentence clarifications were added to all five contracts (concurrent grading and wall-clock margin; no history before day 0 in roster2; acyclic precedence in plan_timetable; scientific notation in pred_demand).
+
+### Calibration of panel D
+
+- **Harness:** swarmtest, `experiments/criba8-lanes.mjs`, seed 20261030, base `criba3.json` (3M cap, 20 min), one campaign per task × arm × repetition. The tasks stay in `staging/`; the driver builds a private view of symlinks (`criba8/tasks/`) that the campaigns read as their tasks folder.
+- **Tasks:** the five above plus opt_routing, re-calibrated in swarmtest so that all of panel D uses one harness (round 7 measured it in the Docker batch harness).
+- **Arms:** c4g-clock n=1 (the reference, k=3) and Pi n=1 (the "beats Pi" reference, k=3).
+- **Load:** these tasks run solvers with a 10 s limit per instance, which load slows down. At most 3 lanes, and no other heavy job running (load below ~8 at launch).
+- **Rule per task:** c4g-clock mean in [0.3, 0.6] → enters panel D. Above 0.6 → out (saturated for the reference). Below 0.3 → the `hard-tasks.md` remedies, then recalibrate. Pi is descriptive.
+- **Budget:** c4g-clock on the optimisation tasks of round 7 used 0.04–0.6M per task; on cph 0.3–1.8M. Estimate 6 tasks × 3 × (~0.8M clock + ~0.3M Pi) ≈ **~20M** (upper bound ~35M if pred_demand or plan_timetable keep the agent busy).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -516,3 +543,4 @@ Smoke of arm O on lot S: one agent (wren), 3M budget, clock lines present, 1.0 /
 | 2026-10-02 | round 7 D, swarmtest (6 campaigns `20261002T074611Z-d6c74849` → `20261002T075652Z-65ab2cc7`, seed 20261025, code `011fb28`) | c4g-clock n=1 | cph, fih × 3 | 4.3M | cph 0.474, fih 0.972; all end with done on a green check | cph enters panel D; fih saturated |
 | 2026-10-02 | round 7 D, batch L3 (Docker `murmur-batch:a5a95a58e2`) | IC (c4g-clock ×4 isolated, 1.5M each) | L3 × 3 | 2.1M | routing 0.534, shop 0.802, packing 0.686, roster 0.830 (mean 0.713); 4–5 min per batch | opt_routing enters panel D; the rest out |
 | 2026-10-02 | round 7 V, batch L1 (Docker `murmur-batch:a5a95a58e2`) | O (one c4g-clock over 4 tasks, 6M) | L1 × 3 | 18.1M | 0.873 / 0.906 / 0.738 (mean 0.839), all end by budget at 14–16 min | above band: L1 too small for panel V; next a 6–8 task lot |
+| 2026-10-02 | pilot OpenSpec (`20261002T100950Z-7e60e3ee`, `20261002T100950Z-9376b32b`, seed 20261031, configs `criba8/pilot-*.json`) | c4g-clock n=1 | ospec_green, ospec_brown × 1 | 4.6M | green 0.970 (12.3 min, done), brown 0.998 (9.3 min, capped at 3M) | both saturate; scale up ~4x before calibrating |
