@@ -524,7 +524,7 @@ Motivation: after round 7, panel D (difficulty-limited, c4g-clock in 0.3–0.6) 
 - **The clock agent stops early on these tasks, as in round 7:** 14–66 calls, 1.2–11 of 18 minutes, 0.06–1.25M of 3M tokens. It makes 2–55 calls after its first green; on the four optimisation tasks the median is 6–7. Pi is no worse on average here (shop2: Pi 0.342 vs clock 0.175). Persistence induced by the clock does not reach quality-limited tasks.
 - **Next, by the rule (`hard-tasks.md`, below the band):** move information into the public check. For shop2, packing2 and plan_timetable, `npm run test` will also report the score on a visible instance as large as the largest hidden one. Then recalibrate c4g-clock with k=3 (a separate step, pre-registered in its own commit).
 
-### Round 8, second step: remedy recalibration and OpenSpec calibration (fixed before measuring, 2026-10-02 15:15; the user approved both proposals)
+### Round 8, second step: remedy recalibration and OpenSpec calibration (fixed before measuring, 2026-10-02 14:40; the user approved both proposals)
 
 Driver `experiments/criba8b-lanes.mjs <stage> <lane>`, c4g-clock n=1 only, k=3, one campaign per task × repetition, tasks read from `staging/` through a private view of symlinks. At most 3 lanes in total, launched only when no offline job is running.
 
@@ -533,12 +533,49 @@ Driver `experiments/criba8b-lanes.mjs <stage> <lane>`, c4g-clock n=1 only, k=3, 
 - **Rule per task:** the same as before, c4g-clock mean in [0.3, 0.6] → panel D. Below 0.3 again → the task is dropped from panel D (one remedy only, so this does not turn into tuning against the reference agent). Above 0.6 → out.
 - **Remedy check, done by hand before launch:** stub 0.0 on all three; solution 0.743 (shop2), 0.674 (packing2) and 0.777 (timetable), the same as before. The hidden instances, `grader.py` and `best_known.json` are untouched (builder's md5 check). `npm run test` prints the large-instance line. The large instances use seeds 9085, 9300 and 36301 (hidden: 311–314, 111–114 and 105 + 1000k). Their best_known comes from the reference at ~30x its budget, two seeds. Known noise: packing2's reference solver stops on a wall-clock deadline, so its own grade varies by ±0.002 between runs.
 - **Budget:** 9 runs × ~0.1–0.6M ≈ **2–5M**.
+- **Deviation (logged at launch, 14:45):** the remedy stage was launched at 14:42 with no job of mine running. Shortly after, the OpenSpec builder resumed to apply the review fixes, with `nice -n 15` and at most 3 processes, so the remedy runs share the machine with that offline job.
 
 **Stage `ospec`** (seed 20261033; `token_budget` 6M, `timeout_seconds` 1920, which gives the agent 30 minutes):
 - **Tasks:** ospec_green and ospec_brown after the ~4x scale-up and the fixes from the ambiguity review (`reports/2026-10-02-panel8-build.md`).
 - **Rule per project:** it enters **panel V** if the c4g-clock mean is in [0.3, 0.6] **and** at least 2 of its 3 runs end by budget or timeout, not by `done`. Above 0.6 → one agent can still cover it, so not a volume task as built. Below 0.3 → too large, to be trimmed. A run that hits the 6M cap counts with its score, which is a floor.
 - **Budget:** 6 runs × ~4–6M ≈ **25–36M**.
 - **Then:** a project that enters panel V gets the swarm comparison (comparison A: c4g-clock n=1 against a 4-agent swarm with a clock and the same total tokens), with its own pre-registration.
+
+**Stage `remedy`, result and rule applied (2026-10-02 15:00):** 9 campaigns `20261002T124256Z-cdc442e1` → `20261002T125232Z-a2671488`, all exit 0, 2.0M tokens.
+
+| task | c4g-clock runs | mean | before the remedy | rule |
+|---|---|---:|---:|---|
+| opt_packing2 | 0.144 / 0.870 / 0.192 | **0.402** | 0.215 | in band → panel D |
+| opt_shop2 | 0.248 / 0.404 / 0.266 | **0.306** | 0.175 | in band → panel D |
+| plan_timetable | 0.178 / 0.386 / 0.252 | 0.272 | 0.218 | below again → dropped (one remedy only) |
+
+- **Panel D is now cph, opt_roster2, opt_shop2 and opt_packing2.** packing2 is bimodal: one run reached 0.87 on every instance, the other two stayed at 0.14–0.20. shop2 is just inside the band.
+- The clock agent still stops early: 0.10–0.58M tokens per run.
+
+**OpenSpec, fixes from the review, applied before the stage `ospec` launch** (builder report; scores, strict validation and public-check exit codes re-verified by hand):
+- the grader allows 20 s per scenario and 900 s in total;
+- `public_check.py` is now a spread sample: 16 capabilities in green; 13 change capabilities and 3 regression checks in brown;
+- brown changes:
+  - one new requirement, "unknown projects raise UNKNOWN_PROJECT", which adds 1 scenario (228 change scenarios, 390 hidden in total) and 1 task (145 in all);
+  - sentences for the notification texts, the empty Markdown export and the CLI usage-error format;
+  - the order of the done-gates;
+  - activity: only the operations listed append an entry;
+  - the two date-dependent scenarios are now seeded at a fixed date;
+- green changes: `create_order` ignores tiers and promotions; a repeated `grant` or `assign_role` still appends an audit entry.
+- Stage `ospec` launched at 15:00 with no offline job running, 3 lanes.
+
+**Stage `ospec`, result and rule applied (2026-10-02 15:45):** 6 campaigns `20261002T130021Z-d3c30e94` → `20261002T132336Z-6d8ed73d`, all exit 0, 36.2M tokens (estimate 25–36M).
+
+| project | c4g-clock runs | mean | end | minutes used (of 30) | calls after first green |
+|---|---|---:|---|---|---|
+| ospec_green | 0.391 / 0.519 / 0.468 | **0.459** | budget ×3 | 22.8 / 18.0 / 19.2 | 79 / 86 / 80 |
+| ospec_brown | 0.422 / 0.473 / 0.449 | **0.448** | budget ×3 | 12.1 / 20.1 / 16.5 | 31 / 54 / 46 |
+
+- **Rule applied:** both means are in [0.3, 0.6] and all 6 runs end by budget, not by `done`. **Both projects enter panel V.** Their spread is small (0.39–0.52), unlike the optimisation tasks.
+- **The binding limit is tokens, not time.** Every run spends its 6M in 12–23 of 30 minutes. One context holding a 3–5k-line project grows until each call is expensive, as with arm O in round 7. A swarm whose agents each hold part of the project would spend fewer tokens per call. If it wins here, part of the gain is context cost, and the comparison must say so.
+- **The agent keeps working this time:** 79–86 calls after the first green check in green, and 31–54 in brown. The spread public check and a large `tasks.md` keep it going; nothing in these runs stops on a green check.
+- **Next:** comparison A on panel V (c4g-clock n=1 against a 4-agent swarm with a clock, same 6M, k=3), and the swarm comparison on panel D. Each gets its own pre-registration.
+
 
 ## Campaign registry
 
@@ -582,3 +619,5 @@ Driver `experiments/criba8b-lanes.mjs <stage> <lane>`, c4g-clock n=1 only, k=3, 
 | 2026-10-02 | round 7 V, batch L1 (Docker `murmur-batch:a5a95a58e2`) | O (one c4g-clock over 4 tasks, 6M) | L1 × 3 | 18.1M | 0.873 / 0.906 / 0.738 (mean 0.839), all end by budget at 14–16 min | above band: L1 too small for panel V; next a 6–8 task lot |
 | 2026-10-02 | pilot OpenSpec (`20261002T100950Z-7e60e3ee`, `20261002T100950Z-9376b32b`, seed 20261031, configs `criba8/pilot-*.json`) | c4g-clock n=1 | ospec_green, ospec_brown × 1 | 4.6M | green 0.970 (12.3 min, done), brown 0.998 (9.3 min, capped at 3M) | both saturate; scale up ~4x before calibrating |
 | 2026-10-02 | round 8 calibration (36 campaigns `20261002T111710Z-c227adf3` → `20261002T115022Z-b1ddf99d`, seed 20261030, code `6e586ac`) | c4g-clock, Pi (n=1, k=3) | opt_shop2, opt_roster2, opt_packing2, plan_timetable, pred_demand, opt_routing × 3 | 6.4M | clock: roster2 0.403 in band; routing 0.620, pred 0.633 above; shop2 0.175, packing2 0.215, timetable 0.218 below | panel D = cph, opt_roster2; remedy (large visible instance) for the three below |
+| 2026-10-02 | round 8 stage remedy (9 campaigns `20261002T124256Z-cdc442e1` → `20261002T125232Z-a2671488`, seed 20261032, code `0097a51`) | c4g-clock n=1 | opt_shop2, opt_packing2, plan_timetable × 3 (after the large-visible-instance remedy) | 2.0M | shop2 0.306, packing2 0.402, timetable 0.272 | shop2 and packing2 enter panel D; timetable dropped |
+| 2026-10-02 | round 8 stage ospec (6 campaigns `20261002T130021Z-d3c30e94` → `20261002T132336Z-6d8ed73d`, seed 20261033, 6M and 30 min per run) | c4g-clock n=1 | ospec_green, ospec_brown × 3 (after the ~4x scale-up and the review fixes) | 36.2M | green 0.459, brown 0.448; all 6 end by budget at 12–23 min | both enter panel V |
