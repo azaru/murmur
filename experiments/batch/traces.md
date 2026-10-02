@@ -44,3 +44,28 @@ IC table. Score is the hidden-grader score from `batch-result.json`; tokens, end
 | L1-IC-r2 | durable | 0.988 | 0.84M | quiescent | 6.4 | 52 | 10 | 17 | 35 | green |
 | L1-IC-r2 | ledger | 1.000 | 0.66M | quiescent | 5.8 | 43 | 8 | 24 | 19 | green |
 | L1-IC-r2 | ieh2 | 0.380 | 1.52M | budget | 8.8 | 60 | 7 | - | - | red |
+
+## Round 7: calibration batches against c4g-clock
+
+Arm IC on L3 (isolated c4g-clock, 1.5M per task) and arm O on L1 (one c4g-clock agent over the four tasks, 6M). Scores from `batch-result.json`; tokens, end reason and minutes from each run's `result.json`. "Calls" for O counts tool calls whose arguments name a task folder, from `wren.messages.json`.
+
+| batch | task | score | tokens | end |
+|---|---|---:|---:|---|
+| L3-IC-r0 | opt_routing | 0.682 | 0.08M | all_done |
+| L3-IC-r0 | opt_shop | 0.880 | 0.16M | all_done |
+| L3-IC-r0 | opt_packing | 0.665 | 0.21M | quiescent |
+| L3-IC-r0 | opt_roster | 0.827 | 0.08M | all_done |
+| L3-IC-r1 | opt_routing | 0.202 | 0.24M | all_done |
+| L3-IC-r1 | opt_shop | 0.772 | 0.05M | all_done |
+| L3-IC-r1 | opt_packing | 0.532 | 0.15M | quiescent |
+| L3-IC-r1 | opt_roster | 0.737 | 0.16M | all_done |
+| L3-IC-r2 | opt_routing | 0.717 | 0.09M | all_done |
+| L3-IC-r2 | opt_shop | 0.755 | 0.21M | quiescent |
+| L3-IC-r2 | opt_packing | 0.861 | 0.61M | all_done |
+| L3-IC-r2 | opt_roster | 0.924 | 0.04M | all_done |
+
+| batch | ieh | durable | ledger | ieh2 | mean | tokens | min | end | calls per folder (ieh / durable / ledger / ieh2) |
+|---|---:|---:|---:|---:|---:|---:|---:|---|---|
+| L1-O-r0 | 0.920 | 0.572 | 1.000 | 1.000 | 0.873 | 6.01M | 15.4 | budget | 49 / 22 / 18 / 41 |
+| L1-O-r1 | 0.981 | 0.651 | 1.000 | 0.990 | 0.906 | 6.05M | 14.3 | budget | 25 / 27 / 19 / 41 |
+| L1-O-r2 | 0.910 | 0.371 | 1.000 | 0.670 | 0.738 | 6.02M | 16.2 | budget | 58 / 22 / 12 / 40 |

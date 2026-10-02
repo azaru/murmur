@@ -6,7 +6,7 @@
 
 ## Findings so far (2026-10-02)
 
-No. Seven rounds, ~315M tokens and ~345 graded runs on hidden-test benchmarks (model `openai-codex/gpt-6-luna`) point the same way: for this model and these tasks, a single agent that keeps working matches or beats every swarm configuration tried.
+No. Eight rounds, ~340M tokens and ~370 graded runs on hidden-test benchmarks (model `openai-codex/gpt-6-luna`) point the same way: for this model and these tasks, a single agent that keeps working matches or beats every swarm configuration tried.
 
 - **Persistence of one agent beats coordination of several.**
   - A single murmur agent with short lessons beats Pi by about +0.25 at ~0.35M tokens.
@@ -22,7 +22,7 @@ No. Seven rounds, ~315M tokens and ~345 graded runs on hidden-test benchmarks (m
   - they break a shared file with a chunked `write`;
   - they yield to a teammate ("X owns the file").
   - Coordination-only turns take 31–62% of a swarm's tokens.
-- **Still open:** the benchmark tasks now saturate for the clock agent (0.93–1.0), so whether coordination helps where a persistent single agent still has headroom is untested. The task panel is being recalibrated against it.
+- **Still open:** most benchmark tasks now saturate for the clock agent (0.93–1.0). After recalibration, two keep it in the 0.3–0.6 band (a planning task and a routing optimisation task); on both it stops on a green check with time left. Whether a swarm helps there is the next test.
 
 ## The research record
 

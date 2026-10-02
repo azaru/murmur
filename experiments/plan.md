@@ -444,6 +444,38 @@ Motivation: after round 6 the tasks saturate for the strong single agent (c4g-cl
 - V L1 O: 3 batches × ~4–6M ≈ 12–18M, plus the O smoke on lot S (~0.1M).
 - **Total ≈ 30–54M, central estimate ~40M.**
 
+### Round 7 result and rule applied (2026-10-02 10:35; launched 09:46 with the user's OK, code `011fb28`, `src/` hash `a5a95a58e2`)
+
+Smoke of arm O on lot S: one agent (wren), 3M budget, clock lines present, 1.0 / 1.0, 40k tokens; output deleted. All 6 swarmtest campaigns and all 6 batches finished with exit 0. Spend: D swarmtest 4.3M, L3 IC 2.1M, L1 O 18.1M, smoke 0.04M: **24.5M** (estimate ~40M; the clock agent stops early on cph, fih and L3).
+
+**D, difficulty-limited** (c4g-clock; per-task means, k=3):
+
+| task | runs | mean | tokens/run | rule |
+|---|---|---:|---:|---|
+| cph | 0.569 / 0.425 / 0.429 | **0.474** | 0.31–1.76M | **in band → panel D** |
+| fih v4 | 1.000 / 0.916 / 1.000 | 0.972 | 0.47–0.76M | saturated, out |
+| opt_routing (L3 IC) | 0.682 / 0.202 / 0.717 | **0.534** | — | **in band → panel D** |
+| opt_shop (L3 IC) | 0.880 / 0.772 / 0.755 | 0.802 | — | saturated, out |
+| opt_packing (L3 IC) | 0.665 / 0.532 / 0.861 | 0.686 | — | above band, out |
+| opt_roster (L3 IC) | 0.827 / 0.737 / 0.924 | 0.830 | — | saturated, out |
+
+- L3 IC batches: 0.764 / 0.561 / 0.814 (mean 0.713; I without a clock in 5B: 0.526), 0.53–0.95M of 6M per batch, 4.0–4.9 minutes.
+- **Panel D after round 7: cph and opt_routing.** fih joins ieh, ieh2, ledger and durable as saturated.
+- **Finding (from `criba7-traces.md` and the batch results):** where the clock agent still has headroom, it is not because it gives up. All 6 swarmtest runs end with `done` on a **green** check, after 4–14 of 18 minutes and 0.3–1.8M of 3M tokens; the L3 batches finish in 4–5 of 20 minutes with 9–16 % of their budget. On cph and the optimisation tasks the public check turns green long before the quality ceiling (feasible plan versus the reference objective), and the agent stops there. The clock fixes giving up on a red check; it does not make the agent keep improving a green solution. That is the regime 6C was meant for.
+
+**V, volume-limited** (one c4g-clock agent over the four L1 tasks, 6M, 20 min):
+
+| batch | ieh | durable | ledger | ieh2 | mean | tokens | minutes | end |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| r0 | 0.920 | 0.572 | 1.000 | 1.000 | 0.873 | 6.01M | 15.4 | budget |
+| r1 | 0.981 | 0.651 | 1.000 | 0.990 | 0.906 | 6.05M | 14.3 | budget |
+| r2 | 0.910 | 0.371 | 1.000 | 0.670 | 0.738 | 6.02M | 16.2 | budget |
+| mean | 0.937 | 0.531 | 1.000 | 0.886 | **0.839** | | | |
+
+- **Rule applied:** 0.839 > 0.6 → **L1 is too small for one agent; it does not enter panel V.** The pre-registered next step is a lot of 6–8 tasks (a separate round). Every batch ended by budget, with durable below 0.5 in one of three.
+- **The binding limit is tokens, not time:** the single agent spends its 6M in 120–139 calls and 14–16 minutes, about 45k tokens per call, because one context carries all four tasks (an isolated agent in 6B spent 17–26k per call). It spent most calls on ieh and ieh2 (66–98 of 120–139) and least on durable (22–27).
+- **Descriptive only (cross-day, as pre-registered):** at 6M per batch, one agent scores 0.839, four isolated agents 0.925 (6B IC) and the swarm 0.921 (6B EC). Four agents beat one by ~0.08–0.09, almost all of it on durable (0.53 vs 0.98–0.99), and the cause visible in the traces is context cost rather than coordination: IC has no board at all.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -480,3 +512,7 @@ Motivation: after round 6 the tasks saturate for the strong single agent (c4g-cl
 | 2026-10-02 | smoke round 6B (batch S, IC path, Docker `murmur-batch:a5a95a58e2`) | IC (c4g-clock × 2 isolated) | S × 1 | 97k | 1.0 / 1.0, one container per task, clock lines in the transcripts | IC goes through the isolated branch; smoke output deleted |
 | 2026-10-02 | round 6A (21 campaigns `20261002T063615Z-10df4893` → `20261002T071139Z-39b069c4`, seed 20261020, code `d9a7510`) | c4g-clock, c4g-guard (n=1, k=3); c4g-evidence (n=1, ledger k=3; ieh and ieh2 reused from 5A) | ieh, ieh2, ledger × 3 | 26.5M | clock 0.997 / guard 0.434 / evidence 0.984 (3-task means); 0 `done_refused` | the clock contributes (+0.56, 3 of 3) and explains c4g-evidence; c4g-clock is the new single-agent reference |
 | 2026-10-02 | round 6B (Docker `murmur-batch:a5a95a58e2`, L1 batches of 4 tasks, 4 agents, 4×1.5M) | IC (c4g-clock ×4 isolated), EC (b-swarm-clock) | L1 × 3 | 32.2M | IC 0.925 (4.70M) / EC 0.921 (6.03M); EC − IC −0.005, wins 2 of 3 | EC does not beat IC: 5B's L1 win was induced persistence; L1 near ceiling with the clock → recalibrate against c4g-clock |
+| 2026-10-02 | smoke round 7 (batch S, arm O, Docker `murmur-batch:a5a95a58e2`) | O (one c4g-clock over 2 tasks) | S × 1 | 40k | 1.0 / 1.0, one agent, clock lines present | arm O valid; smoke output deleted |
+| 2026-10-02 | round 7 D, swarmtest (6 campaigns `20261002T074611Z-d6c74849` → `20261002T075652Z-65ab2cc7`, seed 20261025, code `011fb28`) | c4g-clock n=1 | cph, fih × 3 | 4.3M | cph 0.474, fih 0.972; all end with done on a green check | cph enters panel D; fih saturated |
+| 2026-10-02 | round 7 D, batch L3 (Docker `murmur-batch:a5a95a58e2`) | IC (c4g-clock ×4 isolated, 1.5M each) | L3 × 3 | 2.1M | routing 0.534, shop 0.802, packing 0.686, roster 0.830 (mean 0.713); 4–5 min per batch | opt_routing enters panel D; the rest out |
+| 2026-10-02 | round 7 V, batch L1 (Docker `murmur-batch:a5a95a58e2`) | O (one c4g-clock over 4 tasks, 6M) | L1 × 3 | 18.1M | 0.873 / 0.906 / 0.738 (mean 0.839), all end by budget at 14–16 min | above band: L1 too small for panel V; next a 6–8 task lot |
