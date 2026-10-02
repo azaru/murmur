@@ -1,0 +1,22 @@
+{
+  "lot": "L1",
+  "arm": "IC",
+  "rep": 0,
+  "image": "murmur-batch:a5a95a58e2",
+  "profile": "c4g-clock",
+  "scores": {
+    "information_extraction_hard": 1,
+    "durable_workflow_engine": 0.9814323607427056,
+    "ledger_reconciliation_hard": 1,
+    "information_extraction_hard2": 0.895867
+  },
+  "mean": 0.9693248401856764,
+  "tokens": 4787214,
+  "reasons": [
+    "information_extraction_hard:budget",
+    "durable_workflow_engine:quiescent",
+    "ledger_reconciliation_hard:all_done",
+    "information_extraction_hard2:budget"
+  ],
+  "minutes": 12.008
+}

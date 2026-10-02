@@ -379,6 +379,43 @@ A stuck signal based on quality for optimisation tasks (L3, `staging/opt_*`), be
 - 6B: IC 3 batches × ~4–6M ≈ 15M; EC 3 × ~6M ≈ 18M (E hit 6M in 2 of 3 batches). **≈ 33M** (upper bound 36M).
 - **Total ≈ 66–68M**, upper bound ~77M. Re-running E1 on ieh and ieh2 instead of reusing it would add ~15M.
 
+### Round 6 result and rule applied (2026-10-02 10:00; launched 08:36 with the user's OK, code `d9a7510`, `src/` hash `a5a95a58e2`)
+
+Before 6B, a smoke of the IC path on lot S (bug_fixing + data_analysis): two containers, c4g-clock, 1.0 / 1.0, 97k tokens, clock lines present in the transcripts. All 21 6A campaigns and all 6 6B batches finished with exit 0; no infrastructure failure. Spend: 6A 26.5M, 6B 32.2M, smoke 0.1M, **58.8M** in total (estimate 66–68M).
+
+**6A** (per-task means; tokens per run; capped = runs that hit 3M):
+
+| arm | ieh | ieh2 | ledger | 3-task mean | tokens/run | capped |
+|---|---:|---:|---:|---:|---:|---:|
+| C c4g-clock | 0.999 | 0.990 | 1.000 | **0.997** | 2.22 / 2.93 / 1.40M | 2 of 9 (ieh2) |
+| G c4g-guard | 0.525 | 0.189 | 0.588 | 0.434 | 0.28 / 0.65 / 0.26M | 0 of 9 |
+| E1 c4g-evidence | 0.995 (5A, k6) | 0.991 (5A, k3) | 0.967 | 0.984 | 2.08 / 3.03 / 1.07M | 3 of 12 (ieh2, 5A) |
+
+- **Rule applied:** C − G = **+0.563**, C wins 3 of 3 tasks: **the clock contributes**. E1 − C = **−0.012** (< +0.05): **the clock explains E1**. `done_refused` = 0 in all 21 new runs, as in 5A, so the gate never acted. Conclusion as pre-registered: the active ingredient of 5A's best single agent is a visible clock, that is, induced persistence; **c4g-clock replaces c4g-evidence as the strong single-agent reference.** C has 2 of 9 runs capped (both ieh2, scoring 1.00 and 0.98), below the 1/3 threshold.
+- **Findings from the transcripts** (`criba6-traces.md`; subagent reading of all 21 transcripts, key figures verified by hand: the clock starts at 18.0 because the swarmtest adapter reserves 2 of the 20 min for the final check; G's tool results carry no time line; the quoted stop reasons exist):
+  - **G gives up, it does not run out of anything.** 8 of 9 G runs stop on a red check after 15–39 calls and 2–5 of 18 minutes, with 0.2–0.7M of 3M tokens used, saying the work is incomplete ("Cannot finish within this run: npm run test remains failing", "Further implementation and verification are required"). 3 of the 8 end their turn without `done` (quiescent). The ninth stops 9 calls after its first green, at 0.90. None of the 9 mentions time or budget.
+  - **C keeps going.** It works 9–14 minutes, reaches green at call 21–67 and makes 19–42 more calls after it, mostly probing edge cases with small `python3 -c` snippets and editing the solution (subagent count, not verified by hand: about 119 solution edits and 28 test-file writes after the first green across the 12 C and E1 runs). On ieh2, where G never reaches green, C does and ends at 0.98–1.0. The 2 capped ieh2 runs were still making productive edits when the cap hit.
+  - **Open:** the visible text barely mentions the clock (1 of 12 runs: "time 18m. write full."), and thinking is encrypted. Whether the clock works by correcting a belief that time is short or as a repeated "the session is still open" cue cannot be separated from these traces. A neutral-line control or a tokens-left line would separate them.
+
+**6B** (L1, k=3 batch pairs; batch means; tokens per batch):
+
+| batch | IC c4g-clock isolated | EC b-swarm-clock | EC − IC |
+|---|---:|---:|---:|
+| r0 | 0.969 (4.79M) | 0.977 (6.04M, budget) | +0.008 |
+| r1 | 0.985 (5.63M) | 0.936 (6.04M, budget) | −0.049 |
+| r2 | 0.822 (3.70M) | 0.850 (6.01M, budget) | +0.028 |
+| mean | **0.925** (4.70M) | **0.921** (6.03M) | **−0.005**, EC wins 2 of 3 |
+
+- Per task (IC / EC): ieh 0.964 / 0.933, durable 0.988 / 0.982, ledger 1.000 / 0.967, ieh2 0.750 / 0.801.
+- **Rule applied:** mean Δ = −0.005 < +0.05: **EC does not beat IC.** Conclusion as pre-registered: **E's advantage in 5B L1 was induced persistence, not coordination.** With a clock, isolated agents use 62–94 % of their 6M (I in 5B used ~27 %) and score 0.925 against I's 0.419; the swarm with a clock scores the same as isolated agents with a clock, at 1.3x the tokens.
+- **Descriptive (different days):** IC − I(5B) = +0.51; EC − E(5B) = +0.33.
+- **Findings from the traces** (`batch/traces.md`, "Round 6B"; subagent reading, event counts re-verified by hand on EC r0 and r2):
+  - **IC is limited by tokens, not time.** 6 of 12 IC agents hit their 1.5M cap, including ieh2 in all 3 batches, at 7.4–8.8 of 20 minutes. The other 6 stop on their own (done or quiescent) with 9–15 minutes left. IC r2's ieh2 (0.38) hit the cap while debugging one money-parsing bug, with the check still red; the file was not broken.
+  - **EC is mostly parallel isolated work.** All 3 batches hit the 6M shared budget at 6.6–7.9 minutes. Board tools take 16–20 % of calls; 15–19 posts, 2–3 help signals and 1–3 findings per batch. Folders edited by two or more agents: 2, 0 and 1 per batch, with one edit each from the second agent; no overwrites. In EC r1 every agent stayed in its own folder.
+  - **One plausible case of useful coordination:** in EC r0, wren posted a diagnosed regex bug in ieh2's `extract.py` and made the one-line fix; ieh2 scored 0.918 (not verified against the grader). Against it, IC r1 reached 0.973 on ieh2 with no help. The shared pool let EC's ieh2 holder spend more than 1.5M (lark: 2.16M in r2), and it still did not beat IC on average beyond noise (0.80 vs 0.75, IC spans 0.38–0.97).
+- **Ceiling (threat to validity, stated here because it limits the conclusion):** with the clock, L1 is near saturated for both arms (0.93–1.0 on three of four tasks). 6B shows that the clock closes 5B's gap; it cannot show that coordination never helps, because on these tasks there is almost no headroom left for it. ieh2 is the only task with room (0.75 / 0.80).
+- **Conclusion of round 6:** both pre-registered questions favour the persistent single agent. For this model and these tasks, a single agent that is shown the clock matches or beats every swarm configuration tried, and the swarm's earlier wins are explained by persistence. The next step (agreed with the user on 2026-10-02) is to recalibrate the task panel against c4g-clock, in two separate regimes: tasks limited by difficulty at equal time and tokens, and tasks limited by volume within the time limit.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -412,3 +449,6 @@ A stuck signal based on quality for optimisation tasks (L3, `staging/opt_*`), be
 | 2026-10-01 | smoke round 5B (batch S = bug_fixing + data_analysis, Docker `murmur-batch:a5a95a58e2`) | b-swarm (4→2 agents), c4g-guard × 2 isolated; scripted from `checks` with `helpAfter: 3` | 1 batch E, 1 batch I, 1 scripted | 111k + 51k + 34k | E: 1.0/1.0, split by claim, quiescent; I: 1.0/1.0 in parallel; help notice with the part (`test -f part_a.txt`) | driver and `checks` OK. Fix: Node's `cpSync` fails on macOS mounts → the run goes on the container's disk and `runs/` is copied back |
 | 2026-10-01 | round 5A (22 campaigns `20261001T172348Z-2db1b717` → `20261001T182345Z-f27c7ed5`, seed 20261015, code `46e756b`) | x1g-select, x1g-coord, x1g-evidence (n=3); c4g-relay4, c4g-evidence (n=1) | ieh, ieh2 × 3; ieh, durable × 2 | 61.7M | coord < select (−0.15/−0.18); R4 > best n=3 (+0.3); E1 c4g-evidence 0.995 ieh (k6) / 0.99 ieh2 (k3) with 0 `done_refused` (the clock?) | communication and swarm do not contribute; single-agent persistence does; try c4g-clock |
 | 2026-10-01 | round 5B (Docker `murmur-batch:a5a95a58e2`, batches of 4 tasks, 4 agents, 4×1.5M) | I (c4g-guard ×4 isolated), R (b-realloc), E (b-swarm) | L1 × 3, L3 × 3 (+ calibrations of L2, saturated, and L3) | 28.3M | L1: E 0.593 / I 0.419 / R 0.338 (E wins 2/3); L3: I 0.526 / E 0.452 / R 0.439 (all stop at ~2 min) | E beats I only where the check is red; the I + clock control is missing |
+| 2026-10-02 | smoke round 6B (batch S, IC path, Docker `murmur-batch:a5a95a58e2`) | IC (c4g-clock × 2 isolated) | S × 1 | 97k | 1.0 / 1.0, one container per task, clock lines in the transcripts | IC goes through the isolated branch; smoke output deleted |
+| 2026-10-02 | round 6A (21 campaigns `20261002T063615Z-10df4893` → `20261002T071139Z-39b069c4`, seed 20261020, code `d9a7510`) | c4g-clock, c4g-guard (n=1, k=3); c4g-evidence (n=1, ledger k=3; ieh and ieh2 reused from 5A) | ieh, ieh2, ledger × 3 | 26.5M | clock 0.997 / guard 0.434 / evidence 0.984 (3-task means); 0 `done_refused` | the clock contributes (+0.56, 3 of 3) and explains c4g-evidence; c4g-clock is the new single-agent reference |
+| 2026-10-02 | round 6B (Docker `murmur-batch:a5a95a58e2`, L1 batches of 4 tasks, 4 agents, 4×1.5M) | IC (c4g-clock ×4 isolated), EC (b-swarm-clock) | L1 × 3 | 32.2M | IC 0.925 (4.70M) / EC 0.921 (6.03M); EC − IC −0.005, wins 2 of 3 | EC does not beat IC: 5B's L1 win was induced persistence; L1 near ceiling with the clock → recalibrate against c4g-clock |

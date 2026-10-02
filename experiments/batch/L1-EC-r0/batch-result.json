@@ -1,0 +1,19 @@
+{
+  "lot": "L1",
+  "arm": "EC",
+  "rep": 0,
+  "image": "murmur-batch:a5a95a58e2",
+  "profile": "b-swarm-clock",
+  "scores": {
+    "information_extraction_hard": 1,
+    "durable_workflow_engine": 0.9893899204244032,
+    "ledger_reconciliation_hard": 1,
+    "information_extraction_hard2": 0.917999
+  },
+  "mean": 0.9768472301061009,
+  "tokens": 6036035,
+  "reasons": [
+    "budget"
+  ],
+  "minutes": 8.6233
+}

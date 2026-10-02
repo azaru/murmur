@@ -2,18 +2,19 @@
 
 This is the curated record of every experiment run with murmur so far: the question, what was tried, what came out, which theories held and which did not, and what is wrong with the evidence. The raw lab notebook, with every pre-registration written before its round was measured, is [`experiments/plan.md`](../experiments/plan.md); longer analyses are in [`experiments/reports/`](../experiments/reports/). Numbers here are copied from them, and each one can be traced to a run in [`experiments/rows/runs.json`](../experiments/rows/runs.json).
 
-**Status (2026-10-02): not on track.** No swarm configuration has met the success criterion, and the strongest results so far come from a *single* agent that keeps working, not from agents coordinating. The research question is still open, but the evidence points away from the original hypothesis.
+**Status (2026-10-02, after round 6): the evidence answers the question negatively for the tasks tested.** No swarm configuration has met the success criterion. Round 6 confirmed that the strongest results come from a *single* agent that keeps working: a one-line clock explains the best single agent, and once isolated agents get the same clock, the swarm's only win disappears. What remains open is whether coordination helps on tasks where a persistent single agent still has headroom; the current tasks saturate for it, and the panel is being recalibrated.
 
 ## TL;DR
 
 - The pre-registered criterion (beat Pi n=1 in two independent confirmation campaigns on a held-out task set) has **never been tested**: no candidate earned a confirmation run.
-- Across ~255M tokens and six rounds, the most reliable lever is **persistence of one agent**:
+- Across ~315M tokens and seven rounds, the most reliable lever is **persistence of one agent**:
   - a single murmur agent with short lessons (c4n1) beats Pi by about +0.25 at ~0.35M tokens;
   - a single agent with relays beats every 3-agent arm on the same tasks;
-  - a single agent with a visible clock scores 0.99–1.0 on the two hardest extraction tasks.
+  - **a single agent with a visible clock (c4g-clock) scores 0.997** on ieh, ieh2 and ledger, against 0.434 for the same agent without it (round 6A, k=3). Without the clock the agent gives up on a red check after 2–5 of its 18 minutes; with it, it keeps working for 9–14.
 - **Coordination mechanisms did not help**:
   - message boards, role menus, automatic notices, verified findings, help signals and file locks are neutral or negative against a same-prompt single agent;
-  - the one positive swarm result (batches of tasks with a board, L1) is consistent with the board keeping agents busy, and it spends 3x the tokens of isolated agents.
+  - the one positive swarm result (batches of tasks with a board, L1, +0.17) was **induced persistence**: with a clock on both sides, the swarm scores 0.921 and isolated agents 0.925 (round 6B).
+- **The tasks now saturate** for the clock agent (0.93–1.0 on all but ieh2), so the rounds so far cannot show a coordination benefit where a persistent agent still has headroom. That is the next question.
 - The dominant failure modes are **stopping early**, **breaking a shared file**, and **yielding to a teammate** ("X owns the file, I'll review").
   - Work done after the first green check predicts the score (Spearman 0.72–0.80 on multi-file tasks).
   - 31–62% of a swarm's tokens go to coordination-only turns.
@@ -172,6 +173,39 @@ Round 5 tested those mechanisms in a benign, sandboxed setting, as two sub-round
   - re-allocation happens equally in R and E and is **net negative on its own** (R − I = −0.08 and −0.09). In L3 it caused a teammate to rewrite another agent's solver and make it worse than the baseline;
   - knowledge transfer was not observed (`finding` used 1–2 times per batch).
 
+### Round 6: persistence versus coordination (58.8M tokens, code `d9a7510`)
+
+Two results of round 5 could be persistence rather than the mechanism they were credited to. Round 6 gave the single agents a clock and asked whether anything was left for coordination. The pre-registration was committed before launch (`d9a7510`).
+
+The **clock** (`"clock": true`) appends one line, `[N minutes left before the timeout]`, to every tool result. It changes no prompt, forces nothing and does not show tokens.
+
+#### 6A: is the clock the ingredient? (n=1 arms, k=3)
+
+| arm | ieh | ieh2 | ledger | mean | tokens/run |
+|---|---:|---:|---:|---:|---:|
+| **c4g-clock** (c4g-guard + clock) | 0.999 | 0.990 | 1.000 | **0.997** | 1.4–2.9M |
+| c4g-guard | 0.525 | 0.189 | 0.588 | 0.434 | 0.26–0.65M |
+| c4g-evidence (clock + evidence gate) | 0.995 (5A) | 0.991 (5A) | 0.967 | 0.984 | 1.1–3.0M |
+
+- **Rule as applied:** clock − guard = +0.56, winning 3 of 3 tasks: the clock contributes. evidence − clock = −0.01: the clock explains c4g-evidence. The gate never refused a done (0 events in 21 runs). **c4g-clock is the new single-agent reference.**
+- **Mechanism, from the transcripts:**
+  - without the clock, 8 of 9 runs give up on a red check after 2–5 of 18 minutes, using under a quarter of the budget, and say the work is incomplete. None mentions time;
+  - with the clock, the agent works 9–14 minutes and makes 19–42 calls after its first green, mostly probing edge cases and fixing the parser.
+- **Open:** the visible text barely mentions the clock, and thinking is encrypted. Whether it corrects a belief that time is short, or works as a repeated cue to continue, is untested.
+
+#### 6B: the compute-fair batch control (L1, k=3)
+
+| batch | IC: isolated c4g-clock | EC: b-swarm-clock | EC − IC |
+|---|---:|---:|---:|
+| r0 | 0.969 (4.8M) | 0.977 (6.0M) | +0.008 |
+| r1 | 0.985 (5.6M) | 0.936 (6.0M) | −0.049 |
+| r2 | 0.822 (3.7M) | 0.850 (6.0M) | +0.028 |
+| mean | **0.925** | **0.921** | **−0.005**, 2 of 3 |
+
+- **Rule as applied:** −0.005 < +0.05, so EC does not beat IC. **5B's L1 win was induced persistence, not coordination.** With the clock, isolated agents use 62–94% of their budget (27% without it) and gain +0.51 over 5B's I; the swarm gains +0.33 over 5B's E. Both comparisons with 5B are descriptive, from another day.
+- **Traces:** isolated agents with a clock are limited by their 1.5M cap rather than by time (6 of 12 hit it, ieh2 in all 3 batches). The swarm works mostly as four isolated agents: board tools take 16–20% of calls, a second agent edits a teammate's folder 0–2 times per batch, and there is one plausible useful fix passed through the board (EC r0, ieh2).
+- **Ceiling:** three of the four L1 tasks are at 0.93–1.0 for both arms, so 6B shows that the clock closes the gap, not that coordination can never help. ieh2, the only task with headroom, gives 0.75 (IC) vs 0.80 (EC).
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -182,12 +216,13 @@ Round 5 tested those mechanisms in a benign, sandboxed setting, as two sub-round
 | Norms and lessons in the prompt help | criba 1–2 | **Supported**, and they help a single agent just as much (c4n1) |
 | Parallel private attempts plus selection (c5, select) | criba 2–3, 5A | Supported against a plain single agent (no broken shared file); **not** against a single agent with relays |
 | Guards and locks against the broken shared file | criba 3 | The write guard **fixes** it; locks, stale checks and part claims add nothing |
-| An evidence gate on done | 5A | Untested in effect (never fired); a clock is the likely active ingredient |
+| An evidence gate on done | 5A, 6A | **Inert**: never fired in 33 runs; the clock alone reproduces its scores |
+| A visible clock keeps a single agent working | 6A, 6B | **Supported**: +0.56 over the same agent without it (3 of 3 tasks); closes the isolated agents' gap in batches |
 | Fresh-context relays (compute-matched single agent) | 5A | **Supported**: beats every n=3 arm |
 | Verified findings (knowledge sharing) | 5A, 5B | **Not supported**: barely used, negative point estimate |
-| Help-when-stuck signals | 5A, 5B | Keep agents working on tasks with a red check; no gain against a persistent single agent |
-| Re-allocating effort across tasks | 5B | **Refuted on its own** (R < I); with a board it wins on L1 only, at 3x tokens |
-| The swarm beats a same-prompt single agent | criba 1, 5A | **Not supported** so far |
+| Help-when-stuck signals | 5A, 5B, 6B | Keep agents working on tasks with a red check; no gain against a persistent single agent |
+| Re-allocating effort across tasks | 5B, 6B | **Refuted on its own** (R < I); with a board its L1 win disappears once isolated agents get a clock (EC − IC = −0.005) |
+| The swarm beats a same-prompt single agent | criba 1, 5A, 6B | **Not supported**; untested on tasks where the clock agent has headroom |
 
 ## Cross-cutting findings
 
@@ -198,6 +233,8 @@ Round 5 tested those mechanisms in a benign, sandboxed setting, as two sub-round
 
 ## Threats to validity
 
+- **Ceiling.** With the clock, ieh, ledger and durable score 0.93–1.0 for the single agent. Round 6B cannot show a coordination benefit that would need headroom; it shows only that the clock closes round 5B's gap.
+- **Reused runs.** Round 6A's c4g-evidence figures on ieh and ieh2 are round 5A's runs (another day; same code path, pre-registered). The main contrast (clock − guard) uses only fresh runs; "the clock explains c4g-evidence" uses them, and the fresh c4g-evidence runs on ledger (0.967) agree.
 - **Small k.** Most comparisons use k=2–3 on 2–4 tasks, while one task's noise spans 0.0–0.75 for Pi. Bootstrap CIs over 3–4 task deltas mostly reflect which tasks were sampled.
 - **Capped runs are floors.** Many swarm runs hit 3M; their score is truncated, and a capped run stops its swarmtest campaign.
 - **Rule drift.** The per-run cap moved from 1.5M to 3M, one arm went to k=2 by choice rather than by rule, F1 was stopped at 6 of 64 runs, and criba 2 pools criba 1's runs. All of this is logged in the notebook.
@@ -208,12 +245,16 @@ Round 5 tested those mechanisms in a benign, sandboxed setting, as two sub-round
 
 ## What would change the picture next
 
-1. **Clock-only arm:** c4g-guard + `clock`, against c4g-guard and c4g-evidence. Is the clock the ingredient behind ~1.0 on ieh and ieh2?
-2. **Compute-fair batch control:** L1 with isolated agents that also persist (clock), against the swarm with a clock. If the swarm still wins, that is coordination; if not, the L1 win was induced persistence.
+Rounds 6A and 6B answered the first two items of the previous list (the clock, and the compute-fair batch control); both favoured the persistent single agent. What is left:
+
+1. **A task panel calibrated against c4g-clock** (agreed with the user on 2026-10-02; band 0.3–0.6, k=3), in two regimes reported separately:
+   - **difficulty-limited:** the clock agent stays in the band at equal time and tokens. This is the compute-fair test of coordination;
+   - **volume-limited:** more work than one agent can do in the time limit. A swarm can win here by parallelism, which is a different claim from coordination and will be reported as such.
+2. **Why the clock works:** a control with a neutral line of the same size, and one showing tokens left, would separate "corrects a belief that time is short" from "a repeated cue to continue".
 3. **Stuck signals for open-ended tasks:** in optimisation tasks, help should trigger on quality (the visible score), not on a red check.
 4. **A promotion benchmark with partial credit.** DeepSWE's binary reward gives Pi and ArcSwarm 0 of 12.
 
-If (1) and (2) both favour persistent single agents, the honest conclusion is that, for this model and these tasks, a well-instructed single agent that does not stop beats a non-hierarchical swarm, and the project should report that.
+If the recalibrated panel also favours the persistent single agent, the project's answer is that, for this model, a well-instructed single agent that does not stop beats a non-hierarchical swarm.
 
 ## Record completeness
 
@@ -230,13 +271,14 @@ For each experiment: whether its question or theory was written down before meas
 | Adversarial review | — | — | — | `reports/2026-10-01-adversarial-review.md`, `reports/2026-10-01-review-subagent-reports.md` | led to the n=1 rule and round 5 |
 | Round 5A | yes (merged with round 4) | yes | `rows/runs.json`, `criba5-traces.md` | yes | yes |
 | Round 5B | yes | `batch/run-batch.mjs`, `lane.sh` | `batch/*/batch-result.json`, `batch/traces.md` | yes, plus `reports/2026-10-01-incident-theories.md` | yes |
+| Round 6 (6A, 6B) | yes, committed before launch (`d9a7510`) | `criba6-lanes.mjs`, `batch/run-batch.mjs`, `batch/lane.sh` | `rows/runs.json` (seed 20261020), `criba6-traces.md`, `batch/L1-{IC,EC}-r*/batch-result.json`, `batch/traces.md` | yes, `plan.md` and `reports/2026-10-02-round6-traces.md` | yes |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
 - pre-registrations were not version-controlled before commit `138a4d7`, so their timestamps are self-reported;
 - the F1a–c screens were not pre-registered separately;
 - the code version per run was not recorded before `46e756b`;
-- raw agent transcripts and workspaces are not in git (size); they are packed in a 23 MB archive described in [`archive/MANIFEST.md`](../archive/MANIFEST.md);
+- raw agent transcripts and workspaces are not in git (size); they are packed in a 23 MB archive described in [`archive/MANIFEST.md`](../archive/MANIFEST.md); round 6's raw runs are not in it yet and will go into the next archive;
 - the `fam_*` and `opt_*` task sources live in the separate swarmtest repository (`staging/`, commit `34c8385`), which has no public remote yet.
 
 ## Where the data is
@@ -249,12 +291,13 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the adversarial review and the subagent audits behind it;
   - the DeepSWE diagnosis;
   - the incident-inspired theories and how they fared;
+  - the round 6 transcript analyses (the clock, and coordination in the batches);
   - the construction and calibration of the task families.
-- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (247 runs in 104 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
-- `experiments/criba{1,2,3,5}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
+- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (268 runs in 125 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+- `experiments/criba{1,2,3,5,6}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
-- `experiments/batch/`: the round 5B driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).
+- `experiments/batch/`: the round 5B and 6B driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).
 - `profiles/`: every arm. `src/`: murmur itself. The commit history shows when each lever was added.
 - **Not in this repo:**
   - raw runs (transcripts, events, workspaces) live in `../swarmtest/runs/<campaign>/` and locally in `experiments/batch/*/`. They are packed into one archive, with a checksum and its layout in [`archive/MANIFEST.md`](../archive/MANIFEST.md);

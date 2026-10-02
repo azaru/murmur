@@ -6,22 +6,23 @@
 
 ## Findings so far (2026-10-02)
 
-Not yet, and the evidence points away from it. Six rounds, ~255M tokens and ~300 graded runs on hidden-test benchmarks (model `openai-codex/gpt-6-luna`):
+No. Seven rounds, ~315M tokens and ~345 graded runs on hidden-test benchmarks (model `openai-codex/gpt-6-luna`) point the same way: for this model and these tasks, a single agent that keeps working matches or beats every swarm configuration tried.
 
 - **Persistence of one agent beats coordination of several.**
   - A single murmur agent with short lessons beats Pi by about +0.25 at ~0.35M tokens.
   - A single agent with fresh-context relays beats every 3-agent arm on the same tasks.
-  - A single agent that sees the minutes it has left scores 0.99–1.0 on the two hardest extraction tasks.
+  - A single agent that sees the minutes it has left (a one-line clock on every tool result) scores 0.997 on three hard tasks, against 0.434 for the same agent without it. Without the clock, the agent gives up after 2–5 of its 18 minutes.
 - **Coordination mechanisms did not help** against a same-prompt single agent:
   - message boards, role menus, cheaper delivery channels and automatic notices;
   - verified findings and help-when-stuck signals;
   - file locks.
-- **The one positive swarm result is still unconfirmed.** In batches of four tasks, agents with a board beat isolated agents on one task family (+0.17, k=3), but spent 3x the tokens. The compute-fair control has not been run yet.
+- **The one positive swarm result was persistence.** In batches of four tasks, agents with a board beat isolated agents (+0.17, k=3) at 3x the tokens. Once the isolated agents also see the clock, the swarm with a clock scores the same (0.921 vs 0.925).
 - **What actually fails:**
   - agents stop early: work after the first green check predicts the score, Spearman 0.72–0.80;
   - they break a shared file with a chunked `write`;
   - they yield to a teammate ("X owns the file").
   - Coordination-only turns take 31–62% of a swarm's tokens.
+- **Still open:** the benchmark tasks now saturate for the clock agent (0.93–1.0), so whether coordination helps where a persistent single agent still has headroom is untested. The task panel is being recalibrated against it.
 
 ## The research record
 

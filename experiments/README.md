@@ -15,6 +15,7 @@ Everything needed to audit or rerun murmur's experiments. Start with the summary
 | Review | 10-01 | is the evidence sound? | "Findings of the adversarial review" | — | — | [`reports/2026-10-01-adversarial-review.md`](reports/2026-10-01-adversarial-review.md), [`reports/2026-10-01-review-subagent-reports.md`](reports/2026-10-01-review-subagent-reports.md) |
 | Round 5A | 10-01 | coordination vs compute within a task | "Round 5", "A" | `criba5/`, `criba5-lanes.mjs` | [`rows/runs.json`](rows/runs.json) (seed 20261015) | [`criba5-traces.md`](criba5-traces.md), [`reports/2026-10-01-incident-theories.md`](reports/2026-10-01-incident-theories.md) |
 | Round 5B | 10-01 | batches of tasks, agents and tokens proportional | "Round 5", "B" | [`batch/run-batch.mjs`](batch/run-batch.mjs), [`batch/lane.sh`](batch/lane.sh) | `batch/<lot>-<arm>-r<rep>/batch-result.json` | [`batch/traces.md`](batch/traces.md), [`reports/2026-10-01-task-families.md`](reports/2026-10-01-task-families.md) |
+| Round 6 | 10-02 | persistence vs coordination: is it the clock (6A)? compute-fair batch control (6B) | "Round 6" | `criba6/`, [`criba6-lanes.mjs`](criba6-lanes.mjs); `batch/lane.sh L1 <image> "IC EC"` | [`rows/runs.json`](rows/runs.json) (seed 20261020), `batch/L1-{IC,EC}-r<rep>/batch-result.json` | [`criba6-traces.md`](criba6-traces.md), [`batch/traces.md`](batch/traces.md) ("Round 6B"), [`reports/2026-10-02-round6-traces.md`](reports/2026-10-02-round6-traces.md) |
 
 ## By kind
 
@@ -24,10 +25,11 @@ Everything needed to audit or rerun murmur's experiments. Start with the summary
   - `2026-10-01-review-subagent-reports.md`: methodology audit, trace scan for measurement bugs, DeepSWE diagnosis.
   - `2026-10-01-incident-theories.md`: the coordination theories taken from the July 2026 swarm incident, and how they fared.
   - `2026-10-01-task-families.md`: the `fam_*` and `opt_*` task families, their validation and calibration.
+  - `2026-10-02-round6-traces.md`: why the agent without a clock stops, what the clock agent does with the time, and coordination in the 6B batches.
 - **Per-run data:**
-  - [`rows/runs.json`](rows/runs.json): every swarmtest run since 09-30, 247 rows. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+  - [`rows/runs.json`](rows/runs.json): every swarmtest run since 09-30, 268 rows. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
   - `batch/*/batch-result.json`: one per batch.
-- **Per-agent behaviour:** `criba{1,2,3,5}-traces.md`, from `scripts/traces.mjs`; [`batch/traces.md`](batch/traces.md) for the batches.
+- **Per-agent behaviour:** `criba{1,2,3,5,6}-traces.md`, from `scripts/traces.mjs`; [`batch/traces.md`](batch/traces.md) for the batches.
 - **Campaign configs:** `*.json` here and in `criba*/`. They are swarmtest configs: competitors, seed, repetitions and token budget. Drivers are `*-lanes.mjs` and `criba1-driver*.mjs`.
 - **Raw agent transcripts:** not in git; see [`../archive/MANIFEST.md`](../archive/MANIFEST.md).
 
