@@ -913,7 +913,7 @@ Smoke tests (scripted, from a copy in `tmp/`):
 - **AGENTS.md** gets a rule: no bulk transcript reads while campaigns run.
 - **Archive:** round 11's raw runs are packed locally. Uploading the archives waits for the user to say where.
 
-## Round 12: the tool levers (fixed before measuring, 2026-10-03 15:00; the user approved the plan)
+## Round 12: the tool levers (fixed before measuring, 2026-10-03 13:45; the user approved the plan)
 
 **Question.** Round 11's tool audit found that agents write a long file in several `write` calls, and each call replaces the file. The write guard caught all 5 cases in murmur, and Pi lost the file in 2 of 3 runs. Do an `append` tool and clearer `write`/`edit` descriptions remove the problem and the wasted calls? And is the guard still needed once agents have them? This round settles which tool set phase 2's murmur arms use.
 
