@@ -66,7 +66,7 @@ for (const stage of stages) {
         const arm = ARMS[name], id = `${stage}-${task}-${name}-r${rep}`;
         if (records().filter(r => same(r, task, arm)).length > rep || !take(id)) continue;
         const config = join(dir, `${id}.json`);
-        const competitors = name === "C1" ? [C1] : [arm, C1];
+        const competitors = name === "C1" ? [C1] : [C1, arm]; // under this seed make_plan swaps the two, so the arm runs first (checked on the plan field)
         writeFileSync(config, JSON.stringify({ ...base, ...limits, tasks: view, seed, repetitions: 1, competitors }, null, 2) + "\n");
         log(`start ${id}`);
         const limit = name === "C1" ? [] : ["--limit", "1"];

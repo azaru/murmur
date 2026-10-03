@@ -1216,6 +1216,12 @@ Explained to the user, decision pending: the optimisation lever (each agent pick
 - ST: all_done in 78 s, 0.44M. 12 `enter` events over 53 s.
 - RO: all_done in 93 s, 1.26M. All 12 agents first took builder, and 5 then switched to tester (3) or reviewer (2).
 
+**Deviation (2026-10-03 22:27): order check fixed after a wrong first launch.** The lane started at 22:08. The campaign meant for B on planning (`20261003T201626Z-f3578273`) ran C1 instead, with score 0.19. My `make_plan` check had read the first `variant` in `swarmtest plan`'s output. That output lists the config's competitors before the plan, so the check proved nothing: under seed 20261070 the shuffle swaps the two competitors.
+- I killed the lane at 22:24, during the next campaign (`20261003T202310Z-6f2a1318`, the TL slot, also running C1 and with no record). That campaign is listed in `criba15/invalid.txt` and not counted.
+- The driver now lists `[C1, arm]`. The `plan` field (`plan[0]`) shows the 12-agent arm first for all 12 arm × task pairs (checked).
+- The C1 run in `f3578273` is a valid C1 run, with the same task, seed, caps and code. Done-detection counts it as C1's second planning repetition, so C1's planning r1 does not run again.
+- The locks of the B and TL slots were removed, and the lane was relaunched.
+
 **Budget (estimate).**
 - C1: 4 runs × ~0.4M ≈ 1.6M.
 - Swarm arms: 6 × 2 × (planning ~11M + shop2 ~3.5M) ≈ 174M. Upper bound 6 × 2 × 24M = 288M.
