@@ -878,7 +878,7 @@ Changes made the same day, with the user's OK:
 
 **Deviations and infrastructure:**
 - Stage C was added after looking at interim results (addendum 2), so R4 is a declared deviation.
-- The machine's load rose to 33–91 between 12:25 and 12:39, from the user's other processes (I/O, not murmur). It overlapped the C campaigns opt_packing2 r1, opt_shop2 r1, opt_roster2 r1, ledger r1 and ieh r1. The opt solvers are wall-clock bound, so those runs may be slightly worse. No rule's verdict hangs on a single one of them except packing2 in R4, whose 0.81 run (r2) ran outside the spike.
+- **Correction (same day): the cause of the load spike is not established, and this session's own activity is the likeliest one.** The machine's load rose to 33–91 between about 12:25 and 12:39. It began when this session's two read-only analysis subagents started (the tool audit and the trace analysis). They bulk-read several hundred transcript files under `nice -n 15` with at most 3 processes and ran no grader. Codex processes started at the same moment. The load fell from 91 to 15 within 3 minutes after the second subagent finished. CPU use stayed at about 8 of 12 cores, so the load was mostly I/O wait, which `nice` does not throttle. The first version of this note blamed the user's other processes, which was not supported. The spike overlapped the C campaigns opt_packing2 r1, opt_shop2 r1, opt_roster2 r1, ledger r1 and ieh r1, and the optimisation solvers are wall-clock bound, so those runs may be slightly worse. No verdict depends on them: R4 passes on the other five tasks without packing2, packing2's 0.81 run (r2) ran after the spike, and calibration uses stage P. Lesson: bulk transcript reads wait for the end of wall-clock-bound campaigns.
 
 **Decision.** By the rules: R1 passes narrowly, R2 is not decided, and R3 and R4 pass. Without an oracle, the clock (knowing the time left) is the one lever that moves a single agent, and it works without the norms. As pre-registered, phase 2 has only shop2 and ospec, which is too few to order anything. The tasks are not adjusted in this round; the proposal for phase 2 goes to the user.
 
@@ -886,7 +886,7 @@ Changes made the same day, with the user's OK:
 
 From the tool audit above, and at the user's request to review the tools (code in the commit that adds this note). Both are new levers that default to off, so no existing profile changes. All 39 profiles load as before.
 - `append: true` offers `append(path, content)`, which adds text to the end of a file and creates it if missing. It goes through the same claim and stale-file bookkeeping as `write`. When it is on, the `writeGuard` refusal text suggests it.
-- `toolDescriptions` now also accepts the built-in tools the profile offers, and `append`. murmur then registers its own copy of Pi's tool with the new description. Pi's one-line summaries and guidelines in the system prompt stay as they are.
+- `toolDescriptions` now also accepts the built-in tools the profile offers, and `append`. murmur then registers its own copy of Pi's tool with the new description. Pi's one-line summaries and guidelines in the system prompt stay as they are. The write guard keys on the tool's name (`isToolCallEventType` compares `toolName` only; checked in the SDK), so it still fires when `write`'s description is replaced.
 
 Smoke tests (scripted, from a copy in `tmp/`):
 - writing a file in three parts with `write` + `append` + `append` gave the exact six lines;

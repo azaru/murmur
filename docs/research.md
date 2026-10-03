@@ -391,7 +391,7 @@ The tool audit (`experiments/reports/2026-10-03-tool-usage-audit.md`) found that
 - **A visible oracle in every task (the main threat; it invalidates rounds 1–10 as evidence for real work).** All 31 swarmtest tasks declare `acceptance_command: npm run test`. The default briefing told agents to call done when it passes, and the main profiles' norms described hidden tests. The strongest findings (the clock, norms, persistence after green, selection by a printed score) may be artefacts of that oracle. They are hypotheses until re-tested oracle-free.
 - **Round 11 phase 1:**
   - stage C (the clock without norms) was added after interim results were seen;
-  - a load spike (33–91, the user's other processes) at 12:25–12:39 overlapped five C campaigns, three of them with wall-clock-bound optimisation solvers;
+  - a load spike (33–91, mostly I/O wait) at 12:25–12:39 overlapped five C campaigns. It coincided with this session's own read-only transcript analysis (two subagents) and is likely due to it, three of them with wall-clock-bound optimisation solvers;
   - ospec runs are all capped, so its score is a floor;
   - the optimisation graders give 0 to anything at or above the naive cost, which hides differences between weak solutions.
 - **Ceiling.** With the clock, ieh, ledger and durable score 0.93–1.0 for the single agent. Round 6B cannot show a coordination benefit that would need headroom; it shows only that the clock closes round 5B's gap.
