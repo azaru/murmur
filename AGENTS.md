@@ -22,6 +22,16 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 - swarmtest unit tests: `cd ../swarmtest && python3 -m unittest discover -s tests`. Exactly 4 known failures in `test_runner`; anything else is a regression.
 - Analysis: `node scripts/traces.mjs <campaign-dir>...` and `node scripts/arms.mjs <campaign-dir>... --a <arm> --b <arm>`.
 
+## Realism first: no lab-only experiments
+
+Rounds 1–10 (to 2026-10-02) gave every agent an oracle that real work does not give: a visible acceptance check that revealed correctness, sometimes a printed score that predicted the hidden grade, and prompts that said "call done when the check passes" and "hidden tests will probe every clause". Those results measure how configurations use an oracle, not how they work, and they do not count as evidence until re-tested without it. To keep this from happening again:
+
+- **Before building any task, lever, norm or profile, ask: "would this exist in real work?"** If the answer is no, do not build it. When a design choice makes a result easier to get in the lab than in real work, raise it with the user before running anything.
+- **No oracle in tasks.** A visible check may confirm only that the program runs and its output has the documented format. It must not reveal validity, correctness, cost or quality, and must not print anything that predicts the grade. Agents write their own tests and judge quality themselves.
+- **No grading hints.** Nothing the agents see may describe how they are graded: no "hidden tests", no grader instance sizes, no best-known values.
+- **murmur must not depend on a task-provided signal.** Prompts, norms and levers must work for a task that has no test at all. Levers keyed to the acceptance check (`doneGate`, `doneAfterGreen`, `helpAfter`, check notices) are lab-only and stay off in new profiles.
+- **The hidden grader only measures.** Never tune a prompt, norm or lever against what it rewards.
+
 ## Talking to the user
 
 - The user does not remember profile and arm abbreviations (`c4g-clock`, C1s, S3s, B0, TI…). Every time you name a profile or arm in a message, proposal or summary, add a short plain-words gloss, for example "C1 (one agent with the clock)" or "S2 (two agents, parallel attempts, a board)".
@@ -29,7 +39,7 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 ## Rules for changing murmur
 
 - **Never edit a profile in place.** Every candidate is a new file, because results are keyed by profile path and hash.
-- **New levers default to off** and must leave existing profiles' behaviour unchanged (for example, register Pi hooks only when a lever needs them). Document each lever in `src/profile.ts` and in README.md's profile sentence.
+- **New levers default to off** and must leave existing profiles' behaviour unchanged (for example, register Pi hooks only when a lever needs them). Document each lever in `src/profile.ts` and in README.md's profile sentence. Changing an existing default needs the user's OK and a note in `experiments/plan.md` with the commit, because it changes every profile that relies on it.
 - **Campaigns run murmur straight from `src/`.** While any campaign is running (`pgrep -fl swarmtest`), edit a copy under `tmp/claude-<task>/src`, typecheck it there, smoke-test it from the copy (`npx tsx tmp/claude-<task>/src/cli.ts run ...`), and only then copy the files over `src/` in one step.
 - Smoke-test every new mechanism with a cheap scripted task that forces the behaviour (see the write-guard and claim tests in the history), plus one default-profile run to check nothing regressed.
 - Keep `src/` small and readable, but code quality comes before line count: the old ~600-line figure is a warning to review the design, not a limit that forbids a lever. Never compact code into something harder to read just to save lines; if a file grows past the point where it reads well, split it.
@@ -45,7 +55,7 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 - Every swarmtest campaign needs one single-agent competitor (Pi n=1, or a murmur n=1 control such as `c4g-guard`).
 - **Parallel lanes:** the `criba*-lanes.mjs` drivers run several campaigns at once (`nohup node <driver> <lane> &`), with a lock file per task × arm and done-detection by the campaign seed. Three to five concurrent campaigns have not affected graders so far.
 - Long jobs: start them with `nohup ... &`, not as a tool's background command (those are capped at 2 hours). Wait with a background `until <condition>; do sleep 60; done` command so the session is notified once.
-- **Benchmark tasks:** build new tasks in `../swarmtest/staging/<id>/`, never directly in `tasks/`. swarmtest loads every directory in `tasks/` when a campaign starts, and a half-built task makes every new campaign fail. Validate with a private symlinked view of `tasks/`, then `mv` the finished task in. Calibrate against Pi (k=3) and against the strong single agent c4n1 (k=3, band 0.3–0.6). Rules are in `experiments/hard-tasks.md`.
+- **Benchmark tasks:** build new tasks in `../swarmtest/staging/<id>/`, never directly in `tasks/`. swarmtest loads every directory in `tasks/` when a campaign starts, and a half-built task makes every new campaign fail. Every task must be oracle-free (see "Realism first"). Validate with a private symlinked view of `tasks/`, then `mv` the finished task in. Calibrate against Pi (k=3) and against the strong single agent c4n1 (k=3, band 0.3–0.6). Rules are in `experiments/hard-tasks.md`.
 - **Check that traces are saved before a campaign:** Pi in `state/messages.json`, murmur in `state/murmur/` (`events.jsonl`, `result.json`, `<agent>[.N].messages.json`).
 
 ## Keeping the research record

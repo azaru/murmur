@@ -6,6 +6,8 @@
 
 ## Findings so far (2026-10-02)
 
+> **Caveat (2026-10-03): these results are not evidence for real work.** In every round so far the agents had an oracle that real work does not give: a visible acceptance check that revealed correctness, on some tasks a printed score that predicted the hidden grade, and prompts that said "call done when the check passes". The findings below describe how configurations use that oracle. They are being re-tested on oracle-free tasks with an oracle-free prompt, and until then they are hypotheses.
+
 No. Eleven rounds, ~585M tokens, 441 graded swarmtest runs and 34 task batches on hidden-test benchmarks (model `openai-codex/gpt-6-luna`) point the same way: for this model and these tasks, a single agent that keeps working matches or beats every swarm configuration tried.
 
 - **Persistence of one agent beats coordination of several.**
@@ -69,7 +71,7 @@ docker run --rm -v "$PWD/runs:/murmur/runs" -v "$PWD/examples:/murmur/examples:r
 
 | Field | Meaning |
 |---|---|
-| `goal`, `done`, `check` | The goal, the definition of done, and the acceptance command, which must exit 0 |
+| `goal`, `done`, `check` | The goal, the definition of done, and the acceptance command. The default briefing shows agents only the goal; `done` and `check` are placeholders a profile may use. The check runs at the end to record the result, and only levers keyed to it (lab-only) use it during the run |
 | `project` | Optional folder copied into the workspace |
 | `agents` | 1–12 |
 | `provider`, `model`, `thinking` | The Pi model to run |
@@ -127,7 +129,7 @@ With OAuth subscriptions the reported cost may be 0 or a catalog estimate, so us
 - Every agent works in the same folder with Pi's read/bash/edit/write.
 - Coordination tools: `post`, `inbox`, `team`, `budget`, `claim`/`release` (advisory) and `done(reason)`.
 - A busy agent gets one steer when messages arrive; an idle one is re-prompted.
-- Every briefing carries a verifiable definition of done and an explicit way to give up (`done`).
+- The default briefing assumes no test or check: agents decide when the goal is met, and `done(reason)` is also the explicit way to give up.
 - The swarm ends when all are done, when nobody works and nobody has unread mail, or on budget/timeout.
 - The acceptance check always runs at the end; the trace records posts, tool calls, usage and done reasons.
 - A profile with `messaging: false` registers only `done`: the control condition for measuring the board's value.

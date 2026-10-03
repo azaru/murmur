@@ -758,6 +758,16 @@ Single agents spend 0.2–1.1M per run (C1s 0.21–1.11M, C1 0.26–0.57M by tas
 - **Regrades during live campaigns.** The panel D analysis subagent ran 137 public checks (sequential, `nice -n 15`) between about 19:07 and 19:50 UTC, while B0 r1–r2 and the first S2 campaigns ran. Their graders and in-run checks are wall-clock based, so those runs may have been slightly slowed. The B0 report also found load-driven budget cuts in the capped shop2 run (`20261002T190159Z-488ba77b`, 19:02–19:13 UTC), which falls inside that window. The runs are kept; the effect cannot be separated after the fact.
 - My background wait hit the tool's 2-hour limit and was replaced by a re-armed monitor. Nothing was missed: all three lanes logged "no work left" and every campaign exited 0.
 
+## 2026-10-03: the oracle problem, and an oracle-free default prompt
+
+The user pointed out that every round so far gave the agents an oracle real work does not give. All 31 swarmtest tasks declare `acceptance_command: npm run test`, a visible check that reveals correctness, and on packing2 and shop2 it also prints a score that predicts the hidden grade. murmur's default briefing said "when the definition of done is met and the check passes, call done", and the c4g-* norms said "hidden tests will probe every clause". Rounds 1–10 therefore measure how configurations use an oracle. **They are not evidence for real work, and everything will be re-tested on oracle-free tasks.**
+
+Changes made the same day, with the user's OK:
+- **Default briefing changed** (`src/profile.ts`, in the commit that adds this note): it shows the goal only, with "When you judge that the goal is met, call done(reason)…". `{done}` and `{check}` stay available as placeholders. Every profile without its own `briefing` (33 of 35) now behaves differently, so rounds 1–10 are reproducible only at commit `9d1180b` or earlier. Smoke: the default profile on `examples/trio.json` passed (all_done, 134k tokens), and the transcript shows the new briefing with no acceptance check.
+- **AGENTS.md** gets a "Realism first" rule: no oracle in tasks, no grading hints, murmur must not depend on a task-provided signal, and the check-keyed levers (`doneGate`, `doneAfterGreen`, `helpAfter`, check notices) are lab-only.
+- **Blind variants** of opt_packing2, opt_shop2 and opt_roster2 are being built in `../swarmtest/staging/*_blind` (the check confirms only that `solve.py` runs and writes the documented format; the hidden grader is unchanged). Calibration and the re-test plan will be pre-registered here before anything is launched.
+- The raw runs of rounds 6–10 were packed into `archive/murmur-raw-runs-20261003.tar.xz` (see `archive/MANIFEST.md`).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

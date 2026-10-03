@@ -11,18 +11,13 @@ export const KNOWN_BOARD_TOOLS = [...BOARD_TOOLS, ...THREAD_TOOLS];
 /** Everything about how murmur behaves that an experiment may change. */
 export const DEFAULT_PROFILE = {
   messaging: true,
+  /** No test or check is assumed: real work may have none. {done} and {check} stay available to profiles that want them. */
   briefing: `You are {name}, an agent in a swarm. You work in the current directory; stay inside it.
 {team}
 Goal:
 {goal}
 
-Definition of done:
-{done}
-
-Acceptance check (run from the current directory, must exit 0):
-{check}
-
-When the definition of done is met and the check passes, call done(reason). If you conclude the goal cannot be reached, call done(reason) with the reason instead of pushing on.`,
+When you judge that the goal is met, call done(reason). If you conclude it cannot be reached, call done(reason) with the reason.`,
   teamBriefing: `
 Teammates: {teammates}. You all share this folder and this goal; nobody is in charge.
 Coordinate on the shared board:
