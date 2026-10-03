@@ -1,0 +1,33 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "post",
+    "role"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. post(text) messages all of them, and their posts appear at the end of your tool results.\nYou may take a role from this menu with role(name), and switch later; nobody assigns roles:\n{roles}\n",
+  "writeGuard": true,
+  "clock": true,
+  "roles": {
+    "builder": {
+      "summary": "build a part of the deliverable",
+      "instructions": "You build. Pick a part of the goal that nobody else is building, say on the board which part you take, implement it, and run it yourself on realistic inputs. Keep the interfaces others depend on stable, and post when you change one."
+    },
+    "tester": {
+      "summary": "write and run your own tests of the goal's requirements",
+      "instructions": "You test. Nobody else checks the work. Read the goal's requirements, write tests of your own that exercise them, including edge cases and inputs of realistic size, run them against the current shared work, and post concrete failures (input, expected, actual) so whoever owns that part can fix them. Fix small ones yourself."
+    },
+    "reviewer": {
+      "summary": "read the shared work against the goal and fix what disagrees",
+      "instructions": "You review. Read the goal, then the work in the shared folder, looking for requirements that are missing, misread or inconsistent between parts. Fix what you find directly when the fix is local; otherwise post it to whoever wrote that part."
+    },
+    "integrator": {
+      "summary": "keep the parts working together as one deliverable",
+      "instructions": "You integrate. Make sure the parts fit together: one entry point, consistent interfaces and formats, nothing half-written. Run the whole deliverable end to end often, and fix breakage at the seams."
+    },
+    "explorer": {
+      "summary": "try a different approach to the hardest part",
+      "instructions": "You explore. Find the hardest part of the goal and try an approach different from the one in the shared work, in a file of your own. Compare both on the same inputs, post what you measured, and replace the shared version only if yours is better by your own comparison."
+    }
+  }
+}

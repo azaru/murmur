@@ -1150,6 +1150,70 @@ Explained to the user, decision pending: the optimisation lever (each agent pick
 - optional branches (2 agents): `branch`, write by absolute path, `merge`; both files reached the shared folder; 16k;
 - default profile on `examples/trio.json`: all_done, 155k tokens, same tool list and event types as before.
 
+## Round 15, stage A: twelve agents against one, without an oracle (fixed before measuring, 2026-10-03 21:55; pending the user's OK)
+
+**Question.** Without an oracle, at a shared cap of 12M tokens per run, does any of five levers change a 12-agent swarm pronouncedly? And does any 12-agent configuration beat one agent with the clock at the same cap? The user chose the levers (18:50 note) and the scope of six arms (21:52).
+
+**Tasks** (12M cap and 1200 s per run, for every arm):
+- constrained_planning_hard_blind (difficulty). C1 scored 0.465 and 0.421 in rounds 13–14, at a 3M cap it never reached.
+- opt_shop2_blind (exploration). C1 scored 0.16, 0.12 and 0.18, and single runs range from 0.00 to 0.54.
+- Volume (ospec) is stage B, pre-registered separately after stage A.
+
+**Arms** (all with the neutral briefing, the write guard and the clock; posts arrive at the end of tool results):
+- **C1** = `solo-clock`: one agent with the clock and the write guard, the control.
+- **B** = `s2-board-clock` at n=12: twelve equals with a post-only board, the base swarm.
+- **TL** = `n12-tasks`: B plus the shared task list.
+- **BR** = `n12-branches`: B plus a required branch per agent; only merged work reaches the shared folder.
+- **BO** = `n12-branches-optional`: B plus optional branches, opened with `branch()` from the shared folder.
+- **ST** = `n12-stagger`: B plus turn-based entry; each agent enters after the previous one's 2nd turn, or 60 s after it entered.
+- **RO** = `n12-roles`: B plus a role menu with a sub-prompt per role (builder, tester, reviewer, integrator, explorer). Agents pick a role or none, and nobody assigns. The texts are new and have no check or test-oracle language.
+
+**Before launch:** each of the 5 new profiles gets a 12-agent smoke on `examples/trio.json` (about 2M in total). It checks that the mechanism appears in the events (task-list events, merges, `enter` events, roles taken) and that the run ends.
+
+**Execution.** `experiments/criba15-lanes.mjs 1 A`, one lane, because 12 agents load a 12-core machine.
+- Seed 20261070. One campaign per task × arm × repetition, 28 campaigns in all.
+- A swarm arm's campaign lists `[arm, C1]` and runs with `--limit 1`. With this seed `make_plan` puts the arm first for all 12 arm × task pairs (checked with `swarmtest plan`). C1 gets its own campaigns.
+- Order: repetition 0 of every task and arm (C1 first), then repetition 1, so a stop leaves complete k=1 coverage.
+- `--max-total-tokens 30000000` per campaign.
+- **Quota stop:** after each campaign the driver parses the transcripts for an assistant message with `stopReason: "error"` and "usage limit" in `errorMessage`. It does not grep, because some workspaces contain the phrase. On a hit, the campaign goes to `criba15/invalid.txt` and is skipped by done-detection, its lock is removed so a resumed lane retakes it, and a `STOP` file ends the lane. The detector flags all 3 tested invalid round-14 campaigns and neither of 2 valid ones. Resuming means deleting `STOP` and relaunching, and is noted here when it happens.
+
+**Rules** (per-task means over the 2 tasks, k=2; scores of capped runs count as they are; tokens and minutes are reported next to every score):
+- **L, each lever arm against B (TL, BR, BO, ST, RO):**
+  - **pronounced better** if its two-task mean is ≥ +0.10 above B's and it is above B on both tasks;
+  - **pronounced worse** if it is ≤ −0.10 below and below on both tasks;
+  - otherwise **no pronounced difference**.
+- **S, each 12-agent arm against C1:**
+  - **beats C1** if its mean is ≥ +0.05 above and it is above on both tasks;
+  - **loses** if it is ≤ −0.05 below and below on both tasks;
+  - otherwise **not decided**.
+  - Both get the same cap and not the same spend, so the ratio of tokens spent is reported with each verdict.
+- **Promotion to stage B** (ospec_green_blind, 24M and 1920 s, k=2, pre-registered before it runs): B, C1 and the pronounced-better arms (at most two, by mean). If none is pronounced better, B, C1 and the lever arm with the highest mean.
+- **Descriptive** (from `events.jsonl` and `scripts/traces.mjs`, by a script written before reading the results):
+  - duplicated work, measured as how many agents write each deliverable file;
+  - write refusals; merges and conflicts;
+  - task-list use (adds, takes, dones, drops);
+  - roles taken, and entry times;
+  - the board's share of calls;
+  - done reasons, and tokens and minutes per run.
+- **Predictions:**
+  - TL is pronounced better on planning, because in the n=12 smoke every agent wrote every file.
+  - BR is not pronounced: merge conflicts replace overwrites.
+  - B against C1 is not decided or loses, as S2c (two agents with the clock) did in round 14.
+
+**Known threats, written before measuring:**
+- Two tasks at k=2, and shop2 swings 0.00–0.54 within an arm. That is why the lever threshold is +0.10 and why it requires both tasks.
+- Most 12-agent planning runs will likely end on the 12M cap. Every swarm arm shares that cap, so hitting it is part of the comparison, not a defect.
+- Planning's solver has a 20 s wall-clock limit, and 12 agents load the machine. The load is logged at launch and again during the run.
+- The round may span several quota windows, so resumed campaigns run hours apart.
+- C1 never used more than 1M on these tasks, so its 12M cap changes nothing for it. It is re-run anyway, as the user decided, and rounds 13–14's C1 means are reported next to it, descriptively.
+
+**Budget (estimate).**
+- C1: 4 runs × ~0.4M ≈ 1.6M.
+- Swarm arms: 6 × 2 × (planning ~11M + shop2 ~3.5M) ≈ 174M. Upper bound 6 × 2 × 24M = 288M.
+- Smokes: ~2M.
+- **Total ~178M**, upper bound ~290M: about two quota windows (one ran out after ~108M today).
+- Wall clock about 5–6 hours of running time.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

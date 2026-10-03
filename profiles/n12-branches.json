@@ -1,0 +1,11 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "post"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}, equals working on the same goal in a shared folder; nobody is in charge. post(text) messages all of them, and their posts appear at the end of your tool results.\nYou work in your own branch: your current directory is a private copy of the shared folder. merge(message) integrates your work into the shared folder and brings in what teammates merged; update() brings in their merged work without integrating yours. Work that is not merged does not reach the shared folder.\n",
+  "writeGuard": true,
+  "clock": true,
+  "branches": "required"
+}

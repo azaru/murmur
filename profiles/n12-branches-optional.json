@@ -1,0 +1,11 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "post"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. post(text) messages all of them, and their posts appear at the end of your tool results.\nIf you want to work apart from the others, branch() gives you a private copy of this folder at an absolute path, and merge(message) integrates it back.\n",
+  "writeGuard": true,
+  "clock": true,
+  "branches": "optional"
+}

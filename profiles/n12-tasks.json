@@ -1,0 +1,11 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "post"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. post(text) messages all of them, and their posts appear at the end of your tool results.\nA shared task list is open to everyone: tasks() shows it, task_add adds an item, task_take takes one, task_done marks yours done, and task_drop gives one back.\n",
+  "writeGuard": true,
+  "clock": true,
+  "taskList": true
+}
