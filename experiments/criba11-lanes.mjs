@@ -20,6 +20,8 @@ const P = ["opt_packing2_blind", "opt_shop2_blind", "opt_roster2_blind", "inform
 const solo = ["solo", "solo-norms", "solo-norms-clock"].map(v => agent(v, 1));
 const STAGES = {
   P: { seed: 20261053, tasks: P, competitors: [{ system: "pi", agents: 1 }, ...solo], counted: solo[2] },
+  // Added after 10 of 21 campaigns (see plan.md): the clock without norms, paired with solo; solo-clock runs last.
+  C: { seed: 20261055, tasks: P, competitors: [solo[0], agent("solo-clock", 1)], counted: agent("solo-clock", 1) },
   O: { seed: 20261054, tasks: ["ospec_brown_blind"], competitors: [solo[2]], counted: solo[2],
     limits: { token_budget: 6_000_000, timeout_seconds: 1920 } },
 };

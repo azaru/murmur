@@ -804,6 +804,14 @@ Changes made the same day, with the user's OK:
 
 **Addendum (2026-10-03 10:35, after 4 of 21 campaigns had ended and before any rule was applied).** The user asked whether the clock is a lab artefact too. Decision: it is kept. Users set the token and time caps when they launch a swarm, so showing the time left is available in real use. R3 stays as written. Tokens and minutes per arm are reported next to every score, so that a clock gain bought with much more spend reads as such (descriptive).
 
+**Addendum 2 (2026-10-03 11:30): stage C, the clock without norms. It is a deviation, added after 10 of 21 campaigns had ended and after looking at interim per-task means.** The user pointed out that the design is not factorial. R3 measures the clock only together with the norms, so a gain cannot be attributed to the clock alone, and the norms' "use the time while something is unverified" may be what the clock acts on.
+- **New arm:** solo-clock, which is solo plus `clock` with no norms. Its smoke on the one-agent trio task passed (20k tokens, clock lines present, no norms).
+- **Stage C:** seed 20261055, campaigns `[solo, solo-clock]` on the six P tasks, k=3, 3M and 1200 s. `make_plan` runs solo first (checked), so solo gets a second paired sample.
+- **R4, the clock without norms:** solo-clock − solo, paired within stage C, with the same thresholds as R1–R3.
+- **Descriptive:** the interaction, (solo-norms-clock − solo-norms) against (solo-clock − solo). The two contrasts come from different campaigns, so it is not paired.
+- **Budget:** ~(0.1 + 1.0)M × 18 ≈ 20M.
+- It runs after stage P, on the same 2 lanes.
+
 **Not in this phase:** swarms and prompt optimisation. Phase 2 (swarm against single agent on the tasks that pass calibration) and prompt optimisation (autotuner, with held-out tasks) are pre-registered after phase 1.
 
 **Budget (estimate):** P ~2M per campaign (Pi 0.3, solo 0.3, solo-norms 0.5, solo-norms-clock 0.8) × 18 ≈ 36M. O 3 × 6M = 18M. **Total ~54M**, upper bound ~70M.
