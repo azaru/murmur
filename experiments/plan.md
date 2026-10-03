@@ -948,7 +948,7 @@ Smoke tests (scripted, from a copy in `tmp/`):
 
 **Budget.** About 4 × (0.2 + 4 × 1.0)M ≈ 17M.
 
-### Round 12 result and rule applied (2026-10-03 15:15; launched 13:46 with 2 lanes, code `07b6cf4`)
+### Round 12 result and rule applied (2026-10-03 15:00; launched 13:46 with 2 lanes, code `07b6cf4`)
 
 4 campaigns (`20261003T114648Z-eb5e6f59`, `20261003T114708Z-d6a79cc8`, `20261003T122450Z-91dce613`, `20261003T122926Z-b6187a74`), seed 20261056, 20 runs, **18.7M tokens**. All exit 0, no run capped. Table from `scripts/writes.mjs`, committed before the results; per run in `round12-writes.md`.
 
@@ -976,7 +976,7 @@ Smoke tests (scripted, from a copy in `tmp/`):
 - **Pi did not chunk this time** (0 of 4 runs, against 3 of the round-11 Pi runs on this task). Its edits fail as often as G's.
 - Edit failure rates on this task (18–33%) are well above the audit's 8.5% across all tasks. The clock runs make many regex edits in `extract.py`.
 
-## Round 13: calibration of the third wave of blind tasks for phase 2 (fixed before measuring, 2026-10-03 15:25; within the plan the user approved)
+## Round 13: calibration of the third wave of blind tasks for phase 2 (fixed before measuring, 2026-10-03 15:05; within the plan the user approved)
 
 **Question.** Which of four harder blind contract tasks leave phase 2's control enough headroom? The control is C1 = solo-clock (one agent with the clock and the write guard, no norms; round 12 kept the guard alone).
 
