@@ -1058,6 +1058,36 @@ Contrasts:
 
 **Budget (estimate).** D is 2 × 3 × (0.3 + 1.0 + 0.1 + 0.3)M ≈ 10M. V is 2 × 3 × (6 + 6 + 1 + 2)M ≈ 90M. **Total ~100M**, upper bound ~120M.
 
+### Round 14: stopped by the model quota after stage D (2026-10-03 18:10; launched 16:45 with 2 lanes, code `429cbb3`)
+
+**What happened.** At 17:58 the Codex subscription returned "The usage limit has been reached". Two C1 runs on the V tasks were cut short:
+- ospec_green r0 stopped at 2.54M tokens;
+- ospec_brown r1 stopped at 4.88M tokens.
+
+Three later runs made no model call at all (0 tokens). The lanes were killed at 18:00. The quota error appears in exactly these 5 campaigns, found by a scan of every assistant message with `stopReason: "error"` since 10-02:
+- `20261003T154230Z-6d817148`
+- `20261003T154429Z-aa563b23`
+- `20261003T155828Z-2a47e79f`
+- `20261003T155900Z-43e22a14`
+- `20261003T155905Z-fca20609`
+
+They are **invalid**: not counted, not deleted, and the driver's done-detection must skip them if the round resumes. The valid runs are stage D (6 campaigns, 24 runs, 10.5M) and C1 on ospec_brown r0 (`20261003T153036Z-5adae0be`, capped at 6.04M, 0.589). The round used 24.0M tokens.
+
+**The pre-registered rules need all 4 tasks, so they are not applied.** Stage D, descriptive only (mean score [tokens, minutes], k=3):
+
+| task | C1 (one agent, clock) | S2c (two agents, board, clock) | solo (one agent, no clock) | S2 (two agents, board, no clock) |
+|---|---|---|---|---|
+| constrained_planning_hard_blind | 0.421 [0.57M, 7.3] (0.39 0.45 0.42) | 0.315 [1.97M, 9.1] (0.28 0.22 0.45), 1 capped | 0.356 [0.07M, 1.9] | 0.363 [0.18M, 1.9] |
+| opt_shop2_blind | 0.184 [0.09M, 2.2] (0.52 0.03 0.00) | 0.307 [0.46M, 3.8] (0.12 0.26 0.54) | 0.266 [0.06M, 1.2] | 0.366 [0.12M, 1.3] |
+
+- S2c − C1: −0.11 and +0.12, at 3.5× and 5× the tokens.
+- S2 − solo: +0.01 and +0.10, at 2–2.6× the tokens.
+- shop2 swings 0.00–0.54 within one arm, so it orders nothing at k=3.
+- **A teammate does not keep agents working.** S2's agents stop at 1.9 and 1.2 minutes, like solo (1.9 and 1.2). They make 15 and 10 calls each against 10 and 11, and they end with done or go quiet. With the clock, S2c's agents keep working: 52 and 24 calls each, 9.1 and 3.8 minutes. That matches C1 (33 and 14 calls, 7.3 and 2.2 minutes). The keep-working effect comes from the clock, not from the teammate.
+- In S2c, 21–24% of each agent's calls go to the board. On planning S2c spent 3.5× C1's tokens and scored lower.
+
+**Decision.** The round stops here. The user asked for a recap and a pause to analyse and decide before anything else runs.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -1114,3 +1144,4 @@ Contrasts:
 | 2026-10-03 | round 11 phase 1 C (18 campaigns `20261003T100141Z-ac05f238` → `20261003T110416Z-9d1641ed`, seed 20261055) | solo, solo-clock | 6 blind tasks × 3 | 9.4M | solo-clock − solo +0.335, 6/6 | R4 passes; only shop2 and ospec pass calibration |
 | 2026-10-03 | round 12 tools (4 campaigns `20261003T114648Z-eb5e6f59` → `20261003T122926Z-b6187a74`, seed 20261056, code `07b6cf4`) | Pi, G solo-clock, GA +append, GDA +append+descriptions, DA without guard | information_extraction_hard_blind × 4 | 18.7M | G 0.909, GA 0.843, GDA 0.747, DA 0.972, Pi 0.443; with append: 1 write per run instead of 3, 0 refusals, fewer wasted calls | phase 2 keeps G by the rule (GA and GDA fail the score clause, which noise dominates) |
 | 2026-10-03 | round 13 calibration (12 campaigns `20261003T130631Z-ab2cbcbc` → `20261003T141549Z-9d503af0`, seeds 20261057 and 20261059, code `7f2c84d`) | Pi, C1 solo-clock | planning, ieh2, fam_payouts × 3 (3M); ospec_green × 3 (6M) | 25.3M | C1 0.465 / 0.847 / 1.000 / 0.425 (2/3 capped) | planning and ospec_green enter phase 2 |
+| 2026-10-03 | round 14 phase 2, stage D + 1 V run (7 valid campaigns `20261003T144556Z-fb37df36` → `20261003T153036Z-5adae0be`, seeds 20261066 and 20261060, code `429cbb3`; 5 more invalid, see the note) | C1, S2c, solo, S2 | planning, shop2 × 3; ospec_brown × 1 (C1) | 24.0M | descriptive: S2c − C1 −0.11 / +0.12 at 3.5–5× tokens; S2 stops as early as solo | stopped by the model quota; rules not applied |
