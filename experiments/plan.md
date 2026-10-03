@@ -802,6 +802,8 @@ Changes made the same day, with the user's OK:
   - R2 helps.
   - R3 is smaller than in round 6A and possibly not decided, because without a red check the clock has nothing to keep the agent working against.
 
+**Addendum (2026-10-03 10:35, after 4 of 21 campaigns had ended and before any rule was applied).** The user asked whether the clock is a lab artefact too. Decision: it is kept. Users set the token and time caps when they launch a swarm, so showing the time left is available in real use. R3 stays as written. Tokens and minutes per arm are reported next to every score, so that a clock gain bought with much more spend reads as such (descriptive).
+
 **Not in this phase:** swarms and prompt optimisation. Phase 2 (swarm against single agent on the tasks that pass calibration) and prompt optimisation (autotuner, with held-out tasks) are pre-registered after phase 1.
 
 **Budget (estimate):** P ~2M per campaign (Pi 0.3, solo 0.3, solo-norms 0.5, solo-norms-clock 0.8) × 18 ≈ 36M. O 3 × 6M = 18M. **Total ~54M**, upper bound ~70M.
