@@ -1100,6 +1100,23 @@ Pending the user's decision:
 
 Round 14's V stage is not resumed, because it was a 2-agent design.
 
+## 2026-10-03 18:50: the user's selection of levers for 12-agent swarms
+
+Re-test without an oracle, at n=12:
+- the **threaded board** (`threads`);
+- **delivery** `attach` and `pull` only (`steer` is dropped);
+- the **roles menu**, with a sub-prompt per role (`roles` instructions);
+- **staggered entry**, done properly: each agent enters after the previous one has taken 1–3 turns, or after at least 60 s (today's `spawnGapSeconds` is time-only);
+- **claims and releases with a timeout** (`claimLease`).
+
+New levers to build:
+- a **task list** that every agent can add to and take from while working. The user rates it the most promising;
+- **branches per agent**, in two variants: required and optional.
+
+Explained to the user, decision pending: the optimisation lever (each agent picks a distinct approach, candidates in a shared folder, scored by the agents' own evaluator).
+
+**Budget: per swarm.** The swarm shares one token cap, and comparisons are at equal total tokens. This is the user's choice "B, presupuesto por swarm". The amount per swarm run is to be set from a 12-agent smoke.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
