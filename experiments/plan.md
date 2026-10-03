@@ -911,7 +911,7 @@ Smoke tests (scripted, from a copy in `tmp/`):
   - On re-checking the audit, the write guard's "shorter and starts differently" clause also caught 5 writes in earlier swarms that would have erased a teammate's file, and it already refuses empty writes. So **the guard is not changed**; the proposal to drop that clause is withdrawn.
   - The advice for failed edits (copy backslashes exactly) goes into `edit`'s description, with no new code.
 - **AGENTS.md** gets a rule: no bulk transcript reads while campaigns run.
-- **Archive:** the raw runs of rounds 11–14 will be packed together after phase 2, because packing is bulk I/O and cannot run during campaigns. Uploading the archives waits for the user to say where.
+- **Archive:** the user decided (17:15) that the archives need not be uploaded and that packing is not a priority. The raw runs of rounds 11–14 stay in `../swarmtest/runs/`, and none of them is packed for now.
 
 ## Round 12: the tool levers (fixed before measuring, 2026-10-03 13:45; the user approved the plan)
 
