@@ -1150,7 +1150,7 @@ Explained to the user, decision pending: the optimisation lever (each agent pick
 - optional branches (2 agents): `branch`, write by absolute path, `merge`; both files reached the shared folder; 16k;
 - default profile on `examples/trio.json`: all_done, 155k tokens, same tool list and event types as before.
 
-## Round 15, stage A: twelve agents against one, without an oracle (fixed before measuring, 2026-10-03 21:55; pending the user's OK)
+## Round 15, stage A: twelve agents against one, without an oracle (fixed before measuring, 2026-10-03 21:55; the user approved the plan at 21:59)
 
 **Question.** Without an oracle, at a shared cap of 12M tokens per run, does any of five levers change a 12-agent swarm pronouncedly? And does any 12-agent configuration beat one agent with the clock at the same cap? The user chose the levers (18:50 note) and the scope of six arms (21:52).
 
@@ -1208,6 +1208,13 @@ Explained to the user, decision pending: the optimisation lever (each agent pick
 - Planning's solver has a 20 s wall-clock limit, and 12 agents load the machine. The load is logged at launch and again during the run.
 - The round may span several quota windows, so resumed campaigns run hours apart.
 - C1 never used more than 1M on these tasks, so its 12M cap changes nothing for it. It is re-run anyway, as the user decided, and rounds 13–14's C1 means are reported next to it, descriptively.
+
+**Profile smokes at n=12 (2026-10-03 22:00–22:08, after the OK; `examples/trio.json`, 3M cap; runs deleted).** All five ran and the mechanisms appear in the events:
+- TL: all_done in 62 s, 0.41M. 11 agents called `tasks()`, and nobody added an item on this small task.
+- BR: **ended on the 3M cap after 4 min.** All 12 agents wrote the same three files in their branches, and 29 of 33 merge calls hit conflicts. 5 merges went through, `done` was refused 3 times for unmerged work, and 7 agents were left with unmerged files.
+- BO: all_done in 52 s, 0.41M. Nobody opened a branch.
+- ST: all_done in 78 s, 0.44M. 12 `enter` events over 53 s.
+- RO: all_done in 93 s, 1.26M. All 12 agents first took builder, and 5 then switched to tester (3) or reviewer (2).
 
 **Budget (estimate).**
 - C1: 4 runs × ~0.4M ≈ 1.6M.
