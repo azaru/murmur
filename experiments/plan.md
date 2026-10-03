@@ -897,6 +897,57 @@ Smoke tests (scripted, from a copy in `tmp/`):
 
 **Not measured yet.** If murmur's arms get tools Pi lacks, every murmur-against-Pi comparison must say so.
 
+## 2026-10-03: decisions after round 11 phase 1 (the user approved every recommendation in the proposal)
+
+- **Phase 2 tasks:** harder blind contract tasks, built in `../swarmtest/staging/`, calibrated against solo-clock (one agent with the clock, no norms) at k=3 into the band [0.3, 0.6]. opt_shop2_blind and ospec_brown_blind also enter, because they passed phase 1's calibration. No continuous-metric regrade of the optimisation tasks and no tighter caps.
+- **Phase 2 arms:**
+  - the control is C1 = solo-clock;
+  - S2 has two agents with the clock, a shared folder, a post-only board and the neutral prompt;
+  - S2 without the clock is paired against solo, to test whether a teammate acts as the "keep working" cue.
+  - Every campaign has its n=1 competitor, ospec runs one campaign per arm, and there are at most 2 lanes.
+- **Cost rule for phase 2:** a swarm arm "wins" only if its per-task mean is ≥ +0.05 above the control, it wins ≥ 4 of the tasks, and its mean tokens per run are ≤ 2× the control's. If it clears the score bar at a higher cost, it is recorded as "wins at higher cost". Tokens and minutes are reported next to every score.
+- **Prompt optimisation (autotuner):** the rule "never tune against what the grader rewards" is read as follows. Tuning may use the scores of a training set of tasks whose graders are then retired from measurement, and every claim is confirmed on held-out blind tasks the tuner never saw. This reading is approved by the user. The objective and the task split will be pre-registered after phase 2's tasks exist.
+- **Tools:** a separate small round measures the new tool levers (pre-registered below) before phase 2 uses them.
+  - On re-checking the audit, the write guard's "shorter and starts differently" clause also caught 5 writes in earlier swarms that would have erased a teammate's file, and it already refuses empty writes. So **the guard is not changed**; the proposal to drop that clause is withdrawn.
+  - The advice for failed edits (copy backslashes exactly) goes into `edit`'s description, with no new code.
+- **AGENTS.md** gets a rule: no bulk transcript reads while campaigns run.
+- **Archive:** round 11's raw runs are packed locally. Uploading the archives waits for the user to say where.
+
+## Round 12: the tool levers (fixed before measuring, 2026-10-03 15:00; the user approved the plan)
+
+**Question.** Round 11's tool audit found that agents write a long file in several `write` calls, and each call replaces the file. The write guard caught all 5 cases in murmur, and Pi lost the file in 2 of 3 runs. Do an `append` tool and clearer `write`/`edit` descriptions remove the problem and the wasted calls? And is the guard still needed once agents have them? This round settles which tool set phase 2's murmur arms use.
+
+**Task.** information_extraction_hard_blind is the only blind task where chunked writes happened (14 of 21 round-11 runs). k=4. Every run gets 3M tokens and 1200 s.
+
+**Arms** (all n=1 with the clock; new profiles, which load and register the expected tools):
+- **G** = `solo-clock`: the neutral prompt, the write guard and the clock. This is the reference.
+- **GA** = `solo-clock-append`: G plus `append`.
+- **GDA** = `solo-clock-tools`: GA plus replaced `write` and `edit` descriptions.
+  - `write` says the content becomes the whole file, and to use edit or append.
+  - `edit` says to copy oldText exactly, with backslashes as in the file and not doubled, and to re-read after a failure.
+- **DA** = `solo-clock-tools-noguard`: GDA without the guard.
+- **Pi**: the Pi agent without murmur, as the unguarded reference.
+
+**Execution.** `experiments/criba12-lanes.mjs <lane> T` with 2 lanes and seed 20261056. One campaign per repetition with all five arms. `make_plan` runs Pi, G, GDA, DA, then GA (checked), and no arm is expected near the cap.
+
+**Measures** (from the transcripts and `events.jsonl`, by a script written before reading the results):
+- **shrinking writes**: a `write` whose content is under half the tracked length of the existing file. The length is tracked from earlier write, append and edit calls in the same run. Each one is counted as refused or as gone through.
+- **lost content at the end**: the final deliverable is under half the largest size it reached during the run.
+- **edit failure rate**: edit calls that return an error, over all edit calls.
+- **wasted calls**: calls from a refused write or failed edit to the next successful write or edit on the same path.
+- **append use**, and the score and tokens (descriptive).
+
+**Rule for phase 2's tool set:**
+- Use **GDA** if all of these hold over its 4 runs:
+  - (a) no shrinking write goes through, and no run loses content at the end;
+  - (b) its mean score is not below G's by more than 0.05;
+  - (c) its edit failure rate is not above G's by more than 3 points.
+- Otherwise use **GA** if it meets (a) and (b). Otherwise keep **G**.
+- DA against GDA is descriptive: if DA passes (a) too, the guard was redundant once append and the descriptions exist.
+- Any murmur arm with `append` has a tool Pi lacks, and every murmur-against-Pi comparison will say so.
+
+**Budget.** About 4 × (0.2 + 4 × 1.0)M ≈ 17M.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

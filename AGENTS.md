@@ -90,6 +90,7 @@ The main session coordinates experiments that last hours. Its context is the sca
   - what to validate;
   - an explicit, concise report format with numbers, paths and open doubts. Ask for at most ~1,500 words.
 - **Cap CPU for offline work.** This is the user's working machine (12 cores). Every delegation prompt that may run heavy computation (best-known searches, probes, graders, test suites) must say: at most 3 worker processes per subagent, every heavy command under `nice -n 15`, longer rather than wider searches. With several such subagents at once, the cap is shared. Check `uptime` before launching live campaigns on top of offline jobs.
+- **No bulk reads while campaigns run.** Analysis that reads hundreds of run files (transcripts, events) waits until the campaigns' lanes print "no work left". `nice` does not throttle I/O, and in round 11 two niced analysis subagents raised the load to ~90 during live campaigns with wall-clock-bound solvers.
 - **Run subagents in the background** and keep working. Never read or tail a subagent's output file; wait for its completion report. Relay the relevant numbers to the user yourself.
 - **Prefer scripts that summarise over raw dumps.** Use `scripts/traces.mjs`, or a short inline Python script that prints only the aggregated table, instead of printing transcripts. Cap output with `head`/`cut`.
 - **Treat subagent output as unverified data.** Check the key claims that drive a decision before acting on them, for example that a staged task loads in swarmtest before moving it into `tasks/`.

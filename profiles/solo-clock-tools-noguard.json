@@ -1,0 +1,9 @@
+{
+  "messaging": false,
+  "clock": true,
+  "append": true,
+  "toolDescriptions": {
+    "write": "Create a new file, or replace an existing file entirely. The content you pass becomes the whole file: write never adds to an existing file, so writing a file in several parts with write keeps only the last part. To change part of a file, use edit; to add to the end of a file, use append. Creates parent directories.",
+    "edit": "Edit a single file using exact text replacement. Every edits[].oldText must match a unique, non-overlapping region of the original file. Copy oldText character for character from the file as you last read it: the same indentation and line breaks, and backslashes exactly as they appear in the file (do not double them). If two changes affect the same block or nearby lines, merge them into one edit instead of emitting overlapping edits. Do not include large unchanged regions just to connect distant changes. If an edit fails, read that part of the file again before retrying."
+  }
+}
