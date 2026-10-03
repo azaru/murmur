@@ -976,6 +976,29 @@ Smoke tests (scripted, from a copy in `tmp/`):
 - **Pi did not chunk this time** (0 of 4 runs, against 3 of the round-11 Pi runs on this task). Its edits fail as often as G's.
 - Edit failure rates on this task (18–33%) are well above the audit's 8.5% across all tasks. The clock runs make many regex edits in `extract.py`.
 
+## Round 13: calibration of the third wave of blind tasks for phase 2 (fixed before measuring, 2026-10-03 15:25; within the plan the user approved)
+
+**Question.** Which of four harder blind contract tasks leave phase 2's control enough headroom? The control is C1 = solo-clock (one agent with the clock and the write guard, no norms; round 12 kept the guard alone).
+
+**Tasks.** They were built and checked as in `reports/2026-10-03-blind-panel-wave3.md`. Graders are identical to the originals, and reference scores were re-run before launch.
+- constrained_planning_hard_blind (planning);
+- information_extraction_hard2_blind (ieh2);
+- fam_payouts_blind (an analytics contract);
+- ospec_green_blind (a volume-bound OpenSpec project).
+
+**Arms.** Pi (the Pi agent without murmur) and C1, both n=1, k=3.
+
+**Execution.** `experiments/criba13-lanes.mjs <lane> K G`, with 2 lanes, because planning's solver has a 20 s wall-clock limit.
+- Stage K: seed 20261057, planning, ieh2 and fam_payouts, 3M and 1200 s.
+- Stage G: seed 20261059, ospec_green_blind, 6M and 1920 s, as for ospec_brown.
+- `make_plan` runs C1 last under both seeds (checked).
+
+**Rule.** A task enters phase 2 if C1's mean is in [0.3, 0.6]. Capped runs count as floors, and a task with ≥ 1/3 of C1 runs capped is flagged. opt_shop2_blind and ospec_brown_blind are already in from round 11.
+- If fewer than 2 of the 4 new tasks enter, the next blind wave is built before phase 2. Its candidates are the fallbacks listed in the wave-3 report: data_analysis_hard, fam_billing, fam_clinic and fam_shipments.
+- Pi's means are descriptive.
+
+**Budget.** K is about 9 × 1.2M ≈ 11M. G is about 3 × 6.3M ≈ 19M. ~30M in total.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

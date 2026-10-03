@@ -64,4 +64,4 @@ Private view `tmp/claude-blind3/tasks-view/` (4 symlinks into staging) plus a co
 - `diff -rq` against each source shows changes only in `task.json`, the documentation files listed above and `public_check.py`, plus the deleted `holdout/build_workspace.py` in ieh2. `grader.py`, `holdout/` and `solution/` are identical. Confirmed.
 - A case-insensitive search of each blind task's `workspace/` and `task.json` for hidden, grader, graded, score, scoring, best-known, baseline, evaluat and weight finds only domain words: instance weights, supplier scorecards, promotion evaluation. Confirmed.
 - The four prompts say the acceptance command only checks that the program runs and its format. planning's "Quality" section asks for a good plan without describing grading. Read.
-- Not yet re-run: the reference scores and the loader check. Graders are not run while campaigns are live; this happens before calibration.
+- Re-run before calibration (no campaign live): the reference solution scores 1.0 on all four blind graders, each check passes on the reference, and swarmtest's `plan` loads the four tasks through a private view. Confirmed.
