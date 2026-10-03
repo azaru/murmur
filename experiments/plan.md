@@ -1260,7 +1260,7 @@ Mean score [mean tokens, minutes] (runs), k=2:
 - **Promotion to stage B:** B, C1 and ST, because ST is the only pronounced-better arm.
 
 **Reading, before the transcripts:**
-- Both verdicts that "beat C1" rest on shop2. That task's single runs span 0.00–0.76, and C1 itself scored 0.55 and 0.27 there.
+- Both verdicts that "beat C1" lean on shop2. That task's single runs span 0.00–0.76, and C1 itself scored 0.55 and 0.27 there.
 - On planning every 12-agent arm except BO lands at 0.39–0.47, against C1's 0.275. C1's two planning runs (0.36 and 0.19) are below its rounds 13–14 means (0.465, 0.421).
 - At k=2, a "pronounced" verdict is a screen result, not a confirmed effect.
 
@@ -1288,7 +1288,7 @@ Mean score [mean tokens, minutes] (runs), k=2:
 - **Conflict markers could reach main (fixed).** In BR `8b326a02`, lark ran `git add` on a file that still had conflict markers, and `merge` let it through. Commit `f557f35` on main starts with `<<<<<<< HEAD` ✓ and stayed for about 76 s, until robin's merge replaced it. The marker check looked only at files git still listed as unmerged. It now scans every changed or new file (fix and test in the commit that adds this note). The run still scored 0.76, the best BR run.
 - **The default `wake` text says "Call inbox", but the round-14 and round-15 swarm profiles offer no `inbox`** ✓. There were 8 wakes in 4 runs. One agent posted "I do not have an inbox tool", and one ended its turn on it, which produced the run's quiescent end (`0a019874`). Fixing it changes a default, so it goes to the user.
 - The write guard refuses a clean rewrite of a file with markers, because the rewrite is shorter and starts differently. Agents worked around it with `rm` then `write`.
-- With 12 agents on one machine, two-instance solver checks hit Pi's bash timeout (50 bash failures in `83c3aae1`).
+- With 12 agents on one machine, two-instance solver checks hit their bash timeouts (50 bash failures in `83c3aae1`).
 
 
 ## Campaign registry

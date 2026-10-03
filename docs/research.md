@@ -6,11 +6,19 @@ This is the curated record of every experiment run with murmur so far: the quest
 
 **Direction (2026-10-03, after round 14).** The user restated the goal: the only goal is a better swarm and knowing when a swarm is useful, now with 12 agents. Every lever tested with an oracle is to be re-tested without one ([lever recount](../experiments/reports/2026-10-03-lever-recount.md)).
 
+**Status (2026-10-04, after round 15 stage A, the first 12-agent screen without an oracle).** At a shared 12M cap on planning and opt_shop2 (k=2), two 12-agent arms beat one agent with the clock at 23–27× its tokens: required branches per agent (+0.19) and staggered entry (+0.16). Both verdicts lean on shop2, whose single runs span 0.00–0.76, and on C1 planning runs below its earlier means. Against the base 12-agent swarm, staggered entry is pronounced better (+0.20) and the task list pronounced worse (−0.10, at the threshold). The transcripts support a mechanism for staggered entry on planning only (one early agent claims the deliverable, later ones validate) and show no task-list effect at all (it was barely used). A screen at k=2 orders nothing for certain. Stage B (volume) is next, with B, C1 and ST. See [Round 15](#round-15-stage-a-twelve-agents-against-one-1885m-tokens-code-f8a6693).
+
 **Status (2026-10-03, after round 11 phase 1, the first round without an oracle).** Swarms have not been tested without an oracle yet. For a single agent on 7 blind tasks, one lever matters: a visible clock (time left). It raises the contract tasks from 0.26–0.60 to 0.71–0.99, at 4–10× the tokens, with or without norms. Generic engineering norms are not decided, and murmur's agent beats Pi only narrowly (+0.07, carried by one task). Only two blind tasks leave the clock agent headroom (shop2 and ospec), so phase 2 (swarm against single agent) needs harder tasks first. See [Round 11, phase 1](#round-11-phase-1-the-single-agent-without-an-oracle-398m-tokens-code-7651a12).
 
 **Status before the oracle problem (2026-10-02, after round 10, with an oracle): the evidence answers the question negatively for the tasks tested.** No swarm configuration has met the success criterion. Round 6 confirmed that the strongest results come from a *single* agent that keeps working: a one-line clock explains the best single agent, and once isolated agents get the same clock, the swarm's only win disappears. What remains open is whether coordination helps on tasks where a persistent single agent still has headroom. Rounds 7 and 8 rebuilt the panel around the clock agent: four planning and optimisation tasks where it stops on a green check short of the quality ceiling (panel D), and two medium OpenSpec projects where it runs out of tokens at about 0.45 (panel V). Rounds 9 and 10 put swarms against it on that panel: they lose on V, and on D they win only on one task, packing2, where the single agent sometimes stops early on a low score. A plain single agent that does not stop early matches them.
 
 ## TL;DR
+
+**Without an oracle, 12 agents (round 15 stage A, planning and opt_shop2, 12M shared cap, k=2):**
+- Required branches per agent (BR, 0.534) and staggered entry (ST, 0.506) beat one agent with the clock (C1, 0.343) by the pre-registered rule, at 23–27× its tokens. The base swarm (B, 12 equals with a post-only board) is not decided against C1 (0.305).
+- Against B: ST is pronounced better, the task list (TL) pronounced worse at the threshold, and optional branches, roles and BR are not pronounced (each moves in opposite directions on the two tasks).
+- On planning, staggered entry works as hoped: the first agent claims the planner and the later ones validate it (1.5 full writers per run against 5.0 in B). On shop2, final scores follow the cost of the solver the swarm ends with. Two zeros (TL, B) came from reviewers replacing a wall-clock search with fixed policies.
+- A merge bug (conflict markers reaching the shared folder through a hand-staged file) is fixed. The default wake text tells agents to call an `inbox` tool these profiles do not offer.
 
 **Without an oracle (round 11 phase 1, single agents only, 7 blind tasks, k=3):**
 - **The clock is the one lever that works.** Showing the time left raises the single agent on the three contract tasks from 0.36–0.59 to 0.91–0.96 with norms (R3, +0.255, 6/6) and from 0.26–0.44 to 0.71–0.99 without them (R4, +0.335, 6/6). It costs 4–10× the tokens (0.3–1.0M against ~0.1M) and 3–4× the minutes.
@@ -404,6 +412,38 @@ The tasks were planning and opt_shop2 (stage D), plus ospec_brown and ospec_gree
 - **A teammate is not a "keep working" cue.** S2's agents stop at 1–2 minutes, like solo. With the clock, both swarm and single agents keep working.
 - **Where the clock barely helps (planning, an algorithmic gap), two agents do not help either.** They spend 21–24% of their calls on the board and 3.5× the tokens. shop2 swings 0.00–0.54 within one arm at k=3.
 
+### Round 15, stage A: twelve agents against one (188.5M tokens, code `f8a6693`)
+
+The user restated the goal (a better swarm, and knowing when one is useful), moved to 12 agents, and chose the levers. Three were new, all default off:
+- turn-based staggered entry;
+- a shared task list, like an issue tracker;
+- a git branch per agent with `merge` and `update`, required or optional.
+
+Every arm had the clock and the write guard, and every run got the same 12M cap and 20 minutes, the single agent included. The tasks were constrained_planning_hard_blind and opt_shop2_blind, at k=2.
+
+| arm | planning | shop2 | mean | tokens per run |
+|---|---:|---:|---:|---:|
+| C1, one agent with the clock | 0.275 | 0.412 | 0.343 | 0.30M |
+| B, 12 equals, post-only board | 0.415 | 0.195 | 0.305 | 5.6M |
+| TL, B + task list | 0.410 | 0.000 | 0.205 | 6.2M |
+| BR, B + required branches | 0.409 | 0.658 | 0.534 | 6.8M |
+| BO, B + optional branches | 0.034 | 0.209 | 0.122 | 10.2M |
+| ST, B + staggered entry | 0.473 | 0.539 | 0.506 | 8.2M |
+| RO, B + role menu | 0.387 | 0.409 | 0.398 | 9.9M |
+
+**Rules as applied:**
+- Against B, a lever is pronounced if it moves the mean by ≥ 0.10 in the same direction on both tasks. ST is pronounced better; TL is pronounced worse (−0.100).
+- Against C1, an arm wins if it is ≥ +0.05 above and above on both tasks. BR and ST win and BO loses.
+- Stage B (ospec_green_blind, 24M) takes B, C1 and ST.
+
+**From the transcripts** ([report](../experiments/reports/2026-10-04-round15-traces-analysis.md), model output, key claims checked by hand):
+- **Staggered entry on planning:** the first agent posted "I'm implementing" at 8 s, and each later entrant deferred and validated instead. On shop2 there was no such effect, and the pronounced verdict comes from shop2.
+- **Task list:** barely used (1–3 "inspect" items per run). Its zeros on shop2 match B's own zero: reviewers swapped a time-bounded search for fixed policies, which made the solver costlier than the grader's baseline.
+- **Optional branches on planning:** the shared planner ended broken (an untested edit merged 5 s before the cap, and a last-minute wave of direct edits).
+- **Required branches on shop2:** merges forced agents to compare solvers at each conflict, and both runs ended with one agent's best solver.
+- **Roles:** agents picked roles before reading the task, mostly builder, and both role runs on planning ended on the cap.
+- **Bugs:** conflict markers could reach main through a hand-staged file, now fixed. The default wake text names an `inbox` tool these profiles lack, and fixing it needs the user's OK.
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -425,6 +465,11 @@ The tasks were planning and opt_shop2 (stage D), plus ospec_brown and ospec_gree
 | Parallel attempts escape a bimodal single agent | 9, 10 (D) | **Supported only with a predictive selection signal**, and only against a single agent that stops early: on packing2 n=2 reached the good mode 3 of 3, but the plain clock agent in round 10's S3 campaigns matched n=3 (0.719 vs 0.679). Without a size-aware number, selection picks a solver that does not scale |
 | A text norm makes the single agent use a printed quality score | 10A | **Refuted**: C1s still ends on the first green at a low score (5 of 9 packing2 runs within 3 minutes); C1s − C1 = −0.20 on the signal tasks |
 | Larger swarms do better at the same tokens | 10 (size) | **Not supported at 3M** (descriptive, each n against its own C1s, k=3): n=2 0.69 > n=3 0.58 > n=10 0.50 on the signal tasks; rule verdicts not decided / adds / not decided; n=10 hits the cap after one draft per agent |
+| A 12-agent swarm beats one agent with the clock at equal caps, **without an oracle** | 15 A | **Mixed, screen only**: the base swarm is not decided (−0.04); with required branches (+0.19) or staggered entry (+0.16) it wins on both tasks at 23–27× the tokens, k=2 |
+| Staggered entry lets a structure form that later agents join | 15 A | **Supported on planning only** (1.5 full writers against 5.0, +0.06); pronounced better overall by the rule, but carried by shop2, where the mechanism did not appear |
+| A shared task list cuts duplicated work | 15 A | **Not supported as used**: agents barely used it (1–3 items per run). Pronounced worse by the rule, but its zeros on shop2 come from a failure B shares |
+| A branch per agent with merges protects shared work | 15 A | **Mixed**: required branches beat C1 and tie B on planning; optional branches loses (a broken planner merged at the cap). One mechanism bug fixed |
+| Roles chosen from a menu with sub-prompts, at n=12 | 15 A | **Not pronounced** (+0.09 against B); agents pick before reading, mostly builder |
 | A teammate keeps agents working the way the clock does, **without an oracle** | 14 (stage D) | **Not supported**: two agents without a clock stop at 1–2 minutes, like one |
 | A visible clock keeps a single agent working, **without an oracle** | 11 (R3, R4) | **Supported**: +0.255 with norms and +0.335 without them, 6 of 6 tasks each, at 4–10× the tokens on the contract tasks; agents never mention it |
 | Generic engineering norms help, **without an oracle** | 11 (R2) | **Not decided** (+0.020); a few more ad-hoc probes, same score |
@@ -444,6 +489,7 @@ The tasks were planning and opt_shop2 (stage D), plus ospec_brown and ospec_gree
 ## Threats to validity
 
 - **A visible oracle in every task (the main threat; it invalidates rounds 1–10 as evidence for real work).** All 31 swarmtest tasks declare `acceptance_command: npm run test`. The default briefing told agents to call done when it passes, and the main profiles' norms described hidden tests. The strongest findings (the clock, norms, persistence after green, selection by a printed score) may be artefacts of that oracle. They are hypotheses until re-tested oracle-free.
+- **Round 15 stage A** is a screen: 2 tasks at k=2, and shop2 swings 0.00–0.76 within one arm. Both "beat C1" verdicts lean on shop2 and on C1 planning runs below its rounds 13–14 means (0.275 against 0.42–0.47). ST's pronounced verdict rests on shop2. The first launch ran C1 in place of B on planning because of a wrong order check. That C1 run is valid and counted, one killed campaign is excluded, and all of it is logged in `plan.md`. Merges in BR could let conflict markers into the shared folder; this happened once, for about 76 s, in the best BR run. Eight wakes told agents to call an `inbox` tool their profile lacks.
 - **Round 14** stopped at the model quota: five campaigns are invalid (two C1 runs cut mid-run, three with no model call). They are listed in `plan.md` and excluded.
 - **Round 11 phase 1:**
   - stage C (the clock without norms) was added after interim results were seen;
@@ -499,6 +545,7 @@ For each experiment: whether its question or theory was written down before meas
 | Round 12 (tool levers) | yes, committed before launch (`286f625`, time fixed in `64c4543`; measurement script `07b6cf4`) | `criba12-lanes.mjs`, `criba12/` | `rows/runs.json` (seed 20261056), `round12-traces.md`, `round12-writes.md` | yes, in `plan.md` | yes |
 | Round 13 (phase-2 calibration) | yes, committed before launch (`bdeb8a6`, time fixed in `7f2c84d`) | `criba13-lanes.mjs`, `criba13/` | `rows/runs.json` (seeds 20261057, 20261059), `round13-traces.md` | yes, in `plan.md` | yes |
 | Round 14 (phase 2) | yes, committed before launch (`5da5d6d`, `429cbb3`) | `criba14-lanes.mjs`, `criba14/` | `rows/runs.json` (seeds 20261066, 20261060; 5 invalid campaigns listed in `plan.md`) | descriptive, in `plan.md` | stopped by the model quota after stage D; rules not applied |
+| Round 15 stage A (12 agents) | yes, committed before launch (`a277ff4`, `89fe4fe`; measurement script `fd1e239`; order fix and deviation `95bce30`) | `criba15-lanes.mjs`, `criba15/` | `rows/runs.json` (seed 20261070), `round15-traces.md` | yes, `reports/2026-10-04-round15-traces-analysis.md` | yes; stage B with B, C1 and ST |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -523,9 +570,10 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the round 9 transcript analyses (panels V and D) and the review of the Astra/ExploitGym swarm sources;
   - the round 10 transcript analyses (panel D with the signal and swarm size, the bare board B0, and the threaded V swarm TI);
   - the oracle audit and the build of the blind panel;
-  - the round 11 phase 1 transcript analysis and the tool-usage audit.
-- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (626 runs in 308 campaigns, including 5 invalid ones from the quota stop): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
-- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12,13}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
+  - the round 11 phase 1 transcript analysis and the tool-usage audit;
+  - the lever recount for 12-agent swarms and the round 15 transcript analysis.
+- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (654 runs in 336 campaigns, including 5 invalid ones from round 14's quota stop): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12,13,15}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).
