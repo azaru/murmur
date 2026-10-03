@@ -1088,6 +1088,18 @@ They are **invalid**: not counted, not deleted, and the driver's done-detection 
 
 **Decision.** The round stops here. The user asked for a recap and a pause to analyse and decide before anything else runs.
 
+## 2026-10-03 18:30: the goal restated, and 12-agent swarms
+
+The user restated the goal: **the only goal of murmur is a better swarm, and knowing when a swarm is useful.** From now on the swarm has **12 agents**, and the user wants pronounced differences. Every lever tested only with an oracle has to be re-tested without one, and new levers are to be designed.
+
+The recount, the new lever ideas and the cost estimates are in `reports/2026-10-03-lever-recount.md`.
+
+Pending the user's decision:
+- the budget per round, given the Codex quota (it ran out today after ~108M);
+- the framing: equal wall-clock with a single-agent-sized budget per agent, or equal total tokens.
+
+Round 14's V stage is not resumed, because it was a 2-agent design.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
