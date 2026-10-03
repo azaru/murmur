@@ -22,6 +22,10 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 - swarmtest unit tests: `cd ../swarmtest && python3 -m unittest discover -s tests`. Exactly 4 known failures in `test_runner`; anything else is a regression.
 - Analysis: `node scripts/traces.mjs <campaign-dir>...` and `node scripts/arms.mjs <campaign-dir>... --a <arm> --b <arm>`.
 
+## Talking to the user
+
+- The user does not remember profile and arm abbreviations (`c4g-clock`, C1s, S3s, B0, TI…). Every time you name a profile or arm in a message, proposal or summary, add a short plain-words gloss, for example "C1 (one agent with the clock)" or "S2 (two agents, parallel attempts, a board)".
+
 ## Rules for changing murmur
 
 - **Never edit a profile in place.** Every candidate is a new file, because results are keyed by profile path and hash.
