@@ -367,6 +367,19 @@ The task is information_extraction_hard_blind, the one blind task where agents w
 - **Rule.** The pre-registered score clause (not more than 0.05 below G) fails for GA and GDA, so phase 2 keeps G.
 - **Noise.** GDA and DA had the same effective tools, because the guard never fired in GDA, yet they differ by 0.22. At k=4 on one task, the score clause measures noise. The tools are not ruled out; they were measured with the wrong guard.
 
+### Round 13: calibrating harder blind tasks for phase 2 (25.3M tokens, code `7f2c84d`)
+
+Phase 1 left only two tasks with headroom for the clock agent, so four harder blind variants were built (`experiments/reports/2026-10-03-blind-panel-wave3.md`). Each was calibrated against Pi and C1 (solo-clock, phase 2's control) at k=3. A task enters phase 2 if C1's mean is in [0.3, 0.6].
+
+| task | Pi | C1 | verdict |
+|---|---:|---:|---|
+| constrained_planning_hard_blind | 0.38 | 0.465 | enters |
+| information_extraction_hard2_blind | 0.01 | 0.847 | out |
+| fam_payouts_blind | 0.97 | 1.000 | out |
+| ospec_green_blind (6M) | 0.07 | 0.425 (2/3 capped) | enters, flagged |
+
+Phase 2 (round 14) runs on planning, ospec_green, opt_shop2 and ospec_brown.
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -458,6 +471,7 @@ For each experiment: whether its question or theory was written down before meas
 | Round 9 (swarm vs clock agent, D and V) | yes, committed before launch (`3ea1d8d`) | `criba9-lanes.mjs`, `criba9/` | `rows/runs.json` (seeds 20261034, 20261035), `round9-traces.md` | yes, `reports/2026-10-02-round9-{v,d}-traces.md`, `reports/2026-10-02-astra-swarm-ideas.md` | yes |
 | Round 11 phase 1 (no oracle) | yes, committed before launch (`4a6b664`; addenda `50c1c61`, `7651a12`, stage C a declared deviation) | `criba11-lanes.mjs`, `criba11/` | `rows/runs.json` (seeds 20261053–20261055), `round11-traces.md` | yes, `reports/2026-10-03-round11-traces-analysis.md`, `reports/2026-10-03-tool-usage-audit.md` | yes; phase 2 waits for the user |
 | Round 12 (tool levers) | yes, committed before launch (`286f625`, time fixed in `64c4543`; measurement script `07b6cf4`) | `criba12-lanes.mjs`, `criba12/` | `rows/runs.json` (seed 20261056), `round12-traces.md`, `round12-writes.md` | yes, in `plan.md` | yes |
+| Round 13 (phase-2 calibration) | yes, committed before launch (`bdeb8a6`, time fixed in `7f2c84d`) | `criba13-lanes.mjs`, `criba13/` | `rows/runs.json` (seeds 20261057, 20261059), `round13-traces.md` | yes, in `plan.md` | yes |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -483,8 +497,8 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the round 10 transcript analyses (panel D with the signal and swarm size, the bare board B0, and the threaded V swarm TI);
   - the oracle audit and the build of the blind panel;
   - the round 11 phase 1 transcript analysis and the tool-usage audit.
-- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (572 runs in 284 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
-- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
+- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (596 runs in 296 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12,13}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).
