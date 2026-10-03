@@ -1024,7 +1024,7 @@ Smoke tests (scripted, from a copy in `tmp/`):
 - difficulty and optimisation (3M, 1200 s): constrained_planning_hard_blind, opt_shop2_blind;
 - volume (6M, 1920 s): ospec_brown_blind, ospec_green_blind.
 
-**Arms** (new swarm profiles; both passed a 2-agent smoke on the trio task: neutral briefing and posts attached to tool results. `s2-board-clock` showed clock lines and ended all_done at 55k tokens; `s2-board` showed none and ended all_done at 45k):
+**Arms** (new swarm profiles; both passed a 2-agent smoke on the trio task: neutral briefing and posts attached to tool results. `s2-board-clock` showed clock lines and ended all_done at 55k tokens; `s2-board` showed no clock lines, made 1 post (it ended before any post was attached) and ended all_done at 45k):
 - **C1** = `solo-clock`: one agent with the clock and the write guard, no norms. It is the control, because phase 1 found norms add nothing (R2, R4).
 - **S2c** = `s2-board-clock`: two agents in one folder with a post-only board (posts arrive with tool results), the write guard and the clock. The briefing says only that they are equals with no one in charge, and it has no norms and no check language.
 - **solo**: one agent, the write guard, no clock.
