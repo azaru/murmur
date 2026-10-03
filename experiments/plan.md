@@ -1229,6 +1229,41 @@ Explained to the user, decision pending: the optimisation lever (each agent pick
 - **Total ~178M**, upper bound ~290M: about two quota windows (one ran out after ~108M today).
 - Wall clock about 5–6 hours of running time.
 
+### Round 15 stage A result and rule applied (2026-10-04 01:15; lane 22:24–01:03 after the fix, code `f8a6693`, `src/` unchanged since)
+
+28 valid campaigns (seed 20261070, `20261003T200851Z-dd25b816` → `20261003T225411Z-391aeba3`; the list is in `round15-traces.md`), 28 runs, **188.5M tokens** (estimate ~178M). There was no quota stop and every campaign exited 0. The one invalid campaign is `20261003T202310Z-6f2a1318` (the killed TL slot, no record). Load was 3–6 during the lane.
+
+Mean score [mean tokens, minutes] (runs), k=2:
+
+| arm | constrained_planning_hard_blind | opt_shop2_blind | two-task mean |
+|---|---|---|---|
+| C1 (one agent with the clock) | 0.275 [0.54M, 5.8] (0.36 0.19) | 0.412 [0.06M, 1.3] (0.55 0.27) | 0.343 |
+| B (12 agents, post-only board) | 0.415 [7.40M, 5.8] (0.40 0.43) | 0.195 [3.77M, 3.5] (0.39 0.00) | 0.305 |
+| TL (B + task list) | 0.410 [8.57M, 5.7] (0.44 0.38), 1 capped | 0.000 [3.83M, 4.4] (0.00 0.00) | 0.205 |
+| BR (B + required branches) | 0.409 [7.91M, 6.9] (0.46 0.35) | 0.658 [5.64M, 6.7] (0.56 0.76) | 0.534 |
+| BO (B + optional branches) | 0.034 [12.02M, 6.1] (0.00 0.07), 2 capped | 0.209 [8.40M, 7.6] (0.02 0.40) | 0.122 |
+| ST (B + staggered entry) | 0.473 [9.67M, 6.6] (0.45 0.49), 1 capped | 0.539 [6.69M, 6.0] (0.38 0.69) | 0.506 |
+| RO (B + role menu) | 0.387 [12.03M, 6.5] (0.35 0.42), 2 capped | 0.409 [7.72M, 6.8] (0.42 0.39) | 0.398 |
+
+**Rules, applied as written** (differences in the order planning, shop2):
+- **L, against B:**
+  - **ST: pronounced better.** +0.058 and +0.344, mean +0.201.
+  - **TL: pronounced worse, exactly at the threshold.** −0.005 and −0.195, mean −0.100.
+  - BR: not pronounced. −0.007 and +0.463, mean +0.228; it is below B on planning by 0.007.
+  - BO: not pronounced. −0.381 and +0.014, mean −0.184.
+  - RO: not pronounced. −0.028 and +0.213, mean +0.093.
+- **S, against C1** (tokens spent per run against C1's 0.30M):
+  - **BR beats C1:** +0.134 and +0.246, mean +0.190, at 6.8M (23×).
+  - **ST beats C1:** +0.199 and +0.127, mean +0.163, at 8.2M (27×).
+  - **BO loses:** −0.241 and −0.203, mean −0.222, at 10.2M (34×).
+  - Not decided: B (+0.140 and −0.217, mean −0.038, 19×), TL (−0.139, 21×) and RO (+0.055 but −0.004 on shop2, 33×).
+- **Promotion to stage B:** B, C1 and ST, because ST is the only pronounced-better arm.
+
+**Reading, before the transcripts:**
+- Both verdicts that "beat C1" rest on shop2. That task's single runs span 0.00–0.76, and C1 itself scored 0.55 and 0.27 there.
+- On planning every 12-agent arm except BO lands at 0.39–0.47, against C1's 0.275. C1's two planning runs (0.36 and 0.19) are below its rounds 13–14 means (0.465, 0.421).
+- At k=2, a "pronounced" verdict is a screen result, not a confirmed effect.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -1288,3 +1323,4 @@ Explained to the user, decision pending: the optimisation lever (each agent pick
 | 2026-10-03 | round 14 phase 2, stage D + 1 V run (7 valid campaigns `20261003T144556Z-fb37df36` → `20261003T153036Z-5adae0be`, seeds 20261066 and 20261060, code `429cbb3`; 5 more invalid, see the note) | C1, S2c, solo, S2 | planning, shop2 × 3; ospec_brown × 1 (C1) | 24.0M | descriptive: S2c − C1 −0.11 / +0.12 at 3.5–5× tokens; S2 stops as early as solo | stopped by the model quota; rules not applied |
 | 2026-10-03 | smoke n=12 (`runs/20261003-193607-2967`, deleted) | s2-board-clock n=12 | trio × 1 | 347k | all_done in 52 s; 9 write refusals; all 12 agents wrote all 3 files | 12 agents work; tokens/min with small contexts only |
 | 2026-10-03 | smoke new levers (5 runs, deleted) | stagger by turns n=3, task list n=2, branches required n=2, branches optional n=2, default n=3 | scripted × 1, trio × 2 | 385k | all pass; see the 21:50 note | levers OK |
+| 2026-10-03/04 | round 15 stage A (28 valid campaigns `20261003T200851Z-dd25b816` → `20261003T225411Z-391aeba3`, seed 20261070, code `f8a6693`; 1 invalid, `20261003T202310Z-6f2a1318`) | C1 solo-clock n=1; B s2-board-clock, TL n12-tasks, BR n12-branches, BO n12-branches-optional, ST n12-stagger, RO n12-roles (n=12) | planning, shop2 × 2, 12M cap | 188.5M | two-task means: BR 0.534, ST 0.506, RO 0.398, C1 0.343, B 0.305, TL 0.205, BO 0.122 | L: ST pronounced better, TL pronounced worse (at threshold); S: BR and ST beat C1 at 23–27× tokens, BO loses; stage B gets B, C1, ST |
