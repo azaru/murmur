@@ -351,6 +351,22 @@ From the transcripts (`experiments/reports/2026-10-03-round11-traces-analysis.md
 
 The tool audit (`experiments/reports/2026-10-03-tool-usage-audit.md`) found that chunked writes happen only on ieh's large `extract.py`. About 8.5% of `edit` calls fail, mostly on over-escaped backslashes. It led to two new default-off levers, `append` and `toolDescriptions` for Pi's tools, which are not measured yet.
 
+### Round 12: the tool levers (18.7M tokens, code `07b6cf4`)
+
+The task is information_extraction_hard_blind, the one blind task where agents write a long file in parts, with k=4. Every murmur arm has the clock.
+
+| arm | score | tokens | writes per run | refusals | wasted calls per run | edit failures |
+|---|---:|---:|---:|---:|---:|---:|
+| Pi | 0.443 | 0.16M | 2.0 | – | 1.8 | 33% |
+| G (write guard) | 0.909 | 0.95M | 3.0 | 4 | 12.5 | 32% |
+| GA (guard + `append`) | 0.843 | 1.48M | 1.0 | 0 | 11.5 | 23% |
+| GDA (guard + `append` + clearer write/edit descriptions) | 0.747 | 0.75M | 1.0 | 0 | 9.5 | 23% |
+| DA (`append` + descriptions, no guard) | 0.972 | 1.34M | 1.0 | 0 | 6.5 | 18% |
+
+- **Mechanism.** With `append`, agents write the file once and add to it. Full-file re-sends and refusals disappear, wasted calls fall, and no arm lost content.
+- **Rule.** The pre-registered score clause (not more than 0.05 below G) fails for GA and GDA, so phase 2 keeps G.
+- **Noise.** GDA and DA had the same effective tools, because the guard never fired in GDA, yet they differ by 0.22. At k=4 on one task, the score clause measures noise. The tools are not ruled out; they were measured with the wrong guard.
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -375,6 +391,7 @@ The tool audit (`experiments/reports/2026-10-03-tool-usage-audit.md`) found that
 | A visible clock keeps a single agent working, **without an oracle** | 11 (R3, R4) | **Supported**: +0.255 with norms and +0.335 without them, 6 of 6 tasks each, at 4–10× the tokens on the contract tasks; agents never mention it |
 | Generic engineering norms help, **without an oracle** | 11 (R2) | **Not decided** (+0.020); a few more ad-hoc probes, same score |
 | murmur's single agent beats Pi, **without an oracle** | 11 (R1) | **Passes narrowly** (+0.071, 4 of 6, carried by one task); the old +0.25 had the oracle prompt in it |
+| An `append` tool and clearer write/edit descriptions remove chunked-write damage | 12 | **Supported on the mechanism**: 0 refusals and 1 write per run instead of 3, fewer wasted calls. The score effect is not measurable at k=4 on one task, and phase 2 keeps the guard alone by the rule |
 | murmur's scaffolding hides a swarm benefit (bare board, Astra/ExploitGym style) | 10B | **Not supported**: a post-only board with a one-line briefing ties the single agent (−0.006) at ~4x tokens |
 | A threaded board and an integration rule make a V swarm cheaper | 10C | **Refuted**: board-only turns 35.6% of tokens (S4 27.8%); integration breakage avoided, score unchanged (0.416) |
 
@@ -440,6 +457,7 @@ For each experiment: whether its question or theory was written down before meas
 | Round 10 (signal, size, bare board, cheaper V swarm) | yes, committed before launch (`fb8e16f`, timestamp fixed in `9d1180b`) | `criba10-lanes.mjs`, `criba10/` | `rows/runs.json` (seeds 20261036–20261040), `round10-traces.md` | yes, `reports/2026-10-02-round10-{d,b0,v}-traces.md` | yes |
 | Round 9 (swarm vs clock agent, D and V) | yes, committed before launch (`3ea1d8d`) | `criba9-lanes.mjs`, `criba9/` | `rows/runs.json` (seeds 20261034, 20261035), `round9-traces.md` | yes, `reports/2026-10-02-round9-{v,d}-traces.md`, `reports/2026-10-02-astra-swarm-ideas.md` | yes |
 | Round 11 phase 1 (no oracle) | yes, committed before launch (`4a6b664`; addenda `50c1c61`, `7651a12`, stage C a declared deviation) | `criba11-lanes.mjs`, `criba11/` | `rows/runs.json` (seeds 20261053–20261055), `round11-traces.md` | yes, `reports/2026-10-03-round11-traces-analysis.md`, `reports/2026-10-03-tool-usage-audit.md` | yes; phase 2 waits for the user |
+| Round 12 (tool levers) | yes, committed before launch (`286f625`, time fixed in `64c4543`; measurement script `07b6cf4`) | `criba12-lanes.mjs`, `criba12/` | `rows/runs.json` (seed 20261056), `round12-traces.md`, `round12-writes.md` | yes, in `plan.md` | yes |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -465,8 +483,8 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the round 10 transcript analyses (panel D with the signal and swarm size, the bare board B0, and the threaded V swarm TI);
   - the oracle audit and the build of the blind panel;
   - the round 11 phase 1 transcript analysis and the tool-usage audit.
-- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (552 runs in 280 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
-- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
+- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (572 runs in 284 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).

@@ -948,6 +948,34 @@ Smoke tests (scripted, from a copy in `tmp/`):
 
 **Budget.** About 4 × (0.2 + 4 × 1.0)M ≈ 17M.
 
+### Round 12 result and rule applied (2026-10-03 15:15; launched 13:46 with 2 lanes, code `07b6cf4`)
+
+4 campaigns (`20261003T114648Z-eb5e6f59`, `20261003T114708Z-d6a79cc8`, `20261003T122450Z-91dce613`, `20261003T122926Z-b6187a74`), seed 20261056, 20 runs, **18.7M tokens**. All exit 0, no run capped. Table from `scripts/writes.mjs`, committed before the results; per run in `round12-writes.md`.
+
+| arm | mean score (runs) | tokens | min | shrinking writes through / refused | lost at end | writes per run | appends | edit failure rate | wasted calls per run |
+|---|---|---:|---:|---|---:|---:|---:|---:|---:|
+| Pi (Pi without murmur) | 0.443 (0.52 0.46 0.53 0.27) | 0.16M | 3.2 | 0 / 0 | 0 | 2.0 | – | 33% | 1.8 |
+| G, solo-clock (guard) | **0.909** (0.76 0.91 1.00 0.97) | 0.95M | 8.1 | 0 / 2 (4 refusals) | 0 | 3.0 | – | 32% | 12.5 |
+| GA, solo-clock-append (guard + append) | 0.843 (1.00 0.40 1.00 0.97) | 1.48M | 10.1 | 0 / 0 | 0 | 1.0 | 7 | 23% | 11.5 |
+| GDA, solo-clock-tools (guard + append + descriptions) | 0.747 (0.80 0.54 0.92 0.73) | 0.75M | 7.5 | 0 / 0 | 0 | 1.0 | 7 | 23% | 9.5 |
+| DA, solo-clock-tools-noguard (append + descriptions) | 0.972 (0.93 0.97 1.00 1.00) | 1.34M | 9.4 | 0 / 0 | 0 | 1.0 | 6 | 18% | 6.5 |
+
+**Rule, as written:**
+- GDA meets (a): no shrinking write went through and no run lost content. It fails (b): 0.747 is 0.162 below G.
+- GA meets (a) and fails (b): −0.066.
+- **So phase 2 keeps G** (the write guard, no append, Pi's descriptions).
+- DA, descriptive: it also meets (a), and the guard never fired in GDA, so with append and the descriptions the guard was redundant here.
+
+**Findings** (claims marked ✓ checked by hand in the transcripts):
+- **The mechanism works as intended.**
+  - With `append`, agents write the long `extract.py` as one `write` plus appends (✓ `eb5e6f59/run-0005`: write 6.3k, append 5.5k, append 5.6k). Writes per run fall from 3.0 to 1.0, and refusals from 4 to 0.
+  - G's agents instead re-send the whole file and then get a chunk refused (✓ `d6a79cc8/run-0002`: three full writes of 6.6k, 6.3k and 13.1k, then a refused 2.6k chunk).
+  - Arms with the replaced descriptions waste fewer calls (9.5 and 6.5 per run against 12.5), and edits fail less (18–23% against 32%).
+- **The score rule cannot see this, because single-task noise at k=4 is larger than the effect.** GDA and DA ran with the same effective tools, since the guard never fired in GDA, yet their means differ by 0.225. GA's 0.40 run and GDA's 0.54 run are first-draft outcomes, not tool failures.
+  - In hindsight, a 0.05 score margin on one task at k=4 was the wrong guard for a tools decision. It is kept as written, and the user is told.
+- **Pi did not chunk this time** (0 of 4 runs, against 3 of the round-11 Pi runs on this task). Its edits fail as often as G's.
+- Edit failure rates on this task (18–33%) are well above the audit's 8.5% across all tasks. The clock runs make many regex edits in `extract.py`.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -1002,3 +1030,4 @@ Smoke tests (scripted, from a copy in `tmp/`):
 | 2026-10-03 | round 11 phase 1 P (18 campaigns `20261003T080953Z-d3f8b556` → `20261003T100111Z-917d6ddb`, seed 20261053, code `7651a12`) | Pi, solo, solo-norms, solo-norms-clock (all n=1, no oracle) | 6 blind tasks × 3 | 12.2M | contract: 0.02–0.60 without clock, 0.91–0.96 with it; optimisation ≤ 0.17 for all | R1 passes (+0.071, carried by ieh), R2 not decided (+0.020), R3 passes (+0.255, 6/6) |
 | 2026-10-03 | round 11 phase 1 O (3 campaigns `20261003T080947Z-2337418f` → `20261003T083957Z-55dea7a2`, seed 20261054) | solo-norms-clock | ospec_brown_blind × 3, 6M | 18.2M | 0.47, 3/3 capped | enters phase 2 (flagged) |
 | 2026-10-03 | round 11 phase 1 C (18 campaigns `20261003T100141Z-ac05f238` → `20261003T110416Z-9d1641ed`, seed 20261055) | solo, solo-clock | 6 blind tasks × 3 | 9.4M | solo-clock − solo +0.335, 6/6 | R4 passes; only shop2 and ospec pass calibration |
+| 2026-10-03 | round 12 tools (4 campaigns `20261003T114648Z-eb5e6f59` → `20261003T122926Z-b6187a74`, seed 20261056, code `07b6cf4`) | Pi, G solo-clock, GA +append, GDA +append+descriptions, DA without guard | information_extraction_hard_blind × 4 | 18.7M | G 0.909, GA 0.843, GDA 0.747, DA 0.972, Pi 0.443; with append: 1 write per run instead of 3, 0 refusals, fewer wasted calls | phase 2 keeps G by the rule (GA and GDA fail the score clause, which noise dominates) |
