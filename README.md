@@ -4,7 +4,15 @@
 
 > Can a non-hierarchical swarm of coding agents consistently beat a single agent of the same model?
 
-## Findings so far (2026-10-02)
+## Findings so far (2026-10-03)
+
+**Without an oracle (round 11 phase 1, single agents on 7 blind tasks, k=3).** This is the first evidence that counts for real work, and swarms have not been re-tested yet.
+- A one-line clock (the minutes left, on every tool result) is the one lever that moves a single agent. On three contract tasks it lifts scores from 0.26–0.60 to 0.71–0.99, with or without norms, at 4–10× the tokens.
+- Without it, agents stop after about 2 of 18 minutes, often saying the work is unfinished.
+- Generic engineering norms are not decided. murmur's agent beats Pi only narrowly (+0.07).
+- Details in [docs/research.md](docs/research.md).
+
+**With an oracle (rounds 1–10):**
 
 > **Caveat (2026-10-03): these results are not evidence for real work.** In every round so far the agents had an oracle that real work does not give: a visible acceptance check that revealed correctness, on some tasks a printed score that predicted the hidden grade, and prompts that said "call done when the check passes". The findings below describe how configurations use that oracle. They are being re-tested on oracle-free tasks with an oracle-free prompt, and until then they are hypotheses.
 
@@ -86,11 +94,13 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
 - **Prompts:**
   - `briefing` and `teamBriefing` templates;
   - `steer` and `wake` texts;
-  - `systemPromptAppend` and `toolDescriptions`.
+  - `systemPromptAppend`;
+  - `toolDescriptions`: replaces a tool's description, for board tools, `append` or the built-in tools the profile offers (Pi's one-line summaries and guidelines in the system prompt stay).
 - **Agents and tools:**
   - `messaging`: board on or off;
   - `threads`: a threaded board (`thread_new`, `thread_list`, `thread_read`, `reply`) in place of `post`; agents receive only the threads they follow, plus an announcement of each new thread;
   - `tools`: built-in tools;
+  - `append`: an `append(path, content)` tool that adds text to the end of a file, for writing a long file in parts;
   - `boardTools`: which coordination tools to offer;
   - `spawnGapSeconds`: staggered entry;
   - `roles`: a menu agents pick from, never assigned.

@@ -20,6 +20,7 @@ Everything needed to audit or rerun murmur's experiments. Start with the summary
 | Round 8 | 10-02 | expand panel D (5 new staged tasks, one remedy) and build panel V (OpenSpec projects) | "Round 8" | `criba8/`, [`criba8-lanes.mjs`](criba8-lanes.mjs), [`criba8b-lanes.mjs`](criba8b-lanes.mjs) | [`rows/runs.json`](rows/runs.json) (seeds 20261030–20261033) | [`criba8-traces.md`](criba8-traces.md), [`criba8b-traces.md`](criba8b-traces.md), [`reports/2026-10-02-panel8-build.md`](reports/2026-10-02-panel8-build.md) |
 | Round 9 | 10-02 | the swarm against c4g-clock: 4-agent section swarm on panel V, parallel attempts on panel D | "Round 9" | `criba9/`, [`criba9-lanes.mjs`](criba9-lanes.mjs); profiles `v-swarm-clock`, `x1g-select-clock` | [`rows/runs.json`](rows/runs.json) (seeds 20261034, 20261035) | [`round9-traces.md`](round9-traces.md), [`reports/2026-10-02-round9-v-traces.md`](reports/2026-10-02-round9-v-traces.md), [`reports/2026-10-02-round9-d-traces.md`](reports/2026-10-02-round9-d-traces.md) |
 | Round 10 | 10-02 | does the swarm add anything once the single agent gets the quality signal (10A), swarm size n=2/3/10, a bare post-only board (10B), a cheaper threaded V swarm (10C) | "Round 10" | `criba10/`, [`criba10-lanes.mjs`](criba10-lanes.mjs); profiles `c4g-signal`, `x1g-select-signal`, `b0-basic`, `ti-swarm-clock` | [`rows/runs.json`](rows/runs.json) (seeds 20261036–20261040) | [`round10-traces.md`](round10-traces.md), [`reports/2026-10-02-round10-d-traces.md`](reports/2026-10-02-round10-d-traces.md), [`reports/2026-10-02-round10-b0-traces.md`](reports/2026-10-02-round10-b0-traces.md), [`reports/2026-10-02-round10-v-traces.md`](reports/2026-10-02-round10-v-traces.md) |
+| Round 11, phase 1 | 10-03 | without an oracle: does murmur's single agent beat Pi, do norms help, does the clock help (with and without norms), and which blind tasks leave headroom | "Round 11, phase 1" and its result | `criba11/`, [`criba11-lanes.mjs`](criba11-lanes.mjs); profiles `solo`, `solo-norms`, `solo-norms-clock`, `solo-clock` | [`rows/runs.json`](rows/runs.json) (seeds 20261053–20261055) | [`round11-traces.md`](round11-traces.md), [`reports/2026-10-03-round11-traces-analysis.md`](reports/2026-10-03-round11-traces-analysis.md), [`reports/2026-10-03-tool-usage-audit.md`](reports/2026-10-03-tool-usage-audit.md) |
 
 ## By kind
 
@@ -32,13 +33,16 @@ Everything needed to audit or rerun murmur's experiments. Start with the summary
   - `2026-10-02-panel8-build.md`: the round 8 tasks, their validation, the ambiguity review and the OpenSpec pilot.
   - `2026-10-02-round9-v-traces.md`, `2026-10-02-round9-d-traces.md`: why the swarm lost on panel V and tied on panel D.
   - `2026-10-02-round10-d-traces.md`, `2026-10-02-round10-b0-traces.md`, `2026-10-02-round10-v-traces.md`: whether the single agent uses the printed score, how the n=2/3/10 swarms select, what the bare board does, and why the threaded V swarm was not cheaper.
+  - `2026-10-03-oracle-audit-blind-d.md`, `2026-10-03-blind-panel-wave2.md`: the audit of the oracle in every task, and the build of the oracle-free (blind) panel.
+  - `2026-10-03-round11-traces-analysis.md`: round 11 phase 1, why agents without a clock stop, what the clock does, the norms, and why the optimisation tasks stay near 0.
+  - `2026-10-03-tool-usage-audit.md`: how agents use read, bash, edit and write, the write-guard refusals, and which tool changes are worth making.
   - `2026-10-02-astra-swarm-ideas.md`: the ExploitGym and Astra swarm sources and the ideas drawn from them.
   - `2026-10-02-video-S2sjyokoxeE-review.md`: the video review behind the `threads` lever.
   - `2026-10-02-round6-traces.md`: why the agent without a clock stops, what the clock agent does with the time, and coordination in the 6B batches.
 - **Per-run data:**
-  - [`rows/runs.json`](rows/runs.json): every swarmtest run since 09-30, 441 rows. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+  - [`rows/runs.json`](rows/runs.json): every swarmtest run since 09-30, 552 rows. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
   - `batch/*/batch-result.json`: one per batch.
-- **Per-agent behaviour:** `criba{1,2,3,5,6,7,8}-traces.md`, `round{9,10}-traces.md`, from `scripts/traces.mjs`; [`batch/traces.md`](batch/traces.md) for the batches.
+- **Per-agent behaviour:** `criba{1,2,3,5,6,7,8}-traces.md`, `round{9,10,11}-traces.md`, from `scripts/traces.mjs`; [`batch/traces.md`](batch/traces.md) for the batches.
 - **Campaign configs:** `*.json` here and in `criba*/`. They are swarmtest configs: competitors, seed, repetitions and token budget. Drivers are `*-lanes.mjs` and `criba1-driver*.mjs`.
 - **Raw agent transcripts:** not in git; see [`../archive/MANIFEST.md`](../archive/MANIFEST.md).
 

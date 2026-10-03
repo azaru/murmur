@@ -8,6 +8,7 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { Board, boardTools, formatMessages, type Member } from "./board.ts";
 import { KNOWN_BOARD_TOOLS, loadProfile, type Profile, render } from "./profile.ts";
+import { fileTools } from "./tools.ts";
 
 export type Task = {
   goal: string; done: string; check: string; project?: string;
@@ -107,13 +108,13 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     if (status.get(part)?.ok) seat.stuck = 0;
     else if (profile.helpAfter && work && (seat.stuck = (seat.stuck ?? 0) + 1) === profile.helpAfter) help(name, `has made ${profile.helpAfter} tool calls while the acceptance check is failing or not yet run`, part);
     if (profile.helpAfter && event.toolName === "done" && output.startsWith("You are done") && !status.get(part)?.ok) help(name, `finished without a passing acceptance check, saying: "${event.input.reason}"`, part);
-    if (profile.staleGuard && ["read", "write", "edit"].includes(event.toolName) && !event.isError) {
+    if (profile.staleGuard && ["read", "write", "edit", "append"].includes(event.toolName) && !event.isError) {
       const path = resolve(workspace, String(event.input.path));
       seen.set(`${name}:${path}`, digest(path));
     }
     if (profile.notices) {
-      if ((event.toolName === "write" || event.toolName === "edit") && !event.isError) {
-        board.notice(name, `${name} ${event.toolName === "write" ? "wrote" : "edited"} ${event.input.path}`);
+      if (["write", "edit", "append"].includes(event.toolName) && !event.isError) {
+        board.notice(name, `${name} ${{ write: "wrote", edit: "edited", append: "appended to" }[event.toolName]} ${event.input.path}`);
       } else if (ranCheck) {
         board.notice(name, `${name} ran the acceptance check: ${failed ? `FAIL\n${tail}` : "PASS"}`);
       }
@@ -146,8 +147,8 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         : `Refused: the acceptance check is only a sample. Spend at least ${profile.doneAfterGreen - (seat.calls - seat.firstGreen!)} more tool calls verifying clauses it does not cover (write tests for them, run them, fix what fails), run the check again, then finish.` };
     }
     const write = isToolCallEventType("write", event);
-    if (!write && !isToolCallEventType("edit", event)) return;
-    const path = resolve(workspace, event.input.path), key = normalize(relative(workspace, path));
+    if (!write && !isToolCallEventType("edit", event) && event.toolName !== "append") return;
+    const path = resolve(workspace, String(event.input.path)), key = normalize(relative(workspace, path));
     const refuse = (reason: string) => (log("write_refused", { agent: name, path: key, reason }), { block: true, reason: `Refused: ${reason}` });
     const holder = profile.claimLease ? board.holder(key) : undefined;
     if (holder && holder !== name) {
@@ -161,7 +162,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     }
     const content = (event.input as { content: string }).content, first = (text: string) => text.split("\n").find(line => line.trim()) ?? "";
     if (profile.writeGuard && (/^\s/.test(content) || (content.length < old.length && first(content) !== first(old)))) {
-      return refuse("write replaces the whole file, and this content looks like only part of it (it starts indented, or it is shorter than the file and starts differently), so it would erase what is there. Add it with edit, or write the complete file in one call; to really replace the file with something shorter, delete it first.");
+      return refuse(`write replaces the whole file, and this content looks like only part of it (it starts indented, or it is shorter than the file and starts differently), so it would erase what is there. Add it with ${profile.append ? "append (to the end) or edit" : "edit"}, or write the complete file in one call; to really replace the file with something shorter, delete it first.`);
     }
   };
   const checkBudget = () => {
@@ -237,13 +238,13 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       log("done_check", { agent: name, exitCode: check.exitCode, timedOut: check.timedOut });
       return { ok: check.exitCode === 0, output: check.output };
     };
-    const tools = boardTools(board, name, profile, verify, command => runCheck(command, workspace, 2 * 60_000));
+    const tools = [...fileTools(profile, workspace), ...boardTools(board, name, profile, verify, command => runCheck(command, workspace, 2 * 60_000))];
     const { session } = await createAgentSession({
       cwd: workspace, modelRuntime: runtime, model,
       thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],
       resourceLoader: loader, settingsManager: SettingsManager.inMemory({ steeringMode: "all" }), // queued steers arrive together
       sessionManager: SessionManager.inMemory(workspace),
-      tools: [...profile.tools, ...tools.map(t => t.name)], customTools: tools,
+      tools: [...new Set([...profile.tools, ...tools.map(t => t.name)])], customTools: tools,
     });
     if (task.thinking && session.thinkingLevel !== task.thinking) {
       throw new Error(`${task.model} ran with thinking ${session.thinkingLevel}, not ${task.thinking}`);

@@ -29,6 +29,7 @@ Start by reading your inbox and posting what you will work on. When told you hav
   steer: "You have new messages on the board; call inbox.",
   wake: "You have new messages on the board. Call inbox, then continue toward the goal.",
   systemPromptAppend: "",
+  /** Replaces a tool's description: board tools, append, or the built-in tools in `tools` (those are then registered as murmur's own copy of Pi's tool). */
   toolDescriptions: {} as Record<string, string>,
   tools: ["read", "bash", "edit", "write"],
   spawnGapSeconds: 0,
@@ -37,6 +38,7 @@ Start by reading your inbox and posting what you will work on. When told you hav
   /** done is refused while the agent has unread messages or the acceptance check fails. */ doneGate: false,
   /** How posts reach a busy agent: "steer" interrupts it; "attach" appends them to its next tool result; "pull" waits for inbox. */ delivery: "steer" as "steer" | "attach" | "pull",
   /** Share each agent's file writes and acceptance-check runs with teammates; needs delivery "attach". */ notices: false,
+  /** Offer append(path, content), which adds text to the end of a file and creates it if missing. */ append: false,
   /** Refuse a write that looks like only part of an existing file (starts indented, or is shorter and starts differently). */ writeGuard: false,
   /** Above 0, claims block other agents' write/edit and lapse after this many seconds without the holder writing. */ claimLease: 0,
   /** Refuse a write onto a file that changed since this agent last read or wrote it. */ staleGuard: false,
@@ -54,7 +56,7 @@ export type Profile = typeof DEFAULT_PROFILE;
 const text = Type.Optional(Type.String()), flag = Type.Optional(Type.Boolean()), count = Type.Optional(Type.Integer({ minimum: 0 }));
 const ProfileSchema = Type.Object({
   briefing: text, teamBriefing: text, steer: text, wake: text, systemPromptAppend: text,
-  messaging: flag, threads: flag, doneGate: flag, notices: flag, writeGuard: flag, staleGuard: flag, clock: flag, findings: flag,
+  messaging: flag, threads: flag, doneGate: flag, notices: flag, append: flag, writeGuard: flag, staleGuard: flag, clock: flag, findings: flag,
   revive: count, doneAfterGreen: count, relay: count, relayContext: count, helpAfter: count,
   spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })), claimLease: Type.Optional(Type.Number({ minimum: 0 })),
   toolDescriptions: Type.Optional(Type.Record(Type.String(), Type.String())),
@@ -75,9 +77,12 @@ export function loadProfile(path?: string): Profile {
   if (badTool) throw new Error(`profile ${path}: unknown tool ${badTool} (allowed: ${BUILTIN_TOOLS.join(", ")})`);
   const badBoardTool = raw.boardTools?.find((t: string) => !KNOWN_BOARD_TOOLS.includes(t));
   if (badBoardTool) throw new Error(`profile ${path}: unknown board tool ${badBoardTool} (allowed: ${KNOWN_BOARD_TOOLS.join(", ")})`);
-  const badDescription = Object.keys(raw.toolDescriptions ?? {}).find(t => !KNOWN_BOARD_TOOLS.includes(t));
-  if (badDescription) throw new Error(`profile ${path}: toolDescriptions.${badDescription} is not a board tool`);
+  const describable = [...KNOWN_BOARD_TOOLS, ...BUILTIN_TOOLS, "append"];
+  const badDescription = Object.keys(raw.toolDescriptions ?? {}).find(t => !describable.includes(t));
+  if (badDescription) throw new Error(`profile ${path}: toolDescriptions.${badDescription} is not a known tool`);
   const profile = { ...DEFAULT_PROFILE, ...raw };
+  const unoffered = Object.keys(profile.toolDescriptions).find(t => (BUILTIN_TOOLS.includes(t) && !profile.tools.includes(t)) || (t === "append" && !profile.append));
+  if (unoffered) throw new Error(`profile ${path}: toolDescriptions.${unoffered} describes a tool the profile does not offer`);
   if (profile.threads && profile.boardTools.includes("post")) throw new Error(`profile ${path}: with threads, boardTools cannot offer post (use thread_new and reply)`);
   if (profile.threads && profile.messaging && !THREAD_TOOLS.every(t => profile.boardTools.includes(t))) throw new Error(`profile ${path}: with threads, boardTools must offer ${THREAD_TOOLS.join(", ")}`);
   return profile;

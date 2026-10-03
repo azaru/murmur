@@ -4,9 +4,22 @@ This is the curated record of every experiment run with murmur so far: the quest
 
 > **Caveat (2026-10-03): nothing below is evidence for real work yet.** Every round gave the agents an oracle that real work does not give. Each task had a visible acceptance check (`npm run test`) that revealed correctness. On the optimisation tasks it also printed a score that predicted the hidden grade. murmur's default prompt said "call done when the check passes", and the main norms said "hidden tests will probe every clause". The results describe how configurations use that oracle; the clock, for example, may work only because a red check tells the agent it is not finished. Everything is being re-tested on oracle-free tasks (the visible check confirms only that the program runs with the right output format) with an oracle-free default prompt. See "Threats to validity" and the realism rule in `AGENTS.md`.
 
-**Status (2026-10-02, after round 10): the evidence answers the question negatively for the tasks tested.** No swarm configuration has met the success criterion. Round 6 confirmed that the strongest results come from a *single* agent that keeps working: a one-line clock explains the best single agent, and once isolated agents get the same clock, the swarm's only win disappears. What remains open is whether coordination helps on tasks where a persistent single agent still has headroom. Rounds 7 and 8 rebuilt the panel around the clock agent: four planning and optimisation tasks where it stops on a green check short of the quality ceiling (panel D), and two medium OpenSpec projects where it runs out of tokens at about 0.45 (panel V). Rounds 9 and 10 put swarms against it on that panel: they lose on V, and on D they win only on one task, packing2, where the single agent sometimes stops early on a low score. A plain single agent that does not stop early matches them.
+**Status (2026-10-03, after round 11 phase 1, the first round without an oracle).** Swarms have not been tested without an oracle yet. For a single agent on 7 blind tasks, one lever matters: a visible clock (time left). It raises the contract tasks from 0.26–0.60 to 0.71–0.99, at 4–10× the tokens, with or without norms. Generic engineering norms are not decided, and murmur's agent beats Pi only narrowly (+0.07, carried by one task). Only two blind tasks leave the clock agent headroom (shop2 and ospec), so phase 2 (swarm against single agent) needs harder tasks first. See [Round 11, phase 1](#round-11-phase-1-the-single-agent-without-an-oracle-398m-tokens-code-7651a12).
+
+**Status before the oracle problem (2026-10-02, after round 10, with an oracle): the evidence answers the question negatively for the tasks tested.** No swarm configuration has met the success criterion. Round 6 confirmed that the strongest results come from a *single* agent that keeps working: a one-line clock explains the best single agent, and once isolated agents get the same clock, the swarm's only win disappears. What remains open is whether coordination helps on tasks where a persistent single agent still has headroom. Rounds 7 and 8 rebuilt the panel around the clock agent: four planning and optimisation tasks where it stops on a green check short of the quality ceiling (panel D), and two medium OpenSpec projects where it runs out of tokens at about 0.45 (panel V). Rounds 9 and 10 put swarms against it on that panel: they lose on V, and on D they win only on one task, packing2, where the single agent sometimes stops early on a low score. A plain single agent that does not stop early matches them.
 
 ## TL;DR
+
+**Without an oracle (round 11 phase 1, single agents only, 7 blind tasks, k=3):**
+- **The clock is the one lever that works.** Showing the time left raises the single agent on the three contract tasks from 0.36–0.59 to 0.91–0.96 with norms (R3, +0.255, 6/6) and from 0.26–0.44 to 0.71–0.99 without them (R4, +0.335, 6/6). It costs 4–10× the tokens (0.3–1.0M against ~0.1M) and 3–4× the minutes.
+- **Without the clock, agents stop after about 2 of 18 minutes.** In 14 of 27 runs they say the work is not finished. None keeps a test file of its own. Agents never mention the clock; with it they simply keep working, verifying and fixing.
+- **Generic engineering norms are not decided** (R2, +0.02). They add a few ad-hoc probes and nothing measurable.
+- **murmur's single agent against Pi passes narrowly** (R1, +0.071, 4 of 6). One task carries it. The old gap of +0.25 was mostly the oracle prompt.
+- **The blind optimisation tasks stay near 0 for everyone.** The grader gives 0 to anything not cheaper than a strong naive baseline, and agents submit their first greedy solution.
+- **Only shop2 and ospec pass the phase-2 calibration.** The contract tasks saturate with the clock, so they cannot show a swarm benefit.
+- **Tools:** agents write long files in parts by mistake (`write` replaces the file). The write guard caught all 5 cases in murmur, and Pi lost the file in 2 of 3. New default-off levers: an `append` tool and replaceable descriptions for Pi's tools.
+
+**With an oracle (rounds 1–10; not evidence for real work):**
 
 - The pre-registered criterion (beat Pi n=1 in two independent confirmation campaigns on a held-out task set) has **never been tested**: no candidate earned a confirmation run.
 - Across ~585M tokens and eleven rounds, the most reliable lever is **persistence of one agent**:
@@ -308,6 +321,36 @@ Panel V, ospec_brown (6M and 30 min): TI scores 0.416, against C1 0.448 (round 8
 - **TI did not cut coordination cost.** Board-only turns took 35.6% of its tokens, against S4's 27.8% by the same script; the target was under 10%. The integration rule did prevent broken imports. Coverage stayed at 33 of 41 capabilities.
 - Analyses: `experiments/reports/2026-10-02-round10-{d,b0,v}-traces.md`; per-agent table `experiments/round10-traces.md`.
 
+### Round 11, phase 1: the single agent without an oracle (39.8M tokens, code `7651a12`)
+
+These are the first measurements without an oracle. The panel has 7 blind variants: the visible check only confirms the deliverable runs and has the right format, and the graders are unchanged. The neutral default briefing ends with "When you judge that the goal is met, call done". Every arm is one agent: Pi without murmur; solo (murmur's neutral prompt plus the write guard); solo-norms (plus generic engineering norms); solo-norms-clock (plus the clock); and solo-clock (the clock without norms, added after interim results, as a declared deviation). Runs got 3M tokens and 1200 s, of which the agent's clock shows 18 minutes (ospec: 6M and 1920 s), k=3.
+
+| task | Pi | solo | solo-norms | solo-norms-clock | solo (C) | solo-clock (C) |
+|---|---:|---:|---:|---:|---:|---:|
+| durable | 0.52 | 0.52 | 0.36 | **0.96** | 0.44 | **0.99** |
+| ieh | 0.02 | 0.24 | 0.59 | **0.91** | 0.37 | **0.71** |
+| ledger | 0.42 | 0.60 | 0.44 | **0.92** | 0.26 | **0.92** |
+| opt_packing2 | 0.00 | 0.00 | 0.01 | 0.06 | 0.00 | 0.28 |
+| opt_roster2 | 0.06 | 0.09 | 0.14 | 0.14 | 0.10 | 0.15 |
+| opt_shop2 | 0.17 | 0.05 | 0.09 | 0.16 | 0.00 | 0.12 |
+| tokens per run (contract tasks) | 0.11M | 0.11M | 0.14M | 0.78M | 0.13M | 0.75M |
+
+ospec_brown_blind (solo-norms-clock only): 0.47, with all 3 runs capped at 6M.
+
+Rules as written:
+- R1 (solo-norms − Pi): +0.071, wins 4/6. **Passes**, carried by ieh (+0.56).
+- R2 (solo-norms − solo): +0.020. **Not decided.**
+- R3 (solo-norms-clock − solo-norms): +0.255, 6/6. **Passes.**
+- R4 (solo-clock − solo): +0.335, 6/6. **Passes.**
+- Calibration for phase 2 (clock agent in [0.15, 0.85]): only shop2 (0.16) and ospec (0.47, capped) enter.
+
+From the transcripts (`experiments/reports/2026-10-03-round11-traces-analysis.md`, model output, key claims checked by hand):
+- Without the clock, the pattern is one write, one `npm run test`, then done at about 2 minutes, often admitting the contract is not met.
+- With the clock, agents make 3× the calls (35% verification, 39% edits). They never mention the time and stop on their own with 5–14 minutes left.
+- On the optimisation tasks no run compares two candidate solutions on purpose. The clamp at the naive baseline turns small improvements into 0.
+
+The tool audit (`experiments/reports/2026-10-03-tool-usage-audit.md`) found that chunked writes happen only on ieh's large `extract.py`. About 8.5% of `edit` calls fail, mostly on over-escaped backslashes. It led to two new default-off levers, `append` and `toolDescriptions` for Pi's tools, which are not measured yet.
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -329,12 +372,16 @@ Panel V, ospec_brown (6M and 30 min): TI scores 0.416, against C1 0.448 (round 8
 | Parallel attempts escape a bimodal single agent | 9, 10 (D) | **Supported only with a predictive selection signal**, and only against a single agent that stops early: on packing2 n=2 reached the good mode 3 of 3, but the plain clock agent in round 10's S3 campaigns matched n=3 (0.719 vs 0.679). Without a size-aware number, selection picks a solver that does not scale |
 | A text norm makes the single agent use a printed quality score | 10A | **Refuted**: C1s still ends on the first green at a low score (5 of 9 packing2 runs within 3 minutes); C1s − C1 = −0.20 on the signal tasks |
 | Larger swarms do better at the same tokens | 10 (size) | **Not supported at 3M** (descriptive, each n against its own C1s, k=3): n=2 0.69 > n=3 0.58 > n=10 0.50 on the signal tasks; rule verdicts not decided / adds / not decided; n=10 hits the cap after one draft per agent |
+| A visible clock keeps a single agent working, **without an oracle** | 11 (R3, R4) | **Supported**: +0.255 with norms and +0.335 without them, 6 of 6 tasks each, at 4–10× the tokens on the contract tasks; agents never mention it |
+| Generic engineering norms help, **without an oracle** | 11 (R2) | **Not decided** (+0.020); a few more ad-hoc probes, same score |
+| murmur's single agent beats Pi, **without an oracle** | 11 (R1) | **Passes narrowly** (+0.071, 4 of 6, carried by one task); the old +0.25 had the oracle prompt in it |
 | murmur's scaffolding hides a swarm benefit (bare board, Astra/ExploitGym style) | 10B | **Not supported**: a post-only board with a one-line briefing ties the single agent (−0.006) at ~4x tokens |
 | A threaded board and an integration rule make a V swarm cheaper | 10C | **Refuted**: board-only turns 35.6% of tokens (S4 27.8%); integration breakage avoided, score unchanged (0.416) |
 
 ## Cross-cutting findings
 
 - **Single agents stop early.** Pi runs the check 1–4 times and stops; 19 of 24 calibration runs end admitting incomplete work. Work done after the first green check is the best predictor of score.
+- **Without an oracle, agents stop at about 2 minutes** (round 11), often saying the work is unfinished. A visible clock is enough to keep them working. They never keep a test file of their own unless they have time.
 - **Writes in chunks break files.** Pi writes ~5–7 KB per `write`; a second `write` meant as a continuation replaces the whole file. In a swarm, a broken shared file plus "someone else owns it" leads everyone to give up.
 - **Cost ≈ turns × context length.** Over 85% of tokens are cache reads, context per turn triples during a run, and coordination-only turns take 31–62% of a swarm's tokens.
 - **Contract-style tasks saturate.** The best arms reach 0.91–1.0 on them, and a family built for transfer was solved by a single agent in 2 minutes. Ranking strong systems needs tasks with open-ended headroom, and even then a green public check makes agents stop.
@@ -342,6 +389,11 @@ Panel V, ospec_brown (6M and 30 min): TI scores 0.416, against C1 0.448 (round 8
 ## Threats to validity
 
 - **A visible oracle in every task (the main threat; it invalidates rounds 1–10 as evidence for real work).** All 31 swarmtest tasks declare `acceptance_command: npm run test`. The default briefing told agents to call done when it passes, and the main profiles' norms described hidden tests. The strongest findings (the clock, norms, persistence after green, selection by a printed score) may be artefacts of that oracle. They are hypotheses until re-tested oracle-free.
+- **Round 11 phase 1:**
+  - stage C (the clock without norms) was added after interim results were seen;
+  - a load spike (33–91, the user's other processes) at 12:25–12:39 overlapped five C campaigns, three of them with wall-clock-bound optimisation solvers;
+  - ospec runs are all capped, so its score is a floor;
+  - the optimisation graders give 0 to anything at or above the naive cost, which hides differences between weak solutions.
 - **Ceiling.** With the clock, ieh, ledger and durable score 0.93–1.0 for the single agent. Round 6B cannot show a coordination benefit that would need headroom; it shows only that the clock closes round 5B's gap.
 - **Reused runs.** Round 6A's c4g-evidence figures on ieh and ieh2 are round 5A's runs (another day; same code path, pre-registered). The main contrast (clock − guard) uses only fresh runs; "the clock explains c4g-evidence" uses them, and the fresh c4g-evidence runs on ledger (0.967) agree.
 - **Reused control (round 9 V).** The solo arm is the round 8 calibration: same task fingerprints and code path, but another hour and seed.
@@ -387,6 +439,7 @@ For each experiment: whether its question or theory was written down before meas
 | Round 8 (panel expansion) | yes, committed before each stage (`6e586ac`, `0097a51`) | `criba8-lanes.mjs`, `criba8b-lanes.mjs` | `rows/runs.json` (seeds 20261030, 20261032, 20261033), `criba8-traces.md`, `criba8b-traces.md` | yes, `reports/2026-10-02-panel8-build.md` | yes |
 | Round 10 (signal, size, bare board, cheaper V swarm) | yes, committed before launch (`fb8e16f`, timestamp fixed in `9d1180b`) | `criba10-lanes.mjs`, `criba10/` | `rows/runs.json` (seeds 20261036–20261040), `round10-traces.md` | yes, `reports/2026-10-02-round10-{d,b0,v}-traces.md` | yes |
 | Round 9 (swarm vs clock agent, D and V) | yes, committed before launch (`3ea1d8d`) | `criba9-lanes.mjs`, `criba9/` | `rows/runs.json` (seeds 20261034, 20261035), `round9-traces.md` | yes, `reports/2026-10-02-round9-{v,d}-traces.md`, `reports/2026-10-02-astra-swarm-ideas.md` | yes |
+| Round 11 phase 1 (no oracle) | yes, committed before launch (`4a6b664`; addenda `50c1c61`, `7651a12`, stage C a declared deviation) | `criba11-lanes.mjs`, `criba11/` | `rows/runs.json` (seeds 20261053–20261055), `round11-traces.md` | yes, `reports/2026-10-03-round11-traces-analysis.md`, `reports/2026-10-03-tool-usage-audit.md` | yes; phase 2 waits for the user |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -409,9 +462,11 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the round 6 transcript analyses (the clock, and coordination in the batches);
   - the construction and calibration of the task families;
   - the round 9 transcript analyses (panels V and D) and the review of the Astra/ExploitGym swarm sources;
-  - the round 10 transcript analyses (panel D with the signal and swarm size, the bare board B0, and the threaded V swarm TI).
-- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (441 runs in 241 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
-- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
+  - the round 10 transcript analyses (panel D with the signal and swarm size, the bare board B0, and the threaded V swarm TI);
+  - the oracle audit and the build of the blind panel;
+  - the round 11 phase 1 transcript analysis and the tool-usage audit.
+- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (552 runs in 280 campaigns): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).

@@ -828,6 +828,75 @@ Changes made the same day, with the user's OK:
 | role menus, notices, locks, verified findings, re-allocation across tasks | not re-tested for now: neutral or negative with the oracle; the user decides |
 | evidence gate, help signals, `doneAfterGreen`, selection by a printed score | not re-tested: keyed to the check or to a printed score, so lab-only by the realism rule |
 
+### Round 11 phase 1 result and rule applied (2026-10-03 13:40; launched 10:09 with the user's OK, 2 lanes, code `7651a12`, `src/` unchanged since `d7bc0ae`)
+
+39 campaigns, 111 runs, **39.8M tokens** (P 12.2M, O 18.2M, C 9.4M; estimate was ~54M plus ~20M for C). Every lane ended with exit 0. No grader or check was run during the campaigns.
+
+**Stage P** (seed 20261053, 18 campaigns `20261003T080953Z-d3f8b556` → `20261003T100111Z-917d6ddb`). Mean score, then mean tokens and minutes per run, k=3. No run was capped.
+
+| task | Pi (Pi without murmur) | solo (neutral prompt + writeGuard) | solo-norms (+ engineering norms) | solo-norms-clock (+ norms + clock) |
+|---|---|---|---|---|
+| durable_workflow_engine_blind | 0.52 [0.10M, 2.2 min] | 0.52 [0.09M, 2.1] | 0.36 [0.11M, 2.0] | **0.96** [0.91M, 8.4] |
+| information_extraction_hard_blind | 0.02 [0.17M, 3.2] | 0.24 [0.16M, 2.6] | 0.59 [0.23M, 3.7] | **0.91** [1.01M, 11.1] |
+| ledger_reconciliation_hard_blind | 0.42 [0.06M, 2.1] | 0.60 [0.08M, 2.0] | 0.44 [0.07M, 1.7] | **0.92** [0.43M, 6.0] |
+| opt_packing2_blind | 0.00 [0.03M, 1.1] | 0.00 [0.11M, 1.0] | 0.01 [0.03M, 1.1] | 0.06 [0.07M, 1.8] |
+| opt_roster2_blind | 0.06 [0.04M, 0.9] | 0.09 [0.04M, 1.0] | 0.14 [0.03M, 0.6] | 0.14 [0.10M, 2.2] |
+| opt_shop2_blind | 0.17 [0.03M, 0.6] | 0.05 [0.06M, 0.7] | 0.09 [0.04M, 0.8] | 0.16 [0.07M, 1.5] |
+
+**Stage O** (seed 20261054, 3 campaigns `20261003T080947Z-2337418f` → `20261003T083957Z-55dea7a2`): ospec_brown_blind with solo-norms-clock scores 0.474 / 0.535 / 0.405 (mean 0.47) at 6.0–6.1M and 14 min. **All 3 runs hit the 6M cap**, so they count as floors and the arm is flagged. swarmtest records these campaigns' stop reason as `usage_unknown_or_cleanup_unconfirmed`; each held a single run, so nothing else was lost.
+
+**Stage C** (seed 20261055, 18 campaigns `20261003T100141Z-ac05f238` → `20261003T110416Z-9d1641ed`), k=3, no run capped:
+
+| task | solo | solo-clock (neutral prompt + writeGuard + clock, no norms) |
+|---|---|---|
+| durable | 0.44 [0.10M, 1.8] | 0.99 [1.05M, 8.4] |
+| ieh | 0.37 [0.20M, 2.7] | 0.71 [0.95M, 8.1] |
+| ledger | 0.26 [0.08M, 2.3] | 0.92 [0.26M, 3.6] |
+| opt_packing2 | 0.00 [0.04M, 1.8] | 0.28 [0.12M, 2.9] (0.04 / 0.00 / 0.81) |
+| opt_roster2 | 0.10 [0.05M, 1.0] | 0.15 [0.08M, 2.1] |
+| opt_shop2 | 0.00 [0.03M, 0.6] | 0.12 [0.19M, 3.2] |
+
+**Rules, applied as written** (per-task differences in the order durable, ieh, ledger, packing2, roster2, shop2):
+- **R1, murmur's agent against Pi** (solo-norms − Pi): +0.071, wins 4 of 6. **Passes.** It is carried by ieh (+0.56); the other per-task differences are −0.16, +0.02, +0.01, +0.08, −0.08, so two of the four wins are ≤ +0.02. The old finding (+0.25) shrinks to a third.
+- **R2, norms** (solo-norms − solo): +0.020, wins 4 of 6 (−0.16, +0.35, −0.16, +0.01, +0.05, +0.03). **Not decided.** The prediction "R2 helps" fails.
+- **R3, clock with norms** (solo-norms-clock − solo-norms): +0.255, wins 6 of 6 (+0.60, +0.32, +0.48, +0.05, 0.00, +0.08). **Passes.** The prediction that it would be smaller than in round 6A and possibly not decided fails on the contract tasks. Cost: 4–10× the tokens and 3–4× the minutes on the contract tasks.
+- **R4, clock without norms** (solo-clock − solo, paired in stage C): +0.335, wins 6 of 6 (+0.55, +0.34, +0.66, +0.28, +0.05, +0.12). **Passes.** packing2's +0.28 comes from one run (0.81).
+- **Descriptive interaction:** the clock gains +0.255 with norms and +0.335 without them (different campaigns, not paired). The norms add nothing the clock does not already give.
+- **Calibration for phase 2** (solo-norms-clock mean in [0.15, 0.85]): **only opt_shop2_blind (0.161) and ospec_brown_blind (0.471, flagged: 3/3 capped) enter.** durable (0.96), ieh (0.91) and ledger (0.92) saturate. packing2 (0.06) and roster2 (0.14) stay below. shop2 enters on one run of 0.48 among two zeros.
+
+**Findings from the transcripts** (subagent reports `reports/2026-10-03-round11-traces-analysis.md` and `reports/2026-10-03-tool-usage-audit.md`, model output; the claims below marked ✓ were checked by hand):
+- **Without the clock, agents stop after about 2 minutes of 18, often knowing the work is unfinished.** Across the 27 no-clock contract runs, 0 kept a test file of their own. In 14 of 27 the done reason or final text says the contract is not fully met (all 9 durable runs) ✓ (`20261003T091945Z-94fe3c49/run-0003`, done reason "the full contract is not met … Further work is required"). The usual pattern is one write, one `npm run test`, then done. Ledger's scores are bimodal (0.08–0.17 or 0.64–1.0) with the same behaviour, so first-draft luck decides them.
+- **The clock is never mentioned.** Agents never refer to the time left in their text or reasoning: 1 hit in 30 clock runs, and it is about their code's own timeout handling ✓. They simply keep working: 39 calls per contract run against 13. After minute 3, 35% of their calls verify (probes, test runs, own test files) and 39% edit. They never re-read the contract, and they stop on their own with 5–14 minutes left. The gain mixes verification and more attempts; the analysis could not separate the two.
+- **Norms change behaviour slightly but not the score.** Runs with at least one behavioural probe: 1/9 solo against 6/9 solo-norms; own test files 0 against 0; calls and time about equal.
+- **The optimisation tasks are near 0 for a structural reason.** The grader is `clamp((naive − cost)/(naive − best))`, with a strong naive baseline and best ≈ 0.66–0.79 of naive, so any solution at or above the naive cost scores 0 (99 of 168 instance results). No-clock runs submit their first greedy solution after 33–106 s, using 0.1–2.5 s of the 10 s limit. Local search shows up mainly in clock runs (7/9 solo-norms-clock, 3/3 solo-clock). No run builds a baseline to compare candidates, and one clock run accepted a worse cost (129,870 → 130,275) ✓ (`20261003T080953Z-d3f8b556/run-0004`, messages 22 and 28). The roster workspace has no production-size example.
+- **ospec_brown_blind is volume-bound.** All 3 runs end on the token cap mid-work at 12–14 of 32 minutes. 97% of their tokens are cache reads of a 52–68k context, and regression tests stay at 100% while 21–38% of the change group passes.
+- **Tools:**
+  - `writeGuard` refused 5 writes in round 11 ✓, all on `extract.py` in ieh and all true positives: the agent was trying to append. In 2 of 3 Pi runs that chunked the same file without a guard, the file was destroyed; one ended as a 216-byte stub with score 0.0 ✓ (`20261003T090544Z-46d87407/run-0002`).
+  - The guard missed a 94-character stub over a 9.2k-character file because the stub's first line equals the file's ✓ (`20261003T101120Z-b52e2cc6/run-0002`, message 12).
+  - About 8.5% of `edit` calls fail, in every group. The main cause in round 11 was over-escaped backslashes in regex code (11 of 23 "not found").
+  - Pi's `write` description already says it overwrites. The agents' problem is that there is no append tool, not a misunderstanding.
+
+**Deviations and infrastructure:**
+- Stage C was added after looking at interim results (addendum 2), so R4 is a declared deviation.
+- The machine's load rose to 33–91 between 12:25 and 12:39, from the user's other processes (I/O, not murmur). It overlapped the C campaigns opt_packing2 r1, opt_shop2 r1, opt_roster2 r1, ledger r1 and ieh r1. The opt solvers are wall-clock bound, so those runs may be slightly worse. No rule's verdict hangs on a single one of them except packing2 in R4, whose 0.81 run (r2) ran outside the spike.
+
+**Decision.** By the rules: R1 passes narrowly, R2 is not decided, and R3 and R4 pass. Without an oracle, the clock (knowing the time left) is the one lever that moves a single agent, and it works without the norms. As pre-registered, phase 2 has only shop2 and ospec, which is too few to order anything. The tasks are not adjusted in this round; the proposal for phase 2 goes to the user.
+
+## 2026-10-03: tool levers `append` and `toolDescriptions` for built-in tools (default off)
+
+From the tool audit above, and at the user's request to review the tools (code in the commit that adds this note). Both are new levers that default to off, so no existing profile changes. All 39 profiles load as before.
+- `append: true` offers `append(path, content)`, which adds text to the end of a file and creates it if missing. It goes through the same claim and stale-file bookkeeping as `write`. When it is on, the `writeGuard` refusal text suggests it.
+- `toolDescriptions` now also accepts the built-in tools the profile offers, and `append`. murmur then registers its own copy of Pi's tool with the new description. Pi's one-line summaries and guidelines in the system prompt stay as they are.
+
+Smoke tests (scripted, from a copy in `tmp/`):
+- writing a file in three parts with `write` + `append` + `append` gave the exact six lines;
+- a partial `write` was refused with the text that mentions append;
+- the session's tool definitions carry the replaced descriptions of `write` and `edit`;
+- a description for a tool the profile does not offer is rejected;
+- the default profile on `examples/trio.json` passed (all_done, 157k tokens).
+
+**Not measured yet.** If murmur's arms get tools Pi lacks, every murmur-against-Pi comparison must say so.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -879,3 +948,6 @@ Changes made the same day, with the user's OK:
 | 2026-10-02 | round 10 S10 (9 campaigns `20261002T171902Z-54fb30cf` → `20261002T183722Z-e32a4ae8`, seed 20261038) | C1s, S10s x1g-select-signal n=10 | same × 3 | 29.6M | S10s − C1s −0.03 / −0.06 (roster2 +0.11); all 9 capped at 4.4–6.4 min | size n=10: not decided |
 | 2026-10-02 | round 10 B0 (9 campaigns `20261002T184552Z-9f7c1abc` → `20261002T191921Z-3583a47a`, seed 20261039) | C1 c4g-clock, B0 b0-basic n=3 (post-only board) | same × 3 | 21.7M | B0 − C1 +0.09 / −0.03 / −0.07, mean −0.006 | 10B not decided (as predicted) |
 | 2026-10-02 | round 10 V (3 campaigns `20261002T165259Z-e530e637` → `20261002T171010Z-0af634f7`, seed 20261040, 6M and 30 min) | TI ti-swarm-clock n=4 (C1 round 8 and S4 round 9 reused) | ospec_brown × 3 | 18.1M | TI 0.416 vs C1 0.448, S4 0.412; board-only turns 35.6% of tokens (target < 10%) | 10C: V parked |
+| 2026-10-03 | round 11 phase 1 P (18 campaigns `20261003T080953Z-d3f8b556` → `20261003T100111Z-917d6ddb`, seed 20261053, code `7651a12`) | Pi, solo, solo-norms, solo-norms-clock (all n=1, no oracle) | 6 blind tasks × 3 | 12.2M | contract: 0.02–0.60 without clock, 0.91–0.96 with it; optimisation ≤ 0.17 for all | R1 passes (+0.071, carried by ieh), R2 not decided (+0.020), R3 passes (+0.255, 6/6) |
+| 2026-10-03 | round 11 phase 1 O (3 campaigns `20261003T080947Z-2337418f` → `20261003T083957Z-55dea7a2`, seed 20261054) | solo-norms-clock | ospec_brown_blind × 3, 6M | 18.2M | 0.47, 3/3 capped | enters phase 2 (flagged) |
+| 2026-10-03 | round 11 phase 1 C (18 campaigns `20261003T100141Z-ac05f238` → `20261003T110416Z-9d1641ed`, seed 20261055) | solo, solo-clock | 6 blind tasks × 3 | 9.4M | solo-clock − solo +0.335, 6/6 | R4 passes; only shop2 and ospec pass calibration |
