@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -33,6 +34,8 @@ test("required: agents work in their own worktree; merge integrates, and a confl
     assert.equal(readFileSync(join(workspace, "f.txt"), "utf8"), "from a\n");
     assert.ok(!existsSync(join(workspace, "g.txt")));
     assert.match(await call("b", "merge", { message: "again" }), /still contain conflict markers/);
+    spawnSync("git", ["add", "f.txt"], { cwd: branches.root("b") }); // staging the file by hand does not let the markers through
+    assert.match(await call("b", "merge", { message: "staged" }), /f.txt still contain conflict markers/);
 
     writeFileSync(join(branches.root("b"), "f.txt"), "from a and b\n");
     assert.match(await call("b", "merge", { message: "resolved" }), /Merged into the shared folder: f.txt, g.txt/);

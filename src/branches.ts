@@ -107,8 +107,9 @@ export class Branches {
   /** Commits the agent's work, which also concludes a merge whose conflicts it resolved; returns a message if markers remain. */
   private commit(name: string, message: string) {
     const wt = this.path(name);
-    const pending = this.git(wt, ["diff", "--name-only", "--diff-filter=U"]).out.split("\n").filter(Boolean);
-    const marked = pending.filter(file => /^(<{7}|>{7})( |$)/m.test(readFileSync(join(wt, file), "utf8")));
+    // Every changed or new file is scanned, because an agent may have staged a file with markers itself (git add).
+    const changed = [...this.git(wt, ["diff", "--name-only", "HEAD"]).out.split("\n"), ...this.git(wt, ["ls-files", "-o", "--exclude-standard"]).out.split("\n")];
+    const marked = [...new Set(changed.filter(Boolean))].filter(file => existsSync(join(wt, file)) && /^(<{7}|>{7})( |$)/m.test(readFileSync(join(wt, file), "utf8")));
     if (marked.length) return `Not merged: ${marked.join(", ")} still contain conflict markers (<<<<<<< ... >>>>>>>). Fix them, then call again.`;
     this.git(wt, ["add", "-A"]);
     this.git(wt, ["commit", "-q", "--no-verify", "-m", message]);

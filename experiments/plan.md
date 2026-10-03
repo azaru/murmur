@@ -1264,6 +1264,33 @@ Mean score [mean tokens, minutes] (runs), k=2:
 - On planning every 12-agent arm except BO lands at 0.39–0.47, against C1's 0.275. C1's two planning runs (0.36 and 0.19) are below its rounds 13–14 means (0.465, 0.421).
 - At k=2, a "pronounced" verdict is a screen result, not a confirmed effect.
 
+**Findings from the transcripts** (subagent report `reports/2026-10-04-round15-traces-analysis.md`, model output; ✓ marks claims I checked by hand):
+- **ST on planning: an early agent's claim settles who writes.** In `295e25a1`, wren posted "I'm implementing" at 8 s. Each later entrant deferred ("Wren owns planner.py") and took validation work, and wren made the only write of `planner.py` ✓. Agents writing the whole deliverable: 1.5 per ST planning run against 5.0 in B, where twelve agents announce "I'll implement" at once. On shop2 the effect is absent (5 and 3 full writers against B's 5 and 6). The entry steps were only 5–12 s apart, so all 12 were in by 55–70 s. ST's planning gain (+0.06) is below the lever threshold. The pronounced verdict comes from shop2, where the mechanism did not appear.
+- **TL's zeros on shop2 are not caused by the task list.**
+  - The list was barely used: 3 and 1 items, all "inspect/validate", and no implementation items.
+  - Both final solvers were valid but costlier than the grader's naive baseline. Reviewers had pushed the solver from a wall-clock search to fixed starts, citing determinism and runtime.
+  - B's 0.00 run (`b54b47ab`) failed the same way: a 7.3 s search was cut to 9 fixed policies.
+  - On shop2, scores follow the last cost the agents reported for the large example (heuristic extraction).
+- **BO on planning:**
+  - In `b9b748b9` the final shared `planner.py` raises an IndentationError ✓. The first broken commit is tern's own untested edit, merged 5 s before the cap.
+  - In `1cc39f1b` about 40 direct edits by 10 agents landed in the last minute, after the file had been verified.
+  - About 20 posts begged a teammate to merge a verified solver that sat in its branch.
+  - BO burned 12M in 5.5 minutes (36k tokens/s against B's 20–25k/s), while agents were still in review-and-edit waves.
+- **BR on shop2:**
+  - The two runs merged 6 and 9 times, against 19 and 25 conflicts.
+  - Both ended with one agent's solver (robin's), adopted by the others after comparing costs at a conflict.
+  - Four agents' solvers stayed unmerged in `8b326a02`.
+  - The hypothesis that a conflict forces a comparison that a whole-file `write` skips rests on two runs.
+- **RO:** every agent picked a role at 1–5 s, before reading the task, and builder dominated (9–12 of 12 in 3 of 4 runs). Testers and reviewers barely touched the deliverable. Both planning runs ended on the cap with no agent done.
+- **Coordination share of calls:** 17–30% in B, and 24–37% in the lever arms. End reasons: 16 of 24 swarm runs all_done, 6 on the cap, 2 quiescent.
+
+**Bugs and friction found** (none changes a verdict above):
+- **Conflict markers could reach main (fixed).** In BR `8b326a02`, lark ran `git add` on a file that still had conflict markers, and `merge` let it through. Commit `f557f35` on main starts with `<<<<<<< HEAD` ✓ and stayed for about 76 s, until robin's merge replaced it. The marker check looked only at files git still listed as unmerged. It now scans every changed or new file (fix and test in the commit that adds this note). The run still scored 0.76, the best BR run.
+- **The default `wake` text says "Call inbox", but the round-14 and round-15 swarm profiles offer no `inbox`** ✓. There were 8 wakes in 4 runs. One agent posted "I do not have an inbox tool", and one ended its turn on it, which produced the run's quiescent end (`0a019874`). Fixing it changes a default, so it goes to the user.
+- The write guard refuses a clean rewrite of a file with markers, because the rewrite is shorter and starts differently. Agents worked around it with `rm` then `write`.
+- With 12 agents on one machine, two-instance solver checks hit Pi's bash timeout (50 bash failures in `83c3aae1`).
+
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
