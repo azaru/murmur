@@ -1,0 +1,52 @@
+| run | task | arm | score | tokens | min | end | agent | calls | board % | checks | green at | after green | last check | overwrites | nudges |
+|---|---|---|---:|---:|---:|---|---|---:|---:|---:|---:|---:|---|---:|---:|
+| ab2cbcbc/0001 | constrained_planning_hard_blind | pi/n=1 | 0.391 | 0.06M | 2.3 | succeeded | pi | 9 | 0 | 1 | - | - | red | 0 | 0 |
+| ab2cbcbc/0002 | constrained_planning_hard_blind | murmur[solo-clock]/n=1 | 0.373 | 0.22M | 4.4 | all_done | wren | 21 | 5 | 2 | 7 | 14 | green | 0 | 0 |
+| 8f3c4d11/0001 | information_extraction_hard2_blind | pi/n=1 | 0.000 | 0.27M | 2.4 | failed | pi | 15 | 0 | 2 | - | - | red | 1 | 0 |
+| 8f3c4d11/0002 | information_extraction_hard2_blind | murmur[solo-clock]/n=1 | 0.906 | 1.20M | 9.1 | all_done | wren | 42 | 2 | 8 | 7 | 35 | green | 0 | 0 |
+| 30e1cf6d/0001 | fam_payouts_blind | pi/n=1 | 1.000 | 0.11M | 2.6 | succeeded | pi | 15 | 0 | 2 | 15 | 0 | green | 0 | 0 |
+| 30e1cf6d/0002 | fam_payouts_blind | murmur[solo-clock]/n=1 | 1.000 | 0.12M | 2.4 | all_done | wren | 15 | 7 | 2 | 7 | 8 | green | 0 | 0 |
+| f8073bdf/0001 | constrained_planning_hard_blind | pi/n=1 | 0.378 | 0.04M | 1.5 | succeeded | pi | 7 | 0 | 1 | 7 | 0 | green | 0 | 0 |
+| f8073bdf/0002 | constrained_planning_hard_blind | murmur[solo-clock]/n=1 | 0.584 | 0.51M | 9.5 | all_done | wren | 36 | 3 | 4 | 7 | 29 | green | 0 | 0 |
+| a0b9cb89/0001 | information_extraction_hard2_blind | pi/n=1 | 0.006 | 0.08M | 2.5 | succeeded | pi | 7 | 0 | 1 | 7 | 0 | green | 0 | 0 |
+| a0b9cb89/0002 | information_extraction_hard2_blind | murmur[solo-clock]/n=1 | 0.737 | 2.22M | 12.3 | all_done | wren | 67 | 1 | 9 | 11 | 56 | green | 0 | 0 |
+| c9d7f799/0001 | fam_payouts_blind | pi/n=1 | 0.934 | 0.08M | 2.3 | succeeded | pi | 14 | 0 | 1 | 14 | 0 | green | 0 | 0 |
+| c9d7f799/0002 | fam_payouts_blind | murmur[solo-clock]/n=1 | 1.000 | 0.20M | 2.7 | all_done | wren | 16 | 6 | 1 | 14 | 2 | green | 0 | 0 |
+| 82f52a5e/0001 | constrained_planning_hard_blind | pi/n=1 | 0.372 | 0.12M | 1.5 | succeeded | pi | 11 | 0 | 1 | 7 | 4 | green | 0 | 0 |
+| 82f52a5e/0002 | constrained_planning_hard_blind | murmur[solo-clock]/n=1 | 0.438 | 0.08M | 3.3 | all_done | wren | 11 | 9 | 1 | 10 | 1 | green | 0 | 0 |
+| fe39804f/0001 | information_extraction_hard2_blind | pi/n=1 | 0.017 | 0.10M | 2.4 | succeeded | pi | 8 | 0 | 1 | 8 | 0 | green | 0 | 0 |
+| fe39804f/0002 | information_extraction_hard2_blind | murmur[solo-clock]/n=1 | 0.899 | 1.75M | 13.3 | all_done | wren | 49 | 2 | 6 | 17 | 32 | green | 1 | 0 |
+| c0a79e33/0001 | fam_payouts_blind | pi/n=1 | 0.988 | 0.05M | 3.0 | succeeded | pi | 10 | 0 | 1 | 10 | 0 | green | 0 | 0 |
+| c0a79e33/0002 | fam_payouts_blind | murmur[solo-clock]/n=1 | 1.000 | 0.10M | 4.8 | all_done | wren | 12 | 8 | 1 | 11 | 1 | green | 0 | 0 |
+| 97fa0a26/0001 | ospec_green_blind | pi/n=1 | 0.082 | 0.35M | 4.0 | succeeded | pi | 17 | 0 | 2 | 17 | 0 | green | 2 | 0 |
+| 97fa0a26/0002 | ospec_green_blind | murmur[solo-clock]/n=1 | 0.362 | 5.05M | 26.7 | all_done | wren | 83 | 1 | 7 | 14 | 69 | green | 0 | 0 |
+| c534a06b/0001 | ospec_green_blind | pi/n=1 | 0.060 | 0.26M | 2.1 | succeeded | pi | 15 | 0 | 2 | 14 | 1 | green | 0 | 0 |
+| c534a06b/0002 | ospec_green_blind | murmur[solo-clock]/n=1 | 0.531 | 6.04M | 20.1 | budget | wren | 114 | 0 | 1 | 93 | 21 | green | 1 | 0 |
+| 9d503af0/0001 | ospec_green_blind | pi/n=1 | 0.068 | 0.26M | 2.2 | succeeded | pi | 17 | 0 | 1 | 16 | 1 | green | 0 | 0 |
+| 9d503af0/0002 | ospec_green_blind | murmur[solo-clock]/n=1 | 0.383 | 6.08M | 22.5 | budget | wren | 104 | 0 | 6 | 17 | 87 | green | 0 | 0 |
+
+Why each agent stopped:
+- ab2cbcbc/0001 pi/n=1 pi: last text: Implemented `planner.py` with constraint-aware backtracking and a time limit for search. The planner writes a complete assignment even if it cannot find a feasible one. The example run took about 17 s
+- ab2cbcbc/0002 murmur[solo-clock]/n=1 wren: done: Implemented planner.py as a self-contained standard-library CSP backtracking solver with unary candidate filtering, hard-constraint checks, objective-aware candidate ordering, and a bounded runtime. T
+- 8f3c4d11/0001 pi/n=1 pi: last text: I wasn’t able to complete `extract.py`: the script is missing its imports and normalization helpers, so it does not run. I can continue implementing it if you’d like.
+- 8f3c4d11/0002 murmur[solo-clock]/n=1 wren: done: Implemented extract.py with corpus discovery, normalization, document parsing and case assembly, plus ledger replay, FX conversion and dispute tracking. The script compiles and `npm run test` passes.
+- 30e1cf6d/0001 pi/n=1 pi: last text: Implemented `analyze.py` using only the Python standard library. It writes the report in the documented format, and `npm run test` passes.
+- 30e1cf6d/0002 murmur[solo-clock]/n=1 wren: done: Implemented the standard-library-only report generator in analyze.py according to QUESTIONS.md, including validation, exact Decimal calculations, cleaning, merges, adjustments, fees, payouts, and outp
+- f8073bdf/0001 pi/n=1 pi: last text: Implemented `planner.py`. The smoke test passes, but it took 16.1 seconds—close to the 20-second limit—and the search may fall back to an infeasible plan if it cannot find a feasible one.
+- f8073bdf/0002 murmur[solo-clock]/n=1 wren: done: Implemented the standalone standard-library planner and confirmed `npm run test` passes within the time limit. The planner uses bounded constraint search with randomized greedy fallback and always wri
+- a0b9cb89/0001 pi/n=1 pi: last text: Implemented `extract.py` and confirmed `npm run test` passes. The script writes JSON in the documented format, but the implementation does not yet cover all of `SCHEMA.md`—notably ledger replay, dispu
+- a0b9cb89/0002 murmur[solo-clock]/n=1 wren: done: Implemented extract.py per SCHEMA.md, including document parsing, case grouping, normalization, ledger replay, FX conversion, and dispute tracking. Verified it compiles and `npm run test` passes.
+- c9d7f799/0001 pi/n=1 pi: last text: Implemented `analyze.py` to generate the report using only the Python standard library. `npm run test` passes.
+- c9d7f799/0002 murmur[solo-clock]/n=1 wren: done: Implemented analyze.py per QUESTIONS.md using only the Python standard library, with exact Decimal-based aggregation, CSV validation/cleaning, FX lookup, seller merges, adjustments, fees and payouts. 
+- 82f52a5e/0001 pi/n=1 pi: last text: Implemented `planner.py` and confirmed it passes `npm run test`. The smoke test checks output format only; I have not verified that the generated example plan satisfies the hard constraints.
+- 82f52a5e/0002 murmur[solo-clock]/n=1 wren: done: Implemented planner.py with candidate generation, hard-constraint-aware backtracking, soft-cost candidate ordering, and a bounded runtime fallback. The example passes `npm run test` in about 5 seconds
+- fe39804f/0001 pi/n=1 pi: last text: Implemented `extract.py` and confirmed it passes `npm run test`. The script runs, but ledger replay, dispute tracking, and some document-parsing contract details remain incomplete.
+- fe39804f/0002 murmur[solo-clock]/n=1 wren: done: Implemented extract.py end-to-end using only the Python standard library, including document parsing and grouping, normalization, event ordering/deduplication, ledger replay and FX conversion, dispute
+- c0a79e33/0001 pi/n=1 pi: last text: Implemented `analyze.py` per `QUESTIONS.md`. Verified it writes valid JSON for the example data and passes `npm run test`.
+- c0a79e33/0002 murmur[solo-clock]/n=1 wren: done: Implemented the standard-library report generator in analyze.py per QUESTIONS.md and verified it runs successfully on example data with `npm run test`.
+- 97fa0a26/0001 pi/n=1 pi: last text: Implemented the stockroom package’s catalog, stock, ledger, pricing basics, reports, CSV export, audit log, and JSON persistence foundation. The acceptance check and `openspec validate add-stockroom -
+- 97fa0a26/0002 murmur[solo-clock]/n=1 wren: done: Implemented a substantial standard-library stockroom package covering the catalog, lot-aware stock and ledger, reservations, orders/pricing/returns, purchasing, reports, audit, CSV, persistence/CLI, a
+- c534a06b/0001 pi/n=1 pi: last text: Implemented the `stockroom` package with catalog, lot-aware stock operations, movement and audit logs, basic reservations and reports, CSV product import/export, and JSON persistence. `npm run test` a
+- c534a06b/0002 murmur[solo-clock]/n=1 wren: last text: 
+- 9d503af0/0001 pi/n=1 pi: last text: Implemented the catalog, stock and lot tracking, FEFO adjustments and transfers, movement ledger, audit log, JSON persistence, and a basic CLI in `stockroom/`. `npm run test` and `openspec validate ad
+- 9d503af0/0002 murmur[solo-clock]/n=1 wren: last text: 

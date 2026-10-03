@@ -911,7 +911,7 @@ Smoke tests (scripted, from a copy in `tmp/`):
   - On re-checking the audit, the write guard's "shorter and starts differently" clause also caught 5 writes in earlier swarms that would have erased a teammate's file, and it already refuses empty writes. So **the guard is not changed**; the proposal to drop that clause is withdrawn.
   - The advice for failed edits (copy backslashes exactly) goes into `edit`'s description, with no new code.
 - **AGENTS.md** gets a rule: no bulk transcript reads while campaigns run.
-- **Archive:** round 11's raw runs are packed locally. Uploading the archives waits for the user to say where.
+- **Archive:** the raw runs of rounds 11–14 will be packed together after phase 2, because packing is bulk I/O and cannot run during campaigns. Uploading the archives waits for the user to say where.
 
 ## Round 12: the tool levers (fixed before measuring, 2026-10-03 13:45; the user approved the plan)
 
@@ -999,6 +999,65 @@ Smoke tests (scripted, from a copy in `tmp/`):
 
 **Budget.** K is about 9 × 1.2M ≈ 11M. G is about 3 × 6.3M ≈ 19M. ~30M in total.
 
+### Round 13 result and rule applied (2026-10-03 16:50; launched 15:06 with 2 lanes, code `7f2c84d`)
+
+12 campaigns (K: `20261003T130631Z-ab2cbcbc` → `20261003T134150Z-c0a79e33`; G: `20261003T134942Z-97fa0a26` → `20261003T141549Z-9d503af0`), 24 runs, **25.3M tokens**. All exit 0.
+
+| task | Pi (Pi without murmur) | C1 = solo-clock | C1 tokens, minutes | verdict |
+|---|---|---|---|---|
+| constrained_planning_hard_blind | 0.38 (0.39 0.38 0.37) | **0.465** (0.37 0.58 0.44) | 0.27M, 5.7 | **enters** |
+| information_extraction_hard2_blind | 0.008 | 0.847 (0.91 0.74 0.90) | 1.72M, 11.5 | out (above 0.6) |
+| fam_payouts_blind | 0.974 | 1.000 (1.00 1.00 1.00) | 0.14M, 3.3 | out (saturated) |
+| ospec_green_blind (6M, 1920 s) | 0.07 | **0.425** (0.36 0.53 0.38) | 5.72M, 23.1 | **enters, flagged** (2 of 3 C1 runs capped) |
+
+- **Rule:** 2 of the 4 new tasks enter, so phase 2 goes ahead without another wave. Its tasks are constrained_planning_hard_blind, ospec_green_blind, opt_shop2_blind and ospec_brown_blind.
+- **Notes:**
+  - fam_payouts is easy even for Pi (0.97). The other `fam_*` tasks are probably easy too.
+  - On ieh2 the clock lifts C1 from Pi's 0.01 to 0.85. Without an oracle, that is the largest clock gap seen so far.
+  - Planning's C1 stops at 4–8 minutes of 18. The traces are in `round13-traces.md`.
+
+## Round 14 (phase 2): two agents with a board against one agent, without an oracle (fixed before measuring, 2026-10-03 16:47; within the plan the user approved)
+
+**Question.** Without an oracle, does a small non-hierarchical swarm beat one agent at the same token and time caps? Phase 1 found that without the clock agents stop early. Does a teammate keep agents working the way the clock does?
+
+**Tasks** (the four that passed calibration, rounds 11 and 13):
+- difficulty and optimisation (3M, 1200 s): constrained_planning_hard_blind, opt_shop2_blind;
+- volume (6M, 1920 s): ospec_brown_blind, ospec_green_blind.
+
+**Arms** (new swarm profiles; both passed a 2-agent smoke on the trio task: neutral briefing and posts attached to tool results. `s2-board-clock` showed clock lines and ended all_done at 55k tokens; `s2-board` showed none and ended all_done at 45k):
+- **C1** = `solo-clock`: one agent with the clock and the write guard, no norms. It is the control, because phase 1 found norms add nothing (R2, R4).
+- **S2c** = `s2-board-clock`: two agents in one folder with a post-only board (posts arrive with tool results), the write guard and the clock. The briefing says only that they are equals with no one in charge, and it has no norms and no check language.
+- **solo**: one agent, the write guard, no clock.
+- **S2** = `s2-board`: S2c without the clock.
+- Tools stay as in phase 1, with no `append` (round 12's rule). The swarm shares its run's caps, so it gets the same tokens and time as one agent.
+
+**Execution.** `experiments/criba14-lanes.mjs <lane> D VC VS VB VO`, 2 lanes, k=3.
+- Stage D (seed 20261066): one campaign per task × repetition with all four arms. S2c runs last (checked).
+- Stages VC, VS, VB and VO (seeds 20261060, 20261062, 20261063, 20261065): one campaign per arm, run alone, because single agents already hit the 6M cap on these tasks.
+
+**Rules** (per-task means over the 4 tasks; capped runs count as floors; an arm with ≥ 1/3 of its runs capped is flagged):
+- An arm **wins** if its mean is ≥ +0.05 above the reference, it wins ≥ 3 of 4 tasks, and its mean tokens per run are ≤ 2× the reference's.
+- It **wins at higher cost** if the score conditions hold but its tokens exceed 2×.
+- It **loses** if its mean is ≤ −0.05 below and it loses ≥ 3 of 4.
+- Otherwise it is **not decided**.
+
+Contrasts:
+- **P1 (primary): S2c against C1.** Does a swarm beat the persistent single agent?
+- **P2: S2 against solo.** Does a swarm beat the single agent when neither has a clock?
+- **Descriptive:**
+  - S2 against C1: does a teammate do what the clock does?
+  - S2c against S2: the clock inside a swarm.
+  - Coordination share: the fraction of turns that only post, from `scripts/traces.mjs`.
+- **Predictions:**
+  - P1 is not decided or loses, as in rounds 9–10 with an oracle.
+  - P2 wins, if a teammate's posts keep agents working.
+
+**Known threats, written before measuring:**
+- With 4 tasks and "wins ≥ 3 of 4", one task decides. opt_shop2_blind is the noisiest: the clock agent scored 0.00 / 0.00 / 0.48 and 0.28 / 0.06 / 0.02 in two campaigns.
+- On the V tasks single agents with the clock hit the 6M cap by construction, so C1 and probably S2c will carry the capped flag. That is the comparison, not a defect.
+
+**Budget (estimate).** D is 2 × 3 × (0.3 + 1.0 + 0.1 + 0.3)M ≈ 10M. V is 2 × 3 × (6 + 6 + 1 + 2)M ≈ 90M. **Total ~100M**, upper bound ~120M.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -1054,3 +1113,4 @@ Smoke tests (scripted, from a copy in `tmp/`):
 | 2026-10-03 | round 11 phase 1 O (3 campaigns `20261003T080947Z-2337418f` → `20261003T083957Z-55dea7a2`, seed 20261054) | solo-norms-clock | ospec_brown_blind × 3, 6M | 18.2M | 0.47, 3/3 capped | enters phase 2 (flagged) |
 | 2026-10-03 | round 11 phase 1 C (18 campaigns `20261003T100141Z-ac05f238` → `20261003T110416Z-9d1641ed`, seed 20261055) | solo, solo-clock | 6 blind tasks × 3 | 9.4M | solo-clock − solo +0.335, 6/6 | R4 passes; only shop2 and ospec pass calibration |
 | 2026-10-03 | round 12 tools (4 campaigns `20261003T114648Z-eb5e6f59` → `20261003T122926Z-b6187a74`, seed 20261056, code `07b6cf4`) | Pi, G solo-clock, GA +append, GDA +append+descriptions, DA without guard | information_extraction_hard_blind × 4 | 18.7M | G 0.909, GA 0.843, GDA 0.747, DA 0.972, Pi 0.443; with append: 1 write per run instead of 3, 0 refusals, fewer wasted calls | phase 2 keeps G by the rule (GA and GDA fail the score clause, which noise dominates) |
+| 2026-10-03 | round 13 calibration (12 campaigns `20261003T130631Z-ab2cbcbc` → `20261003T141549Z-9d503af0`, seeds 20261057 and 20261059, code `7f2c84d`) | Pi, C1 solo-clock | planning, ieh2, fam_payouts × 3 (3M); ospec_green × 3 (6M) | 25.3M | C1 0.465 / 0.847 / 1.000 / 0.425 (2/3 capped) | planning and ospec_green enter phase 2 |
