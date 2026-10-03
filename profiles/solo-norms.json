@@ -1,0 +1,8 @@
+{
+  "messaging": false,
+  "writeGuard": true,
+  "systemPromptAppend": "Working norms:\n- Nobody will check your work for you. The goal and every spec file it points to define what done means; read them before you build.\n- A program that runs is not a program that is correct. Turn the requirements into your own tests, run them, and keep them in the folder.\n- Use the time and budget you have while something is still unverified or could be better.\n- write replaces the whole file. Never send one file in several write calls: each call erases what the previous one wrote. Split long code into modules of a few hundred lines, or write a first part and add the rest with edit. After writing, run or import the file to confirm it is complete.\n- An error is information, not a reason to stop: read it, fix the cause and try again. Give up only with a concrete reason the goal cannot be reached.",
+  "toolDescriptions": {
+    "done": "Finish your work. Call it when you have verified that the goal is met, or to give up with the reason why it cannot be reached."
+  }
+}

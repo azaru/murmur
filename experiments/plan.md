@@ -768,6 +768,56 @@ Changes made the same day, with the user's OK:
 - **Blind variants** of opt_packing2, opt_shop2 and opt_roster2 are being built in `../swarmtest/staging/*_blind` (the check confirms only that `solve.py` runs and writes the documented format; the hidden grader is unchanged). Calibration and the re-test plan will be pre-registered here before anything is launched.
 - The raw runs of rounds 6–10 were packed into `archive/murmur-raw-runs-20261003.tar.xz` (see `archive/MANIFEST.md`).
 
+## Round 11, phase 1: the single agent without an oracle, and calibration of the blind panel (fixed before measuring, 2026-10-03 10:09; the user approved the plan, keeping the clock, ospec's own regression tests and the production sizes in the specs)
+
+**The blind panel** (built 2026-10-03; reports `reports/2026-10-03-oracle-audit-blind-d.md` and `reports/2026-10-03-blind-panel-wave2.md`). Seven variants in `../swarmtest/staging/*_blind`. In each, the visible check (`npm run test`) confirms only that the deliverable runs and writes the documented format. No agent-visible file mentions a grader, hidden tests or scores. The hidden graders are byte-identical to the originals, and each reference solution gets the same hidden score (packing2 within 0.0004, because its solver stops on wall-clock time).
+- Optimisation: opt_packing2_blind, opt_shop2_blind, opt_roster2_blind. Baseline, score formula and best-known values are removed. Production sizes and the 10 s limit stay as requirements.
+- Contracts: information_extraction_hard_blind, ledger_reconciliation_hard_blind, durable_workflow_engine_blind.
+  - The old checks gave expected records or accounts and asserted scenario values.
+  - durable's prompt and CONTRACT.md also lose the ArcSwarm roster/ownership paragraph, because it assigned roles.
+  - ledger's `holdout/build_workspace.py`, which only regenerated the old check, is removed.
+- Volume: ospec_brown_blind.
+  - The 13-scenario check and its scenario counts are gone.
+  - The project's own regression tests stay in `workspace/tests/`, as in a real brownfield project, but `npm run test` no longer runs them.
+
+**Question.** Without an oracle, which of the old single-agent findings hold? They are "murmur's agent beats Pi", "norms help" and "the clock helps". And which blind tasks leave the single agent headroom for phase 2?
+
+**Arms** (all n=1; new profiles, smoked on a one-agent trio task: all passed, 20–25k tokens; norms and clock lines present; no acceptance-check text):
+- **Pi**: the Pi coding agent without murmur, given only the task prompt (`adapters/pi.mjs` sends `request.prompt` and nothing else; checked).
+- **solo**: murmur's oracle-free default briefing plus `writeGuard`.
+- **solo-norms**: solo plus generic engineering norms: nobody checks your work, write and run your own tests, use the time while something is unverified, the `write` warning, errors are information. It also gets a `done` description without any check.
+- **solo-norms-clock**: solo-norms plus `clock`.
+
+**Execution.** `experiments/criba11-lanes.mjs <lane> <stage>...`, 2 lanes (the optimisation solvers are wall-clock bound, and round 10 showed the load moves in-run results).
+- **Stage P:** seed 20261053, 3M and 1200 s. One campaign per task × repetition over the six non-ospec tasks, k=3. With this seed, `make_plan` runs solo-norms, Pi, solo, then solo-norms-clock (checked).
+- **Stage O:** seed 20261054, 6M and 1920 s. ospec_brown_blind with solo-norms-clock alone, k=3.
+
+**Rules** (per-task means over the six P tasks; capped runs count as floors; an arm with ≥ 1/3 capped runs is flagged). Each contrast passes if the difference is ≥ +0.05 on the mean and the arm wins at least 4 of 6 tasks. It fails if the difference is ≤ −0.05 and the arm loses at least 4 of 6. Otherwise it is not decided.
+- R1, murmur's agent against Pi: solo-norms − Pi. Old finding: c4n1 − Pi ≈ +0.25.
+- R2, norms: solo-norms − solo.
+- R3, clock: solo-norms-clock − solo-norms. Old finding: +0.56 on ieh, ieh2 and ledger with a red check.
+- **Calibration for phase 2, fixed now:** a task enters phase 2 if solo-norms-clock's mean is in [0.15, 0.85]. Tasks outside that range are left out of phase 2, with no adjustment in this round. The same rule applies to ospec_brown_blind for a volume comparison.
+- **Predictions:**
+  - Contract tasks drop the most against their oracle runs: ieh and ledger lost sample expected values, and durable lost asserted scenarios.
+  - R2 helps.
+  - R3 is smaller than in round 6A and possibly not decided, because without a red check the clock has nothing to keep the agent working against.
+
+**Not in this phase:** swarms and prompt optimisation. Phase 2 (swarm against single agent on the tasks that pass calibration) and prompt optimisation (autotuner, with held-out tasks) are pre-registered after phase 1.
+
+**Budget (estimate):** P ~2M per campaign (Pi 0.3, solo 0.3, solo-norms 0.5, solo-norms-clock 0.8) × 18 ≈ 36M. O 3 × 6M = 18M. **Total ~54M**, upper bound ~70M.
+
+**Old findings and where they are re-tested:**
+
+| finding (with oracle) | re-test |
+|---|---|
+| murmur's single agent beats Pi; norms help | phase 1, R1 and R2 |
+| the clock keeps the single agent working | phase 1, R3 |
+| no swarm beats a persistent single agent (board, parallel attempts, bare board B0, V swarm) | phase 2, on the tasks that pass calibration |
+| fresh-context relays beat n=3 swarms | phase 2, as the compute-matched single-agent control |
+| the write guard fixes the broken shared file | phase 2 (it needs a swarm); kept on in every arm |
+| role menus, notices, locks, verified findings, re-allocation across tasks | not re-tested for now: neutral or negative with the oracle; the user decides |
+| evidence gate, help signals, `doneAfterGreen`, selection by a printed score | not re-tested: keyed to the check or to a printed score, so lab-only by the realism rule |
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
