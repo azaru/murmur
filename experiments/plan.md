@@ -1203,6 +1203,8 @@ Explained to the user, decision pending: the optimisation lever (each agent pick
 **Known threats, written before measuring:**
 - Two tasks at k=2, and shop2 swings 0.00–0.54 within an arm. That is why the lever threshold is +0.10 and why it requires both tasks.
 - Most 12-agent planning runs will likely end on the 12M cap. Every swarm arm shares that cap, so hitting it is part of the comparison, not a defect.
+- **Unmerged work at the cap.** When a run ends on the cap or the timeout, whatever sits in BR's twelve worktrees, or in BO's opened branches, never reaches the shared folder. murmur commits it to the branches as a record, but nothing merges it. That is the real-work meaning of a branch, but it ties BR's score to when the cap hits. So every BR and BO score is reported next to `result.json`'s `unmerged` (files per agent), to tell "left unmerged" apart from "merged but worse".
+- A campaign that fails to start (exit ≠ 0, no campaign directory) keeps its lock. Before a resume, locks of units with no record are deleted. `criba15/invalid.txt` is not tracked, so its contents are copied here whenever a quota stop happens.
 - Planning's solver has a 20 s wall-clock limit, and 12 agents load the machine. The load is logged at launch and again during the run.
 - The round may span several quota windows, so resumed campaigns run hours apart.
 - C1 never used more than 1M on these tasks, so its 12M cap changes nothing for it. It is re-run anyway, as the user decided, and rounds 13–14's C1 means are reported next to it, descriptively.
