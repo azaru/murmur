@@ -8,7 +8,7 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 
 ## Layout
 
-- `src/` (small on purpose; see "Rules for changing murmur"): `swarm.ts` (run loop, sessions, hooks, relays), `board.ts` (board state and coordination tools), `profile.ts` (every tunable lever and its default), `cli.ts`.
+- `src/` (small on purpose; see "Rules for changing murmur"): `swarm.ts` (run loop, sessions, hooks, relays), `board.ts` (board state and coordination tools), `profile.ts` (every tunable lever and its default), `tools.ts` (file tools), `tasklist.ts` (shared task list), `branches.ts` (branch per agent), `cli.ts`. Unit tests: `npm test`.
 - `profiles/*.json`: one file per experimental arm. `no-messaging.json` is the control.
 - `scripts/arms.mjs`: paired comparison of two arms inside the same swarmtest campaign(s). `scripts/traces.mjs`: per-agent behaviour table (calls, board share, checks, calls after the first green, overwrites, steers) and why each agent stopped.
 - `examples/`: tiny task files for smoke tests (`trio.json` with 3 agents is the usual one).

@@ -95,14 +95,17 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
   - `briefing` and `teamBriefing` templates;
   - `steer` and `wake` texts;
   - `systemPromptAppend`;
-  - `toolDescriptions`: replaces a tool's description, for board tools, `append` or the built-in tools the profile offers (Pi's one-line summaries and guidelines in the system prompt stay).
+  - `toolDescriptions`: replaces a tool's description, for board, task-list and branch tools, `append` or the built-in tools the profile offers (Pi's one-line summaries and guidelines in the system prompt stay).
 - **Agents and tools:**
   - `messaging`: board on or off;
   - `threads`: a threaded board (`thread_new`, `thread_list`, `thread_read`, `reply`) in place of `post`; agents receive only the threads they follow, plus an announcement of each new thread;
   - `tools`: built-in tools;
   - `append`: an `append(path, content)` tool that adds text to the end of a file, for writing a long file in parts;
   - `boardTools`: which coordination tools to offer;
-  - `spawnGapSeconds`: staggered entry;
+  - `spawnGapSeconds`: staggered entry by time;
+  - `spawnAfterTurns`: staggered entry by turns: each agent enters once the previous one has made that many model turns, or `spawnGapSeconds` after it entered if that comes first;
+  - `taskList`: a shared task list (`tasks`, `task_add`, `task_take`, `task_done`, `task_drop`) that any agent adds to and takes from; murmur only keeps it and shows its progress on tool results, and it works with the board off;
+  - `branches`: a git branch per agent in its own worktree, with `merge` (integrate into the shared folder, reporting conflicts) and `update`; `"required"` puts every agent in its branch, `"optional"` leaves agents in the shared folder with a `branch` tool;
   - `roles`: a menu agents pick from, never assigned.
 - **Delivery of posts:**
   - `delivery`: `"steer"` interrupts a busy agent; `"attach"` appends new posts to its next tool result; `"pull"` waits until it calls `inbox`;

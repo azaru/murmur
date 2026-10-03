@@ -1117,6 +1117,39 @@ Explained to the user, decision pending: the optimisation lever (each agent pick
 
 **Budget: per swarm.** The swarm shares one token cap, and comparisons are at equal total tokens. This is the user's choice "B, presupuesto por swarm". The amount per swarm run is to be set from a 12-agent smoke.
 
+## 2026-10-03 21:50: the user's decisions for 12-agent swarms, the 12-agent smoke, and three new levers (default off)
+
+**Decisions (the user, 21:40):**
+- **Cap per run: 12M tokens on planning and optimisation tasks, 24M on ospec**, shared by the whole swarm. C1 (one agent with the clock and the write guard) gets the same cap, so swarm and single agent are compared at equal caps. C1 is re-run at these caps; rounds 11–14 used 3M and 6M.
+- **The optimisation lever (lever 8) is not built for now.**
+- **Staggered entry by turns:** an agent enters when the previous one has made N turns or 60 s after the previous one entered, whichever comes first.
+- **Optional branches:** agents work in the shared folder and may open their own branch with a `branch` tool. They then work in it by absolute path and integrate with `merge`.
+
+**Smoke with 12 agents** (`examples/trio.json` with `agents: 12` and `s2-board-clock`, i.e. a post-only board with posts on tool results, the write guard and the clock; code `8dc2890`). It passed with all_done in 52 s and 347k tokens (149k input, 186k cache read, 13k output). Each agent used 21–37k tokens and made 8–15 calls, and all 12 called done. NAMES holds exactly 12 names. All 12 agents wrote all three modules at the same time; nobody split the work. The write guard refused 9 writes. The rate is about 0.4M tokens per minute with small contexts. It does not extrapolate to real tasks. Budgets use the single-agent rates × 12: planning ~1M/min, optimisation ~0.5M/min, ospec ~5M/min.
+
+**New levers** (code in the commit that adds this note; all default off, and all 44 existing profiles load with them off):
+- `spawnAfterTurns` (in `src/swarm.ts`): each agent enters once the previous one has finished that many model turns (assistant messages), or ends a turn, or `spawnGapSeconds` after the previous one entered, whichever comes first. murmur logs an `enter` event. With it off, `spawnGapSeconds` keeps its old meaning (agent i starts i × gap after the run starts).
+- `taskList` (`src/tasklist.ts`): a shared task list, like an issue tracker. The tools are `tasks`, `task_add`, `task_take`, `task_done` and `task_drop`.
+  - Only the holder can mark an item done.
+  - An agent that calls done gives back the items it had taken.
+  - A one-line progress summary (`[task list: 2 open, 1 taken (by you: #3), 4 done]`) is appended to an agent's next tool result whenever it changed for that agent.
+  - The tools work with the board off. Nobody assigns, and no time lease was built: holding an item has no natural "touch" signal.
+- `branches` (`src/branches.ts`): one git repository per run, kept in the run directory, so the shared folder gets no `.git`. The shared folder is the working tree of branch `main`. Each agent's branch has a worktree in `<runDir>/worktrees/<agent>`, outside the folder the grader reads.
+  - `merge(message)` commits the agent's work and merges `main` into its branch. On conflict it stops and reports the files; the markers stay in the agent's copy. Otherwise it fast-forwards the shared folder.
+  - `update()` brings others' merged work into the branch.
+  - Direct edits in the shared folder are committed to `main` before every merge.
+  - `"required"`: every agent works in its worktree (its cwd), and `done` is refused once while it holds unmerged work.
+  - `"optional"`: agents work in the shared folder and get a `branch` tool.
+  - At the end murmur commits each worktree, removes it, and records what was left unmerged in `result.json` (`unmerged`).
+
+**Smoke tests** (from `src/`, no campaign running; scripted tasks in `tmp/`):
+- unit tests `test/tasklist.test.ts` and `test/branches.test.ts` (conflict, markers refused, resolution, update, the done warning, the optional flow): 10 of 10 pass;
+- turn-based stagger (trio, 3 agents, `spawnAfterTurns: 2`, gap 60 s): finch entered right after wren's second turn and robin right after finch's second; all_done, 91k tokens;
+- task list (2 agents, board off): both found the list empty and added the same three items, a race the script invites; then 6 takes and 6 dones, and the progress line on every change; all_done, 99k;
+- required branches (2 agents writing the same file): the first merge went through, the second reported a conflict in `shared.txt`; the agent resolved it and merged, and the shared folder ended with both names and both files; 23k. The write guard refused the agent's first resolution, a whole-file write shorter than the file with markers; the agent used `edit` instead;
+- optional branches (2 agents): `branch`, write by absolute path, `merge`; both files reached the shared folder; 16k;
+- default profile on `examples/trio.json`: all_done, 155k tokens, same tool list and event types as before.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -1174,3 +1207,5 @@ Explained to the user, decision pending: the optimisation lever (each agent pick
 | 2026-10-03 | round 12 tools (4 campaigns `20261003T114648Z-eb5e6f59` → `20261003T122926Z-b6187a74`, seed 20261056, code `07b6cf4`) | Pi, G solo-clock, GA +append, GDA +append+descriptions, DA without guard | information_extraction_hard_blind × 4 | 18.7M | G 0.909, GA 0.843, GDA 0.747, DA 0.972, Pi 0.443; with append: 1 write per run instead of 3, 0 refusals, fewer wasted calls | phase 2 keeps G by the rule (GA and GDA fail the score clause, which noise dominates) |
 | 2026-10-03 | round 13 calibration (12 campaigns `20261003T130631Z-ab2cbcbc` → `20261003T141549Z-9d503af0`, seeds 20261057 and 20261059, code `7f2c84d`) | Pi, C1 solo-clock | planning, ieh2, fam_payouts × 3 (3M); ospec_green × 3 (6M) | 25.3M | C1 0.465 / 0.847 / 1.000 / 0.425 (2/3 capped) | planning and ospec_green enter phase 2 |
 | 2026-10-03 | round 14 phase 2, stage D + 1 V run (7 valid campaigns `20261003T144556Z-fb37df36` → `20261003T153036Z-5adae0be`, seeds 20261066 and 20261060, code `429cbb3`; 5 more invalid, see the note) | C1, S2c, solo, S2 | planning, shop2 × 3; ospec_brown × 1 (C1) | 24.0M | descriptive: S2c − C1 −0.11 / +0.12 at 3.5–5× tokens; S2 stops as early as solo | stopped by the model quota; rules not applied |
+| 2026-10-03 | smoke n=12 (`runs/20261003-193607-2967`, deleted) | s2-board-clock n=12 | trio × 1 | 347k | all_done in 52 s; 9 write refusals; all 12 agents wrote all 3 files | 12 agents work; tokens/min with small contexts only |
+| 2026-10-03 | smoke new levers (5 runs, deleted) | stagger by turns n=3, task list n=2, branches required n=2, branches optional n=2, default n=3 | scripted × 1, trio × 2 | 385k | all pass; see the 21:50 note | levers OK |

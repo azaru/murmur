@@ -7,7 +7,9 @@ import {
   getAgentDir, isToolCallEventType, ModelRuntime, SessionManager, SettingsManager, type ToolCallEvent, type ToolResultEvent,
 } from "@earendil-works/pi-coding-agent";
 import { Board, boardTools, formatMessages, type Member } from "./board.ts";
+import { Branches } from "./branches.ts";
 import { KNOWN_BOARD_TOOLS, loadProfile, type Profile, render } from "./profile.ts";
+import { TaskList, taskTools } from "./tasklist.ts";
 import { fileTools } from "./tools.ts";
 
 export type Task = {
@@ -41,6 +43,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   let agents: Agent[] = [];
   const retired: { name: string; session: AgentSession }[] = []; // sessions replaced by a relay
   let reason: EndReason | undefined;
+  // Staggered entry by turns: seat i opens when seat i-1 reaches spawnAfterTurns turns, ends a turn, or entered spawnGapSeconds ago.
+  const gates = names.map(() => { let open = () => {}; const opened = new Promise<void>(resolve => { open = resolve; }); return { opened, open }; });
+  const openNext = (name: string) => gates[names.indexOf(name) + 1]?.open();
+  const turns = new Map<string, number>();
 
   const totals = () => {
     const usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
@@ -77,6 +83,9 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   const board = new Board(names, log, notify, budgetText);
   board.lease = profile.claimLease * 1000;
   board.threaded = profile.threads;
+  const tasks = profile.taskList ? new TaskList(log) : undefined;
+  const branches = profile.branches !== "off" ? new Branches(workspace, opts.runDir, profile.branches, log) : undefined;
+  const root = (name: string) => branches?.root(name) ?? workspace; // the folder an agent works in
   const seen = new Map<string, string>(); // agent and path -> content digest it last read or wrote
   const digest = (path: string) => (existsSync(path) ? createHash("sha1").update(readFileSync(path)).digest("hex") : "");
   const evidence = new Map<string, { calls: number; firstGreen?: number; green?: boolean; stuck?: number; part?: string }>(); // per seat, reset by a relay
@@ -109,7 +118,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     else if (profile.helpAfter && work && (seat.stuck = (seat.stuck ?? 0) + 1) === profile.helpAfter) help(name, `has made ${profile.helpAfter} tool calls while the acceptance check is failing or not yet run`, part);
     if (profile.helpAfter && event.toolName === "done" && output.startsWith("You are done") && !status.get(part)?.ok) help(name, `finished without a passing acceptance check, saying: "${event.input.reason}"`, part);
     if (profile.staleGuard && ["read", "write", "edit", "append"].includes(event.toolName) && !event.isError) {
-      const path = resolve(workspace, String(event.input.path));
+      const path = resolve(root(name), String(event.input.path));
       seen.set(`${name}:${path}`, digest(path));
     }
     if (profile.notices) {
@@ -119,6 +128,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         board.notice(name, `${name} ran the acceptance check: ${failed ? `FAIL\n${tail}` : "PASS"}`);
       }
     }
+    if (event.toolName === "done" && output.startsWith("You are done")) tasks?.release(name);
     const lines: string[] = [];
     const notices = profile.delivery === "attach" ? board.members.get(name)!.notices.splice(0) : [];
     const messages = profile.delivery === "attach" && board.unread(name).length ? board.inbox(name) : [];
@@ -126,6 +136,8 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       log("attach", { agent: name, messages: messages.length, notices: notices.length });
       lines.push("New on the board:", ...notices.map(n => `- ${n}`), formatMessages(messages));
     }
+    const news = tasks?.news(name);
+    if (news) lines.push(news);
     if (profile.clock) lines.push(`[${minutesLeft()} minutes left before the timeout]`);
     const text = lines.filter(Boolean).join("\n");
     return text ? { content: [...event.content, { type: "text" as const, text: `\n\n${text}` }] } : undefined;
@@ -134,6 +146,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     if (reason) return;
     reason = why;
     for (const member of board.members.values()) member.wake?.();
+    for (const gate of gates) gate.open();
     if (why === "all_done" || why === "quiescent") return;
     log("abort", { reason: why });
     for (const { session } of agents) session.abort().catch(() => {});
@@ -146,9 +159,11 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         ? "Refused: the acceptance check must pass, run by you, before you finish. If the goal truly cannot be reached, end your turn without calling done."
         : `Refused: the acceptance check is only a sample. Spend at least ${profile.doneAfterGreen - (seat.calls - seat.firstGreen!)} more tool calls verifying clauses it does not cover (write tests for them, run them, fix what fails), run the check again, then finish.` };
     }
+    const unmerged = event.toolName === "done" ? branches?.doneWarning(name) : undefined;
+    if (unmerged) return (log("done_refused", { agent: name, unmerged: true }), { block: true, reason: unmerged });
     const write = isToolCallEventType("write", event);
     if (!write && !isToolCallEventType("edit", event) && event.toolName !== "append") return;
-    const path = resolve(workspace, String(event.input.path)), key = normalize(relative(workspace, path));
+    const path = resolve(root(name), String(event.input.path)), key = normalize(relative(root(name), path));
     const refuse = (reason: string) => (log("write_refused", { agent: name, path: key, reason }), { block: true, reason: `Refused: ${reason}` });
     const holder = profile.claimLease ? board.holder(key) : undefined;
     if (holder && holder !== name) {
@@ -179,7 +194,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   const runAgent = async (agent: Agent, index: number) => {
     const { name, briefing } = agent, member = board.members.get(name)!;
     let relays = 0;
-    if (index && profile.spawnGapSeconds) {
+    if (index && profile.spawnAfterTurns) {
+      await gates[index].opened;
+      if (reason) return;
+    } else if (index && profile.spawnGapSeconds) {
       // Staggered start; end() cuts the wait short through wake.
       await new Promise<void>(resolve => {
         const timer = setTimeout(resolve, index * profile.spawnGapSeconds * 1000);
@@ -188,11 +206,16 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       member.wake = undefined;
       if (reason) return;
     }
+    if (profile.spawnAfterTurns) {
+      log("enter", { agent: name });
+      if (profile.spawnGapSeconds) setTimeout(() => openNext(name), profile.spawnGapSeconds * 1000).unref();
+    }
     let prompt = briefing;
     while (true) {
       member.working = true;
       await agent.session.prompt(prompt).catch(error => log("error", { agent: name, message: String(error) }));
       member.working = false;
+      if (profile.spawnAfterTurns) openNext(name);
       if (!reason && member.doneReason !== undefined && relays < profile.relay) {
         // A fresh instance takes the seat: same name and board history, empty context.
         relays += 1;
@@ -226,11 +249,11 @@ export async function runSwarm(task: Task, opts: RunOptions) {
 
   const open = async (name: string) => {
     const loader = new DefaultResourceLoader({
-      cwd: workspace, agentDir: getAgentDir(),
+      cwd: root(name), agentDir: getAgentDir(),
       noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
       appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
       extensionFactories: profile.delivery === "attach" || profile.notices || profile.writeGuard || profile.claimLease || profile.staleGuard
-        || profile.doneAfterGreen || profile.clock || profile.helpAfter ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
+        || profile.doneAfterGreen || profile.clock || profile.helpAfter || profile.taskList || branches ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
     });
     await loader.reload();
     const verify = async () => {
@@ -238,12 +261,13 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       log("done_check", { agent: name, exitCode: check.exitCode, timedOut: check.timedOut });
       return { ok: check.exitCode === 0, output: check.output };
     };
-    const tools = [...fileTools(profile, workspace), ...boardTools(board, name, profile, verify, command => runCheck(command, workspace, 2 * 60_000))];
+    const tools = [...fileTools(profile, root(name)), ...boardTools(board, name, profile, verify, command => runCheck(command, root(name), 2 * 60_000)),
+      ...(tasks ? taskTools(tasks, name, profile.toolDescriptions) : []), ...(branches?.tools(name, profile.toolDescriptions) ?? [])];
     const { session } = await createAgentSession({
-      cwd: workspace, modelRuntime: runtime, model,
+      cwd: root(name), modelRuntime: runtime, model,
       thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],
       resourceLoader: loader, settingsManager: SettingsManager.inMemory({ steeringMode: "all" }), // queued steers arrive together
-      sessionManager: SessionManager.inMemory(workspace),
+      sessionManager: SessionManager.inMemory(root(name)),
       tools: [...new Set([...profile.tools, ...tools.map(t => t.name)])], customTools: tools,
     });
     if (task.thinking && session.thinkingLevel !== task.thinking) {
@@ -256,6 +280,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         const { input, output, totalTokens, cost } = event.message.usage;
         log("usage", { agent: name, input, output, total: totalTokens, cost: cost.total });
         setImmediate(checkBudget); // session stats include this message only after listeners run
+        if (profile.spawnAfterTurns) {
+          turns.set(name, (turns.get(name) ?? 0) + 1);
+          if (turns.get(name) === profile.spawnAfterTurns) openNext(name);
+        }
         const relaysLeft = retired.filter(r => r.name === name).length < profile.relay;
         if (profile.relayContext && totalTokens > profile.relayContext && relaysLeft && !handoff && session.isStreaming) {
           handoff = true;
@@ -269,6 +297,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
 
   const timer = setTimeout(() => end("timeout"), task.timeoutMinutes * 60_000);
   try {
+    branches?.init(names);
     agents = await Promise.all(names.map(async name => ({ name, session: await open(name), briefing: briefing(task, profile, name, names) })));
     log("run_start", { task, profile, workspace, agents: agents.map(({ name, session, briefing }) => ({
       name, model: session.model?.id, thinking: session.thinkingLevel, tools: session.getActiveToolNames(), briefing })) });
@@ -278,13 +307,15 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     end("error");
   }
   clearTimeout(timer);
+  const unmerged = branches?.finish(names); // agent -> files its branch holds that the shared folder lacks
+  if (unmerged) log("branches_end", { unmerged });
 
   const check = await runCheck(task.check, workspace, opts.checkTimeoutMs ?? 10 * 60_000);
   log("check", check);
   const { cost, tokens, usage } = totals();
   const result = {
     status: check.exitCode === 0 ? "passed" : "failed",
-    reason, check, costUsd: cost, tokens, usage, durationMs: Date.now() - started,
+    reason, check, costUsd: cost, tokens, usage, durationMs: Date.now() - started, ...(unmerged && { unmerged }),
     agents: [...board.members.values()].map(m => {
       const stats = [...agents, ...retired].filter(a => a.name === m.name).map(a => a.session.getSessionStats());
       return { name: m.name, done: m.doneReason !== undefined, doneReason: m.doneReason, relays: stats.length - 1,

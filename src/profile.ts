@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { Type } from "typebox";
 import { Errors } from "typebox/value";
+import { BRANCH_TOOLS } from "./branches.ts";
+import { TASK_TOOLS } from "./tasklist.ts";
 
 export const BUILTIN_TOOLS = ["read", "bash", "edit", "write", "grep", "find", "ls"];
 export const BOARD_TOOLS = ["post", "inbox", "team", "budget", "claim", "release", "role", "finding", "done"];
@@ -32,7 +34,8 @@ Start by reading your inbox and posting what you will work on. When told you hav
   /** Replaces a tool's description: board tools, append, or the built-in tools in `tools` (those are then registered as murmur's own copy of Pi's tool). */
   toolDescriptions: {} as Record<string, string>,
   tools: ["read", "bash", "edit", "write"],
-  spawnGapSeconds: 0,
+  /** Staggered start: agent i starts i × this many seconds after the run starts. With spawnAfterTurns, the longest an agent waits after the previous one entered. */ spawnGapSeconds: 0,
+  /** Staggered start by turns: each agent enters once the previous one has finished this many model turns (assistant messages), or spawnGapSeconds after the previous one entered if that comes first. 0 is off. */ spawnAfterTurns: 0,
   /** Menu agents may pick from with role(name); empty means no role tool. Never assigned. */ roles: {} as Record<string, { summary: string; instructions: string }>,
   /** How many times a new post may wake an agent that already called done. */ revive: 0,
   /** done is refused while the agent has unread messages or the acceptance check fails. */ doneGate: false,
@@ -50,19 +53,22 @@ Start by reading your inbox and posting what you will work on. When told you hav
   /** Tool calls an agent makes while the acceptance check fails or has not run before the board hears it may need help; also posts when one finishes without a pass. 0 is off. */ helpAfter: 0,
   /** Board tools offered when messaging is on; done is always offered. */ boardTools: BOARD_TOOLS,
   /** Threaded board: agents open threads with thread_new and answer with reply instead of using post. Agents only receive the threads they follow (opened, replied to or read), plus a one-line announcement of each new thread. Offer the thread tools through boardTools. */ threads: false,
+  /** Offer a shared task list (tasks, task_add, task_take, task_done, task_drop): any agent adds items and takes them, and an agent that calls done gives back what it had taken. murmur only keeps the list and appends its progress to tool results when it changes; nobody assigns. Works with messaging off. */ taskList: false,
+  /** A git branch per agent, in its own worktree outside the shared folder, with merge (integrate into the shared folder, reporting conflicts) and update (bring others' merged work in). "required": every agent works in its branch, and done is refused once while it holds unmerged work. "optional": agents work in the shared folder and may open a branch with branch(). */ branches: "off" as "off" | "required" | "optional",
 };
 export type Profile = typeof DEFAULT_PROFILE;
 
 const text = Type.Optional(Type.String()), flag = Type.Optional(Type.Boolean()), count = Type.Optional(Type.Integer({ minimum: 0 }));
 const ProfileSchema = Type.Object({
   briefing: text, teamBriefing: text, steer: text, wake: text, systemPromptAppend: text,
-  messaging: flag, threads: flag, doneGate: flag, notices: flag, append: flag, writeGuard: flag, staleGuard: flag, clock: flag, findings: flag,
+  messaging: flag, threads: flag, taskList: flag, doneGate: flag, notices: flag, append: flag, writeGuard: flag, staleGuard: flag, clock: flag, findings: flag,
   revive: count, doneAfterGreen: count, relay: count, relayContext: count, helpAfter: count,
-  spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })), claimLease: Type.Optional(Type.Number({ minimum: 0 })),
+  spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })), spawnAfterTurns: count, claimLease: Type.Optional(Type.Number({ minimum: 0 })),
   toolDescriptions: Type.Optional(Type.Record(Type.String(), Type.String())),
   tools: Type.Optional(Type.Array(Type.String())), boardTools: Type.Optional(Type.Array(Type.String())),
   roles: Type.Optional(Type.Record(Type.String(), Type.Object({ summary: Type.String(), instructions: Type.String() }, { additionalProperties: false }))),
   delivery: Type.Optional(Type.Union([Type.Literal("steer"), Type.Literal("attach"), Type.Literal("pull")])),
+  branches: Type.Optional(Type.Union([Type.Literal("off"), Type.Literal("required"), Type.Literal("optional")])),
 }, { additionalProperties: false });
 
 export function loadProfile(path?: string): Profile {
@@ -77,11 +83,12 @@ export function loadProfile(path?: string): Profile {
   if (badTool) throw new Error(`profile ${path}: unknown tool ${badTool} (allowed: ${BUILTIN_TOOLS.join(", ")})`);
   const badBoardTool = raw.boardTools?.find((t: string) => !KNOWN_BOARD_TOOLS.includes(t));
   if (badBoardTool) throw new Error(`profile ${path}: unknown board tool ${badBoardTool} (allowed: ${KNOWN_BOARD_TOOLS.join(", ")})`);
-  const describable = [...KNOWN_BOARD_TOOLS, ...BUILTIN_TOOLS, "append"];
+  const describable = [...KNOWN_BOARD_TOOLS, ...BUILTIN_TOOLS, "append", ...TASK_TOOLS, ...BRANCH_TOOLS];
   const badDescription = Object.keys(raw.toolDescriptions ?? {}).find(t => !describable.includes(t));
   if (badDescription) throw new Error(`profile ${path}: toolDescriptions.${badDescription} is not a known tool`);
   const profile = { ...DEFAULT_PROFILE, ...raw };
-  const unoffered = Object.keys(profile.toolDescriptions).find(t => (BUILTIN_TOOLS.includes(t) && !profile.tools.includes(t)) || (t === "append" && !profile.append));
+  const unoffered = Object.keys(profile.toolDescriptions).find(t => (BUILTIN_TOOLS.includes(t) && !profile.tools.includes(t)) || (t === "append" && !profile.append)
+    || (TASK_TOOLS.includes(t) && !profile.taskList) || (BRANCH_TOOLS.includes(t) && (profile.branches === "off" || (t === "branch" && profile.branches !== "optional"))));
   if (unoffered) throw new Error(`profile ${path}: toolDescriptions.${unoffered} describes a tool the profile does not offer`);
   if (profile.threads && profile.boardTools.includes("post")) throw new Error(`profile ${path}: with threads, boardTools cannot offer post (use thread_new and reply)`);
   if (profile.threads && profile.messaging && !THREAD_TOOLS.every(t => profile.boardTools.includes(t))) throw new Error(`profile ${path}: with threads, boardTools must offer ${THREAD_TOOLS.join(", ")}`);
