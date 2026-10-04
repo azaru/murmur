@@ -1366,6 +1366,87 @@ Score [tokens, minutes, end] per run, k=2:
   - The write guard refused 8 writes; the 3 that were inspected were genuine partial writes.
   - The subagent found no bash timeouts in this stage.
 
+## 2026-10-04 09:27: the user's decisions after stage B, the `clockTokens` lever, and the list of arms to re-evaluate
+
+**Decisions (the user, in reply to the 09:05 proposal):**
+- Show the tokens left next to the clock. This is realistic: real work has budgets, and people can see them.
+- Drop B (12 equals with a post-only board). From here on, C1 (one agent) and ST (12 agents with staggered entry) are the arms, and ST is the base swarm.
+- Run stage C as proposed: equal spend, two volume tasks.
+
+**New lever `clockTokens`** (default off; `src/profile.ts`, `src/swarm.ts`, in the commit that adds this note). It appends `[12.3M tokens left in the budget shared by all agents]` to every tool result ("in the budget" alone at n=1). The count is the run's `budgetTokens` minus the tokens spent so far, cache reads included: the same counter that ends the run on `budget`. It is independent of `clock`.
+- New profiles: `solo-clock-tokens` (`solo-clock` + `clockTokens`) and `n12-stagger-tokens` (`n12-stagger` + `clockTokens`).
+- Smokes (from `src/`, no campaign running; runs deleted):
+  - trio with 3 agents on `n12-stagger-tokens`: all_done, 81k tokens, 3 `enter` events, and the line went from 1.5M to 1.4M;
+  - trio with 1 agent on `solo-clock-tokens`: all_done, 23k, with "in the budget";
+  - default profile on `examples/trio.json`: all_done, 124k, and no "tokens left" line.
+- Typecheck and unit tests (10 of 10) pass.
+
+**Arms to re-evaluate** (the user asked for the list). Every verdict below is either a k=2 screen, or was measured at unequal spend, or was measured with an oracle.
+1. **Swarm against single agent at equal spend.** In every round 15 verdict against C1, C1 spent much less than the cap: 0.3M of 12M on planning and shop2 (it ends with `done` at ~6 of 20 minutes), and 11M of 24M on ospec. Stage C covers ospec. Planning and shop2 would need a spend-matched single-agent control. Candidates:
+   - C1 with tokens left on the clock;
+   - fresh-context relays (`relay`);
+   - 12 isolated agents in one folder with the board off, which is also recount item 2.
+2. **Round 15 stage A screens (k=2, mostly carried by shop2):**
+   - BR (required branches) and ST (staggered entry) "beat C1", and ST is "pronounced better than B";
+   - TL (task list) is "pronounced worse", at the threshold, and was barely used;
+   - BO (optional branches) "loses";
+   - RO (roles) is not pronounced.
+   
+   BR and ST are the ones worth confirming with more k. TL, BO and RO are low priority.
+3. **Stage B screen:** ST is pronounced better than B by +0.135, inside B's own 0.19 spread. Not followed up, because B is dropped.
+4. **Levers measured only with an oracle** (from `reports/2026-10-03-lever-recount.md`; staggered entry and roles have since been retested in round 15):
+   - board on or off (`messaging`) at n=12;
+   - delivery (`attach`, `pull`, `steer`);
+   - write notices (`notices`);
+   - claims with leases (`claimLease`) and `staleGuard`;
+   - fresh-context relays (`relay`, `relayContext`);
+   - verified findings (`finding`);
+   - threads (`threads`);
+   - revive without `doneGate`;
+   - parallel attempts with selection by the agents' own probes;
+   - section split for volume (old norms that mention hidden tests, to be rewritten).
+5. **Single-agent results from round 11** that rest on one task: murmur against Pi (+0.07), and norms not decided. These are low priority for the swarm question.
+
+## Round 15, stage C: equal spend on volume (fixed before measuring, 2026-10-04 09:27; the user approved the plan and the launch in reply to the 09:05 proposal)
+
+**Question.** On volume tasks, does a 12-agent swarm still beat one agent once the single agent has the time to spend the same cap, and both see how many tokens are left? Stage B left this open: C1 stopped on its 30-minute clock with 13M of 24M unspent.
+
+**Tasks** (24M cap and 3720 s per run for every arm; murmur's clock starts at 60 minutes, because the adapter keeps 2 minutes for the final check; k=2):
+- ospec_green_blind, as in stage B.
+- ospec_brown_blind, an OpenSpec change to an existing codebase. A single agent with the clock scored 0.47 there in round 11, with all 3 runs capped at 6M. It is added so that the volume result does not rest on one task.
+
+**Arms:**
+- **C1T** = `solo-clock-tokens`: one agent with the write guard, the clock and the tokens left.
+- **STT** = `n12-stagger-tokens` at n=12: ST (12 equals with a post-only board, turn-based staggered entry, write guard, clock) plus the tokens left.
+
+**Execution.** `experiments/criba15-lanes.mjs`, stage C, seed 20261074, in two lanes: `1 C --arms C1T` and `2 C --arms STT`. At most one 12-agent run and one single-agent run run at a time.
+- STT campaigns list `[C1T, STT]` with `--limit 1`. Under this seed `plan[0]` is STT on both tasks (checked on the `plan` field of `swarmtest plan`). C1T gets its own campaigns.
+- Order within each lane: repetition 0 on both tasks, then repetition 1.
+- `--max-total-tokens 30000000` per campaign. The quota stop and the resume rules are as in stage A. A STOP ends both lanes, after their running campaigns.
+
+**Rules** (per-task means over the 2 tasks, k=2; scores of capped runs count as they are; tokens and minutes are reported with every score):
+- **STT against C1T:**
+  - **beats C1T** if its two-task mean is ≥ +0.05 above and it is above on both tasks;
+  - **loses** if it is ≤ −0.05 below and below on both tasks;
+  - otherwise **not decided**.
+- **Descriptive:**
+  - On green, C1T against stage B's C1 and STT against stage B's ST. These compare the same task at another hour and seed, so they are descriptive only. They are reported for tokens spent, minutes, score, and (for the swarm) modules left unwired or unwritten at the end.
+  - How often agents mention the tokens left or the budget in their messages.
+  - The end reason per run, and tokens left at the end.
+  - Wall time. If the scores tie, the swarm's speed is the result to report.
+- **Predictions:**
+  - C1T spends more than C1 did (over 15M on green) but still ends before the cap and gains less than 0.15 over C1's 0.447. Its pace (about 3 tasks a minute) is the limit, not its knowledge of the budget.
+  - STT beats C1T on both tasks. On brown the margin is smaller, because the existing code makes coverage less of the bottleneck.
+  - The tokens line makes some STT agents wire in or finish modules before the cap. STT ends with fewer unwired modules than ST's stage B runs.
+
+**Known threats:**
+- STT, C1T and the lever change together against stage B, so stage B comparisons are descriptive. The verdict compares STT with C1T only, and both arms carry the lever.
+- C1T runs take up to an hour each. With k=2 on two tasks, a single run can move a task mean by 0.2.
+- Two lanes put 13 agents on the machine at once (12 + 1). The ospec tests are not wall-clock bound, and load is logged.
+- The round likely spans two quota windows, so resumed campaigns run hours apart.
+
+**Budget (estimate):** STT 4 × 24M = 96M; C1T 4 × ~20M ≈ 80M (upper 96M). **Total ~176M**, upper bound ~192M, about two quota windows. Wall clock about 4 hours, set by the single-agent lane.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

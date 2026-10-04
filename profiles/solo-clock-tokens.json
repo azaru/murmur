@@ -1,0 +1,6 @@
+{
+  "messaging": false,
+  "writeGuard": true,
+  "clock": true,
+  "clockTokens": true
+}

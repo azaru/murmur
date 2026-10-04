@@ -58,6 +58,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     return { cost, tokens, usage };
   };
   const minutesLeft = () => Math.max(0, task.timeoutMinutes - (Date.now() - started) / 60_000).toFixed(1);
+  const tokensLeft = () => `${(Math.max(0, task.budgetTokens! - totals().tokens) / 1e6).toFixed(1)}M`;
   const budgetText = () => {
     const { cost, tokens } = totals();
     const left = [task.budgetUsd && `$${(task.budgetUsd - cost).toFixed(4)}`, task.budgetTokens && `${task.budgetTokens - tokens} tokens`];
@@ -142,6 +143,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     const news = tasks?.news(name);
     if (news) lines.push(news);
     if (profile.clock) lines.push(`[${minutesLeft()} minutes left before the timeout]`);
+    if (profile.clockTokens && task.budgetTokens) lines.push(`[${tokensLeft()} tokens left in the budget${task.agents > 1 ? " shared by all agents" : ""}]`);
     const text = lines.filter(Boolean).join("\n");
     return text ? { content: [...event.content, { type: "text" as const, text: `\n\n${text}` }] } : undefined;
   };

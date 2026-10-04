@@ -123,6 +123,7 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
   - `doneGate`: no `done` with unread posts or a failing check;
   - `doneAfterGreen`: tool calls required after the first passing check;
   - `clock`: minutes left appended to tool results.
+  - `clockTokens`: tokens left in the run's budget, shared by the whole swarm, appended to tool results.
 - **Fresh context:**
   - `relay`: a new instance takes over the seat after `done`;
   - `relayContext`: or once turns grow past that many tokens.

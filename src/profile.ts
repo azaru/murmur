@@ -48,6 +48,7 @@ Start by reading your inbox and posting what you will work on. When told you hav
   /** Refuse a write onto a file that changed since this agent last read or wrote it. */ staleGuard: false,
   /** Tool calls required after an agent's first passing check before done; its latest check must pass too. 0 is off. */ doneAfterGreen: 0,
   /** Append the minutes left before the timeout to every tool result. */ clock: false,
+  /** Append the tokens left in the run's token budget (budgetTokens), shared by all agents, to every tool result. */ clockTokens: false,
   /** How many fresh instances may take over each agent's seat after it calls done (a context reset, not a revival). */ relay: 0,
   /** Tokens per turn above which an agent with relays left is asked to write its handoff and call done. 0 is off. */ relayContext: 0,
   /** Offer finding(text, command): murmur runs the command and posts the claim with its real exit code and output. */ findings: false,
@@ -62,7 +63,7 @@ export type Profile = typeof DEFAULT_PROFILE;
 const text = Type.Optional(Type.String()), flag = Type.Optional(Type.Boolean()), count = Type.Optional(Type.Integer({ minimum: 0 }));
 const ProfileSchema = Type.Object({
   briefing: text, teamBriefing: text, steer: text, wake: text, systemPromptAppend: text,
-  messaging: flag, threads: flag, taskList: flag, doneGate: flag, notices: flag, append: flag, writeGuard: flag, staleGuard: flag, clock: flag, findings: flag,
+  messaging: flag, threads: flag, taskList: flag, doneGate: flag, notices: flag, append: flag, writeGuard: flag, staleGuard: flag, clock: flag, clockTokens: flag, findings: flag,
   revive: count, doneAfterGreen: count, relay: count, relayContext: count, helpAfter: count,
   spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })), spawnAfterTurns: count, claimLease: Type.Optional(Type.Number({ minimum: 0 })),
   toolDescriptions: Type.Optional(Type.Record(Type.String(), Type.String())),
