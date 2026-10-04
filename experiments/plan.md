@@ -1791,6 +1791,30 @@ Round 16 stage D left only expr below 0.85. A subagent chose 12 candidates with 
 - Predictions: C1TR not decided against C1T, as predicted, but with the margin on shop2 rather than planning. AUD against C1TR not decided, as predicted. Spend: C1TR was 1.0–1.4× C1T (predicted 2–3×) and AUD 4–11× (predicted 3–5×).
 - The transcript analysis also waits for the screen to end (no bulk reads while runs are live).
 
+### Round 17 stage S result: DeepSWE screen (2026-10-05 01:33; batches 23:55–01:31, code `497b6d9`)
+
+C1T, one run per task, `isolated` arm, three batches of four, 48M shared and 90 minutes per batch, 6 GB per sidecar. 46.1M tokens in total (13.0M, 18.9M and 14.2M), above the 20–36M estimate. No infrastructure failure: every task parsed its tests in both modes.
+
+| task | score | binary | new / base fraction | tokens | minutes | end | stage E |
+|---|---:|---:|---|---:|---:|---|---|
+| oxvg-structural-selector-preservation (Rust) | 0.000 | 0 | 0.000 / 1.000 | 7.02M | 35.7 | all_done | **kept** |
+| scriggo-method-declarations (Go) | 0.000 | 0 | 0.000 / 0.993 | 0.63M | 4.9 | quiescent | **kept** |
+| tengo-destructuring-bindings (Go) | 0.440 | 0 | 0.440 / 1.000 | 1.46M | 7.6 | all_done | **kept** |
+| wasmi-trap-coredumps (Rust) | 0.636 | 0 | 0.636 / 1.000 | 12.13M | 27.7 | all_done | **kept** |
+| scc-bounded-memory-spilling (Go) | 0.903 | 0 | 0.903 / 1.000 | 1.11M | 9.0 | all_done | out |
+| participle-grammar-conflict-analysis (Go) | 0.955 | 0 | 0.955 / 1.000 | 0.54M | 8.3 | all_done | out |
+| dasel-html-document-format (Go) | 0.973 | 0 | 0.973 / 1.000 | 1.59M | 9.5 | all_done | out |
+| fastapi-implicit-head-options (Python) | 0.977 | 0 | 0.977 / 1.000 | 9.22M | 23.1 | all_done | out |
+| returns-validated-error-accumulation (Python) | 0.981 | 1 | 0.981 / 1.000 | 2.66M | 11.2 | all_done | out |
+| etree-xml-diff-patch (Go) | 1.000 | 1 | 1.000 / 1.000 | 1.82M | 11.2 | all_done | out |
+| go-git-worktree-merge-conflicts (Go) | 1.000 | 1 | 1.000 / 1.000 | 4.05M | 15.4 | all_done | out |
+| ytt-jsonpath-query-api (Go) | 1.000 | 1 | 1.000 / 1.000 | 3.78M | 15.0 | all_done | out |
+
+- **Rule as written:** 4 of 12 score below 0.85: oxvg, scriggo, tengo and wasmi. With expr from round 16 stage D (0.671), stage E has 5 tasks.
+- **The two zeros are real:** the tests ran and failed on assertions. In oxvg, all 6 fail-to-pass tests panic. In scriggo, 50 of the new tests fail, and its agent stopped on its own after 4.9 minutes with a 4.8 KB diff.
+- **Prediction** ("about half below 0.85"): one third did. Patch size predicted difficulty poorly, as the candidate report warned.
+- The binary reward is 1 on 4 of 12 tasks. Partial credit again puts C1T near the ceiling on most tasks it does not fully solve.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -1857,3 +1881,4 @@ Round 16 stage D left only expr below 0.85. A subagent chose 12 candidates with 
 | 2026-10-04 | round 16 side test U (6 campaigns `20261004T182025Z-4f3259e1` → `20261004T182208Z-ee9d90bc`, seed 20261090, code `e5f402f`) | C1T solo-clock-tokens, CU solo-clock-unlimited, C0 solo (all n=1) | shop2 × 2, 24M, 3720 s | 0.29M | means: C0 0.130, C1T 0.000, CU 0.000; CU 35–51 s, C1T 115–130 s | no difference in any pair; "unlimited" does not lengthen work |
 | 2026-10-04 | round 16 stage D, DeepSWE calibration (batches `cal16-r0`, `cal16-r1`, `isolated` arm, code `4833873`; fd r1 rescored after a cargo cache fault) | C1T solo-clock-tokens n=1 per task | expr, termenv, cattrs, fd × 2, 48M shared, 90 min | 19.7M | means: termenv 1.000, fd 0.989, cattrs 0.972, expr 0.671 (partial credit) | three tasks excluded (≥ 0.85); only expr stays; stage E needs new tasks |
 | 2026-10-04/05 | round 17 (18 campaigns `20261004T210830Z-5a3ac503` → `20261004T220858Z-7ac6739b`, seed 20261101, code `73ff3e7`) | C1T solo-clock-tokens; C1TR solo-clock-tokens-relay2 (n=1); AUD n3-audit-tokens (n=3) | planning, shop2 × 3, 12M, 3720 s | 27.1M | means: AUD 0.348, C1TR 0.313, C1T 0.238 | AUD beats C1T (shop2-led); C1TR vs C1T and AUD vs C1TR not decided; quiet regrade pending |
+| 2026-10-04/05 | round 17 stage S, DeepSWE screen (batches `scr17-b1` to `scr17-b3`, `isolated` arm, code `497b6d9`) | C1T solo-clock-tokens n=1 per task | 12 candidates × 1, 48M shared per batch, 90 min | 46.1M | 4 below 0.85: oxvg 0, scriggo 0, tengo 0.44, wasmi 0.64 | those 4 plus expr go to stage E |

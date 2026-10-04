@@ -1,0 +1,100 @@
+{
+  "batch": "scr17-b3",
+  "arm": "isolated",
+  "profile": "profiles/solo-clock-tokens.json",
+  "profileSha256": "3040e3a7fcf92872",
+  "agents": 1,
+  "tasks": [
+    "ytt-jsonpath-query-api",
+    "scriggo-method-declarations",
+    "participle-grammar-conflict-analysis",
+    "fastapi-implicit-head-options"
+  ],
+  "tokenCap": 48000000,
+  "timeoutMinutes": 90,
+  "tokens": 14176381,
+  "minutes": 23.5,
+  "endReason": "all_done,quiescent,all_done,all_done",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "ytt-jsonpath-query-api": {
+      "diffBytes": 27900,
+      "leakCheck": {
+        "ok": true,
+        "all": 1284,
+        "head": 1284,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "c4e551ec9c0287c1b8182690c7d6c3924705b0d0",
+        "log": "all=1284 | head=1284 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 1,
+      "new_frac": 1,
+      "base_frac": 1,
+      "binary": 1,
+      "parsed": 106
+    },
+    "scriggo-method-declarations": {
+      "diffBytes": 4845,
+      "leakCheck": {
+        "ok": true,
+        "all": 5005,
+        "head": 5005,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "5a01b067130bd3bed36468ba6cc3c6e9b1b230e3",
+        "log": "all=5005 | head=5005 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 0.9933014354066986,
+      "binary": 0,
+      "parsed": 1091
+    },
+    "participle-grammar-conflict-analysis": {
+      "diffBytes": 15255,
+      "leakCheck": {
+        "ok": true,
+        "all": 456,
+        "head": 456,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "5e75812f083a18c24deb16e7b33bf68de5d3fbda",
+        "log": "all=456 | head=456 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9550561797752809,
+      "new_frac": 0.9550561797752809,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 242
+    },
+    "fastapi-implicit-head-options": {
+      "diffBytes": 36947,
+      "leakCheck": {
+        "ok": true,
+        "all": 6914,
+        "head": 6914,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "ed4cc219ce1c8f8bddd88a60c52a701fef3b5f64",
+        "log": "all=6914 | head=6914 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9767441860465116,
+      "new_frac": 0.9767441860465116,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 3179
+    }
+  },
+  "meanScore": 0.7329500914554481,
+  "code": {
+    "commit": "0adf2cfcbfbadaa0b375bd527265814d604551d2",
+    "srcDirty": false
+  },
+  "date": "2026-10-04T23:31:28.625Z"
+}
