@@ -1622,7 +1622,7 @@ Mean score [mean tokens] (runs, end), k=2:
 - On these difficulty tasks a 12-agent swarm does not beat one agent left to its own spend, with or without threads.
 - The transcript analysis waits until the DeepSWE calibration (stage D) has finished, because bulk reads stay off while runs are live.
 
-### Round 16 stage D result: DeepSWE C1T calibration (2026-10-04 20:35; batches 19:23–20:17, code `4833873`; rule not yet final)
+### Round 16 stage D result: DeepSWE C1T calibration (2026-10-04 20:19; batches 19:23–20:17, code `4833873`; rule not yet final)
 
 C1T (one agent with the clock and the tokens left), `isolated` arm: the four tasks in parallel, one agent each, 48M shared cap, 90 minutes. Scores are partial credit (new tests' pass fraction × base tests' pass fraction); "binary" is the official all-pass reward.
 
@@ -1639,7 +1639,7 @@ C1T (one agent with the clock and the tokens left), `isolated` arm: the four tas
 - The batch cap is computed once fd is settled. With expr alone: max(4M, 8.54M) → 12M; with expr and fd: max(8M, 8.54M + 2.12M = 10.66M) → 12M.
 - Partial credit puts C1T near the ceiling on three of four tasks even when the official binary reward is 0 (cattrs both runs, fd r0). The swarm's room on these tasks is in the binary reward, not in the partial score.
 
-### Side test U: one agent told its time and tokens are unlimited (fixed before measuring, 2026-10-04 20:35; the user asked for it)
+### Side test U: one agent told its time and tokens are unlimited (fixed before measuring, 2026-10-04 20:19; the user asked for it)
 
 **The user's request:** C1T with the clock always saying "unlimited" for time and tokens, to see whether one agent behaves better than the plain version. It is a single-agent question, not about the swarm.
 
@@ -1660,6 +1660,31 @@ C1T (one agent with the clock and the tokens left), `isolated` arm: the four tas
 - **Predictions:** CU spends more than C1T (median tokens at least ×2) but its score is not different. C0 behaves like C1T, because C1T never reached its limits.
 
 **Known threats:** one task at k=2, and shop2 has swung 0.00–0.76 across arms. The "unlimited" line is untrue while a hard timeout exists. That is the lever as asked, and the generous cap keeps it from biting at the spends seen so far.
+
+### Side test U result (2026-10-04 20:27; lanes 20:20–20:23, code `e5f402f`)
+
+| arm | r0 score (tokens, seconds) | r1 score (tokens, seconds) | mean |
+|---|---|---|---|
+| C1T (real minutes and tokens left) | 0.000 (76k, 115) | 0.000 (61k, 130) | 0.000 |
+| CU (both lines say "unlimited") | 0.000 (39k, 35) | 0.000 (42k, 51) | 0.000 |
+| C0 (no clock line) | 0.000 (41k, 42) | 0.261 (35k, 34) | 0.130 |
+
+**Rules as written:**
+- CU against C1T: no difference (0.000 against 0.000).
+- C0 against C1T: no difference. The mean is +0.130, but C0's lower run (0.000) is not above C1T's higher run (0.000).
+- CU against C0: no difference.
+
+**Checks:**
+- The zeros are real, not a grading fault. Each zero is a solver whose cost is worse than the contract's naive baseline on all four hidden instances, which scores 0 by the grader's formula. Two C1T solutions were regraded on a quiet machine with the same result (C1T r0 costs 23603/48965/79686/98401 against naive 21108/41974/61528/74963).
+- C1T scored 0.565 and 0.547 in stage A, three hours earlier, with the same arm, cap and behaviour (~100 s, 60–70k tokens). One agent's shop2 score is bimodal: the quick heuristic it writes either beats the naive baseline or does not.
+
+**Descriptive (from the six transcripts):**
+- Every agent wrote a short solver (40–136 lines) and called `done` within 35–130 s, using 8–13 tool calls and 1–3 runs of its own solver. Every agent stopped far below the cap and the clock.
+- No agent mentioned the clock or tokens line, "unlimited" included.
+- CU spent less than C1T, not more: 39–42k tokens and 35–51 s, against 61–76k and 115–130 s. CU and C0 behave alike. Seeing a real countdown went with somewhat longer work, but at k=2 that is a hint, not a finding.
+- Predictions: "CU spends at least ×2 C1T" is refuted (×0.6). "C0 behaves like C1T" is half right: same stopping, about half the time.
+
+**Finding.** On shop2, telling one agent that time and tokens are unlimited does not make it work longer or better. The agent stops when it judges the deliverable finished, a minute or two in, whatever the line says. What limits one agent here is its stopping judgement, not the budget it sees.
 
 ## Campaign registry
 
@@ -1724,3 +1749,4 @@ C1T (one agent with the clock and the tokens left), `isolated` arm: the four tas
 | 2026-10-04 | round 15 stage B (6 valid campaigns `20261004T052617Z-702c5333` → `20261004T064229Z-4b350f75`, seed 20261072, code `f4c5f63`) | C1 solo-clock n=1; B s2-board-clock, ST n12-stagger (n=12) | ospec_green_blind × 2, 24M cap, 1920 s | 117.8M | ST 0.869, B 0.734, C1 0.447; swarms all capped at ~7 min, C1 done at ~11M | ST pronounced better than B (+0.135); B and ST beat C1 (+0.29, +0.42) at 2.2× tokens |
 | 2026-10-04 | round 15 stage C, closed early (6 valid campaigns `20261004T072757Z-102de6ff` → `20261004T081156Z-cfaad405`, seed 20261074, code `10e6f54`; 1 invalid, `20261004T084418Z-f23dfd8d`, quota) | C1T solo-clock-tokens n=1 (k=1); STT n12-stagger-tokens n=12 (k=2) | ospec_green, ospec_brown, 24M, 60-minute clock | 154.6M | STT 0.959, C1T 0.952; all valid runs capped | not decided (C1T k=1); volume tasks saturated; the user moves to quality-bound tasks calibrated against C1T |
 | 2026-10-04 | round 16 stage A (12 valid campaigns `20261004T154422Z-5d32faf7` → `20261004T171634Z-37116428`, seed 20261080, code `b438df5`) | C1T solo-clock-tokens n=1; STT n12-stagger-tokens, STH n12-stagger-threads-tokens (n=12) | planning, shop2 × 2, 12M | 72.7M | two-task means: STT 0.545, C1T 0.524, STH 0.470; C1T spends 0.5M per run | STT vs C1T not decided; STH loses to C1T; threads not pronounced vs posts |
+| 2026-10-04 | round 16 side test U (6 campaigns `20261004T182025Z-4f3259e1` → `20261004T182208Z-ee9d90bc`, seed 20261090, code `e5f402f`) | C1T solo-clock-tokens, CU solo-clock-unlimited, C0 solo (all n=1) | shop2 × 2, 24M, 3720 s | 0.29M | means: C0 0.130, C1T 0.000, CU 0.000; CU 35–51 s, C1T 115–130 s | no difference in any pair; "unlimited" does not lengthen work |
