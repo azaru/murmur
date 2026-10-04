@@ -1483,6 +1483,37 @@ At the stop, 6 of 8 runs were valid. C1T's second runs on green and brown are le
 - **Where the strong runs lose their last points:** mostly interface and command-line mismatches (argparse usage errors in three `...-command-line` checks, an unexpected keyword argument), not missing capabilities. On brown, one timesheet check failed in all 3 runs ("expected INVALID_WEEK, got INVALID_DATE"); it may be a spec ambiguity and should be read before brown is reused.
 - **Friction:** no `wake` events, 3 write refusals, no bash timeouts.
 
+## 2026-10-04 13:30: DeepSWE batches, the user's decisions and the infrastructure (no measurement yet)
+
+**Decisions (the user, after round 15 stage C):**
+- Test murmur on DeepSWE (`../deep-swe`: 113 real tasks from open-source repositories, Harbor format, with hidden tests applied only when grading). This fits the realism rule.
+- The design is a **batch**: one swarm gets several tasks at once and organises itself across them, against one agent with the clock on the same batch at the same cap.
+- Start with 3–4 tasks per batch and look for the sweet spot.
+- First check that single agents with the clock get signal.
+- Giving containers more CPU is acceptable.
+
+**Feasibility** (subagent report `reports/2026-10-04-deepswe-batch-feasibility.md`, model output; ✓ marks claims I checked):
+- The task format sets only time: 5400 s for the agent and 1800 s for the verifier. There is no token cap, and the leaderboard ran mini-swe-agent with no cost limit.
+- The official reward is binary, so a partial-credit scorer was added. The score is the fraction of fail-to-pass new tests that pass, times the fraction of the reference's base tests still passing. Fail-to-pass means the test fails on the untouched base and passes with the solution.
+- **Oracle leak found.** Each image's `.git` holds the full upstream history, including commits after the base: anko has 1119 commits in all refs against 1105 reachable from HEAD ✓. The driver strips it.
+
+**Driver** (`experiments/deepswe/`, built by a subagent; report `reports/2026-10-04-deepswe-driver-build.md`, model output). `src/` is unchanged.
+- Layout: a hub container runs murmur, and one sidecar per task runs the task's own image with `--network none` and 2 CPUs. The repositories sit on shared volumes, and agents run commands in a task's environment with `run <task> <cmd>`.
+- Arms: `swarm` (N agents, one shared cap), `solo` (one agent, same cap) and `isolated` (one single-agent run per task, cap divided by the number of tasks).
+- Anti-leak:
+  - Before any agent starts, every ref except the base HEAD, the remotes and the reflogs are deleted, followed by `gc --prune=now`.
+  - The batch is checked and aborts if a check fails: `rev-list --all` must equal HEAD, with no unreachable objects, refs or remotes.
+  - Hidden tests are copied in only at grading time.
+- Validation without a model (`--dry`) on anko (Go), ts-pattern (jest) and true-myth (vitest): the untouched base scores 0.0 and the reference solution 1.0 (binary 1) on all three. The mocha parser was checked only on a synthetic snippet. Runners called through a package script are not parsed, so for those tasks only the binary reward counts.
+- Model smokes (about 1.72M tokens, on anko, which has only 2 new tests):
+  - `solo` scored 0.0 with 193k tokens: it looked for `goyacc`, found none, and called done with no edits;
+  - `swarm` with 3 agents scored 0.0 with 1.52M tokens, ending on the cap, and broke 17 base tests;
+  - agents did use `run`, and the traces are saved.
+  
+  anko needs generated code that the offline sidecar cannot produce, so it is not a candidate.
+- Open issues: grading time is not counted in the clock; 12 agents share each sidecar's 2 CPUs under amd64 emulation; the hub holds a filtered OAuth copy, as in round 5B; murmur's `check` is `true` and its status is meaningless here.
+- The Docker VM has 3.8 GB of RAM. One sidecar at a time fits, so single-task calibration can run now. Batches of 4 need about 16 GB, and the user has been asked to raise it.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

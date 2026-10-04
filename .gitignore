@@ -19,3 +19,11 @@ experiments/**
 !experiments/reports/*.md
 experiments/tmp/
 archive/*.tar.xz
+!experiments/deepswe/*.mjs
+!experiments/deepswe/*.py
+!experiments/deepswe/*.sh
+!experiments/deepswe/run
+!experiments/deepswe/README.md
+!experiments/deepswe/refs/*.json
+!experiments/deepswe/results/*.json
+experiments/deepswe/runs/

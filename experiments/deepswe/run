@@ -1,0 +1,22 @@
+#!/bin/bash
+# In the hub: run <task-id> <command...>   executes the command in that task's environment (its toolchain, no network);
+# the repository at /work/<task-id> is the command's working directory. Streams the output, exits with the command's code.
+# Concurrent calls are safe: every call has its own id. Killing this script (or its caller) kills the remote command.
+t=$1; shift
+[ -n "$t" ] && [ $# -gt 0 ] || { echo "usage: run <task-id> <command...>" >&2; exit 2; }
+q=/q/$t; [ -d "$q/req" ] || { echo "run: unknown task '$t'" >&2; exit 2; }
+id=$$-$RANDOM
+touch "$q/res/$id.alive"
+trap 'touch "$q/res/$id.kill"; exit 143' TERM INT HUP
+printf '%s\n' "$*" > "$q/req/$id.tmp" && mv "$q/req/$id.tmp" "$q/req/$id.sh"
+while [ ! -e "$q/res/$id.out" ]; do sleep 0.1; done
+off=0 n=0
+while true; do
+  done_=0; [ -e "$q/res/$id.rc" ] && done_=1
+  size=$(wc -c < "$q/res/$id.out")
+  if [ "$size" -gt "$off" ]; then tail -c +$((off + 1)) "$q/res/$id.out" | head -c $((size - off)); off=$size; fi
+  [ $done_ = 1 ] && break
+  (( ++n % 20 == 0 )) && touch "$q/res/$id.alive"
+  sleep 0.1
+done
+exit "$(cat "$q/res/$id.rc")"

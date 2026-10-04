@@ -1,0 +1,43 @@
+{
+  "batch": "smoke-swarm",
+  "arm": "swarm",
+  "profile": "profiles/n12-stagger-tokens.json",
+  "profileSha256": "588ee1ccd24640d2",
+  "agents": 3,
+  "tasks": [
+    "anko-default-function-arguments"
+  ],
+  "tokenCap": 1500000,
+  "timeoutMinutes": 15,
+  "tokens": 1519984,
+  "minutes": 4.5,
+  "endReason": "budget",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "anko-default-function-arguments": {
+      "diffBytes": 17419,
+      "leakCheck": {
+        "ok": true,
+        "all": 1105,
+        "head": 1105,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "3087ace8f8ade3f38931d0fe1c25f67a81fc72ca",
+        "log": "all=1105 | head=1105 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 0.8403361344537815,
+      "binary": 0,
+      "parsed": 106
+    }
+  },
+  "meanScore": 0,
+  "code": {
+    "commit": "3f3010246acd398f75f3ec588abd6373651d24d6",
+    "srcDirty": false
+  },
+  "date": "2026-10-04T11:26:27.680Z"
+}

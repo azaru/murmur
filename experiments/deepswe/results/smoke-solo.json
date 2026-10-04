@@ -1,0 +1,42 @@
+{
+  "batch": "smoke-solo",
+  "arm": "solo",
+  "profile": "profiles/solo-clock-tokens.json",
+  "profileSha256": "3040e3a7fcf92872",
+  "agents": 1,
+  "tasks": [
+    "anko-default-function-arguments"
+  ],
+  "tokenCap": 1000000,
+  "timeoutMinutes": 15,
+  "tokens": 193000,
+  "minutes": 2.2,
+  "endReason": "all_done",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "anko-default-function-arguments": {
+      "diffBytes": 1041,
+      "leakCheck": {
+        "ok": true,
+        "all": 1105,
+        "head": 1105,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "log": "all=1105 | head=1105 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 120
+    }
+  },
+  "meanScore": 0,
+  "code": {
+    "commit": "3f3010246acd398f75f3ec588abd6373651d24d6",
+    "srcDirty": false
+  },
+  "date": "2026-10-04T11:21:12.548Z"
+}
