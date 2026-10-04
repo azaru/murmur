@@ -1765,7 +1765,7 @@ Round 16 stage D left only expr below 0.85. A subagent chose 12 candidates with 
 
 **Estimate:** 7–12M per batch, so about 20–36M.
 
-### Round 17 result and rules applied (2026-10-05 00:16; lanes 23:08–00:15, code `73ff3e7`; quiet regrade pending)
+### Round 17 result and rules applied (2026-10-05 00:16; lanes 23:08–00:15, code `73ff3e7`; quiet regrade 01:40)
 
 | arm | planning (runs) | shop2 (runs) | two-task mean | tokens per run (planning, shop2) |
 |---|---|---|---:|---|
@@ -1783,7 +1783,7 @@ Round 16 stage D left only expr below 0.85. A subagent chose 12 candidates with 
 **Caveats:**
 - The "beats" verdict rests on shop2, where C1T scored 0 in all three runs, as in side test U. Its planning margin (+0.024) is small.
 - AUD's shop2 mean comes from one run (0.592), with two zeros.
-- The quiet regrade of all 18 final workspaces waits until the DeepSWE screen ends, because that screen loads the machine.
+- **Quiet regrade** (2026-10-05, after the DeepSWE screen, with no runs live): all 18 final workspaces were regraded with each task's grader. No run moved by more than 0.02, and the arm means are unchanged (AUD 0.349, C1TR 0.313, C1T 0.237). The load from the concurrent screen did not change the grades.
 
 **Descriptive:**
 - Every AUD run entered all 3 agents and used revivals (2–9 per run, 5–28 posts).
@@ -1880,5 +1880,5 @@ C1T, one run per task, `isolated` arm, three batches of four, 48M shared and 90 
 | 2026-10-04 | round 16 stage A (12 valid campaigns `20261004T154422Z-5d32faf7` → `20261004T171634Z-37116428`, seed 20261080, code `b438df5`) | C1T solo-clock-tokens n=1; STT n12-stagger-tokens, STH n12-stagger-threads-tokens (n=12) | planning, shop2 × 2, 12M | 72.7M | two-task means: STT 0.545, C1T 0.524, STH 0.470; C1T spends 0.5M per run | STT vs C1T not decided; STH loses to C1T; threads not pronounced vs posts |
 | 2026-10-04 | round 16 side test U (6 campaigns `20261004T182025Z-4f3259e1` → `20261004T182208Z-ee9d90bc`, seed 20261090, code `e5f402f`) | C1T solo-clock-tokens, CU solo-clock-unlimited, C0 solo (all n=1) | shop2 × 2, 24M, 3720 s | 0.29M | means: C0 0.130, C1T 0.000, CU 0.000; CU 35–51 s, C1T 115–130 s | no difference in any pair; "unlimited" does not lengthen work |
 | 2026-10-04 | round 16 stage D, DeepSWE calibration (batches `cal16-r0`, `cal16-r1`, `isolated` arm, code `4833873`; fd r1 rescored after a cargo cache fault) | C1T solo-clock-tokens n=1 per task | expr, termenv, cattrs, fd × 2, 48M shared, 90 min | 19.7M | means: termenv 1.000, fd 0.989, cattrs 0.972, expr 0.671 (partial credit) | three tasks excluded (≥ 0.85); only expr stays; stage E needs new tasks |
-| 2026-10-04/05 | round 17 (18 campaigns `20261004T210830Z-5a3ac503` → `20261004T220858Z-7ac6739b`, seed 20261101, code `73ff3e7`) | C1T solo-clock-tokens; C1TR solo-clock-tokens-relay2 (n=1); AUD n3-audit-tokens (n=3) | planning, shop2 × 3, 12M, 3720 s | 27.1M | means: AUD 0.348, C1TR 0.313, C1T 0.238 | AUD beats C1T (shop2-led); C1TR vs C1T and AUD vs C1TR not decided; quiet regrade pending |
+| 2026-10-04/05 | round 17 (18 campaigns `20261004T210830Z-5a3ac503` → `20261004T220858Z-7ac6739b`, seed 20261101, code `73ff3e7`) | C1T solo-clock-tokens; C1TR solo-clock-tokens-relay2 (n=1); AUD n3-audit-tokens (n=3) | planning, shop2 × 3, 12M, 3720 s | 27.1M | means: AUD 0.348, C1TR 0.313, C1T 0.238 | AUD beats C1T (shop2-led); C1TR vs C1T and AUD vs C1TR not decided; quiet regrade confirms the grades |
 | 2026-10-04/05 | round 17 stage S, DeepSWE screen (batches `scr17-b1` to `scr17-b3`, `isolated` arm, code `497b6d9`) | C1T solo-clock-tokens n=1 per task | 12 candidates × 1, 48M shared per batch, 90 min | 46.1M | 4 below 0.85: oxvg 0, scriggo 0, tengo 0.44, wasmi 0.64 | those 4 plus expr go to stage E |
