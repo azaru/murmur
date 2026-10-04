@@ -1447,6 +1447,13 @@ Score [tokens, minutes, end] per run, k=2:
 
 **Budget (estimate):** STT 4 × 24M = 96M; C1T 4 × ~20M ≈ 80M (upper 96M). **Total ~176M**, upper bound ~192M, about two quota windows. Wall clock about 4 hours, set by the single-agent lane.
 
+**Quota stop (2026-10-04 11:11).** The model quota ran out during C1T's second green run (`20261004T084418Z-f23dfd8d`, cut at 26 minutes, end `quiescent`). The driver marked it invalid and wrote `STOP`, and lane 1 exited. Lane 2 (STT) had already finished its 4 runs at 10:02. `criba15/invalid.txt` now reads:
+```
+20261003T202310Z-6f2a1318
+20261004T084418Z-f23dfd8d
+```
+At the stop, 6 of 8 runs were valid. C1T's second runs on green and brown are left, and neither has a lock (the driver removed green's, and brown's was never taken). The lane resumes with `nohup node criba15-lanes.mjs 1 C --arms C1T &` once the quota is back.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
