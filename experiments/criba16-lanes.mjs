@@ -20,10 +20,13 @@ const swarmtest = "/Users/azaru/Documents/projects/swarmtest";
 const runs = join(swarmtest, "runs");
 const base = JSON.parse(readFileSync(join(here, "criba3.json"), "utf8"));
 const agent = (variant, agents) => ({ system: "murmur", agents, variant: `profiles/${variant}.json` });
-const ARMS = { C1T: agent("solo-clock-tokens", 1), STT: agent("n12-stagger-tokens", 12), STH: agent("n12-stagger-threads-tokens", 12) };
+const ARMS = { C1T: agent("solo-clock-tokens", 1), CU: agent("solo-clock-unlimited", 1), C0: agent("solo", 1), STT: agent("n12-stagger-tokens", 12), STH: agent("n12-stagger-threads-tokens", 12) };
 const STAGES = {
   A: { seed: 20261080, reps: 2, tasks: ["constrained_planning_hard_blind", "opt_shop2_blind"], arms: ["C1T", "STT", "STH"], solo: "C1T",
     limits: { token_budget: 12_000_000, timeout_seconds: 1200 } },
+  // Side test: one agent whose clock lines say "unlimited" (CU) against C1T and against no clock line (C0), each arm alone.
+  U: { seed: 20261090, reps: 2, tasks: ["opt_shop2_blind"], arms: ["C1T", "CU", "C0"], alone: true,
+    limits: { token_budget: 24_000_000, timeout_seconds: 3720 } },
 };
 if (!lane || !stages.length || stages.some(s => !STAGES[s])) throw new Error(`usage: node criba16-lanes.mjs <lane> <${Object.keys(STAGES).join("|")}>...`);
 const dir = join(here, "criba16");
@@ -46,7 +49,7 @@ const quotaHit = campaign => readdirSync(join(runs, campaign)).filter(n => n.sta
 });
 
 for (const stage of stages) {
-  const { seed, reps, tasks, arms, limits, solo } = STAGES[stage];
+  const { seed, reps, tasks, arms, limits, solo, alone } = STAGES[stage];
   const view = join(dir, `tasks-${stage}`);
   mkdirSync(view, { recursive: true });
   for (const task of tasks) {
@@ -69,10 +72,10 @@ for (const stage of stages) {
         const arm = ARMS[name], id = `${stage}-${task}-${name}-r${rep}`;
         if (records().filter(r => same(r, task, arm)).length > rep || !take(id)) continue;
         const config = join(dir, `${id}.json`);
-        const competitors = name === solo ? [arm] : [ARMS[solo], arm]; // under each stage's seed make_plan swaps the two, so the arm runs first (checked on the plan field)
+        const competitors = name === solo || alone ? [arm] : [ARMS[solo], arm]; // under each stage's seed make_plan swaps the two, so the arm runs first (checked on the plan field)
         writeFileSync(config, JSON.stringify({ ...base, ...limits, tasks: view, seed, repetitions: 1, competitors }, null, 2) + "\n");
         log(`start ${id}`);
-        const limit = name === solo ? [] : ["--limit", "1"];
+        const limit = name === solo || alone ? [] : ["--limit", "1"];
         const out = spawnSync("python3", ["-m", "swarmtest", "--config", config, "run", "--live", "--tasks", task, ...limit, "--max-total-tokens", "30000000"],
           { cwd: swarmtest, encoding: "utf8" });
         writeFileSync(join(dir, `${id}.log`), out.stdout + out.stderr);

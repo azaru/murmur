@@ -126,6 +126,7 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
   - `doneAfterGreen`: tool calls required after the first passing check;
   - `clock`: minutes left appended to tool results.
   - `clockTokens`: tokens left in the run's budget, shared by the whole swarm, appended to tool results.
+  - `clockUnlimited`: the clock and tokens lines say "unlimited" instead of the real amounts left; the real limits still apply.
 - **Fresh context:**
   - `relay`: a new instance takes over the seat after `done`;
   - `relayContext`: or once turns grow past that many tokens.

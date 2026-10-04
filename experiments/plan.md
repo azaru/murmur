@@ -1622,6 +1622,45 @@ Mean score [mean tokens] (runs, end), k=2:
 - On these difficulty tasks a 12-agent swarm does not beat one agent left to its own spend, with or without threads.
 - The transcript analysis waits until the DeepSWE calibration (stage D) has finished, because bulk reads stay off while runs are live.
 
+### Round 16 stage D result: DeepSWE C1T calibration (2026-10-04 20:35; batches 19:23–20:17, code `4833873`; rule not yet final)
+
+C1T (one agent with the clock and the tokens left), `isolated` arm: the four tasks in parallel, one agent each, 48M shared cap, 90 minutes. Scores are partial credit (new tests' pass fraction × base tests' pass fraction); "binary" is the official all-pass reward.
+
+| task | r0 score (binary, tokens, minutes) | r1 score (binary, tokens, minutes) | mean |
+|---|---|---|---|
+| expr-try-catch-errors | 0.999 (1, 8.54M, 34.2) | 0.342 (0, 1.05M, 6.3) | 0.671 |
+| termenv-preserve-ansi-resets | 1.000 (1, 0.36M, 4.5) | 1.000 (1, 1.01M, 7.9) | 1.000 |
+| cattrs-partial-structuring-recovery | 0.957 (0, 1.76M, 9.4) | 0.986 (0, 2.97M, 15.2) | 0.972 |
+| fd-deterministic-multi-key-sorting | 0.977 (0, 1.86M, 10.6, quiescent) | **invalid score** (2.12M, 17.4) | — |
+
+- Batch totals: r0 12.5M in 34.4 minutes, r1 7.1M in 17.6 minutes. Every agent ended by itself (`all_done`, one `quiescent`), far below the cap and the clock.
+- **Infrastructure failure, fd r1:** the scorer's `cargo test` could not resolve `static.crates.io` while fetching `getrandom 0.4.2` (exit 101, no tests parsed, base and new alike). The agent's diff touches no Cargo file, so the 0 is not the agent's. The saved diff must be rescored before fd's mean exists, and the scorer should not depend on the network.
+- **Rule as written:** termenv (1.000) and cattrs (0.972) are excluded (C1T mean ≥ 0.85). expr stays (0.671). fd waits for the rescore: it is excluded if the rescored r1 is ≥ 0.723.
+- The batch cap is computed once fd is settled. With expr alone: max(4M, 8.54M) → 12M; with expr and fd: max(8M, 8.54M + 2.12M = 10.66M) → 12M.
+- Partial credit puts C1T near the ceiling on three of four tasks even when the official binary reward is 0 (cattrs both runs, fd r0). The swarm's room on these tasks is in the binary reward, not in the partial score.
+
+### Side test U: one agent told its time and tokens are unlimited (fixed before measuring, 2026-10-04 20:35; the user asked for it)
+
+**The user's request:** C1T with the clock always saying "unlimited" for time and tokens, to see whether one agent behaves better than the plain version. It is a single-agent question, not about the swarm.
+
+**Lever.** New lever `clockUnlimited` (default off). With `clock` and `clockTokens` it appends `[time left: unlimited]` and `[tokens left: unlimited]` to every tool result in place of the real amounts. The real cap and timeout still apply. Nothing else shows the agent the real limits: a solo agent gets only the `done` board tool, so `budget()` and its "minutes before timeout" text are unreachable. Smoke on `examples/hello.json` at n=1 from a copy of `src/` (run deleted): both lines on every tool result, all_done.
+
+**Arms** (all one agent, write guard, no board):
+- **C1T** = `solo-clock-tokens` (the real minutes and tokens left after each tool call).
+- **CU** = `solo-clock-unlimited`, new: C1T with both lines saying "unlimited".
+- **C0** = `solo` (no clock line at all). It answers the other reading of "the basic one" and separates "told it is unlimited" from "told nothing".
+
+**Task:** opt_shop2_blind (job shop, an optimisation task where more work can lower the cost). In stage A, C1T ended by itself after ~100 s with 60–70k of 12M tokens and scored 0.565 and 0.547, so it has room to do more.
+
+**Execution.** `experiments/criba16-lanes.mjs <lane> U`, seed 20261090, k=2, each arm alone in its own campaign (no `--limit`, no make_plan pairing). Cap 24M and 3720 s per run (C1T's clock starts at 60 minutes), the same for every arm. This is generous so that the "unlimited" claim is not contradicted by a cutoff at a plausible spend. A run that times out is graded on what it left. Three lanes at once, so the three arms' repetition 0 run in the same window, then repetition 1. Nothing else runs alongside: shop2's grader is wall-clock bound.
+
+**Rules** (per-arm mean over k=2 on shop2; one task, so this is a screen, not a decision):
+- **CU against C1T**, **C0 against C1T** and **CU against C0**: better if the mean is ≥ +0.10 above and its lower run is above the other arm's higher run; worse if the mean is ≤ −0.10 below and its higher run is below the other arm's lower run; otherwise no difference.
+- **Descriptive:** tokens, minutes and end reason per run; tool calls, and runs of the agent's own tests or solver; whether the agent mentions the time or tokens line.
+- **Predictions:** CU spends more than C1T (median tokens at least ×2) but its score is not different. C0 behaves like C1T, because C1T never reached its limits.
+
+**Known threats:** one task at k=2, and shop2 has swung 0.00–0.76 across arms. The "unlimited" line is untrue while a hard timeout exists. That is the lever as asked, and the generous cap keeps it from biting at the spends seen so far.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

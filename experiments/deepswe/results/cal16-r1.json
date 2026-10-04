@@ -1,0 +1,100 @@
+{
+  "batch": "cal16-r1",
+  "arm": "isolated",
+  "profile": "profiles/solo-clock-tokens.json",
+  "profileSha256": "3040e3a7fcf92872",
+  "agents": 1,
+  "tasks": [
+    "expr-try-catch-errors",
+    "termenv-preserve-ansi-resets",
+    "cattrs-partial-structuring-recovery",
+    "fd-deterministic-multi-key-sorting"
+  ],
+  "tokenCap": 48000000,
+  "timeoutMinutes": 90,
+  "tokens": 7147857,
+  "minutes": 17.6,
+  "endReason": "all_done,all_done,all_done,all_done",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "expr-try-catch-errors": {
+      "diffBytes": 6182,
+      "leakCheck": {
+        "ok": true,
+        "all": 1023,
+        "head": 1023,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "686643214052394fb41e743ccc34f4f3beedef46",
+        "log": "all=1023 | head=1023 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.3416288576434122,
+      "new_frac": 0.34177215189873417,
+      "base_frac": 0.9995807316233173,
+      "binary": 0,
+      "parsed": 66856
+    },
+    "termenv-preserve-ansi-resets": {
+      "diffBytes": 12625,
+      "leakCheck": {
+        "ok": true,
+        "all": 228,
+        "head": 228,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "5e4058c32cc62a50432ed5cd63a0570ec28ecbdf",
+        "log": "all=228 | head=228 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 1,
+      "new_frac": 1,
+      "base_frac": 1,
+      "binary": 1,
+      "parsed": 125
+    },
+    "cattrs-partial-structuring-recovery": {
+      "diffBytes": 14883,
+      "leakCheck": {
+        "ok": true,
+        "all": 933,
+        "head": 933,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "2ebd2041c8a5625c3a52328a98375fea398eb848",
+        "log": "all=933 | head=933 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9855072463768116,
+      "new_frac": 0.9855072463768116,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 76
+    },
+    "fd-deterministic-multi-key-sorting": {
+      "diffBytes": 17181,
+      "leakCheck": {
+        "ok": true,
+        "all": 1849,
+        "head": 1849,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "b2bc6a095a283fa7e31c5b8bc96a153759565a8a",
+        "log": "all=1849 | head=1849 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 0,
+      "binary": 0,
+      "parsed": 0
+    }
+  },
+  "meanScore": 0.581784026005056,
+  "code": {
+    "commit": "4833873a755016aabf4a037dca36d0b8fae440cd",
+    "srcDirty": false
+  },
+  "date": "2026-10-04T18:17:14.890Z"
+}

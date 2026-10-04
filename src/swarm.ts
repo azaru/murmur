@@ -142,8 +142,9 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     }
     const news = tasks?.news(name);
     if (news) lines.push(news);
-    if (profile.clock) lines.push(`[${minutesLeft()} minutes left before the timeout]`);
-    if (profile.clockTokens && task.budgetTokens) lines.push(`[${tokensLeft()} tokens left in the budget${task.agents > 1 ? " shared by all agents" : ""}]`);
+    if (profile.clock) lines.push(profile.clockUnlimited ? "[time left: unlimited]" : `[${minutesLeft()} minutes left before the timeout]`);
+    if (profile.clockTokens && profile.clockUnlimited) lines.push("[tokens left: unlimited]");
+    else if (profile.clockTokens && task.budgetTokens) lines.push(`[${tokensLeft()} tokens left in the budget${task.agents > 1 ? " shared by all agents" : ""}]`);
     const text = lines.filter(Boolean).join("\n");
     return text ? { content: [...event.content, { type: "text" as const, text: `\n\n${text}` }] } : undefined;
   };
