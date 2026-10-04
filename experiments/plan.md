@@ -1708,7 +1708,7 @@ The user asked to add these to the list of tests to run. They come from [`report
 
 Suggested order: H4, then H1, then H2 and H3 on decomposable tasks.
 
-## Round 17: a fresh-context audit before the run ends (fixed before measuring, 2026-10-04 23:08; the user approved the 22:00 proposal with "adelante con todo")
+## Round 17: a fresh-context audit before the run ends (fixed before measuring, 2026-10-04 23:08; the user approved the proposal made after the round 16 record with "adelante con todo")
 
 **Why.** Round 16 and side test U point the same way. One agent stops when it judges itself finished, within minutes and far below its budget, whatever its clock line says. In the swarm most agents call `done` on an older version, and nobody tests beyond the example. H1 of the literature list targets this: a later agent with no access to earlier transcripts audits the work cold before the run ends. Its key control is the same single agent with relays, because a fresh context alone might explain any gain.
 
@@ -1747,9 +1747,23 @@ Suggested order: H4, then H1, then H2 and H3 on decomposable tasks.
 - The DeepSWE screen (stage S below) runs in Docker at the same time, and both graders run time-bounded solvers. Hence the quiet regrade.
 - AUD differs from C1TR in several ways at once: the board, revival, three named agents instead of one seat, and the briefing wording. That is the arm as a whole. The audit instruction itself is matched in content.
 
-### Stage S: screening new DeepSWE candidates (pre-registered separately once the candidates are validated)
+### Stage S: screening 12 new DeepSWE candidates (fixed before measuring, 2026-10-04 23:55)
 
-Round 16 stage D left only expr below 0.85. A subagent is choosing 10–12 harder candidates and validating them with the driver's dry mode. The screen (one C1T run per candidate, in batches of 4, keep those below 0.85) gets its own pre-registration with the task ids before it runs.
+Round 16 stage D left only expr below 0.85. A subagent chose 12 candidates with larger reference patches than the calibration tasks and validated them with the driver's dry mode ([report](reports/2026-10-04-deepswe-candidates.md), model output). The test counts in `refs/*.json` were checked by hand against its table; the dry runs were not re-run.
+
+**Candidates** (language; fail-to-pass / base tests):
+- **Batch 1:** oxvg-structural-selector-preservation (Rust; 6/58), etree-xml-diff-patch (Go; 52/15), tengo-destructuring-bindings (Go; 91/123), returns-validated-error-accumulation (Python; 159/61).
+- **Batch 2:** scc-bounded-memory-spilling (Go; 31/283), go-git-worktree-merge-conflicts (Go; 17/2), dasel-html-document-format (Go; 146/1012), wasmi-trap-coredumps (Rust; 22/58).
+- **Batch 3:** ytt-jsonpath-query-api (Go; 103/1), scriggo-method-declarations (Go; 48/1045), participle-grammar-conflict-analysis (Go; 89/152), fastapi-implicit-head-options (Python; 43/3131).
+- Dropped in the dry runs: dateutil (the reference's binary reward is 0), narwhals (pytest segfaults under amd64 emulation), valibot and happy-dom (vitest output not parsed).
+
+**Execution.** `experiments/deepswe/screen17.sh`: C1T (`profiles/solo-clock-tokens.json`), `isolated` arm, the three batches one after another, each with its four tasks in parallel, 48M shared and 90 minutes. Sidecar memory goes from 3 GB to 6 GB, because scc reached 2.99 GB in its reference run alone. It runs alongside round 17's lanes. Quota stop as in stage D.
+
+**Rule** (k=1, a screen): a task goes to stage E if its partial-credit score is < 0.85. A task whose scoring fails for infrastructure reasons (no tests parsed in both modes, a killed sidecar, an image failure) is invalid, not scored, and is rerun once in a make-up batch. Reported: score, binary reward, tokens, minutes and end reason per task.
+
+**Prediction:** about half the candidates score < 0.85, giving 5–7 tasks plus expr for stage E. Stage E (the batch, swarm against solo) gets its own pre-registration after the screen.
+
+**Estimate:** 7–12M per batch, so about 20–36M.
 
 ## Campaign registry
 
