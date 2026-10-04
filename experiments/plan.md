@@ -1621,8 +1621,8 @@ Mean score [mean tokens] (runs, end), k=2:
 - C1T against round 15 stage A's C1 (another hour and seed): planning 0.492 against 0.275, shop2 0.556 against 0.412, with similar spend (0.5M against 0.3M per run). The tokens line did not make C1T spend more, so the gap is more likely noise in C1's runs than an effect of the line.
 - On these difficulty tasks a 12-agent swarm does not beat one agent left to its own spend, with or without threads.
 
-**Findings from the transcripts** ([report](reports/2026-10-04-round16a-traces-analysis.md), model output; claims 1, 5, 8 and 10 checked by hand):
-- A near-final deliverable existed within 1–2 minutes in 3 of 7 evaluable swarm runs, and the graded file was the best version produced in all 7. Later work bought little and did not degrade it.
+**Findings from the transcripts** ([report](reports/2026-10-04-round16a-traces-analysis.md), model output; the spend part of claim 1 and claims 4, 5, 8 and 10 checked by hand, the version replay behind claims 1–2 not re-run):
+- From the report's version replay: a near-final deliverable existed within 1–2 minutes in 3 of 7 evaluable swarm runs, and the graded file was the best version produced in all 7. Later work bought little and did not degrade it.
 - The 17× spend is 17× the calls (566 against 35 in planning STT rep 0), mostly 8–9 reviewers re-reading the file one of 3–7 writers owns. Reviewers named the weakness the grader measures and left the fix to the owner.
 - Validation used only the 16-session example; points are lost on hard constraints of the 36–80-session hidden instances. Scores follow the first full solver's algorithm family, not the arm.
 - Threads: one thread opened in the first minute takes most posts (two busy threads in one run); board share 46% against 29%, posts not fewer, more whole-file rewrites (10 against 6).

@@ -5,7 +5,8 @@
 - ✓ Claim 5 (threads), with one nuance: in all four STH runs the largest thread has posts from 11–12 agents (t1 with 52, 132 and 98 posts), but in shop2 STH rep 1 the largest is t3 (54) and t1 has 36, so that run has two busy threads rather than one room.
 - ✓ Claim 8: shop2 STT rep 0 has 12 `done` events, 11 of them before the last write/edit of `solve.py` (16:24:00).
 - ✓ Claim 10: `grep -ic "naive\|baseline"` on the blind shop2 `PROBLEM.md` returns 0. The premise of question 5 (a naive baseline in the contract) was the main session's mistake, corrected in `plan.md` side test U.
-- Not re-run: the version replay and per-version grading (claims 2–4, 7, 11).
+- ✓ Claim 4, by keyword counts in the six final `planner.py` files: C1T rep 1 (0.650) is the only one with annealing; STH rep 1 (0.598) has 12 local-search markers (swap/improve/random/iterate) against 2–3 in the STT planners (0.479, 0.430) and MRV/backtracking in C1T rep 0 (0.334) and STH rep 0 (0.354).
+- Not re-run: the version replay and per-version grading (claims 1's timing part, 2, 3, 7, 11).
 
 Scope: 12 runs of round 16 stage A (C1T = one agent with clock and tokens-left line; STT = 12 equal agents, post-only board, staggered entry; STH = STT with a threaded board), tasks `constrained_planning_hard_blind` (planning) and `opt_shop2_blind` (shop2). All numbers below come from the run directories under `../swarmtest/runs/<campaign>/run-0001/` (`record.json`, `state/murmur/events.jsonl`, `state/murmur/<agent>.messages.json`, `workspace/`). Labels: **[V]** = computed by a script and cross-checked against the grader's own record (see "Method and caveats"); **[Q]** = read from transcripts, quoted; **[H]** = hypothesis, not tested.
 
