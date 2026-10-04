@@ -55,7 +55,7 @@ Generated 2026-10-04 01:05 from the 28 valid campaigns listed in experiments/pla
 | 20261003T224939Z-2b97dfb2 | run-0001 | opt_shop2_blind | n12-stagger n=12 | all_done |  | 0.69 | 3.24M | 4.42 | 12.0 | 270.0 | 0.24 | 5.0 | 5.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.96 |
 | 20261003T225411Z-391aeba3 | run-0001 | opt_shop2_blind | n12-roles n=12 | all_done | builder builder builder builder builder builder builder builder builder builder builder builder tester tester tester tester tester tester tester | 0.39 | 10.19M | 9.35 | 12.0 | 567.0 | 0.31 | 4.0 | 1.78 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
 
-(Regenerated 2026-10-04 09:00: the first version of this file had a broken command here and no per-run table.)
+(Regenerated 2026-10-04 08:55: the first version of this file had a broken command here and no per-run table.)
 ## Per agent (scripts/traces.mjs)
 
 | run | task | arm | score | tokens | min | end | agent | calls | board % | checks | green at | after green | last check | overwrites | nudges |
@@ -649,7 +649,7 @@ Why each agent stopped:
 
 # Stage B
 
-Generated 2026-10-04 09:00 from the 6 valid campaigns of stage B (`20261004T052617Z-702c5333` → `20261004T064229Z-4b350f75`, listed in experiments/plan.md).
+Generated 2026-10-04 08:55 from the 6 valid campaigns of stage B (`20261004T052617Z-702c5333` → `20261004T064229Z-4b350f75`, listed in experiments/plan.md).
 
 ## Per task x arm (scripts/n12.mjs)
 

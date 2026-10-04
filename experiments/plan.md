@@ -1323,7 +1323,7 @@ The default `wake` text says "Call inbox". Swarm profiles that offer no `inbox` 
 
 **Budget (estimate):** B 2 × 24M + ST 2 × 24M + C1 2 × ~14M ≈ **124M**, upper bound ~144M. That is probably two quota windows. Wall clock is about 2 hours.
 
-### Round 15 stage B result and rule applied (2026-10-04 09:05; lane 07:26–08:50, code `f4c5f63`, `src/` and profiles unchanged since)
+### Round 15 stage B result and rule applied (2026-10-04 08:57; lane 07:26–08:50, code `f4c5f63`, `src/` and profiles unchanged since)
 
 6 valid campaigns (seed 20261072, `20261004T052617Z-702c5333` → `20261004T064229Z-4b350f75`; the list is in `round15-traces.md`), 6 runs, **117.8M tokens** (estimate ~124M). There was no quota stop, every campaign exited 0, and `criba15/invalid.txt` still lists only stage A's killed slot. Each campaign ran the intended competitor (checked on `record.json`'s variant). Load was 3–5 during the lane.
 
