@@ -580,6 +580,14 @@ Round 9 ran items 1 and 2 of the previous list, and round 10 ran items 1–3 (si
 4. **Panel V stays parked.** Its cost is turns × context (~24k tokens per turn). A threaded board did not cut turns, so only a design that removes coordination turns altogether is worth another V round.
 5. **Why the clock works**, and **a promotion benchmark with partial credit**, as before.
 
+**Added 2026-10-04 after the literature review** ([synthesis](../experiments/reports/2026-10-04-swarm-literature.md); candidate list in `plan.md`, "candidate tests from the literature review"). No source compares identical peers in one repository against a persistent single agent at matched spend without an oracle; the closest studies (CooperBench, "Multi-Agent Teams Hold Experts Back") agree with murmur's null result. Candidates, in suggested order:
+
+6. **H4, runway diagnostic** on the volume tasks: does the tokens-left line help or cause early wrap-up?
+7. **H1, execution-quorum finish with a fresh-context auditor**, controlled by C1T + `relay`.
+8. **H2, independence first, then one structured exchange**, with seeded approach diversity and an oracle-free pairwise selector.
+9. **H3, a curated shared file injected at entry instead of the chat board**, and H3b, a fixed-size board tail on every tool result (like the clock line), against plain `attach`.
+10. **H5, report results by task type** (unitary/sequential against decomposable).
+
 ## Record completeness
 
 For each experiment: whether its question or theory was written down before measuring (pre-registration), its setup (configs and drivers), its per-run results, its analysis, and its decision.
