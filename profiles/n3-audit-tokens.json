@@ -1,0 +1,13 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "post"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. You join one at a time: each joins when the previous one finishes its turn. post(text) messages all of them, and their posts appear at the end of your tool results. If you join after a teammate has finished, do not assume the goal is met: read the folder as it is, run the program, write and run your own tests against the spec, then fix what is wrong or missing yourself, or post what you found with the command output so whoever knows the code best can fix it.\n",
+  "writeGuard": true,
+  "clock": true,
+  "clockTokens": true,
+  "enterOnDone": true,
+  "revive": 3
+}

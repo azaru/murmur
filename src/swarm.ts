@@ -47,6 +47,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   const gates = names.map(() => { let open = () => {}; const opened = new Promise<void>(resolve => { open = resolve; }); return { opened, open }; });
   const openNext = (name: string) => gates[names.indexOf(name) + 1]?.open();
   const turns = new Map<string, number>();
+  const entered = new Set<string>();
 
   const totals = () => {
     const usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
@@ -194,13 +195,14 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   const evaluate = () => {
     const members = [...board.members.values()];
     if (members.some(m => m.working)) return;
+    if (profile.enterOnDone && entered.size < members.length) return; // the next seat is about to enter
     if (members.every(m => m.doneReason !== undefined)) end("all_done");
     else if (members.every(m => m.doneReason !== undefined || !board.unread(m.name).length)) end("quiescent");
   };
   const runAgent = async (agent: Agent, index: number) => {
     const { name, briefing } = agent, member = board.members.get(name)!;
     let relays = 0;
-    if (index && profile.spawnAfterTurns) {
+    if (index && (profile.spawnAfterTurns || profile.enterOnDone)) {
       await gates[index].opened;
       if (reason) return;
     } else if (index && profile.spawnGapSeconds) {
@@ -212,7 +214,8 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       member.wake = undefined;
       if (reason) return;
     }
-    if (profile.spawnAfterTurns) {
+    entered.add(name);
+    if (profile.spawnAfterTurns || profile.enterOnDone) {
       log("enter", { agent: name });
       if (profile.spawnGapSeconds) setTimeout(() => openNext(name), profile.spawnGapSeconds * 1000).unref();
     }
@@ -221,7 +224,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       member.working = true;
       await agent.session.prompt(prompt).catch(error => log("error", { agent: name, message: String(error) }));
       member.working = false;
-      if (profile.spawnAfterTurns) openNext(name);
+      if (profile.spawnAfterTurns || profile.enterOnDone) openNext(name);
       if (!reason && member.doneReason !== undefined && relays < profile.relay) {
         // A fresh instance takes the seat: same name and board history, empty context.
         relays += 1;

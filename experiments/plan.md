@@ -1708,6 +1708,49 @@ The user asked to add these to the list of tests to run. They come from [`report
 
 Suggested order: H4, then H1, then H2 and H3 on decomposable tasks.
 
+## Round 17: a fresh-context audit before the run ends (fixed before measuring, 2026-10-04 23:08; the user approved the 22:00 proposal with "adelante con todo")
+
+**Why.** Round 16 and side test U point the same way. One agent stops when it judges itself finished, within minutes and far below its budget, whatever its clock line says. In the swarm most agents call `done` on an older version, and nobody tests beyond the example. H1 of the literature list targets this: a later agent with no access to earlier transcripts audits the work cold before the run ends. Its key control is the same single agent with relays, because a fresh context alone might explain any gain.
+
+**Question.** Does a fresh-context audit raise quality over C1T? And does coordination, meaning a board that lets auditors reach a still-live author, add anything over fresh context alone?
+
+**Arms:**
+- **C1T** = `solo-clock-tokens` (one agent: write guard, clock, tokens left).
+- **C1TR** = `solo-clock-tokens-relay2`, new: C1T with `relay: 2`. After each `done`, a fresh instance takes the seat (empty context), up to 2 times. The existing relay prompt tells it not to assume the goal is met, to check the work against the spec itself, to fix what is wrong, and to call `done` only after verifying.
+- **AUD** = `n3-audit-tokens`, new: 3 equals with a post-only board, posts attached to tool results, the write guard, the clock and the tokens line. Entry uses the new lever `enterOnDone`: each agent enters when the previous one ends its turn, and seats not yet entered keep the run going. `revive: 3` lets a post wake an agent that already called `done`. Everyone gets the same neutral briefing: "If you join after a teammate has finished, do not assume the goal is met: read the folder as it is, run the program, write and run your own tests against the spec, then fix what is wrong or missing yourself, or post what you found with the command output so whoever knows the code best can fix it." Nobody is assigned a role.
+- C1TR and AUD are both three fresh contexts in sequence with the same audit instruction. The difference is that AUD's earlier agents stay reachable through the board and can be woken to fix their own code.
+
+**Smoke tests** (from a copy of `src/`, runs deleted): `examples/hello.json` with AUD at n=3 entered wren, then finch after wren's `done`, then robin after finch's, and ended all_done with no early quiescent end. C1TR relayed twice (`wren.1`, `wren.2`). A scripted two-agent task forced a post after the first agent's `done`: the post revived it, it made the change, and the run ended all_done. The default profile on `examples/hello.json` passed.
+
+**Tasks:** constrained_planning_hard_blind and opt_shop2_blind, 12M and 3720 s per run (C1T's clock starts at 60 minutes, so the three sequential contexts have room), k=3.
+
+**Execution.** `experiments/criba17-lanes.mjs <lane> A`, three lanes, seed 20261101. Non-solo campaigns list `[C1T, arm]` with `--limit 1`, and `plan[0]` is the arm for both arms on both tasks under this seed (checked on the `plan` field; seed 20261100 put C1T first and was dropped). Repetition 0 of every arm runs before repetition 1. Quota stop and resume as before.
+
+**Rules** (per-task means over k=3; capped scores count as they are):
+- **C1TR against C1T** and **AUD against C1T**:
+  - beats if the two-task mean is ≥ +0.05 above and above on both tasks;
+  - loses if ≤ −0.05 below and below on both tasks;
+  - otherwise not decided.
+- **AUD against C1TR** (coordination over fresh context): better if ≥ +0.05 above and above on both tasks; worse if ≤ −0.05 below and below on both; otherwise not decided.
+- **Descriptive:**
+  - tokens, minutes and end reason per run; relays used and agents entered;
+  - posts and revivals in AUD;
+  - whether a later context changed the deliverable, and whether any context tested on inputs larger than the example (the contracts state the real sizes: planning 15–90 sessions; shop2 states its production sizes);
+  - a quiet regrade of every final workspace after all lanes and the DeepSWE screen have finished, reported beside the swarmtest grade.
+- **Predictions:**
+  - C1TR is above C1T by a small margin (+0.03 to +0.08, likely not decided), because a fresh instance re-checks but writes the same kind of solver.
+  - AUD against C1TR is not decided: coordination adds little over fresh context.
+  - Spend: C1TR 2–3× C1T, AUD 3–5×.
+
+**Known threats:**
+- Two tasks at k=3. One agent's shop2 score is bimodal (0.55 in round 16 stage A, 0 in side test U).
+- The DeepSWE screen (stage S below) runs in Docker at the same time, and both graders run time-bounded solvers. Hence the quiet regrade.
+- AUD differs from C1TR in several ways at once: the board, revival, three named agents instead of one seat, and the briefing wording. That is the arm as a whole. The audit instruction itself is matched in content.
+
+### Stage S: screening new DeepSWE candidates (pre-registered separately once the candidates are validated)
+
+Round 16 stage D left only expr below 0.85. A subagent is choosing 10–12 harder candidates and validating them with the driver's dry mode. The screen (one C1T run per candidate, in batches of 4, keep those below 0.85) gets its own pre-registration with the task ids before it runs.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
