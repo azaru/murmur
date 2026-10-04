@@ -1815,6 +1815,42 @@ C1T, one run per task, `isolated` arm, three batches of four, 48M shared and 90 
 - **Prediction** ("about half below 0.85"): one third did. Patch size predicted difficulty poorly, as the candidate report warned.
 - The binary reward is 1 on 4 of 12 tasks. Partial credit again puts C1T near the ceiling on most tasks it does not fully solve.
 
+### Stage E: the DeepSWE batch, 12 agents against one (fixed before measuring, 2026-10-05 01:47; part of the "adelante con todo" approval: screen first, then the batch)
+
+**Question.** On a batch of real repository tasks where one agent stays below the ceiling, does a 12-agent swarm sharing the batch's budget beat one agent with the same budget and clock?
+
+**Tasks** (C1T's partial score in stage D or S): expr-try-catch-errors (Go, 0.671), oxvg-structural-selector-preservation (Rust, 0.000), scriggo-method-declarations (Go, 0.000), tengo-destructuring-bindings (Go, 0.440), wasmi-trap-coredumps (Rust, 0.636).
+
+**Arms:**
+- **STT** = `n12-stagger-tokens` (12 equals, post-only board, staggered entry, write guard, clock, tokens left), driver arm `swarm`. All five repositories are in one shared `/work`, and `run <task> <cmd>` runs commands in each task's sidecar.
+- **C1T** = `solo-clock-tokens` (one agent, write guard, clock, tokens left), driver arm `solo`: the same five repositories and tools.
+
+**Budget (stage D rule):** max(4M × 5, the sum of C1T's larger spend per task: 8.54 + 7.02 + 0.63 + 1.46 + 12.13 = 29.8M), rounded up to the next 4M, gives **32M per batch, shared**, with a **120-minute** clock, for both arms.
+
+**Execution.** `experiments/deepswe/batch17.sh`, k=2. Both arms of a repetition run at the same time (paired load), repetition 0 before repetition 1. Sidecars get 5 GB and 2 CPUs each; the Docker VM has 16 GB and 8 CPUs. Quota stop as before. Scoring uses partial credit (new tests' pass fraction × base tests' pass fraction) and the binary reward, from the saved diff of each repository.
+
+**Rule** (per-task means over k=2, then the mean over the five tasks):
+- STT **beats** C1T if the five-task mean is ≥ +0.05 above and STT is above on at least 3 of 5 tasks;
+- **loses** if ≤ −0.05 below and below on at least 3 of 5;
+- otherwise **not decided**.
+
+**Descriptive:**
+- binary rewards per arm; tokens, minutes and end reason per batch;
+- how the swarm spread over the tasks (agents and writes per repository);
+- per-task scores against C1T's isolated runs in stages D and S (one agent per task, a separate budget each), as a reference.
+
+**Predictions:**
+- C1T alone runs out of the 120 minutes before finishing all five, because its isolated runs took 5–36 minutes each (about 100 in sequence). It scores below its isolated runs on the last tasks it reaches.
+- STT covers all five and beats C1T (the batch is volume-like across tasks).
+- Neither arm gets binary 1 on oxvg or scriggo.
+
+**Estimate:** up to 32M per batch, 4 batches, so ≤128M (likely 60–100M).
+
+**Known threats:**
+- k=2, five tasks, one hub per arm. Twelve agents in one hub container are untested at this size (the swarm smoke used n=3).
+- Running both arms at once shares 8 Docker CPUs between up to 10 sidecars, which slows builds (oxvg compiles in ~100 s) for both arms alike.
+- C1T's numbers from stages D and S come from a separate budget per task, so they are a reference, not a control.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
