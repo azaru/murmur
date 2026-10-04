@@ -1323,6 +1323,49 @@ The default `wake` text says "Call inbox". Swarm profiles that offer no `inbox` 
 
 **Budget (estimate):** B 2 × 24M + ST 2 × 24M + C1 2 × ~14M ≈ **124M**, upper bound ~144M. That is probably two quota windows. Wall clock is about 2 hours.
 
+### Round 15 stage B result and rule applied (2026-10-04 09:05; lane 07:26–08:50, code `f4c5f63`, `src/` and profiles unchanged since)
+
+6 valid campaigns (seed 20261072, `20261004T052617Z-702c5333` → `20261004T064229Z-4b350f75`; the list is in `round15-traces.md`), 6 runs, **117.8M tokens** (estimate ~124M). There was no quota stop, every campaign exited 0, and `criba15/invalid.txt` still lists only stage A's killed slot. Each campaign ran the intended competitor (checked on `record.json`'s variant). Load was 3–5 during the lane.
+
+Score [tokens, minutes, end] per run, k=2:
+
+| arm | run 1 | run 2 | mean | mean tokens | mean minutes |
+|---|---|---|---:|---:|---:|
+| C1 (one agent with the clock) | 0.426 [11.0M, 24.9, done] | 0.469 [10.6M, 26.9, done] | 0.447 | 10.81M | 25.9 |
+| B (12 agents, post-only board) | 0.638 [24.1M, 7.4, cap] | 0.830 [24.0M, 7.0, cap] | 0.734 | 24.05M | 7.2 |
+| ST (B + staggered entry) | 0.790 [24.0M, 7.1, cap] | 0.947 [24.0M, 7.3, cap] | 0.869 | 24.03M | 7.2 |
+
+**Rules, applied as written:**
+- **ST against B: pronounced better**, +0.135 (threshold +0.10).
+- **B beats C1**, +0.286, at 2.2× C1's tokens.
+- **ST beats C1**, +0.421, at 2.2× C1's tokens.
+
+**Descriptive:**
+- Three-task means (stage A's planning and shop2 plus ospec_green; tokens per run averaged over the three tasks): ST 0.627 [13.5M], B 0.448 [11.7M], C1 0.378 [3.8M].
+- Both predictions failed. B did not lose to C1: it won by +0.29. ST was pronounced better than B on a many-file task.
+- C1 did not run out of anything. Both runs ended with `done` at 10.6–11.0M of 24M and at 25–27 of 32 minutes. Its mean (0.447) is close to round 13's 0.425 at a 6M cap, where 2 of 3 runs were capped. So the larger cap did not raise C1 on this task.
+- Every 12-agent run ended on the 24M cap after about 7 minutes (3.3M tokens per minute), with 0–1 agents done.
+- The ranges overlap. B's runs differ by 0.19 and ST's by 0.16, and ST's lower run (0.790) is below B's higher one (0.830). All four swarm runs are above both C1 runs.
+
+**Findings from the transcripts** (subagent report `reports/2026-10-04-round15b-traces-analysis.md`, model output; ✓ marks claims I checked by hand):
+- **C1 is bound by time on this task, not by tokens.** murmur's own timeout is 30 minutes (`timeoutMinutes`, inside swarmtest's 1920 s). C1 called `done` with the clock showing 5.2 and 3.3 minutes left ✓, at 11.0M and 10.6M ✓. Both done messages say the change is incomplete (95 and 86 of 167 tasks unticked). One agent turns about 0.44M tokens per minute into about 3 ticked tasks per minute, all in one 870–900-line file.
+- **The swarm wins on coverage, not on quality** ✓. The grader has 47 capabilities. The ones scoring 0 number 23 and 20 for C1, 14 and 6 for B, and 8 and 1 for ST. Inside the capabilities scored above 0, the weighted score is 0.87–0.89 for C1, 0.92–0.95 for B and 0.96–0.97 for ST. Twelve agents covered more of the spec in 7 minutes than one agent did in 25.
+- **The swarm's losses are orphaned or unwired modules:**
+  - In B `ad877a8f`, plover and swift each yielded the warehouse-operations module to the other, 1.2 s apart, and nobody wrote it. Its six capabilities are exactly the run's six zeros ✓.
+  - In B `f21a7e66`, reports, import-export, units and barcodes were never written. The board noticed the missing `reports.py` at 401 s, and four agents then claimed it within 25 s.
+  - In ST `f7a15bdf`, four modules written in the last 25 s before the cap were never wired into the `Stockroom` class.
+  - In ST `4b350f75`, only `abc_analysis` is unwired, and it is the run's only zero ✓.
+- **Staggered entry gives a cleaner start; the score gap is not separated.** In B `ad877a8f`, seven agents posted that they would take the core between 6.3 and 14.7 s ✓. In ST `4b350f75`, wren claimed the core at 10.1 s and finch took the extensions at 15–17 s ✓; later entrants read the board and claimed what was still open. Posts before 60 s: 54–55 in B against 24–28 in ST. Duplicate whole-file writes: 5 and 2 in B, 2 (both refused) and 0 in ST. The post share of calls is similar (19–27%). With B's runs 0.19 apart, +0.135 at k=2 is a screen result. The mechanism matches stage A's planning finding, this time on a many-file task.
+- **Where the 24M went:**
+  - cache reads are 94–95%;
+  - 97–99% of posts take a full-context turn of their own, which makes post-only turns 20–28% of tokens;
+  - the 12 agents made 645–745 turns at about 34k tokens per turn;
+  - when the cap hit, the agents' clock still showed about 22.8 minutes left. Nothing tells them about the shared token budget. In f21a7e66, the write that was in flight at the cap (`reports.py`) was lost.
+- **Friction:**
+  - The new default wake was not exercised: there is no `wake` event in any swarm run ✓, because no agent went idle before the cap.
+  - The write guard refused 8 writes; the 3 that were inspected were genuine partial writes.
+  - The subagent found no bash timeouts in this stage.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -1383,3 +1426,4 @@ The default `wake` text says "Call inbox". Swarm profiles that offer no `inbox` 
 | 2026-10-03 | smoke n=12 (`runs/20261003-193607-2967`, deleted) | s2-board-clock n=12 | trio × 1 | 347k | all_done in 52 s; 9 write refusals; all 12 agents wrote all 3 files | 12 agents work; tokens/min with small contexts only |
 | 2026-10-03 | smoke new levers (5 runs, deleted) | stagger by turns n=3, task list n=2, branches required n=2, branches optional n=2, default n=3 | scripted × 1, trio × 2 | 385k | all pass; see the 21:50 note | levers OK |
 | 2026-10-03/04 | round 15 stage A (28 valid campaigns `20261003T200851Z-dd25b816` → `20261003T225411Z-391aeba3`, seed 20261070, code `f8a6693`; 1 invalid, `20261003T202310Z-6f2a1318`) | C1 solo-clock n=1; B s2-board-clock, TL n12-tasks, BR n12-branches, BO n12-branches-optional, ST n12-stagger, RO n12-roles (n=12) | planning, shop2 × 2, 12M cap | 188.5M | two-task means: BR 0.534, ST 0.506, RO 0.398, C1 0.343, B 0.305, TL 0.205, BO 0.122 | L: ST pronounced better, TL pronounced worse (at threshold); S: BR and ST beat C1 at 23–27× tokens, BO loses; stage B gets B, C1, ST |
+| 2026-10-04 | round 15 stage B (6 valid campaigns `20261004T052617Z-702c5333` → `20261004T064229Z-4b350f75`, seed 20261072, code `f4c5f63`) | C1 solo-clock n=1; B s2-board-clock, ST n12-stagger (n=12) | ospec_green_blind × 2, 24M cap, 1920 s | 117.8M | ST 0.869, B 0.734, C1 0.447; swarms all capped at ~7 min, C1 done at ~11M | ST pronounced better than B (+0.135); B and ST beat C1 (+0.29, +0.42) at 2.2× tokens |

@@ -1,4 +1,6 @@
-# Round 15, stage A: per-run measures and per-agent traces
+# Round 15: per-run measures and per-agent traces
+
+# Stage A
 
 Generated 2026-10-04 01:05 from the 28 valid campaigns listed in experiments/plan.md (round 15 result).
 
@@ -22,7 +24,38 @@ Generated 2026-10-04 01:05 from the 28 valid campaigns listed in experiments/pla
 | opt_shop2_blind | solo-clock n=1 | 2 | 0 | 0.41 | 0.06M | 1.31 | 1.0 | 11.0 | 0.00 | 1.0 | 1.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – | 0.55 0.27 |
 ## Per run (scripts/n12.mjs --runs)
 
-head: illegal line count -- -0
+| campaign | run | task | arm | reason | roles | score | tokens | minutes | agentsDone | calls | coordination | maxWriters | meanWriters | refused | adds | takes | taskDone | drops | branches | merges | conflicts | updates | unmergedAgents | unmergedFiles | lastEnter |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 20261003T200851Z-dd25b816 | run-0001 | constrained_planning_hard_blind | solo-clock n=1 | all_done |  | 0.36 | 0.79M | 6.47 | 1.0 | 43.0 | 0.00 | 1.0 | 1.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T201626Z-f3578273 | run-0001 | constrained_planning_hard_blind | solo-clock n=1 | all_done |  | 0.19 | 0.29M | 5.21 | 1.0 | 25.0 | 0.00 | 1.0 | 1.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T202413Z-38f6ba4c | run-0001 | constrained_planning_hard_blind | s2-board-clock n=12 | all_done |  | 0.40 | 5.67M | 3.83 | 12.0 | 407.0 | 0.23 | 6.0 | 2.25 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T202844Z-bf95f72a | run-0001 | constrained_planning_hard_blind | n12-tasks n=12 | all_done |  | 0.44 | 5.11M | 4.27 | 12.0 | 370.0 | 0.36 | 4.0 | 2.00 | 0.0 | 3.0 | 3.0 | 3.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T203414Z-01376639 | run-0001 | constrained_planning_hard_blind | n12-branches n=12 | all_done |  | 0.46 | 4.99M | 5.47 | 12.0 | 332.0 | 0.08 | 12.0 | 6.50 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 12.0 | 14.0 | 14.0 | 3.0 | 1.0 | 1.0 | – |
+| 20261003T204049Z-b9b748b9 | run-0001 | constrained_planning_hard_blind | n12-branches-optional n=12 | budget |  | 0.00 | 12.03M | 5.50 | 1.0 | 596.0 | 0.33 | 7.0 | 2.50 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 10.0 | 2.0 | 0.0 | 1.0 | 3.0 | 3.0 | – |
+| 20261003T204627Z-295e25a1 | run-0001 | constrained_planning_hard_blind | n12-stagger n=12 | all_done |  | 0.45 | 7.33M | 5.59 | 12.0 | 476.0 | 0.31 | 2.0 | 1.33 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.92 |
+| 20261003T205317Z-90548874 | run-0001 | constrained_planning_hard_blind | n12-roles n=12 | budget | builder explorer builder builder builder builder builder builder builder explorer builder tester tester tester reviewer reviewer | 0.35 | 12.06M | 6.33 | 0.0 | 606.0 | 0.34 | 5.0 | 2.33 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T210018Z-5e5f0aa0 | run-0001 | opt_shop2_blind | solo-clock n=1 | all_done |  | 0.55 | 0.05M | 1.18 | 1.0 | 9.0 | 0.00 | 1.0 | 1.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T210136Z-a06df206 | run-0001 | opt_shop2_blind | s2-board-clock n=12 | all_done |  | 0.39 | 5.47M | 4.53 | 12.0 | 436.0 | 0.22 | 6.0 | 2.25 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T210612Z-0a019874 | run-0001 | opt_shop2_blind | n12-tasks n=12 | quiescent |  | 0.00 | 3.58M | 3.50 | 11.0 | 301.0 | 0.34 | 2.0 | 1.50 | 0.0 | 3.0 | 3.0 | 3.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T210947Z-3852eb50 | run-0001 | opt_shop2_blind | n12-branches n=12 | all_done |  | 0.56 | 6.73M | 7.56 | 12.0 | 440.0 | 0.17 | 12.0 | 12.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 12.0 | 6.0 | 19.0 | 16.0 | 2.0 | 2.0 | – |
+| 20261003T211724Z-83c3aae1 | run-0001 | opt_shop2_blind | n12-branches-optional n=12 | quiescent |  | 0.02 | 7.76M | 9.17 | 11.0 | 446.0 | 0.28 | 5.0 | 5.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 2.0 | 0.0 | 0.0 | 0.0 | 2.0 | 2.0 | – |
+| 20261003T212639Z-58df707d | run-0001 | opt_shop2_blind | n12-stagger n=12 | all_done |  | 0.38 | 10.13M | 7.58 | 12.0 | 557.0 | 0.25 | 5.0 | 2.33 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.03 |
+| 20261003T213420Z-4b82f5ba | run-0001 | opt_shop2_blind | n12-roles n=12 | all_done | builder builder explorer builder builder builder builder builder integrator builder builder builder reviewer reviewer reviewer | 0.42 | 5.26M | 4.31 | 12.0 | 421.0 | 0.32 | 2.0 | 1.17 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T213841Z-b9457a0f | run-0001 | constrained_planning_hard_blind | s2-board-clock n=12 | all_done |  | 0.43 | 9.13M | 7.68 | 12.0 | 498.0 | 0.30 | 4.0 | 2.50 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T214738Z-22928c54 | run-0001 | constrained_planning_hard_blind | n12-tasks n=12 | budget |  | 0.38 | 12.03M | 7.12 | 9.0 | 612.0 | 0.37 | 5.0 | 2.00 | 0.0 | 2.0 | 2.0 | 2.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T215609Z-57c5dae0 | run-0001 | constrained_planning_hard_blind | n12-branches n=12 | all_done |  | 0.35 | 10.82M | 8.22 | 12.0 | 532.0 | 0.10 | 12.0 | 12.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 12.0 | 13.0 | 24.0 | 14.0 | 0.0 | 0.0 | – |
+| 20261003T220441Z-1cc39f1b | run-0001 | constrained_planning_hard_blind | n12-branches-optional n=12 | budget |  | 0.07 | 12.00M | 6.72 | 1.0 | 622.0 | 0.26 | 9.0 | 3.67 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 8.0 | 1.0 | 2.0 | 0.0 | 2.0 | 2.0 | – |
+| 20261003T221243Z-f163d09e | run-0001 | constrained_planning_hard_blind | n12-stagger n=12 | budget |  | 0.49 | 12.00M | 7.61 | 0.0 | 566.0 | 0.34 | 6.0 | 6.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.16 |
+| 20261003T222132Z-654efcff | run-0001 | constrained_planning_hard_blind | n12-roles n=12 | budget | builder explorer explorer explorer builder builder builder builder explorer builder explorer builder tester reviewer reviewer reviewer integrator explorer reviewer | 0.42 | 12.00M | 6.61 | 0.0 | 614.0 | 0.35 | 7.0 | 2.50 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T222819Z-0184c709 | run-0001 | opt_shop2_blind | solo-clock n=1 | all_done |  | 0.27 | 0.07M | 1.43 | 1.0 | 13.0 | 0.00 | 1.0 | 1.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T222952Z-b54b47ab | run-0001 | opt_shop2_blind | s2-board-clock n=12 | all_done |  | 0.00 | 2.07M | 2.40 | 12.0 | 226.0 | 0.17 | 6.0 | 6.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T223219Z-c0f34249 | run-0001 | opt_shop2_blind | n12-tasks n=12 | all_done |  | 0.00 | 4.09M | 5.26 | 12.0 | 306.0 | 0.36 | 2.0 | 2.00 | 0.0 | 1.0 | 1.0 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261003T223740Z-8b326a02 | run-0001 | opt_shop2_blind | n12-branches n=12 | all_done |  | 0.76 | 4.54M | 5.84 | 12.0 | 313.0 | 0.06 | 12.0 | 12.00 | 7.0 | 0.0 | 0.0 | 0.0 | 0.0 | 12.0 | 9.0 | 25.0 | 0.0 | 4.0 | 4.0 | – |
+| 20261003T224337Z-c74d72c6 | run-0001 | opt_shop2_blind | n12-branches-optional n=12 | all_done |  | 0.40 | 9.03M | 5.97 | 12.0 | 474.0 | 0.33 | 7.0 | 7.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 6.0 | 0.0 | 0.0 | 0.0 | 4.0 | 4.0 | – |
+| 20261003T224939Z-2b97dfb2 | run-0001 | opt_shop2_blind | n12-stagger n=12 | all_done |  | 0.69 | 3.24M | 4.42 | 12.0 | 270.0 | 0.24 | 5.0 | 5.00 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.96 |
+| 20261003T225411Z-391aeba3 | run-0001 | opt_shop2_blind | n12-roles n=12 | all_done | builder builder builder builder builder builder builder builder builder builder builder builder tester tester tester tester tester tester tester | 0.39 | 10.19M | 9.35 | 12.0 | 567.0 | 0.31 | 4.0 | 1.78 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+
+(Regenerated 2026-10-04 09:00: the first version of this file had a broken command here and no per-run table.)
 ## Per agent (scripts/traces.mjs)
 
 | run | task | arm | score | tokens | min | end | agent | calls | board % | checks | green at | after green | last check | overwrites | nudges |
@@ -613,3 +646,133 @@ Why each agent stopped:
 - 391aeba3/0001 murmur[n12-roles]/n=12 swift: done: Tested shared solver on example and largest instance with independent validators; verified hard constraints, empty-job/blocked-interval edge cases, deterministic repeated output after fixed trial budg
 - 391aeba3/0001 murmur[n12-roles]/n=12 tern: done: Tester work complete: validated current solve.py against both example and largest instance with exact constraints/cost, repeated outputs byte-identical, npm smoke passes, and synthetic empty-job/block
 - 391aeba3/0001 murmur[n12-roles]/n=12 wren: done: Implemented and validated solve.py. It produces valid blocked-aware job-shop schedules, passes npm run test and strict feasibility checks on example and large instances, runs within the time limit, an
+
+# Stage B
+
+Generated 2026-10-04 09:00 from the 6 valid campaigns of stage B (`20261004T052617Z-702c5333` → `20261004T064229Z-4b350f75`, listed in experiments/plan.md).
+
+## Per task x arm (scripts/n12.mjs)
+
+| task | arm | runs | capped | mean score | mean tokens | mean minutes | mean agentsDone | mean calls | mean coordination | mean maxWriters | mean meanWriters | mean refused | mean adds | mean takes | mean taskDone | mean drops | mean branches | mean merges | mean conflicts | mean updates | mean unmergedAgents | mean unmergedFiles | mean lastEnter | scores |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| ospec_green_blind | n12-stagger n=12 | 2 | 2 | 0.87 | 24.03M | 7.20 | 0.5 | 783.0 | 0.19 | 11.0 | 1.65 | 1.5 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.33 | 0.79 0.95 |
+| ospec_green_blind | s2-board-clock n=12 | 2 | 2 | 0.73 | 24.05M | 7.16 | 0.5 | 816.5 | 0.23 | 8.0 | 1.84 | 1.5 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – | 0.64 0.83 |
+| ospec_green_blind | solo-clock n=1 | 2 | 0 | 0.45 | 10.81M | 25.90 | 1.0 | 151.5 | 0.00 | 1.0 | 1.00 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – | 0.43 0.47 |
+
+## Per run (scripts/n12.mjs --runs)
+
+| campaign | run | task | arm | reason | roles | score | tokens | minutes | agentsDone | calls | coordination | maxWriters | meanWriters | refused | adds | takes | taskDone | drops | branches | merges | conflicts | updates | unmergedAgents | unmergedFiles | lastEnter |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 20261004T052617Z-702c5333 | run-0001 | ospec_green_blind | solo-clock n=1 | all_done |  | 0.43 | 11.01M | 24.93 | 1.0 | 150.0 | 0.00 | 1.0 | 1.00 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261004T055147Z-f21a7e66 | run-0001 | ospec_green_blind | s2-board-clock n=12 | budget |  | 0.64 | 24.06M | 7.36 | 0.0 | 815.0 | 0.27 | 7.0 | 1.74 | 2.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261004T055945Z-f7a15bdf | run-0001 | ospec_green_blind | n12-stagger n=12 | budget |  | 0.79 | 24.04M | 7.14 | 0.0 | 783.0 | 0.20 | 11.0 | 1.81 | 3.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.47 |
+| 20261004T060732Z-371a385b | run-0001 | ospec_green_blind | solo-clock n=1 | all_done |  | 0.47 | 10.61M | 26.87 | 1.0 | 153.0 | 0.00 | 1.0 | 1.00 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261004T063455Z-ad877a8f | run-0001 | ospec_green_blind | s2-board-clock n=12 | budget |  | 0.83 | 24.04M | 6.97 | 1.0 | 818.0 | 0.20 | 9.0 | 1.94 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261004T064229Z-4b350f75 | run-0001 | ospec_green_blind | n12-stagger n=12 | budget |  | 0.95 | 24.03M | 7.26 | 1.0 | 783.0 | 0.19 | 11.0 | 1.48 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.19 |
+
+## Per agent (scripts/traces.mjs)
+
+| run | task | arm | score | tokens | min | end | agent | calls | board % | checks | green at | after green | last check | overwrites | nudges |
+|---|---|---|---:|---:|---:|---|---|---:|---:|---:|---:|---:|---|---:|---:|
+| 702c5333/0001 | ospec_green_blind | murmur[solo-clock]/n=1 | 0.426 | 11.01M | 24.9 | all_done | wren | 150 | 1 | 0 | - | - | none | 1 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | crane | 71 | 27 | 2 | 50 | 21 | green | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | dunlin | 64 | 31 | 2 | 26 | 38 | green | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | finch | 51 | 10 | 3 | 38 | 13 | green | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | heron | 54 | 31 | 0 | - | - | none | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | kite | 56 | 30 | 3 | - | - | red | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | lark | 92 | 35 | 3 | 64 | 28 | green | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | linnet | 64 | 23 | 0 | - | - | none | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | plover | 82 | 26 | 0 | - | - | none | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | robin | 79 | 28 | 0 | - | - | none | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | swift | 75 | 21 | 1 | 55 | 20 | green | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | tern | 62 | 26 | 2 | 49 | 13 | green | 0 | 0 |
+| f21a7e66/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.638 | 24.06M | 7.4 | budget | wren | 67 | 27 | 1 | 55 | 12 | green | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | crane | 72 | 21 | 2 | 32 | 40 | green | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | dunlin | 87 | 8 | 3 | 22 | 65 | green | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | finch | 69 | 14 | 3 | 24 | 45 | green | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | heron | 67 | 25 | 1 | 56 | 11 | green | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | kite | 65 | 28 | 0 | - | - | none | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | lark | 48 | 23 | 3 | 35 | 13 | green | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | linnet | 65 | 15 | 3 | 30 | 35 | green | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | plover | 62 | 19 | 4 | 19 | 43 | green | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | robin | 71 | 25 | 2 | 56 | 15 | red | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | swift | 57 | 19 | 2 | 26 | 31 | green | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | tern | 80 | 23 | 4 | 25 | 55 | green | 0 | 0 |
+| f7a15bdf/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.790 | 24.04M | 7.1 | budget | wren | 45 | 18 | 2 | 33 | 12 | green | 1 | 0 |
+| 371a385b/0001 | ospec_green_blind | murmur[solo-clock]/n=1 | 0.469 | 10.61M | 26.9 | all_done | wren | 153 | 1 | 11 | 19 | 134 | green | 1 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | crane | 66 | 23 | 0 | - | - | none | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | dunlin | 52 | 19 | 0 | - | - | none | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | finch | 83 | 20 | 0 | - | - | none | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | heron | 56 | 11 | 0 | - | - | none | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | kite | 55 | 25 | 0 | - | - | none | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | lark | 63 | 14 | 0 | - | - | none | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | linnet | 70 | 13 | 0 | - | - | none | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | plover | 81 | 30 | 0 | - | - | none | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | robin | 72 | 18 | 4 | 30 | 42 | green | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | swift | 88 | 26 | 0 | - | - | none | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | tern | 70 | 13 | 0 | - | - | none | 0 | 0 |
+| ad877a8f/0001 | ospec_green_blind | murmur[s2-board-clock]/n=12 | 0.830 | 24.04M | 7.0 | budget | wren | 63 | 25 | 0 | - | - | none | 1 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | crane | 105 | 16 | 0 | - | - | none | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | dunlin | 58 | 26 | 2 | 44 | 14 | green | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | finch | 62 | 19 | 0 | - | - | none | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | heron | 57 | 23 | 0 | - | - | none | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | kite | 60 | 15 | 0 | - | - | none | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | lark | 74 | 22 | 4 | 36 | 38 | green | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | linnet | 68 | 10 | 2 | 53 | 15 | green | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | plover | 49 | 18 | 2 | 22 | 27 | green | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | robin | 37 | 35 | 0 | - | - | none | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | swift | 68 | 22 | 2 | 29 | 39 | green | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | tern | 73 | 16 | 0 | - | - | none | 0 | 0 |
+| 4b350f75/0001 | ospec_green_blind | murmur[n12-stagger]/n=12 | 0.947 | 24.03M | 7.3 | budget | wren | 73 | 12 | 2 | 41 | 32 | green | 0 | 0 |
+
+Why each agent stopped:
+- 702c5333/0001 murmur[solo-clock]/n=1 wren: done: Implemented the package facade and core catalog, stock/lots, ledger, reservations, orders, pricing, returns, purchasing, reports, audit, CSV, persistence, CLI, plus categories, units, barcodes, varian
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 crane: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 dunlin: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 finch: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 heron: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 kite: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 lark: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 linnet: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 plover: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 robin: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 swift: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 tern: last text: 
+- f21a7e66/0001 murmur[s2-board-clock]/n=12 wren: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 crane: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 dunlin: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 finch: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 heron: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 kite: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 lark: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 linnet: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 plover: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 robin: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 swift: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 tern: last text: 
+- f7a15bdf/0001 murmur[n12-stagger]/n=12 wren: last text: 
+- 371a385b/0001 murmur[solo-clock]/n=1 wren: done: Implemented the stockroom package and CLI with catalog, lots/stock, ledger, reservations, orders, pricing, returns, purchasing, reports, audit, CSV, persistence, and several additional capabilities; m
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 crane: last text: 
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 dunlin: last text: 
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 finch: done: Completed the category capability in stockroom/categories.py, integrated CategoryMixin into Stockroom, added category CLI support with the CLI owner, ticked tasks 15.1–15.4, and verified category scen
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 heron: last text: 
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 kite: last text: 
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 lark: last text: 
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 linnet: last text: 
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 plover: last text: 
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 robin: last text: 
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 swift: last text: 
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 tern: last text: 
+- ad877a8f/0001 murmur[s2-board-clock]/n=12 wren: last text: 
+- 4b350f75/0001 murmur[n12-stagger]/n=12 crane: last text: 
+- 4b350f75/0001 murmur[n12-stagger]/n=12 dunlin: last text: 
+- 4b350f75/0001 murmur[n12-stagger]/n=12 finch: last text: We are taking extras listed only. Need methods broadly. Wait state conventions from wren. Read specs each selected.
+- 4b350f75/0001 murmur[n12-stagger]/n=12 heron: last text: 
+- 4b350f75/0001 murmur[n12-stagger]/n=12 kite: last text: 
+- 4b350f75/0001 murmur[n12-stagger]/n=12 lark: last text: 
+- 4b350f75/0001 murmur[n12-stagger]/n=12 linnet: last text: 
+- 4b350f75/0001 murmur[n12-stagger]/n=12 plover: last text: 
+- 4b350f75/0001 murmur[n12-stagger]/n=12 robin: done: Implemented and integrated the access-control mixin in stockroom/access.py, covering policies, grants, assignments, access checks/explanations, deny precedence, audit hooks and JSON persistence. Ticke
+- 4b350f75/0001 murmur[n12-stagger]/n=12 swift: last text: 
+- 4b350f75/0001 murmur[n12-stagger]/n=12 tern: last text: 
+- 4b350f75/0001 murmur[n12-stagger]/n=12 wren: last text: 

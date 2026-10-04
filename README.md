@@ -6,7 +6,9 @@
 
 ## Findings so far (2026-10-04)
 
-**Without an oracle, 12 agents (round 15 stage A, a screen: 2 tasks, k=2, a 12M cap shared by the swarm and by the single agent).** Two 12-agent configurations beat one agent with the clock, at 23–27× its tokens: a git branch per agent with merges (0.53 against 0.34) and staggered entry (0.51). A plain 12-agent swarm with a board does not (0.31). A shared task list went almost unused. These verdicts rest mostly on one noisy task and are being followed up on a volume task. Details in [docs/research.md](docs/research.md).
+**Without an oracle, 12 agents on a large project (round 15 stage B, one OpenSpec task, k=2, a 24M cap shared by the swarm and by the single agent).** Twelve agents beat one agent with the clock by a wide margin: 0.73 with a plain board and 0.87 with staggered entry, against 0.45, at 2.2× its tokens. They win by covering more of the spec in 7 minutes than one agent covers in 25. The single agent stopped on its own clock with half the cap unspent, so a single agent given the same tokens and enough time to spend them has not been tested yet. Their losses were modules nobody wrote, or wrote but never wired in. Details in [docs/research.md](docs/research.md).
+
+**Without an oracle, 12 agents (round 15 stage A, a screen: 2 tasks, k=2, a 12M cap shared by the swarm and by the single agent).** Two 12-agent configurations beat one agent with the clock, at 23–27× its tokens: a git branch per agent with merges (0.53 against 0.34) and staggered entry (0.51). A plain 12-agent swarm with a board does not (0.31). A shared task list went almost unused. These verdicts rest mostly on one noisy task. Details in [docs/research.md](docs/research.md).
 
 **Without an oracle (round 11 phase 1, single agents on 7 blind tasks, k=3).** This is the first evidence that counts for real work, and swarms have not been re-tested yet.
 - A one-line clock (the minutes left, on every tool result) is the one lever that moves a single agent. On three contract tasks it lifts scores from 0.26–0.60 to 0.71–0.99, with or without norms, at 4–10× the tokens.
@@ -95,7 +97,7 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
 
 - **Prompts:**
   - `briefing` and `teamBriefing` templates;
-  - `steer` and `wake` texts;
+  - `steer` and `wake` texts (the default wake tells the agent to call `inbox`; when the profile offers no `inbox`, it carries the unread posts itself);
   - `systemPromptAppend`;
   - `toolDescriptions`: replaces a tool's description, for board, task-list and branch tools, `append` or the built-in tools the profile offers (Pi's one-line summaries and guidelines in the system prompt stay).
 - **Agents and tools:**
