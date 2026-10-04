@@ -1528,6 +1528,73 @@ The new checks also found a real bug in the original task's `solution/`: reserva
 - Open issues: grading time is not counted in the clock; 12 agents share each sidecar's 2 CPUs under amd64 emulation; the hub holds a filtered OAuth copy, as in round 5B; murmur's `check` is `true` and its status is meaningless here.
 - The Docker VM has 3.8 GB of RAM. One sidecar at a time fits, so single-task calibration can run now. Batches of 4 need about 16 GB, and the user has been asked to raise it.
 
+## Round 16: equal caps with the tokens left on difficulty tasks, threads at n=12, and DeepSWE calibration (fixed before measuring, 2026-10-04 17:45; the user asked for it in reply to the 13:45 proposal)
+
+**The user's requests (in reply to the DeepSWE calibration proposal):**
+- Raise Docker's RAM. Done: the VM now has 16 GB, with 8 CPUs unchanged.
+- The DeepSWE test is a batch, run after calibration. A task where one agent scores 0 may still give signal for a swarm.
+- Run planning and shop2 with STT.
+- Find out whether a threaded board helps 12 agents on complex tasks. Threads were tested only in round 10C: with an oracle, n=4 and volume, where they were refuted on cost.
+
+### Stage A: planning and shop2, C1T against STT and STH
+
+**Question.** On difficulty tasks, at a shared 12M cap with the tokens left visible to everyone, does STT beat C1T? And does a threaded board change the 12-agent swarm pronouncedly?
+
+**Tasks:** constrained_planning_hard_blind and opt_shop2_blind, 12M and 1200 s per run, k=2.
+
+**Arms:**
+- **C1T** = `solo-clock-tokens` (one agent: write guard, clock, tokens left).
+- **STT** = `n12-stagger-tokens` (12 equals, post-only board, staggered entry, write guard, clock, tokens left).
+- **STH** = `n12-stagger-threads-tokens`: STT with a threaded board in place of `post`. Agents get `thread_new`, `thread_list`, `thread_read` and `reply`, receive only the threads they follow plus an announcement of each new one, and get a neutral one-paragraph briefing with no norms. It is a new profile.
+- STH smoke at n=12 on `examples/trio.json` (3M cap; run deleted): all_done, 0.30M, 12 `enter` events and 4 write refusals. All 12 agents called `thread_list`, and nobody opened a thread on this small task. The tokens line was present.
+
+**Execution.** `experiments/criba16-lanes.mjs 1 A`, one lane, seed 20261080. Swarm campaigns list `[C1T, arm]` with `--limit 1`, and `plan[0]` is the 12-agent arm for both arms on both tasks (checked on the `plan` field). C1T gets its own campaigns. Order: repetition 0 (planning C1T, STT, STH, then shop2), then repetition 1. Quota stop and resume as in round 15.
+
+**Rules** (per-task means, k=2; capped scores count as they are; tokens and minutes reported):
+- **STT against C1T** and **STH against C1T**:
+  - beats if the two-task mean is ≥ +0.05 above and above on both tasks;
+  - loses if ≤ −0.05 below and below on both tasks;
+  - otherwise not decided. Tokens spent are reported with each verdict.
+- **STH against STT** (the threads lever):
+  - pronounced better if ≥ +0.10 above and above on both tasks;
+  - pronounced worse if ≤ −0.10 below and below on both;
+  - otherwise no pronounced difference.
+- **Descriptive:**
+  - tokens spent and the end reason per run; C1T against round 15 stage A's C1, from another hour and seed;
+  - thread use: threads opened, replies, reads, and how many threads each agent follows;
+  - the board's share of calls, writers per deliverable, and mentions of the tokens line.
+- **Predictions:**
+  - C1T still ends with `done` far below the cap on both tasks, because nobody mentioned the tokens line in round 15 stage C.
+  - STT is above C1T on planning by ≥ 0.05 (ST was +0.20 over C1 there). On shop2 the result is noise, so overall it is not decided.
+  - STH shows no pronounced difference against STT. Threads did not cut coordination turns in round 10C.
+
+**Known threats:**
+- Two tasks at k=2, and shop2 swings 0.00–0.76.
+- planning and shop2 have wall-clock-bound solvers, so nothing else runs during this lane. Stage D waits for it.
+- STH changes the board's tools and briefing together. That is the lever as a whole.
+
+### Stage D: C1T calibration on four DeepSWE tasks
+
+**Question.** Does one agent with the clock get signal on these DeepSWE tasks under partial credit? And how much does it spend when left to itself?
+
+**Tasks** (all validated with `--dry`: the reference solution scores 1.0 with binary 1, the untouched base 0, and the anti-leak checks pass):
+- expr-try-catch-errors (Go, 74 new tests);
+- termenv-preserve-ansi-resets (Go, 35);
+- cattrs-partial-structuring-recovery (Python, 63);
+- fd-deterministic-multi-key-sorting (Rust, 47).
+
+**Execution.** `sh experiments/deepswe/calib16.sh` starts after stage A's lane. It runs the driver's `isolated` arm: one C1T run per task, all four in parallel, each with 12M and 90 minutes (DeepSWE's official agent time) and its own 3 GB, 2-CPU sidecar. It does this twice (k=2). On the usage-limit error it marks the batch invalid and writes `deepswe/STOP16`.
+
+**Rule:**
+- A task goes into the first batch unless C1T's mean partial score on it is ≥ 0.85 (saturated). Tasks where C1T scores 0 stay, because a swarm may get signal where one agent does not (the user's point). If fewer than 3 tasks remain, more candidates are validated and calibrated the same way.
+- The batch cap is 4M × the number of tasks, or the sum of C1T's larger spend on each retained task, whichever is greater, rounded up to the next 4M. The swarm and the single agent share it, with a 120-minute clock.
+- The batch round itself (stage E) is pre-registered after stage D.
+
+**Budget (estimate):**
+- Stage A: C1T 4 × ~3M (upper 48M), STT 4 × ~9M, STH 4 × ~10M. About 88M, upper 144M.
+- Stage D: 8 runs × up to 12M. About 40M, upper 96M.
+- **Total ~128M**, upper ~240M, about two quota windows.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
