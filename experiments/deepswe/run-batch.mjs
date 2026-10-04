@@ -92,7 +92,9 @@ async function startUnit(unit, unitTasks) {
     const app = `dswe-${batch}-${unit}-${t.id}-app`, q = `dswe-${batch}-${unit}-${t.id}-q`;
     for (const v of [app, q]) dockerOk(["volume", "create", "--label", label, v]);
     dockerOk(["run", "-d", "--init", "--name", `dswe-${batch}-${unit}-${t.id}`, "--label", label, "--platform", "linux/amd64", "--network", "none",
-      "--cpus", "2", "--memory", opt["sidecar-memory"], "-e", `RUN_TIMEOUT=${cmdTimeout}`, "-v", `${app}:/app`, "-v", `${q}:/q`,
+      "--cpus", "2", "--memory", opt["sidecar-memory"], "-e", `RUN_TIMEOUT=${cmdTimeout}`,
+      "-e", "CARGO_CACHE_AUTO_CLEAN_FREQUENCY=never",  // cargo >= 1.78 deletes cached crates unused for a month; with no network that breaks `cargo test` after a `cargo check`
+      "-v", `${app}:/app`, "-v", `${q}:/q`,
       "-v", `${join(here, "execd.sh")}:/opt/execd.sh:ro`, "--entrypoint", "bash", t.image, "/opt/execd.sh"]);
     hubMounts.push("-v", `${app}:/work/${t.id}`, "-v", `${q}:/q/${t.id}`);
     const s = sidecarExec(`dswe-${batch}-${unit}-${t.id}`, STRIP(t.base));

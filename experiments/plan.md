@@ -1622,7 +1622,7 @@ Mean score [mean tokens] (runs, end), k=2:
 - On these difficulty tasks a 12-agent swarm does not beat one agent left to its own spend, with or without threads.
 - The transcript analysis waits until the DeepSWE calibration (stage D) has finished, because bulk reads stay off while runs are live.
 
-### Round 16 stage D result: DeepSWE C1T calibration (2026-10-04 20:19; batches 19:23–20:17, code `4833873`; rule not yet final)
+### Round 16 stage D result: DeepSWE C1T calibration (2026-10-04 20:19, rule applied 20:52; batches 19:23–20:17, code `4833873`)
 
 C1T (one agent with the clock and the tokens left), `isolated` arm: the four tasks in parallel, one agent each, 48M shared cap, 90 minutes. Scores are partial credit (new tests' pass fraction × base tests' pass fraction); "binary" is the official all-pass reward.
 
@@ -1631,12 +1631,13 @@ C1T (one agent with the clock and the tokens left), `isolated` arm: the four tas
 | expr-try-catch-errors | 0.999 (1, 8.54M, 34.2) | 0.342 (0, 1.05M, 6.3) | 0.671 |
 | termenv-preserve-ansi-resets | 1.000 (1, 0.36M, 4.5) | 1.000 (1, 1.01M, 7.9) | 1.000 |
 | cattrs-partial-structuring-recovery | 0.957 (0, 1.76M, 9.4) | 0.986 (0, 2.97M, 15.2) | 0.972 |
-| fd-deterministic-multi-key-sorting | 0.977 (0, 1.86M, 10.6, quiescent) | **invalid score** (2.12M, 17.4) | — |
+| fd-deterministic-multi-key-sorting | 0.977 (0, 1.86M, 10.6, quiescent) | 1.000 after rescore (1, 2.12M, 17.4); first score invalid | 0.989 |
 
 - Batch totals: r0 12.5M in 34.4 minutes, r1 7.1M in 17.6 minutes. Every agent ended by itself (`all_done`, one `quiescent`), far below the cap and the clock.
 - **Infrastructure failure, fd r1:** the scorer's `cargo test` could not resolve `static.crates.io` while fetching `getrandom 0.4.2` (exit 101, no tests parsed, base and new alike). The agent's diff touches no Cargo file, so the 0 is not the agent's. The saved diff must be rescored before fd's mean exists, and the scorer should not depend on the network.
-- **Rule as written:** termenv (1.000) and cattrs (0.972) are excluded (C1T mean ≥ 0.85). expr stays (0.671). fd waits for the rescore: it is excluded if the rescored r1 is ≥ 0.723.
-- The batch cap is computed once fd is settled. With expr alone: max(4M, 8.54M) → 12M; with expr and fd: max(8M, 8.54M + 2.12M = 10.66M) → 12M.
+- **Rescore (2026-10-04 20:52, [report](reports/2026-10-04-deepswe-scorer-offline-fix.md)):** the cause was cargo's cache garbage collection, not the network. Cargo 1.92 deletes cached crates it considers unused for a month, and the image's crates count as old. r1's agent ran `cargo check` first, which kept only the non-dev crates and deleted the dev-dependencies, so every later `cargo test` (the agent's and the scorer's) tried to download them and failed offline. r0's agent ran `cargo test` first and was not hit. The driver now sets `CARGO_CACHE_AUTO_CLEAN_FREQUENCY=never` in every sidecar. The saved r1 diff rescores to 1.000 (binary 1, 44/44 new and 106/106 base tests); as a control, r0's diff rescores to its original 0.977. r1's agent could not run the tests during its run, so its process is not comparable with r0's.
+- **Rule as written:** termenv (1.000), cattrs (0.972) and fd (0.989) are excluded (C1T mean ≥ 0.85). Only expr stays (0.671). Batch cap: max(4M × 1, 8.54M) → 12M, with a 120-minute clock.
+- **Consequence:** a batch of one task is not a batch. Three of the four candidates are near the ceiling for C1T under partial credit, so stage E needs new candidate tasks, either calibrated on the binary reward or chosen to be harder.
 - Partial credit puts C1T near the ceiling on three of four tasks even when the official binary reward is 0 (cattrs both runs, fd r0). The swarm's room on these tasks is in the binary reward, not in the partial score.
 
 ### Side test U: one agent told its time and tokens are unlimited (fixed before measuring, 2026-10-04 20:19; the user asked for it)
@@ -1763,3 +1764,4 @@ Suggested order: H4, then H1, then H2 and H3 on decomposable tasks.
 | 2026-10-04 | round 15 stage C, closed early (6 valid campaigns `20261004T072757Z-102de6ff` → `20261004T081156Z-cfaad405`, seed 20261074, code `10e6f54`; 1 invalid, `20261004T084418Z-f23dfd8d`, quota) | C1T solo-clock-tokens n=1 (k=1); STT n12-stagger-tokens n=12 (k=2) | ospec_green, ospec_brown, 24M, 60-minute clock | 154.6M | STT 0.959, C1T 0.952; all valid runs capped | not decided (C1T k=1); volume tasks saturated; the user moves to quality-bound tasks calibrated against C1T |
 | 2026-10-04 | round 16 stage A (12 valid campaigns `20261004T154422Z-5d32faf7` → `20261004T171634Z-37116428`, seed 20261080, code `b438df5`) | C1T solo-clock-tokens n=1; STT n12-stagger-tokens, STH n12-stagger-threads-tokens (n=12) | planning, shop2 × 2, 12M | 72.7M | two-task means: STT 0.545, C1T 0.524, STH 0.470; C1T spends 0.5M per run | STT vs C1T not decided; STH loses to C1T; threads not pronounced vs posts |
 | 2026-10-04 | round 16 side test U (6 campaigns `20261004T182025Z-4f3259e1` → `20261004T182208Z-ee9d90bc`, seed 20261090, code `e5f402f`) | C1T solo-clock-tokens, CU solo-clock-unlimited, C0 solo (all n=1) | shop2 × 2, 24M, 3720 s | 0.29M | means: C0 0.130, C1T 0.000, CU 0.000; CU 35–51 s, C1T 115–130 s | no difference in any pair; "unlimited" does not lengthen work |
+| 2026-10-04 | round 16 stage D, DeepSWE calibration (batches `cal16-r0`, `cal16-r1`, `isolated` arm, code `4833873`; fd r1 rescored after a cargo cache fault) | C1T solo-clock-tokens n=1 per task | expr, termenv, cattrs, fd × 2, 48M shared, 90 min | 19.7M | means: termenv 1.000, fd 0.989, cattrs 0.972, expr 0.671 (partial credit) | three tasks excluded (≥ 0.85); only expr stays; stage E needs new tasks |

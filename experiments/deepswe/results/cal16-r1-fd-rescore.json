@@ -1,0 +1,29 @@
+{
+  "batch": "cal16-r1",
+  "note": "Rescore of fd-deterministic-multi-key-sorting from the saved diff (no agent run) after the cargo auto-gc fix; see experiments/reports/2026-10-04-deepswe-scorer-offline-fix.md. results/cal16-r1.json is left as originally written.",
+  "fd": {
+    "old": {
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 0,
+      "binary": 0,
+      "parsed": 0
+    },
+    "rescored": {
+      "score": 1.0,
+      "new_frac": 1.0,
+      "base_frac": 1.0,
+      "binary": 1,
+      "parsed": 153
+    }
+  },
+  "meanScoreOriginal": 0.581784026005056,
+  "meanScoreWithRescore": 0.831784026005056,
+  "control_cal16-r0_fd": {
+    "score": 0.9772727272727273,
+    "new_frac": 0.9772727272727273,
+    "base_frac": 1.0,
+    "binary": 0,
+    "original_score": 0.9772727272727273
+  }
+}
