@@ -1483,6 +1483,20 @@ At the stop, 6 of 8 runs were valid. C1T's second runs on green and brown are le
 - **Where the strong runs lose their last points:** mostly interface and command-line mismatches (argparse usage errors in three `...-command-line` checks, an unexpected keyword argument), not missing capabilities. On brown, one timesheet check failed in all 3 runs ("expected INVALID_WEEK, got INVALID_DATE"); it may be a spec ambiguity and should be read before brown is reused.
 - **Friction:** no `wake` events, 3 write refusals, no bash timeouts.
 
+## 2026-10-04 13:40: the quality-bound ospec task misses its target (no measurement)
+
+A subagent built `ospec_green_q_blind` in `../swarmtest/staging/` (report `reports/2026-10-04-ospec-quality-task-build.md`, model output; no model calls). It keeps the scope and the agents' prompt ✓, adds 10 spec lines ✓, and puts 70% of the weight on 41 depth checks: long random walks, persistence and ledger invariants, state-machine tables, and error-precedence matrices. Each check traces to the spec. The solution scores 1.0 and the initial workspace 0.0.
+
+**Proxy (stage B and C final workspaces regraded):**
+- C1T 0.980 (old grader 0.985) and STT 0.979 and 0.858.
+- ST 0.668 and 0.899; B 0.557 and 0.703; C1 0.415 and 0.397.
+
+The 0.3–0.5 target is not reachable with checks that trace to this spec. The strong workspaces are 96–99% correct on everything the spec states, and they lose only a handful of real bugs. The task orders weak and strong arms more widely than the old grader did, but it cannot separate strong ones.
+
+**Reading:** on spec-implementation tasks, quality is not where this model fails once it has the time. Its limit is coverage and time. To find where coordination improves quality, the next tasks should be difficulty-bound: DeepSWE, and the optimisation tasks at equal spend.
+
+The new checks also found a real bug in the original task's `solution/`: reservations reload as R10 before R2. It is fixed in the q copy only. The old grader never reloads past nine reservations, so no past score is affected.
+
 ## 2026-10-04 13:30: DeepSWE batches, the user's decisions and the infrastructure (no measurement yet)
 
 **Decisions (the user, after round 15 stage C):**
