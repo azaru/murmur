@@ -6,6 +6,8 @@ This is the curated record of every experiment run with murmur so far: the quest
 
 **Direction (2026-10-03, after round 14).** The user restated the goal: the only goal is a better swarm and knowing when a swarm is useful, now with 12 agents. Every lever tested with an oracle is to be re-tested without one ([lever recount](../experiments/reports/2026-10-03-lever-recount.md)).
 
+**Status (2026-10-04, after round 15 stage C, equal spend).** Stage B's swarm win on volume was mostly spend. Stage C gave one agent the time to spend the same 24M (a 60-minute clock) and showed every agent the tokens left. C1T (that single agent) scored 0.985 on ospec_green and 0.919 on ospec_brown, at k=1. STT (12 agents with staggered entry and the tokens line) scored 0.955 and 0.963. The rule says not decided, and both tasks are at the ceiling. The swarm's remaining advantage on these tasks is speed: it gets the same score 4–6× faster. No agent ever mentioned the tokens line, so whether it or the longer clock kept C1T working is open. The stage was closed early, and the user moved to quality-bound tasks calibrated against C1T, to find where coordination improves quality. See [Round 15 stage C](#round-15-stage-c-equal-spend-on-volume-closed-early-1546m-tokens-code-10e6f54).
+
 **Status (2026-10-04, after round 15 stage B, volume).** On ospec_green_blind, a many-file project, at a shared 24M cap (k=2), both 12-agent arms beat one agent with the clock by wide margins. B (12 equals with a post-only board) scored 0.734 and ST (B + staggered entry) scored 0.869, against C1's 0.447, at 2.2× its tokens. ST is pronounced better than B (+0.135), but the run ranges overlap. Both predictions failed: B was expected to lose to C1. The swarm wins on coverage. C1 stops on its own 30-minute clock with about half the spec untouched, while twelve agents cover far more of it in 7 minutes before the cap. The confound left open is that C1 had the same cap but spent half of it: it is bound by time, not tokens. Over the three tasks, ST averages 0.627, B 0.448 and C1 0.378. See [Round 15](#round-15-stage-b-twelve-agents-against-one-on-volume-1178m-tokens-code-f4c5f63).
 
 **Status (2026-10-04, after round 15 stage A, the first 12-agent screen without an oracle).** At a shared 12M cap on planning and opt_shop2 (k=2), two 12-agent arms beat one agent with the clock at 23–27× its tokens: required branches per agent (+0.19) and staggered entry (+0.16). Both verdicts lean on shop2, whose single runs span 0.00–0.76, and on C1 planning runs below its earlier means. Against the base 12-agent swarm, staggered entry is pronounced better (+0.20) and the task list pronounced worse (−0.10, at the threshold). The transcripts support a mechanism for staggered entry on planning only (one early agent claims the deliverable, later ones validate) and show no task-list effect at all (it was barely used). A screen at k=2 orders nothing for certain. Stage B (volume) is next, with B, C1 and ST. See [Round 15](#round-15-stage-a-twelve-agents-against-one-1885m-tokens-code-f8a6693).
@@ -15,6 +17,12 @@ This is the curated record of every experiment run with murmur so far: the quest
 **Status before the oracle problem (2026-10-02, after round 10, with an oracle): the evidence answers the question negatively for the tasks tested.** No swarm configuration has met the success criterion. Round 6 confirmed that the strongest results come from a *single* agent that keeps working: a one-line clock explains the best single agent, and once isolated agents get the same clock, the swarm's only win disappears. What remains open is whether coordination helps on tasks where a persistent single agent still has headroom. Rounds 7 and 8 rebuilt the panel around the clock agent: four planning and optimisation tasks where it stops on a green check short of the quality ceiling (panel D), and two medium OpenSpec projects where it runs out of tokens at about 0.45 (panel V). Rounds 9 and 10 put swarms against it on that panel: they lose on V, and on D they win only on one task, packing2, where the single agent sometimes stops early on a low score. A plain single agent that does not stop early matches them.
 
 ## TL;DR
+
+**Without an oracle, equal spend on volume (round 15 stage C, ospec_green and ospec_brown, 24M, 60-minute clock):**
+- One agent that can spend the whole cap (C1T, 0.952) ties 12 agents (STT, 0.959). Both sit at the ceiling, with C1T at k=1. Stage B's +0.29 to +0.42 for the swarm came from C1 stopping at 11M.
+- The swarm's edge on these tasks is wall time: about 8 minutes against 31–43.
+- Nobody mentioned the new tokens-left line. C1T simply never stopped: it finished all tasks at 37 minutes and then audited until the cap.
+- The volume panel is saturated, and the next tasks are quality-bound, calibrated so that C1T lands near 0.4.
 
 **Without an oracle, 12 agents on volume (round 15 stage B, ospec_green_blind, 24M shared cap, k=2):**
 - B (12 equals, post-only board) 0.734 and ST (B + staggered entry) 0.869 both beat C1 (one agent with the clock, 0.447), at 2.2× its tokens. ST is pronounced better than B by the rule (+0.135), but B's best run beats ST's worst.
@@ -475,6 +483,23 @@ Stage A's promotion rule sent B, C1 and ST to ospec_green_blind, a many-file Ope
 - **Staggered entry gives a cleaner start.** In one B run seven agents claimed the core within 15 s. In the best ST run one agent claimed it at 10 s and the next entrant took the extensions. ST also had half the posts before 60 s and fewer duplicate whole-file writes. The overall post share is similar, and at k=2 the score gap is inside the run-to-run spread.
 - **Where the swarm's tokens go:** cache reads are 94–95% of them, and each post is a full-context turn (20–28% of tokens). When the cap hit, the agents' clock still showed about 23 minutes left: nothing tells them about the shared token budget.
 
+### Round 15, stage C: equal spend on volume, closed early (154.6M tokens, code `10e6f54`)
+
+Stage B left a confound: C1 stopped on its 30-minute clock with 13M unspent. Stage C gave every run a 60-minute clock and a new default-off lever, `clockTokens`, which shows the tokens left in the shared budget on every tool result. Arms: C1T (one agent with the clock and the tokens line) and STT (ST plus the tokens line). Tasks: ospec_green_blind and ospec_brown_blind, 24M, k=2. The model quota ran out during C1T's second green run. The user then judged the tasks saturated and closed the stage, so C1T has k=1 (a declared deviation).
+
+| arm | green | brown | mean | minutes |
+|---|---:|---:|---:|---:|
+| C1T, one agent, clock + tokens left | 0.985 (k=1) | 0.919 (k=1) | 0.952 | 43, 31 |
+| STT, 12 agents, staggered entry + tokens left | 0.955 | 0.963 | 0.959 | ~8 |
+
+**Rule as applied** (C1T at k=1): STT − C1T is −0.030 on green and +0.044 on brown, mean +0.007, so **not decided**. Every valid run ended on the 24M cap.
+
+**From the transcripts** ([report](../experiments/reports/2026-10-04-round15c-traces-analysis.md), model output, key claims checked by hand):
+- No agent mentioned the tokens line in any message or post.
+- C1T worked at about C1's pace (8.5M at 25 minutes) but never called `done`. It ticked all 167 tasks at 37 minutes and then audited and patched until the cap. Whether the tokens line or the 60-minute clock did that cannot be separated.
+- Both STT green runs had every module wired in, where stage B's ST runs had left 4 and 1 unwired.
+- The strong runs lose their last points to interface and command-line mismatches, not to missing capabilities.
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -496,11 +521,12 @@ Stage A's promotion rule sent B, C1 and ST to ospec_green_blind, a many-file Ope
 | Parallel attempts escape a bimodal single agent | 9, 10 (D) | **Supported only with a predictive selection signal**, and only against a single agent that stops early: on packing2 n=2 reached the good mode 3 of 3, but the plain clock agent in round 10's S3 campaigns matched n=3 (0.719 vs 0.679). Without a size-aware number, selection picks a solver that does not scale |
 | A text norm makes the single agent use a printed quality score | 10A | **Refuted**: C1s still ends on the first green at a low score (5 of 9 packing2 runs within 3 minutes); C1s − C1 = −0.20 on the signal tasks |
 | Larger swarms do better at the same tokens | 10 (size) | **Not supported at 3M** (descriptive, each n against its own C1s, k=3): n=2 0.69 > n=3 0.58 > n=10 0.50 on the signal tasks; rule verdicts not decided / adds / not decided; n=10 hits the cap after one draft per agent |
-| A 12-agent swarm beats one agent with the clock at equal caps, **without an oracle** | 15 A, 15 B | **Supported on volume, mixed on difficulty, screens only.** On ospec (B) both B (+0.29) and ST (+0.42) win at 2.2× tokens and a quarter of the wall time, by covering more of the spec; C1 is time-bound there and spends half the cap. On planning and shop2 (A) the base swarm is not decided (−0.04); required branches (+0.19) and staggered entry (+0.16) win at 23–27× the tokens, k=2 |
+| A 12-agent swarm beats one agent with the clock at equal caps, **without an oracle** | 15 A, 15 B, 15 C | **On volume, only at unequal spend:** at equal spend (15 C) the swarm ties one agent at the ceiling (+0.007, C1T k=1) and is 4–6× faster. **Earlier, at unequal spend:** on ospec (B) both B (+0.29) and ST (+0.42) win at 2.2× tokens and a quarter of the wall time, by covering more of the spec; C1 is time-bound there and spends half the cap. On planning and shop2 (A) the base swarm is not decided (−0.04); required branches (+0.19) and staggered entry (+0.16) win at 23–27× the tokens, k=2 |
 | Staggered entry lets a structure form that later agents join | 15 A, 15 B | **Supported as a mechanism on planning and ospec** (planning: 1.5 full writers against 5.0; ospec: 1–2 core claimants against 7–8, half the early posts); pronounced better than B on both stages by the rule (+0.20, +0.135), but each verdict sits inside k=2 noise (A's is carried by shop2) |
 | A shared task list cuts duplicated work | 15 A | **Not supported as used**: agents barely used it (1–3 items per run). Pronounced worse by the rule, but its zeros on shop2 come from a failure B shares |
 | A branch per agent with merges protects shared work | 15 A | **Mixed**: required branches beat C1 and tie B on planning; optional branches loses (a broken planner merged at the cap). One mechanism bug fixed |
 | Roles chosen from a menu with sub-prompts, at n=12 | 15 A | **Not pronounced** (+0.09 against B); agents pick before reading, mostly builder |
+| Showing the tokens left keeps agents spending the budget | 15 C | **Not separable**: C1T spent the whole 24M where C1 stopped at 11M, but its clock was also 60 minutes instead of 30, and no agent ever mentioned the tokens line |
 | A teammate keeps agents working the way the clock does, **without an oracle** | 14 (stage D) | **Not supported**: two agents without a clock stop at 1–2 minutes, like one |
 | A visible clock keeps a single agent working, **without an oracle** | 11 (R3, R4) | **Supported**: +0.255 with norms and +0.335 without them, 6 of 6 tasks each, at 4–10× the tokens on the contract tasks; agents never mention it |
 | Generic engineering norms help, **without an oracle** | 11 (R2) | **Not decided** (+0.020); a few more ad-hoc probes, same score |
@@ -521,6 +547,7 @@ Stage A's promotion rule sent B, C1 and ST to ospec_green_blind, a many-file Ope
 
 - **A visible oracle in every task (the main threat; it invalidates rounds 1–10 as evidence for real work).** All 31 swarmtest tasks declare `acceptance_command: npm run test`. The default briefing told agents to call done when it passes, and the main profiles' norms described hidden tests. The strongest findings (the clock, norms, persistence after green, selection by a printed score) may be artefacts of that oracle. They are hypotheses until re-tested oracle-free.
 - **Round 15 stage A** is a screen: 2 tasks at k=2, and shop2 swings 0.00–0.76 within one arm. Both "beat C1" verdicts lean on shop2 and on C1 planning runs below its rounds 13–14 means (0.275 against 0.42–0.47). ST's pronounced verdict rests on shop2. The first launch ran C1 in place of B on planning because of a wrong order check. That C1 run is valid and counted, one killed campaign is excluded, and all of it is logged in `plan.md`. Merges in BR could let conflict markers into the shared folder; this happened once, for about 76 s, in the best BR run. Eight wakes told agents to call an `inbox` tool their profile lacks.
+- **Round 15 stage C** was closed early: C1T has k=1 per task, and its second green run was cut by the quota and excluded. Two things changed against stage B at once (the 60-minute clock and the tokens line), so their effects cannot be separated. Both tasks are at the ceiling for both arms.
 - **Round 15 stage B** is one task at k=2. B's two runs differ by 0.19, so ST's +0.135 over B is inside the noise, although the rule calls it pronounced. "Equal cap" is not equal spend or equal time. C1 ended on its own 30-minute clock at about 11M, while the swarms spent 24M in about 7 minutes. A single agent given 24M and enough time to spend it is the missing control. The new default wake was not exercised in any stage B run, because no agent went idle before the cap; only its scripted smoke has passed.
 - **Round 14** stopped at the model quota: five campaigns are invalid (two C1 runs cut mid-run, three with no model call). They are listed in `plan.md` and excluded.
 - **Round 11 phase 1:**
@@ -578,7 +605,8 @@ For each experiment: whether its question or theory was written down before meas
 | Round 13 (phase-2 calibration) | yes, committed before launch (`bdeb8a6`, time fixed in `7f2c84d`) | `criba13-lanes.mjs`, `criba13/` | `rows/runs.json` (seeds 20261057, 20261059), `round13-traces.md` | yes, in `plan.md` | yes |
 | Round 14 (phase 2) | yes, committed before launch (`5da5d6d`, `429cbb3`) | `criba14-lanes.mjs`, `criba14/` | `rows/runs.json` (seeds 20261066, 20261060; 5 invalid campaigns listed in `plan.md`) | descriptive, in `plan.md` | stopped by the model quota after stage D; rules not applied |
 | Round 15 stage A (12 agents) | yes, committed before launch (`a277ff4`, `89fe4fe`; measurement script `fd1e239`; order fix and deviation `95bce30`) | `criba15-lanes.mjs`, `criba15/` | `rows/runs.json` (seed 20261070), `round15-traces.md` (per-run table regenerated in stage B's commit; the first version was empty) | yes, `reports/2026-10-04-round15-traces-analysis.md` | yes; stage B with B, C1 and ST |
-| Round 15 stage B (12 agents, volume) | yes, committed before launch (`f4c5f63`) | `criba15-lanes.mjs` (stage V), `criba15/V-*.json` | `rows/runs.json` (seed 20261072), `round15-traces.md` | yes, `reports/2026-10-04-round15b-traces-analysis.md` | yes; next step waits for the user |
+| Round 15 stage B (12 agents, volume) | yes, committed before launch (`f4c5f63`) | `criba15-lanes.mjs` (stage V), `criba15/V-*.json` | `rows/runs.json` (seed 20261072), `round15-traces.md` | yes, `reports/2026-10-04-round15b-traces-analysis.md` | yes |
+| Round 15 stage C (equal spend) | yes, committed before launch (`10e6f54`); closed early by the user's decision, logged in `plan.md` | `criba15-lanes.mjs` (stage C), `criba15/C-*.json` | `rows/runs.json` (seed 20261074; 1 invalid campaign), `round15-traces.md` | yes, `reports/2026-10-04-round15c-traces-analysis.md` | yes: not decided at the ceiling; quality-bound tasks next |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -604,8 +632,8 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the round 10 transcript analyses (panel D with the signal and swarm size, the bare board B0, and the threaded V swarm TI);
   - the oracle audit and the build of the blind panel;
   - the round 11 phase 1 transcript analysis and the tool-usage audit;
-  - the lever recount for 12-agent swarms and the round 15 transcript analyses (stages A and B).
-- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (660 runs in 342 campaigns, including 5 invalid ones from round 14's quota stop): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+  - the lever recount for 12-agent swarms and the round 15 transcript analyses (stages A, B and C).
+- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (667 runs in 349 campaigns, including 6 invalid ones: 5 from round 14's quota stop and 1 from round 15 stage C's): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
 - `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12,13,15}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.

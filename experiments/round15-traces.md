@@ -776,3 +776,134 @@ Why each agent stopped:
 - 4b350f75/0001 murmur[n12-stagger]/n=12 swift: last text: 
 - 4b350f75/0001 murmur[n12-stagger]/n=12 tern: last text: 
 - 4b350f75/0001 murmur[n12-stagger]/n=12 wren: last text: 
+
+# Stage C
+
+Generated 2026-10-04 12:15 from the 6 valid campaigns of stage C (seed 20261074, listed in experiments/plan.md; the quota-cut campaign `20261004T084418Z-f23dfd8d` is excluded).
+
+## Per task x arm (scripts/n12.mjs)
+
+| task | arm | runs | capped | mean score | mean tokens | mean minutes | mean agentsDone | mean calls | mean coordination | mean maxWriters | mean meanWriters | mean refused | mean adds | mean takes | mean taskDone | mean drops | mean branches | mean merges | mean conflicts | mean updates | mean unmergedAgents | mean unmergedFiles | mean lastEnter | scores |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| ospec_brown_blind | n12-stagger-tokens n=12 | 2 | 2 | 0.96 | 24.03M | 7.67 | 1.5 | 791.5 | 0.15 | 10.5 | 1.44 | 0.5 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.18 | 0.94 0.99 |
+| ospec_brown_blind | solo-clock-tokens n=1 | 1 | 1 | 0.92 | 24.15M | 31.24 | 0.0 | 194.0 | 0.00 | 1.0 | 1.00 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – | 0.92 |
+| ospec_green_blind | n12-stagger-tokens n=12 | 2 | 2 | 0.95 | 24.02M | 7.74 | 0.5 | 749.0 | 0.20 | 8.0 | 1.55 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.24 | 0.98 0.93 |
+| ospec_green_blind | solo-clock-tokens n=1 | 1 | 1 | 0.98 | 24.12M | 43.43 | 0.0 | 214.0 | 0.00 | 1.0 | 1.00 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – | 0.98 |
+
+## Per run (scripts/n12.mjs --runs)
+
+| campaign | run | task | arm | reason | roles | score | tokens | minutes | agentsDone | calls | coordination | maxWriters | meanWriters | refused | adds | takes | taskDone | drops | branches | merges | conflicts | updates | unmergedAgents | unmergedFiles | lastEnter |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 20261004T072759Z-b3cf2574 | run-0001 | ospec_green_blind | n12-stagger-tokens n=12 | budget |  | 0.98 | 24.04M | 7.80 | 1.0 | 743.0 | 0.20 | 9.0 | 1.59 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.26 |
+| 20261004T073624Z-92e01575 | run-0001 | ospec_brown_blind | n12-stagger-tokens n=12 | budget |  | 0.94 | 24.06M | 7.38 | 0.0 | 772.0 | 0.14 | 12.0 | 1.58 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.26 |
+| 20261004T074445Z-4650e8ee | run-0001 | ospec_green_blind | n12-stagger-tokens n=12 | budget |  | 0.93 | 24.00M | 7.68 | 0.0 | 755.0 | 0.21 | 7.0 | 1.50 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.21 |
+| 20261004T075304Z-f4a6dd58 | run-0001 | ospec_brown_blind | n12-stagger-tokens n=12 | budget |  | 0.99 | 24.00M | 7.95 | 3.0 | 811.0 | 0.15 | 9.0 | 1.30 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.09 |
+| 20261004T072757Z-102de6ff | run-0001 | ospec_green_blind | solo-clock-tokens n=1 | budget |  | 0.98 | 24.12M | 43.43 | 0.0 | 214.0 | 0.00 | 1.0 | 1.00 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+| 20261004T081156Z-cfaad405 | run-0001 | ospec_brown_blind | solo-clock-tokens n=1 | budget |  | 0.92 | 24.15M | 31.24 | 0.0 | 194.0 | 0.00 | 1.0 | 1.00 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | – |
+
+## Per agent (scripts/traces.mjs)
+
+| run | task | arm | score | tokens | min | end | agent | calls | board % | checks | green at | after green | last check | overwrites | nudges |
+|---|---|---|---:|---:|---:|---|---|---:|---:|---:|---:|---:|---|---:|---:|
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | crane | 45 | 22 | 0 | - | - | none | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | dunlin | 75 | 16 | 4 | 37 | 38 | green | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | finch | 64 | 28 | 1 | 39 | 25 | green | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | heron | 60 | 22 | 2 | 32 | 28 | green | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | kite | 55 | 22 | 1 | 46 | 9 | green | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | lark | 72 | 22 | 2 | 47 | 25 | green | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | linnet | 79 | 18 | 0 | - | - | none | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | plover | 42 | 14 | 2 | 28 | 14 | green | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | robin | 57 | 18 | 2 | 38 | 19 | green | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | swift | 73 | 25 | 2 | 46 | 27 | green | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | tern | 61 | 11 | 1 | 53 | 8 | green | 0 | 0 |
+| b3cf2574/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.985 | 24.04M | 7.8 | budget | wren | 61 | 23 | 2 | 36 | 25 | green | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | crane | 50 | 10 | 0 | - | - | none | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | dunlin | 43 | 16 | 0 | - | - | none | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | finch | 64 | 17 | 1 | 54 | 10 | green | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | heron | 55 | 18 | 0 | - | - | none | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | kite | 69 | 12 | 0 | - | - | none | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | lark | 56 | 11 | 1 | 42 | 14 | green | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | linnet | 51 | 10 | 0 | - | - | none | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | plover | 59 | 12 | 0 | - | - | none | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | robin | 75 | 11 | 0 | - | - | none | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | swift | 82 | 17 | 1 | 62 | 20 | green | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | tern | 85 | 16 | 1 | 76 | 9 | green | 0 | 0 |
+| 92e01575/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.941 | 24.06M | 7.4 | budget | wren | 85 | 15 | 1 | 39 | 46 | green | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | crane | 79 | 32 | 3 | 14 | 65 | green | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | dunlin | 91 | 27 | 0 | - | - | none | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | finch | 52 | 25 | 0 | - | - | none | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | heron | 57 | 12 | 2 | 42 | 15 | green | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | kite | 62 | 18 | 1 | 61 | 1 | green | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | lark | 47 | 23 | 1 | 33 | 14 | green | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | linnet | 103 | 15 | 2 | 83 | 20 | green | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | plover | 55 | 29 | 3 | 38 | 17 | green | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | robin | 54 | 19 | 2 | 46 | 8 | red | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | swift | 54 | 22 | 1 | 45 | 9 | green | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | tern | 44 | 16 | 1 | 32 | 12 | green | 0 | 0 |
+| 4650e8ee/0001 | ospec_green_blind | murmur[n12-stagger-tokens]/n=12 | 0.925 | 24.00M | 7.7 | budget | wren | 61 | 11 | 3 | 33 | 28 | green | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | crane | 53 | 13 | 0 | - | - | none | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | dunlin | 68 | 13 | 1 | 66 | 2 | green | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | finch | 74 | 12 | 1 | 73 | 1 | green | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | heron | 74 | 9 | 0 | - | - | none | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | kite | 74 | 19 | 1 | 69 | 5 | green | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | lark | 84 | 20 | 0 | - | - | none | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | linnet | 60 | 22 | 0 | - | - | none | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | plover | 69 | 14 | 0 | - | - | none | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | robin | 54 | 20 | 0 | - | - | none | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | swift | 60 | 17 | 0 | - | - | none | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | tern | 66 | 14 | 0 | - | - | none | 0 | 0 |
+| f4a6dd58/0001 | ospec_brown_blind | murmur[n12-stagger-tokens]/n=12 | 0.986 | 24.00M | 7.9 | budget | wren | 75 | 12 | 0 | - | - | none | 0 | 0 |
+| 102de6ff/0001 | ospec_green_blind | murmur[solo-clock-tokens]/n=1 | 0.985 | 24.12M | 43.4 | budget | wren | 214 | 0 | 0 | - | - | none | 1 | 0 |
+| cfaad405/0001 | ospec_brown_blind | murmur[solo-clock-tokens]/n=1 | 0.919 | 24.15M | 31.2 | budget | wren | 194 | 0 | 3 | 88 | 106 | red | 0 | 0 |
+
+Why each agent stopped:
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 crane: last text: 
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 dunlin: last text: 
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 finch: last text: 
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 heron: last text: 
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 kite: done: Completed and integrated stock holds/write-offs (tasks 25.1–25.3, 26.1–26.3) and pick-list/shipment behavior (tasks 34.1–34.4, 35.1–35.3). Smoke-tested holds/write-offs including persistence, pick/shi
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 lark: last text: 
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 linnet: last text: 
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 plover: last text: 
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 robin: last text: 
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 swift: last text: 
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 tern: last text: 
+- b3cf2574/0001 murmur[n12-stagger-tokens]/n=12 wren: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 crane: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 dunlin: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 finch: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 heron: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 kite: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 lark: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 linnet: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 plover: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 robin: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 swift: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 tern: last text: 
+- 92e01575/0001 murmur[n12-stagger-tokens]/n=12 wren: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 crane: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 dunlin: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 finch: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 heron: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 kite: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 lark: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 linnet: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 plover: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 robin: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 swift: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 tern: last text: 
+- 4650e8ee/0001 murmur[n12-stagger-tokens]/n=12 wren: last text: 
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 crane: last text: 
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 dunlin: last text: 
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 finch: last text: 
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 heron: last text: 
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 kite: last text: 
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 lark: last text: 
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 linnet: done: Completed assigned checklist and analytics-report requirements, updated focused tests, confirmed their test modules pass, and confirmed strict OpenSpec validation passes.
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 plover: last text: 
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 robin: done: Implemented and tested my assigned sections: team-capacity (20.1–20.5) and burnup/forecast (29.1–29.4), with new ext modules and targeted tests. Strict OpenSpec validation passes. Other agents are sti
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 swift: done: Completed sections 15–17 (time entries, reports, timesheets), added focused API/CLI tests, ticked their task items, and verified the focused suite plus strict OpenSpec validation. Remaining integratio
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 tern: last text: 
+- f4a6dd58/0001 murmur[n12-stagger-tokens]/n=12 wren: last text: 
+- 102de6ff/0001 murmur[solo-clock-tokens]/n=1 wren: last text: 
+- cfaad405/0001 murmur[solo-clock-tokens]/n=1 wren: last text: 

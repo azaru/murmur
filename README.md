@@ -6,6 +6,8 @@
 
 ## Findings so far (2026-10-04)
 
+**Without an oracle, equal spend (round 15 stage C, two OpenSpec tasks, a 24M cap and a 60-minute clock for everyone).** Once one agent has the time to spend the whole cap and sees the tokens left, it ties twelve agents at the ceiling: 0.95 against 0.96, with the single agent at k=1. The swarm's only clear edge there is speed, about 8 minutes against 31–43. Stage B's swarm win below came mostly from the single agent stopping at half the budget. The next tasks are quality-bound, to find where coordination improves quality. Details in [docs/research.md](docs/research.md).
+
 **Without an oracle, 12 agents on a large project (round 15 stage B, one OpenSpec task, k=2, a 24M cap shared by the swarm and by the single agent).** Twelve agents beat one agent with the clock by a wide margin: 0.73 with a plain board and 0.87 with staggered entry, against 0.45, at 2.2× its tokens. They win by covering more of the spec in 7 minutes than one agent covers in 25. The single agent stopped on its own clock with half the cap unspent, so a single agent given the same tokens and enough time to spend them has not been tested yet. Their losses were modules nobody wrote, or wrote but never wired in. Details in [docs/research.md](docs/research.md).
 
 **Without an oracle, 12 agents (round 15 stage A, a screen: 2 tasks, k=2, a 12M cap shared by the swarm and by the single agent).** Two 12-agent configurations beat one agent with the clock, at 23–27× its tokens: a git branch per agent with merges (0.53 against 0.34) and staggered entry (0.51). A plain 12-agent swarm with a board does not (0.31). A shared task list went almost unused. These verdicts rest mostly on one noisy task. Details in [docs/research.md](docs/research.md).

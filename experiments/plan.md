@@ -1454,6 +1454,35 @@ Score [tokens, minutes, end] per run, k=2:
 ```
 At the stop, 6 of 8 runs were valid. C1T's second runs on green and brown are left, and neither has a lock (the driver removed green's, and brown's was never taken). The lane resumes with `nohup node criba15-lanes.mjs 1 C --arms C1T &` once the quota is back.
 
+### Round 15 stage C closed early, and its result (2026-10-04 12:11; the user decided in reply to the proposal made after the quota stop)
+
+**Deviation.** After the quota stop the user judged the volume tasks saturated, and the stage was closed with C1T at k=1 per task, without its second runs (about 48M not spent). The rule needs k=2 for both arms, so it is applied below with that gap stated. The lane was not relaunched, and `STOP` stays.
+
+6 valid campaigns (seed 20261074: `20261004T072757Z-102de6ff`, `20261004T072759Z-b3cf2574`, `20261004T073624Z-92e01575`, `20261004T074445Z-4650e8ee`, `20261004T075304Z-f4a6dd58`, `20261004T081156Z-cfaad405`), plus 1 invalid (`20261004T084418Z-f23dfd8d`, cut by the quota). **154.6M tokens** in all, 144.4M of them in valid runs. Every valid run ended on the 24M cap.
+
+| arm | ospec_green_blind | ospec_brown_blind | two-task mean |
+|---|---|---|---:|
+| C1T (one agent, clock + tokens left) | 0.985 [24.1M, 43.4 min] (k=1) | 0.919 [24.2M, 31.2 min] (k=1) | 0.952 |
+| STT (ST + tokens left, n=12) | 0.955 [24.0M, 7.7 min] (0.985, 0.925) | 0.963 [24.0M, 7.7 min] (0.941, 0.986) | 0.959 |
+
+**Rule, applied with C1T at k=1:** STT − C1T = −0.030 on green and +0.044 on brown, mean +0.007. **Not decided.** The tasks are at the ceiling for both arms.
+
+**Descriptive:**
+- C1T against stage B's C1 on green (other hour and seed): 0.985 at 24.1M and 43 minutes, against 0.447 at 10.8M and 26 minutes. The invalid run was at 0.935 with 10.2M when the quota cut it at 26 minutes. It points the same way and is not counted.
+- STT against stage B's ST on green: 0.955 against 0.869.
+- Both predictions about C1T failed. It spent the whole cap and gained +0.54 over C1, not less than +0.15. STT did not beat C1T.
+- The tokens line and the longer clock changed together, so stage C cannot tell which of them made C1T keep working.
+- Wall time: STT reaches the same score about 4–6× faster.
+
+**Findings from the transcripts** (subagent report `reports/2026-10-04-round15c-traces-analysis.md`, model output; ✓ marks claims I checked by hand):
+- **No agent ever mentioned the tokens line.**
+  - C1T's assistant text and thinking never mention tokens, budget, minutes left or the timeout ✓. It never called `done` ✓.
+  - No STT post mentions them either ✓, and STT agents did not visibly change behaviour near the cap. In the last 90 s they still made 12–59 bash calls and 12–31 edits per run.
+- **C1T kept a pace like C1's but did not stop.** At 25 minutes it had spent about 8.5M ✓, against C1's 11.0M at its `done` at 24.8 minutes. It had ticked about 120 of 167 tasks against C1's 72, and it ticked all 167 at 37 minutes. After that it audited and patched until the cap at 43 minutes. Whether the 60-minute clock or the tokens line kept it going cannot be told from these runs: no run changes only one of them.
+- **Wiring:** both STT green runs had every module wired in. One still never wrote two capabilities (events, access-control). Stage B's ST runs had left 4 modules and 1 module unwired. This is 2 runs against 2.
+- **Where the strong runs lose their last points:** mostly interface and command-line mismatches (argparse usage errors in three `...-command-line` checks, an unexpected keyword argument), not missing capabilities. On brown, one timesheet check failed in all 3 runs ("expected INVALID_WEEK, got INVALID_DATE"); it may be a spec ambiguity and should be read before brown is reused.
+- **Friction:** no `wake` events, 3 write refusals, no bash timeouts.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -1515,3 +1544,4 @@ At the stop, 6 of 8 runs were valid. C1T's second runs on green and brown are le
 | 2026-10-03 | smoke new levers (5 runs, deleted) | stagger by turns n=3, task list n=2, branches required n=2, branches optional n=2, default n=3 | scripted × 1, trio × 2 | 385k | all pass; see the 21:50 note | levers OK |
 | 2026-10-03/04 | round 15 stage A (28 valid campaigns `20261003T200851Z-dd25b816` → `20261003T225411Z-391aeba3`, seed 20261070, code `f8a6693`; 1 invalid, `20261003T202310Z-6f2a1318`) | C1 solo-clock n=1; B s2-board-clock, TL n12-tasks, BR n12-branches, BO n12-branches-optional, ST n12-stagger, RO n12-roles (n=12) | planning, shop2 × 2, 12M cap | 188.5M | two-task means: BR 0.534, ST 0.506, RO 0.398, C1 0.343, B 0.305, TL 0.205, BO 0.122 | L: ST pronounced better, TL pronounced worse (at threshold); S: BR and ST beat C1 at 23–27× tokens, BO loses; stage B gets B, C1, ST |
 | 2026-10-04 | round 15 stage B (6 valid campaigns `20261004T052617Z-702c5333` → `20261004T064229Z-4b350f75`, seed 20261072, code `f4c5f63`) | C1 solo-clock n=1; B s2-board-clock, ST n12-stagger (n=12) | ospec_green_blind × 2, 24M cap, 1920 s | 117.8M | ST 0.869, B 0.734, C1 0.447; swarms all capped at ~7 min, C1 done at ~11M | ST pronounced better than B (+0.135); B and ST beat C1 (+0.29, +0.42) at 2.2× tokens |
+| 2026-10-04 | round 15 stage C, closed early (6 valid campaigns `20261004T072757Z-102de6ff` → `20261004T081156Z-cfaad405`, seed 20261074, code `10e6f54`; 1 invalid, `20261004T084418Z-f23dfd8d`, quota) | C1T solo-clock-tokens n=1 (k=1); STT n12-stagger-tokens n=12 (k=2) | ospec_green, ospec_brown, 24M, 60-minute clock | 154.6M | STT 0.959, C1T 0.952; all valid runs capped | not decided (C1T k=1); volume tasks saturated; the user moves to quality-bound tasks calibrated against C1T |
