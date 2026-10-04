@@ -1595,6 +1595,33 @@ The new checks also found a real bug in the original task's `solution/`: reserva
 - Stage D: 8 runs × up to 12M. About 40M, upper 96M.
 - **Total ~128M**, upper ~240M, about two quota windows.
 
+### Round 16 stage A result and rules applied (2026-10-04 19:40; lane 17:44–19:23, code `b438df5`)
+
+12 valid campaigns (seed 20261080, `20261004T154422Z-5d32faf7` → `20261004T171634Z-37116428`), 12 runs, **72.7M tokens** (estimate ~88M). Every campaign exited 0, with no quota stop. Load was 4–5.
+
+Mean score [mean tokens] (runs, end), k=2:
+
+| arm | planning | shop2 | two-task mean | tokens per run |
+|---|---|---|---:|---:|
+| C1T (one agent, clock + tokens left) | 0.492 [0.93M] (0.334, 0.650; done, done) | 0.556 [0.07M] (0.565, 0.547; done, done) | 0.524 | 0.50M |
+| STT (12 agents, staggered entry, post board, tokens left) | 0.455 [11.74M] (0.479 cap, 0.430 done) | 0.636 [5.13M] (0.639, 0.633; done) | 0.545 | 8.4M |
+| STH (STT with a threaded board) | 0.476 [8.78M] (0.354 done, 0.598 cap) | 0.464 [9.71M] (0.451, 0.477; done) | 0.470 | 9.2M |
+
+**Rules, applied as written:**
+- **STT against C1T: not decided.** −0.038 on planning, +0.080 on shop2, mean +0.021, at 17× C1T's tokens.
+- **STH against C1T: loses.** −0.016 on planning, −0.092 on shop2, mean −0.054 (below on both tasks), at 18× C1T's tokens.
+- **STH against STT: no pronounced difference.** +0.021 on planning, −0.172 on shop2, mean −0.076.
+
+**Predictions:**
+- C1T ended with `done` far below the cap, as predicted: 0.06–1.23M of 12M.
+- STT was not above C1T on planning, so that prediction failed: C1T's 0.650 is the best planning run of the stage.
+- STT against C1T is not decided overall, and STH is not pronounced against STT, both as predicted.
+
+**Descriptive:**
+- C1T against round 15 stage A's C1 (another hour and seed): planning 0.492 against 0.275, shop2 0.556 against 0.412, with similar spend (0.5M against 0.3M per run). The tokens line did not make C1T spend more, so the gap is more likely noise in C1's runs than an effect of the line.
+- On these difficulty tasks a 12-agent swarm does not beat one agent left to its own spend, with or without threads.
+- The transcript analysis waits until the DeepSWE calibration (stage D) has finished, because bulk reads stay off while runs are live.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -1657,3 +1684,4 @@ The new checks also found a real bug in the original task's `solution/`: reserva
 | 2026-10-03/04 | round 15 stage A (28 valid campaigns `20261003T200851Z-dd25b816` → `20261003T225411Z-391aeba3`, seed 20261070, code `f8a6693`; 1 invalid, `20261003T202310Z-6f2a1318`) | C1 solo-clock n=1; B s2-board-clock, TL n12-tasks, BR n12-branches, BO n12-branches-optional, ST n12-stagger, RO n12-roles (n=12) | planning, shop2 × 2, 12M cap | 188.5M | two-task means: BR 0.534, ST 0.506, RO 0.398, C1 0.343, B 0.305, TL 0.205, BO 0.122 | L: ST pronounced better, TL pronounced worse (at threshold); S: BR and ST beat C1 at 23–27× tokens, BO loses; stage B gets B, C1, ST |
 | 2026-10-04 | round 15 stage B (6 valid campaigns `20261004T052617Z-702c5333` → `20261004T064229Z-4b350f75`, seed 20261072, code `f4c5f63`) | C1 solo-clock n=1; B s2-board-clock, ST n12-stagger (n=12) | ospec_green_blind × 2, 24M cap, 1920 s | 117.8M | ST 0.869, B 0.734, C1 0.447; swarms all capped at ~7 min, C1 done at ~11M | ST pronounced better than B (+0.135); B and ST beat C1 (+0.29, +0.42) at 2.2× tokens |
 | 2026-10-04 | round 15 stage C, closed early (6 valid campaigns `20261004T072757Z-102de6ff` → `20261004T081156Z-cfaad405`, seed 20261074, code `10e6f54`; 1 invalid, `20261004T084418Z-f23dfd8d`, quota) | C1T solo-clock-tokens n=1 (k=1); STT n12-stagger-tokens n=12 (k=2) | ospec_green, ospec_brown, 24M, 60-minute clock | 154.6M | STT 0.959, C1T 0.952; all valid runs capped | not decided (C1T k=1); volume tasks saturated; the user moves to quality-bound tasks calibrated against C1T |
+| 2026-10-04 | round 16 stage A (12 valid campaigns `20261004T154422Z-5d32faf7` → `20261004T171634Z-37116428`, seed 20261080, code `b438df5`) | C1T solo-clock-tokens n=1; STT n12-stagger-tokens, STH n12-stagger-threads-tokens (n=12) | planning, shop2 × 2, 12M | 72.7M | two-task means: STT 0.545, C1T 0.524, STH 0.470; C1T spends 0.5M per run | STT vs C1T not decided; STH loses to C1T; threads not pronounced vs posts |
