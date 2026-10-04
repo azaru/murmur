@@ -1676,7 +1676,7 @@ C1T (one agent with the clock and the tokens left), `isolated` arm: the four tas
 - CU against C0: no difference.
 
 **Checks:**
-- The zeros are real, not a grading fault. Each zero is a solver whose cost is worse than the contract's naive baseline on all four hidden instances, which scores 0 by the grader's formula. Two C1T solutions were regraded on a quiet machine with the same result (C1T r0 costs 23603/48965/79686/98401 against naive 21108/41974/61528/74963).
+- The zeros are real, not a grading fault. Each zero is a solver whose cost is worse than the grader's naive baseline on all four hidden instances (the baseline is in the hidden grader; the blind PROBLEM.md does not describe one), which scores 0 by the grader's formula. Two C1T solutions were regraded on a quiet machine with the same result (C1T r0 costs 23603/48965/79686/98401 against naive 21108/41974/61528/74963).
 - C1T scored 0.565 and 0.547 in stage A, three hours earlier, with the same arm, cap and behaviour (~100 s, 60–70k tokens). One agent's shop2 score is bimodal: the quick heuristic it writes either beats the naive baseline or does not.
 
 **Descriptive (from the six transcripts):**
