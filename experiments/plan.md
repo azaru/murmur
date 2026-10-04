@@ -1291,6 +1291,38 @@ Mean score [mean tokens, minutes] (runs), k=2:
 - With 12 agents on one machine, two-instance solver checks hit their bash timeouts (50 bash failures in `83c3aae1`).
 
 
+## 2026-10-04 07:25: default change, the wake without inbox (the user approved it at 07:20)
+
+The default `wake` text says "Call inbox". Swarm profiles that offer no `inbox` tool left agents with an order they could not follow; round 15 had 8 such wakes in 4 runs. **Change (in the commit that adds this note):** when a profile keeps the default `wake` but offers no `inbox`, the wake now carries the unread posts itself: "You have new messages on the board: … Continue toward the goal."
+- Profiles with an `inbox` tool, or with their own `wake` text, are unchanged.
+- The changed profiles are b-realloc, b-swarm, b-swarm-clock, b0-basic, n12-branches, n12-branches-optional, n12-roles, n12-stagger, n12-tasks, s2-board, s2-board-clock, v-swarm-clock and x5-lean. Their earlier runs are reproducible at commit `831e7f6` or before.
+- Smoke: a scripted 2-agent run on `s2-board-clock` passed (all_done, 12k tokens). The idle agent was woken with "You have new messages on the board: wren: ping" and wrote the message to a file.
+
+## Round 15, stage B: twelve agents against one on volume (fixed before measuring, 2026-10-04 07:25; the user approved the launch at 07:20)
+
+**Question.** On a volume-bound task, do B (12 equals with a post-only board) and ST (B + staggered entry, stage A's only pronounced-better lever) beat C1 (one agent with the clock) at the same 24M cap? And is ST still better than B there? The arms follow stage A's promotion rule.
+
+**Task.** ospec_green_blind, a volume-bound OpenSpec project. C1 scored 0.425 at 6M in round 13, with 2 of 3 runs capped. Every run gets 24M and 1920 s; k=2.
+
+**Arms:** C1 = `solo-clock`; B = `s2-board-clock` at n=12; ST = `n12-stagger` at n=12. The profiles are unchanged since stage A. The code differs from stage A by the conflict-marker fix (branches only, not used here) and by the wake change above, which applies to B and ST.
+
+**Execution.** `experiments/criba15-lanes.mjs 1 V`, one lane, seed 20261072. Campaigns list `[C1, arm]` with `--limit 1`, and `plan[0]` is the 12-agent arm for B and ST under this seed (checked on the plan field). C1 gets its own campaigns. Order: repetition 0 (C1, B, ST), then repetition 1. The quota stop and the resume rules are as in stage A.
+
+**Rules** (k=2 on one task; scores of capped runs count as they are; tokens and minutes are reported):
+- **ST against B:** pronounced better if ST's mean is ≥ +0.10 above, pronounced worse if ≤ −0.10, otherwise no pronounced difference.
+- **Each of B and ST against C1:** beats C1 if ≥ +0.05 above, loses if ≤ −0.05 below, otherwise not decided. Tokens spent are reported with the verdict.
+- **Descriptive:** the three-task means (stage A plus this task) for B, ST and C1, and the measures of `scripts/n12.mjs`.
+- **Predictions:**
+  - B loses to C1. Twelve agents spend 24M in about 5 minutes at the observed ~5M/min, while C1 can work for most of 32 minutes. The 4-agent V swarm also lost in round 9, with an oracle.
+  - ST is not pronounced against B, because ST's mechanism helps when one deliverable file is the bottleneck, and ospec has many files.
+
+**Known threats:**
+- The 12-agent runs will very likely end on the 24M cap, and C1 may end on the timeout. Both endings are part of the comparison.
+- With one task at k=2, a single run can move a mean by 0.2.
+- ospec's own regression tests run in each agent's shell, so 12 agents load the machine.
+
+**Budget (estimate):** B 2 × 24M + ST 2 × 24M + C1 2 × ~14M ≈ **124M**, upper bound ~144M. That is probably two quota windows. Wall clock is about 2 hours.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

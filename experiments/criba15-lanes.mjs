@@ -5,7 +5,7 @@
 // Repetition 0 of every arm runs before any repetition 1, so a stop leaves complete k=1 coverage.
 // After each campaign the transcripts are scanned for the model's "usage limit" error: the campaign is recorded as
 // invalid, its lock is removed so a resumed lane retakes it, a STOP file is written and every lane exits.
-//   nohup node criba15-lanes.mjs <lane> A &      (resume: delete criba15/STOP and launch again)
+//   nohup node criba15-lanes.mjs <lane> A|V &      (resume: delete criba15/STOP and launch again)
 import { appendFileSync, closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
@@ -22,6 +22,8 @@ const ARMS = { C1, B: agent("s2-board-clock", 12), TL: agent("n12-tasks", 12), B
 const STAGES = {
   A: { seed: 20261070, reps: 2, tasks: ["constrained_planning_hard_blind", "opt_shop2_blind"], arms: ["C1", "B", "TL", "BR", "BO", "ST", "RO"],
     limits: { token_budget: 12_000_000, timeout_seconds: 1200 } },
+  // Stage B of the round (volume); named V here to keep it apart from arm B.
+  V: { seed: 20261072, reps: 2, tasks: ["ospec_green_blind"], arms: ["C1", "B", "ST"], limits: { token_budget: 24_000_000, timeout_seconds: 1920 } },
 };
 if (!lane || !stages.length || stages.some(s => !STAGES[s])) throw new Error(`usage: node criba15-lanes.mjs <lane> <${Object.keys(STAGES).join("|")}>...`);
 const dir = join(here, "criba15");

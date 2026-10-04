@@ -29,6 +29,7 @@ Coordinate on the shared board:
 Start by reading your inbox and posting what you will work on. When told you have new messages, call inbox.
 `,
   steer: "You have new messages on the board; call inbox.",
+  /** Prompt for an idle agent woken by a new post. If the profile keeps this default but offers no inbox, the wake carries the unread posts itself. */
   wake: "You have new messages on the board. Call inbox, then continue toward the goal.",
   systemPromptAppend: "",
   /** Replaces a tool's description: board tools, append, or the built-in tools in `tools` (those are then registered as murmur's own copy of Pi's tool). */

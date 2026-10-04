@@ -8,7 +8,7 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { Board, boardTools, formatMessages, type Member } from "./board.ts";
 import { Branches } from "./branches.ts";
-import { KNOWN_BOARD_TOOLS, loadProfile, type Profile, render } from "./profile.ts";
+import { DEFAULT_PROFILE, KNOWN_BOARD_TOOLS, loadProfile, type Profile, render } from "./profile.ts";
 import { TaskList, taskTools } from "./tasklist.ts";
 import { fileTools } from "./tools.ts";
 
@@ -66,6 +66,9 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   // A {messages} placeholder delivers the unread posts inline and marks them read.
   const withMessages = (template: string, name: string) =>
     template.includes("{messages}") ? render(template, { messages: formatMessages(board.inbox(name)) }) : template;
+  // The default wake tells the agent to call inbox; a profile that offers no inbox gets the unread posts in the wake itself.
+  const wake = profile.wake === DEFAULT_PROFILE.wake && !profile.boardTools.includes("inbox")
+    ? "You have new messages on the board:\n\n{messages}\n\nContinue toward the goal." : profile.wake;
   // A new post steers a busy agent (once until it reads, unless delivered inline), wakes an idle one
   // and revives a done one while it has revivals left.
   const notify = (member: Member) => {
@@ -242,7 +245,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         log("revive", { agent: name });
       }
       log("wake", { agent: name });
-      prompt = withMessages(profile.wake, name);
+      prompt = withMessages(wake, name);
     }
     evaluate();
   };
