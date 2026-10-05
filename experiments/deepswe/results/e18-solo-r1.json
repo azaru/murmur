@@ -1,0 +1,215 @@
+{
+  "batch": "e18-solo-r1",
+  "arm": "solo",
+  "profile": "profiles/solo-clock-persist.json",
+  "profileSha256": "e9e7a33eb3e569cd",
+  "agents": 1,
+  "tasks": [
+    "expr-try-catch-errors",
+    "oxvg-structural-selector-preservation",
+    "scriggo-method-declarations",
+    "tengo-destructuring-bindings",
+    "wasmi-trap-coredumps",
+    "scc-bounded-memory-spilling",
+    "participle-grammar-conflict-analysis",
+    "dasel-html-document-format",
+    "fastapi-implicit-head-options",
+    "cattrs-partial-structuring-recovery"
+  ],
+  "tokenCap": 400000000,
+  "timeoutMinutes": 120,
+  "tokens": 47000,
+  "costUsd": 0.0027531200000000004,
+  "minutes": 1.3,
+  "endReason": "all_done",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "expr-try-catch-errors": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 1023,
+        "head": 1023,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "686643214052394fb41e743ccc34f4f3beedef46",
+        "log": "all=1023 | head=1023 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 0.999371097434976,
+      "binary": 0,
+      "parsed": 66841
+    },
+    "oxvg-structural-selector-preservation": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 480,
+        "head": 480,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "575fa4f3ff89639d6a331d0dd4ea0c35f9ff9550",
+        "log": "all=480 | head=480 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 68
+    },
+    "scriggo-method-declarations": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 5005,
+        "head": 5005,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "5a01b067130bd3bed36468ba6cc3c6e9b1b230e3",
+        "log": "all=5005 | head=5005 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 0.9933014354066986,
+      "binary": 0,
+      "parsed": 1091
+    },
+    "tengo-destructuring-bindings": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 344,
+        "head": 344,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "a8c6a82ceb4186b06c83b26a3a505bc5488c8063",
+        "log": "all=344 | head=344 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 224
+    },
+    "wasmi-trap-coredumps": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 1364,
+        "head": 1364,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "564a5c17e53ff516bdb4418a56b34dfb7c7da39d",
+        "log": "all=1364 | head=1364 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 58
+    },
+    "scc-bounded-memory-spilling": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 1564,
+        "head": 1564,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "64f3a36f7f0927d023c49ed74a85e8faae6f9896",
+        "log": "all=1564 | head=1564 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 319
+    },
+    "participle-grammar-conflict-analysis": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 456,
+        "head": 456,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "5e75812f083a18c24deb16e7b33bf68de5d3fbda",
+        "log": "all=456 | head=456 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 152
+    },
+    "dasel-html-document-format": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 804,
+        "head": 804,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "f2d01c446cf536197d0614747bfbefcc5bcd13e8",
+        "log": "all=804 | head=804 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 1012
+    },
+    "fastapi-implicit-head-options": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 6914,
+        "head": 6914,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "ed4cc219ce1c8f8bddd88a60c52a701fef3b5f64",
+        "log": "all=6914 | head=6914 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 3131
+    },
+    "cattrs-partial-structuring-recovery": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 933,
+        "head": 933,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "2ebd2041c8a5625c3a52328a98375fea398eb848",
+        "log": "all=933 | head=933 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 7
+    }
+  },
+  "meanScore": 0,
+  "code": {
+    "commit": "3c02043c5e0ee364856a536295af11e274b8ee59",
+    "srcDirty": false
+  },
+  "date": "2026-10-05T07:08:57.937Z"
+}

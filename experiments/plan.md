@@ -1937,6 +1937,47 @@ C1T, one run per task, `isolated` arm, three batches of four, 48M shared and 90 
 - The tasks were chosen with C1T's isolated scores (another profile), and five of them are near its ceiling when run alone.
 - Twelve agents spending for 120 minutes in one hub is untested.
 
+### Round 18 result and rule applied (2026-10-05 13:51; batches 06:03–09:07 UTC, code `7eeeca4` for repetition 0 and `3c02043` for repetition 1, see the deviation)
+
+| task | ST r0 | ST r1 | ST mean | C1P r0 | C1P r1 | C1P mean |
+|---|---:|---:|---:|---:|---:|---:|
+| expr | 0.000 | 0.886 | 0.443 | 0.000 | 0.000 | 0.000 |
+| oxvg | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.000 | 0.973 | 0.486 | 0.000 | 0.000 | 0.000 |
+| tengo | 0.714 | 1.000 | 0.857 | 0.000 | 0.000 | 0.000 |
+| wasmi | 0.136 | 1.000 | 0.568 | 0.000 | 0.000 | 0.000 |
+| scc | 0.903 | 0.806 | 0.855 | 0.000 | 0.000 | 0.000 |
+| participle | 0.000 | 0.135 | 0.067 | 0.000 | 0.000 | 0.000 |
+| dasel | 0.925 | 0.219 | 0.572 | 0.000 | 0.000 | 0.000 |
+| fastapi | 0.977 | 0.744 | 0.860 | 0.163 | 0.000 | 0.081 |
+| cattrs | 0.899 | 0.942 | 0.920 | 0.594 | 0.000 | 0.297 |
+| **ten-task mean** | 0.455 | 0.671 | **0.563** | 0.076 | 0.000 | **0.038** |
+
+| batch | tokens | cost | minutes | end |
+|---|---:|---:|---:|---|
+| ST r0 (`e18-swarm-r0`) | 36.1M | $0.60 | 35.1 | quiescent: 11 of 12 agents called `done` by 22.8 min; the twelfth worked until 34 min and stopped without it |
+| ST r1 (`e18-swarm-r1`) | 337.3M | $4.21 | 120.7 | quiescent at 119.8 min, at the clock; 10 of 12 called `done` |
+| C1P r0 (`e18-solo-r0`) | 2.0M | $0.04 | 13.9 | `done` |
+| C1P r1 (`e18-solo-r1`) | 0.05M | $0.003 | 1.3 | `done` after reading the ten task files |
+
+- **Rule as written: ST beats C1P.** The ten-task mean is +0.525 above, and ST is above on 9 of 10 tasks (oxvg tied at 0).
+- **But, as in round 17 E, the margin is the single agent stopping, now even earlier.** The persistence instruction was in C1P's system prompt in both repetitions (checked in both transcripts ✓). In r0 C1P made 49 bash calls, implemented cattrs and part of fastapi, and called `done` at 13 minutes: "I could not complete the requested work across all 10 repositories ... The full goal is therefore not met." In r1 it read the ten task files, never called bash, and called `done` 0.4 minutes in: "This assignment requests ten independent repository-level changes across different toolchains, and no project command can be run in this execution context." That belief is false: the same image and prompt gave r0 49 working bash calls and a passing cattrs test run. So r1's zeros are the model's behaviour, not an infrastructure fault (✓). Round 17's C1T, without the instruction, worked 14–19 minutes and spent 3.1M per batch.
+- **The swarm stops too, at random.** In r0 eleven agents called `done` by minute 23, the twelfth (lark) stopped at minute 34 without calling it, and the run went quiescent with 36M spent; in r1 two agents never called `done` and the run used the whole clock (337M). The two repetitions differ by 0.216 on the ten tasks and by 0.602 on the five shared with round 17 E (0.170 and 0.772). Run r1 has the first two binary rewards on DeepSWE in this project (tengo and wasmi).
+- **Spread** ([`deepswe/traces18.md`](deepswe/traces18.md)): r0 wrote in 9 of 10 repositories (not oxvg) with 1–2 agents per repository; r1 wrote in all 10, with up to 4 agents on scriggo, wasmi and fastapi. oxvg scored 0 everywhere (r1 wrote 6.7 KB there).
+- **From the transcripts** ([report](reports/2026-10-05-round18-19-traces-analysis.md), model output; key claims checked by hand):
+  - In r0 each agent called `done` when its own repository was finished or claimed by someone else, often admitting the work was partial (tern on scriggo, "only partially complete"; heron on wasmi, "remains incomplete"). There was no cascade. All ten repositories were claimed within about 2 minutes, with five agents claiming expr, and nobody took over a repository after its owner stopped. Lark, the last one working, ended its turn with a final message instead of `done` at 34 minutes, and with everyone else done nothing woke it.
+  - In r1 the same early stops happened (seven agents done by minute 20), but crane, plover, heron, linnet and dunlin kept offering help after their own repository and took the abandoned ones. Tern dropped tengo at 2.8 minutes, and crane noticed at 60.7 that the repository was still clean and took it over. Nobody edited expr until minute 91.5 (✓), so its 0.886 was built in the last 29 minutes. Both binary rewards came from two to four agents working one repository late in the run.
+  - r1's losses on dasel and fastapi: wren's HTML reader hangs a test until the grader's 10-minute timeout (✓), and wren had called `done` at 6.5 minutes with nobody reviewing; fastapi was split among four agents with unclear ownership (0.744, against 0.977 by one agent in r0).
+  - A `done` agent is not woken by posts (`revive: 0`), so the swarm's working time is set by how many agents refuse to call `done`.
+- **Against round 17 E on the five shared tasks** (32M cap there, so descriptive): ST 0.471 (0.170, 0.772) against STT 0.408; C1P 0.000 against C1T 0.045.
+- **Suspicious zeros checked:** no batch has an empty diff together with `parsed=0`; every zero comes either from an empty diff (nobody changed that repository) or from new tests failing with the base tests intact. No infrastructure fault.
+- **Predictions:**
+  - "C1P works much longer than C1T" is refuted: 13.9 and 1.3 minutes, 2.0M and 0.05M. "It still calls `done` with tasks unfinished" holds.
+  - "ST uses most of the 120 minutes and covers more tasks" holds in r1 only.
+  - "ST beats C1P" holds. "Neither arm touches oxvg" is refuted for ST r1, which wrote there without scoring.
+- **Spend:** 375.5M tokens and $4.86 in total, inside the 400–700M estimate; no quota stop in this round (round 19 hit it later).
+- **Deviation:** round 19's levers (`boardTail`, `sharedNotes`, both default off) and the driver's `costUsd` field were committed in `3c02043` at 06:13 UTC, ten minutes into repetition 0. Repetition 0's hubs had loaded `src/` at start (`7eeeca4`); repetition 1 ran on `3c02043`. ST and C1P do not use the new levers, so their behaviour is unchanged, but the driver was edited in place instead of in a copy. The driver records HEAD when it writes the summary, so all four summaries say `3c02043`, and the repetition 0 summaries lack `costUsd`; their costs above come from each run's `murmur/run/result.json`.
+
 ## Round 19: how the team shares state, on the five-task DeepSWE batch (fixed before measuring, 2026-10-05 08:12; the user asked for it)
 
 **The user's requests:**
@@ -1994,6 +2035,33 @@ C1T, one run per task, `isolated` arm, three batches of four, 48M shared and 90 
 - The task list and the file add their own instructions, so their arms change the wording too.
 
 **Cost reporting from now on.** `scripts/rows.mjs` now writes `cost_usd` per run (murmur's `costUsd`, or swarmtest's `cost_usd` for Pi runs). The batch driver's summary now writes `costUsd`, from round 19 on; earlier batch costs are in each run's `murmur/run/result.json`. As a check on round 17: the token ratios and the dollar ratios between arms are close, because cache reads are 77–96% of tokens in every arm. AUD against C1T is 4.2× in tokens and 4.3× in dollars on planning, and 10.9× and 8.5× on shop2. The DeepSWE swarm against the single agent is 10.3× in tokens and 10× in dollars.
+
+### Round 19: stopped by the model quota after the first wave of repetition 0 (2026-10-05 13:52; batches 09:08–10:34 UTC, code `3c02043`)
+
+Only wave 1 of repetition 0 is valid: ST, ST-tail and ST-file, one batch each. The three wave-2 batches (ST-threads, ST-norms, ST-tasks) hit the model's usage limit ("Codex error: The usage limit has been reached") at about 10:12 UTC, 16 minutes after they started; the driver moved their summaries into their run directories and wrote `STOP19`. **With k=1 and half the arms missing, no rule is applied**, following round 18's clause for this case (round 19's pre-registration says "quota stop as before"). The numbers below are descriptive.
+
+| task | ST r0 | ST-tail r0 | ST-file r0 |
+|---|---:|---:|---:|
+| expr | 0.038 | 1.000 | 0.342 |
+| oxvg | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.000 | 0.000 | 0.000 |
+| tengo | 0.945 | 0.011 | 0.692 |
+| wasmi | 0.773 | 0.364 | 0.134 |
+| **five-task mean** | 0.351 | 0.275 | 0.234 |
+| tokens / cost | 32.1M / $0.53 | 32.0M / $0.52 | 11.0M / $0.23 |
+| minutes / end | 39.6 / budget | 28.3 / budget | 28.5 / quiescent |
+
+- **One repetition orders nothing here.** On these five tasks the ST control (12 agents, staggered entry, post-only board) has now scored 0.351 (this round), 0.170 and 0.772 (round 18, no cap), and its tokens-line twin STT 0.411 and 0.406 (round 17 E). Every gap in the table is inside that spread.
+- **ST-tail** (ST plus each teammate's latest post on every tool result) is the only batch with a binary reward (expr 1.000). Its oxvg zero is a broken build: the diff (10 KB) does not compile (`E0308` and `E0282` in both the base and new test logs), so `parsed=0` is a legitimate zero, not a grader fault (✓). Its tengo 0.011 comes from a 500-byte diff. It wrote in all five repositories, oxvg included (13 write/edit calls).
+- **ST-file** (no board; a shared `TEAM.md` added to each agent's first prompt) went quiescent at 28 minutes with 11M of the 32M spent: 11 of 12 agents called `done`. The agents edited `TEAM.md` 87 times, more often than any repository (at most 30 write/edit calls on one).
+- **From the transcripts** ([report](reports/2026-10-05-round18-19-traces-analysis.md), model output; key claims checked by hand):
+  - ST-tail's oxvg zero is a budget-cut artifact: finch was mid-edit when the 32M cap aborted the run (✓ "Operation aborted"). Its tengo 0.011 is tern's single edit before `done` at 6.9 minutes (✓); nobody took tengo after that. The tail rode on 806 tool results (about 1.1 KB each); no agent mentions it, and spread over the repositories did not change.
+  - ST-file: 35 of the 87 `TEAM.md` edits failed on stale or ambiguous `oldText` (✓). The file grew to about 18 lines. It is injected only at entry, so later agents re-read it with tools (66 times). Eleven agents called `done` while saying work "remains in progress with teammates", and with no board nothing wakes an idle agent, so the run ended with 21M unspent.
+  - Wave 2 (invalid), mechanism use only: threads opened 10 threads (two titled "Project ownership") with 44 replies, against 17 edits in the whole batch; norms posts were claims and review findings, with few thanks; in the task-list arm one agent added one item per repository in the first 12 seconds and nobody added anything after, with no `task_done`.
+- **Suspicious zeros checked:** apart from ST-tail's oxvg (above), every zero has base tests intact and new tests failing, or an empty diff. No infrastructure fault.
+- **Coordination counts:** [`deepswe/traces19.md`](deepswe/traces19.md), with the invalid batches' mechanism use up to the quota stop (threads: 10 opened, 44 replies; task list: 5 items added, 13 takes).
+- **Spend:** valid 75.2M and $1.27; invalid 25.5M and $0.57, spent but not counted; 100.7M and $1.84 in total. The quota stop came after about 475M tokens since 06:03 UTC, in rounds 18 and 19 together.
+- **Resuming.** `batch19.sh` skips any batch with a `results/*.json`, so deleting `STOP19` and restarting it would rerun wave 2 of repetition 0 and all of repetition 1: 9 batches, at most 288M and about $4.7 at this round's ~$0.016 per million. The quota's reset time is not known.
 
 ## Campaign registry
 
@@ -2063,3 +2131,5 @@ C1T, one run per task, `isolated` arm, three batches of four, 48M shared and 90 
 | 2026-10-04/05 | round 17 (18 campaigns `20261004T210830Z-5a3ac503` → `20261004T220858Z-7ac6739b`, seed 20261101, code `73ff3e7`) | C1T solo-clock-tokens; C1TR solo-clock-tokens-relay2 (n=1); AUD n3-audit-tokens (n=3) | planning, shop2 × 3, 12M, 3720 s | 27.1M | means: AUD 0.348, C1TR 0.313, C1T 0.238 | AUD beats C1T (shop2-led); C1TR vs C1T and AUD vs C1TR not decided; quiet regrade confirms the grades |
 | 2026-10-04/05 | round 17 stage S, DeepSWE screen (batches `scr17-b1` to `scr17-b3`, `isolated` arm, code `497b6d9`) | C1T solo-clock-tokens n=1 per task | 12 candidates × 1, 48M shared per batch, 90 min | 46.1M | 4 below 0.85: oxvg 0, scriggo 0, tengo 0.44, wasmi 0.64 | those 4 plus expr go to stage E |
 | 2026-10-05 | round 17 stage E, DeepSWE batch (batches `e17-swarm-r0/r1`, `e17-solo-r0/r1`, code `37213a7`) | STT n12-stagger-tokens (n=12); C1T solo-clock-tokens (n=1) | expr, oxvg, scriggo, tengo, wasmi × 2, 32M shared, 120 min | 70.3M | five-task means: STT 0.408, C1T 0.045 (C1T gave up at 14–19 min with 3.1M) | STT beats C1T by the rule; the margin is mostly C1T stopping early |
+| 2026-10-05 | round 18, DeepSWE batch (batches `e18-swarm-r0/r1`, `e18-solo-r0/r1`, code `7eeeca4` r0, `3c02043` r1) | ST n12-stagger (n=12); C1P solo-clock-persist (n=1) | 10 DeepSWE tasks × 2, 400M cap, 120 min | 375.5M ($4.86) | ten-task means: ST 0.563, C1P 0.038; C1P stopped at 13.9 and 1.3 min; ST r0 quiescent at 35 min, r1 to the clock | ST beats C1P by the rule; the margin is again the single agent stopping, and the swarm's two repetitions differ by 0.22 |
+| 2026-10-05 | round 19, DeepSWE batch, stopped by the quota (valid `e19-stagger-r0`, `e19-stagger-tail-r0`, `e19-stagger-file-r0`; invalid `e19-stagger-threads-r0`, `-norms-r0`, `-tasks-r0`; code `3c02043`) | ST n12-stagger, ST-tail n12-stagger-tail, ST-file n12-stagger-file (n=12, k=1) | expr, oxvg, scriggo, tengo, wasmi × 1, 32M, 120 min | 100.7M ($1.84; 25.5M invalid) | five-task means: ST 0.351, ST-tail 0.275, ST-file 0.234 | no rule applied (k=1, wave 2 invalid); resume or close is the user's call |

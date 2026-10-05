@@ -4,7 +4,9 @@
 
 > Can a non-hierarchical swarm of coding agents consistently beat a single agent of the same model?
 
-## Findings so far (2026-10-04)
+## Findings so far (2026-10-05)
+
+**Without an oracle, ten real repository tasks with the clock deciding (rounds 18 and 19).** Twelve agents scored 0.56 against 0.04 for one agent told to keep working until every change was implemented and verified. The instruction did not help: the single agent quit after 14 minutes, and in its other run after one minute without running a command. The swarm stops by the same judgement, since each agent calls `done` once its own repository looks finished or taken. In one repetition all twelve stopped within 34 minutes; in the other a few kept taking abandoned repositories until the clock, which gave the first two fully solved DeepSWE tasks for $4.21. A round on how the team shares state (a board tail, a shared notes file, threads, norms, a task list) was stopped by the model quota after one repetition of three arms, with no verdict.
 
 **Without an oracle, an audit chain and a DeepSWE batch (round 17).** Three agents who enter one at a time, each when the previous finishes, with a board, beat one agent with the clock on planning and a job-shop optimiser: 0.35 against 0.24, at about 6× its tokens. But the margin is on the optimiser, where the single agent scored 0 three times, and the transcripts credit the first draft more than the audit. The same agent with two fresh-context relays is not decided against either. On a batch of five real repository tasks from DeepSWE, twelve agents scored 0.41 against one agent's 0.05 with the same 32M budget. The single agent gave up within 20 minutes with 90% of the budget unused, saying the work was unfinished; on the same tasks one at a time it scores 0.35. Details in [docs/research.md](docs/research.md).
 

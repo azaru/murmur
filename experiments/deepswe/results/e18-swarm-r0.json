@@ -1,0 +1,214 @@
+{
+  "batch": "e18-swarm-r0",
+  "arm": "swarm",
+  "profile": "profiles/n12-stagger.json",
+  "profileSha256": "ca1cbbf58c1d33d6",
+  "agents": 12,
+  "tasks": [
+    "expr-try-catch-errors",
+    "oxvg-structural-selector-preservation",
+    "scriggo-method-declarations",
+    "tengo-destructuring-bindings",
+    "wasmi-trap-coredumps",
+    "scc-bounded-memory-spilling",
+    "participle-grammar-conflict-analysis",
+    "dasel-html-document-format",
+    "fastapi-implicit-head-options",
+    "cattrs-partial-structuring-recovery"
+  ],
+  "tokenCap": 400000000,
+  "timeoutMinutes": 120,
+  "tokens": 36142386,
+  "minutes": 35.1,
+  "endReason": "quiescent",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "expr-try-catch-errors": {
+      "diffBytes": 43545,
+      "leakCheck": {
+        "ok": true,
+        "all": 1023,
+        "head": 1023,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "686643214052394fb41e743ccc34f4f3beedef46",
+        "log": "all=1023 | head=1023 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 0.9995807316233173,
+      "binary": 0,
+      "parsed": 66795
+    },
+    "oxvg-structural-selector-preservation": {
+      "diffBytes": 0,
+      "leakCheck": {
+        "ok": true,
+        "all": 480,
+        "head": 480,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "575fa4f3ff89639d6a331d0dd4ea0c35f9ff9550",
+        "log": "all=480 | head=480 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 68
+    },
+    "scriggo-method-declarations": {
+      "diffBytes": 7356,
+      "leakCheck": {
+        "ok": true,
+        "all": 5005,
+        "head": 5005,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "5a01b067130bd3bed36468ba6cc3c6e9b1b230e3",
+        "log": "all=5005 | head=5005 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 1099
+    },
+    "tengo-destructuring-bindings": {
+      "diffBytes": 8272,
+      "leakCheck": {
+        "ok": true,
+        "all": 344,
+        "head": 344,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "a8c6a82ceb4186b06c83b26a3a505bc5488c8063",
+        "log": "all=344 | head=344 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.7142857142857143,
+      "new_frac": 0.7142857142857143,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 229
+    },
+    "wasmi-trap-coredumps": {
+      "diffBytes": 11562,
+      "leakCheck": {
+        "ok": true,
+        "all": 1364,
+        "head": 1364,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "564a5c17e53ff516bdb4418a56b34dfb7c7da39d",
+        "log": "all=1364 | head=1364 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.13636363636363635,
+      "new_frac": 0.13636363636363635,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 82
+    },
+    "scc-bounded-memory-spilling": {
+      "diffBytes": 8611,
+      "leakCheck": {
+        "ok": true,
+        "all": 1564,
+        "head": 1564,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "64f3a36f7f0927d023c49ed74a85e8faae6f9896",
+        "log": "all=1564 | head=1564 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9032258064516129,
+      "new_frac": 0.9032258064516129,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 319
+    },
+    "participle-grammar-conflict-analysis": {
+      "diffBytes": 9918,
+      "leakCheck": {
+        "ok": true,
+        "all": 456,
+        "head": 456,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "5e75812f083a18c24deb16e7b33bf68de5d3fbda",
+        "log": "all=456 | head=456 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 153
+    },
+    "dasel-html-document-format": {
+      "diffBytes": 11489,
+      "leakCheck": {
+        "ok": true,
+        "all": 804,
+        "head": 804,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "f2d01c446cf536197d0614747bfbefcc5bcd13e8",
+        "log": "all=804 | head=804 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9246575342465754,
+      "new_frac": 0.9246575342465754,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 1158
+    },
+    "fastapi-implicit-head-options": {
+      "diffBytes": 34427,
+      "leakCheck": {
+        "ok": true,
+        "all": 6914,
+        "head": 6914,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "ed4cc219ce1c8f8bddd88a60c52a701fef3b5f64",
+        "log": "all=6914 | head=6914 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9767441860465116,
+      "new_frac": 0.9767441860465116,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 3177
+    },
+    "cattrs-partial-structuring-recovery": {
+      "diffBytes": 10244,
+      "leakCheck": {
+        "ok": true,
+        "all": 933,
+        "head": 933,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "2ebd2041c8a5625c3a52328a98375fea398eb848",
+        "log": "all=933 | head=933 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.8985507246376812,
+      "new_frac": 0.8985507246376812,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 76
+    }
+  },
+  "meanScore": 0.45538276020317314,
+  "code": {
+    "commit": "3c02043c5e0ee364856a536295af11e274b8ee59",
+    "srcDirty": false
+  },
+  "date": "2026-10-05T06:46:38.580Z"
+}

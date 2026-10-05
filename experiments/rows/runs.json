@@ -14,6 +14,7 @@
   "status": "succeeded",
   "tokens": 122337,
   "reason": "all_done",
+  "cost_usd": 0.00564666,
   "minutes": 1.1
  },
  {
@@ -31,6 +32,7 @@
   "status": "succeeded",
   "tokens": 25662,
   "reason": "all_done",
+  "cost_usd": 0.0016695600000000003,
   "minutes": 1.1
  },
  {
@@ -48,6 +50,7 @@
   "status": "succeeded",
   "tokens": 230111,
   "reason": "all_done",
+  "cost_usd": 0.01002366,
   "minutes": 1.4
  },
  {
@@ -65,6 +68,7 @@
   "status": "succeeded",
   "tokens": 25834,
   "reason": "all_done",
+  "cost_usd": 0.0015606799999999998,
   "minutes": 0.6
  },
  {
@@ -82,6 +86,7 @@
   "status": "succeeded",
   "tokens": 58493,
   "reason": "all_done",
+  "cost_usd": 0.0043544199999999995,
   "minutes": 0.6
  },
  {
@@ -99,6 +104,7 @@
   "status": "succeeded",
   "tokens": 14457,
   "reason": null,
+  "cost_usd": 0.0011387400000000003,
   "minutes": 0.5
  },
  {
@@ -116,6 +122,7 @@
   "status": "succeeded",
   "tokens": 149892,
   "reason": null,
+  "cost_usd": 0.006665760000000001,
   "minutes": 2.3
  },
  {
@@ -133,6 +140,7 @@
   "status": "failed",
   "tokens": 65399,
   "reason": null,
+  "cost_usd": 0.0038615000000000003,
   "minutes": 1.5
  },
  {
@@ -150,6 +158,7 @@
   "status": "succeeded",
   "tokens": 1111803,
   "reason": "all_done",
+  "cost_usd": 0.029262460000000004,
   "minutes": 5.5
  },
  {
@@ -167,6 +176,7 @@
   "status": "succeeded",
   "tokens": 677224,
   "reason": "all_done",
+  "cost_usd": 0.02110928,
   "minutes": 2.1
  },
  {
@@ -184,6 +194,7 @@
   "status": "succeeded",
   "tokens": 197807,
   "reason": null,
+  "cost_usd": 0.007064620000000001,
   "minutes": 1.9
  },
  {
@@ -201,6 +212,7 @@
   "status": "succeeded",
   "tokens": 626715,
   "reason": "all_done",
+  "cost_usd": 0.020589419999999997,
   "minutes": 2.5
  },
  {
@@ -218,6 +230,7 @@
   "status": "succeeded",
   "tokens": 47518,
   "reason": null,
+  "cost_usd": 0.0036759600000000003,
   "minutes": 1.3
  },
  {
@@ -235,6 +248,7 @@
   "status": "succeeded",
   "tokens": 114170,
   "reason": null,
+  "cost_usd": 0.00480572,
   "minutes": 2
  },
  {
@@ -252,6 +266,7 @@
   "status": "succeeded",
   "tokens": 417910,
   "reason": "all_done",
+  "cost_usd": 0.01626268,
   "minutes": 1.6
  },
  {
@@ -269,6 +284,7 @@
   "status": "succeeded",
   "tokens": 640429,
   "reason": "all_done",
+  "cost_usd": 0.01891186,
   "minutes": 2.2
  },
  {
@@ -286,6 +302,7 @@
   "status": "succeeded",
   "tokens": 723759,
   "reason": "all_done",
+  "cost_usd": 0.027035420000000004,
   "minutes": 2.9
  },
  {
@@ -303,6 +320,7 @@
   "status": "succeeded",
   "tokens": 622010,
   "reason": "all_done",
+  "cost_usd": 0.023015,
   "minutes": 2.7
  },
  {
@@ -320,6 +338,7 @@
   "status": "succeeded",
   "tokens": 86250,
   "reason": null,
+  "cost_usd": 0.00496988,
   "minutes": 1.8
  },
  {
@@ -337,6 +356,7 @@
   "status": "succeeded",
   "tokens": 1047403,
   "reason": "all_done",
+  "cost_usd": 0.027334940000000002,
   "minutes": 3.4
  },
  {
@@ -354,6 +374,7 @@
   "status": "succeeded",
   "tokens": 156756,
   "reason": "all_done",
+  "cost_usd": 0.01014464,
   "minutes": 1.4
  },
  {
@@ -371,6 +392,7 @@
   "status": "succeeded",
   "tokens": 64059,
   "reason": null,
+  "cost_usd": 0.00444646,
   "minutes": 1.4
  },
  {
@@ -388,6 +410,7 @@
   "status": "failed",
   "tokens": 92066,
   "reason": null,
+  "cost_usd": 0.00419996,
   "minutes": 1.5
  },
  {
@@ -405,6 +428,7 @@
   "status": "token_budget",
   "tokens": 1501020,
   "reason": "budget",
+  "cost_usd": 0.03654056,
   "minutes": 3.8
  },
  {
@@ -422,6 +446,7 @@
   "status": "succeeded",
   "tokens": 14103,
   "reason": null,
+  "cost_usd": 0.00103062,
   "minutes": 0.5
  },
  {
@@ -439,6 +464,7 @@
   "status": "succeeded",
   "tokens": 136139,
   "reason": "all_done",
+  "cost_usd": 0.00568406,
   "minutes": 0.8
  },
  {
@@ -456,6 +482,7 @@
   "status": "succeeded",
   "tokens": 174740,
   "reason": "all_done",
+  "cost_usd": 0.00793096,
   "minutes": 1
  },
  {
@@ -473,6 +500,7 @@
   "status": "succeeded",
   "tokens": 20234,
   "reason": null,
+  "cost_usd": 0.00132884,
   "minutes": 0.5
  },
  {
@@ -490,6 +518,7 @@
   "status": "succeeded",
   "tokens": 15804,
   "reason": null,
+  "cost_usd": 0.00113544,
   "minutes": 0.5
  },
  {
@@ -507,6 +536,7 @@
   "status": "succeeded",
   "tokens": 204821,
   "reason": "all_done",
+  "cost_usd": 0.0083897,
   "minutes": 1.3
  },
  {
@@ -524,6 +554,7 @@
   "status": "succeeded",
   "tokens": 10403,
   "reason": null,
+  "cost_usd": 0.00067374,
   "minutes": 0.3
  },
  {
@@ -541,6 +572,7 @@
   "status": "succeeded",
   "tokens": 122480,
   "reason": "all_done",
+  "cost_usd": 0.00553856,
   "minutes": 0.7
  },
  {
@@ -558,6 +590,7 @@
   "status": "failed",
   "tokens": 189600,
   "reason": null,
+  "cost_usd": 0.00836424,
   "minutes": 3
  },
  {
@@ -575,6 +608,7 @@
   "status": "succeeded",
   "tokens": 130091,
   "reason": null,
+  "cost_usd": 0.006608460000000001,
   "minutes": 2.7
  },
  {
@@ -592,6 +626,7 @@
   "status": "succeeded",
   "tokens": 111846,
   "reason": null,
+  "cost_usd": 0.005474600000000001,
   "minutes": 2.1
  },
  {
@@ -609,6 +644,7 @@
   "status": "failed",
   "tokens": 136147,
   "reason": null,
+  "cost_usd": 0.006123739999999999,
   "minutes": 2
  },
  {
@@ -626,6 +662,7 @@
   "status": "succeeded",
   "tokens": 143166,
   "reason": null,
+  "cost_usd": 0.006568279999999999,
   "minutes": 3.9
  },
  {
@@ -643,6 +680,7 @@
   "status": "failed",
   "tokens": 109164,
   "reason": null,
+  "cost_usd": 0.00548728,
   "minutes": 2
  },
  {
@@ -660,6 +698,7 @@
   "status": "failed",
   "tokens": 188140,
   "reason": null,
+  "cost_usd": 0.007802879999999998,
   "minutes": 4.8
  },
  {
@@ -677,6 +716,7 @@
   "status": "succeeded",
   "tokens": 226322,
   "reason": null,
+  "cost_usd": 0.011630840000000002,
   "minutes": 4.6
  },
  {
@@ -694,6 +734,7 @@
   "status": "failed",
   "tokens": 52004,
   "reason": null,
+  "cost_usd": 0.0040656,
   "minutes": 1.6
  },
  {
@@ -711,6 +752,7 @@
   "status": "failed",
   "tokens": 242505,
   "reason": null,
+  "cost_usd": 0.009684340000000001,
   "minutes": 4.7
  },
  {
@@ -728,6 +770,7 @@
   "status": "failed",
   "tokens": 446081,
   "reason": null,
+  "cost_usd": 0.012051700000000002,
   "minutes": 3.5
  },
  {
@@ -745,6 +788,7 @@
   "status": "failed",
   "tokens": 468999,
   "reason": null,
+  "cost_usd": 0.0163943,
   "minutes": 5.6
  },
  {
@@ -762,6 +806,7 @@
   "status": "succeeded",
   "tokens": 101362,
   "reason": null,
+  "cost_usd": 0.004151719999999999,
   "minutes": 2.2
  },
  {
@@ -779,6 +824,7 @@
   "status": "failed",
   "tokens": 87726,
   "reason": null,
+  "cost_usd": 0.00348524,
   "minutes": 2.2
  },
  {
@@ -796,6 +842,7 @@
   "status": "failed",
   "tokens": 104572,
   "reason": null,
+  "cost_usd": 0.00390552,
   "minutes": 2.7
  },
  {
@@ -813,6 +860,7 @@
   "status": "failed",
   "tokens": 115574,
   "reason": null,
+  "cost_usd": 0.00537364,
   "minutes": 1.2
  },
  {
@@ -830,6 +878,7 @@
   "status": "failed",
   "tokens": 128773,
   "reason": null,
+  "cost_usd": 0.0052125800000000005,
   "minutes": 1.7
  },
  {
@@ -847,6 +896,7 @@
   "status": "failed",
   "tokens": 220558,
   "reason": null,
+  "cost_usd": 0.00824516,
   "minutes": 2.7
  },
  {
@@ -864,6 +914,7 @@
   "status": "failed",
   "tokens": 121781,
   "reason": null,
+  "cost_usd": 0.00563666,
   "minutes": 1.9
  },
  {
@@ -881,6 +932,7 @@
   "status": "failed",
   "tokens": 160190,
   "reason": null,
+  "cost_usd": 0.00800332,
   "minutes": 2.8
  },
  {
@@ -898,6 +950,7 @@
   "status": "failed",
   "tokens": 167120,
   "reason": null,
+  "cost_usd": 0.007218880000000001,
   "minutes": 1.9
  },
  {
@@ -915,6 +968,7 @@
   "status": "failed",
   "tokens": 166710,
   "reason": null,
+  "cost_usd": 0.0072787600000000004,
   "minutes": 2.5
  },
  {
@@ -932,6 +986,7 @@
   "status": "failed",
   "tokens": 147222,
   "reason": null,
+  "cost_usd": 0.0065950800000000006,
   "minutes": 2.3
  },
  {
@@ -949,6 +1004,7 @@
   "status": "succeeded",
   "tokens": 200475,
   "reason": null,
+  "cost_usd": 0.007760060000000001,
   "minutes": 3
  },
  {
@@ -966,6 +1022,7 @@
   "status": "succeeded",
   "tokens": 1688358,
   "reason": "all_done",
+  "cost_usd": 0.03592228,
   "minutes": 5.3
  },
  {
@@ -983,6 +1040,7 @@
   "status": "token_budget",
   "tokens": 3011718,
   "reason": "budget",
+  "cost_usd": 0.05855691999999999,
   "minutes": 5.7
  },
  {
@@ -1000,6 +1058,7 @@
   "status": "failed",
   "tokens": 887113,
   "reason": "all_done",
+  "cost_usd": 0.02322218,
   "minutes": 3.4
  },
  {
@@ -1017,6 +1076,7 @@
   "status": "token_budget",
   "tokens": 3001656,
   "reason": "budget",
+  "cost_usd": 0.062359040000000004,
   "minutes": 10
  },
  {
@@ -1034,6 +1094,7 @@
   "status": "failed",
   "tokens": 382574,
   "reason": null,
+  "cost_usd": 0.011599719999999999,
   "minutes": 3.4
  },
  {
@@ -1051,6 +1112,7 @@
   "status": "succeeded",
   "tokens": 707985,
   "reason": "all_done",
+  "cost_usd": 0.02434522,
   "minutes": 5.5
  },
  {
@@ -1068,6 +1130,7 @@
   "status": "failed",
   "tokens": 467077,
   "reason": null,
+  "cost_usd": 0.012136580000000001,
   "minutes": 3.3
  },
  {
@@ -1085,6 +1148,7 @@
   "status": "token_budget",
   "tokens": 3020421,
   "reason": "budget",
+  "cost_usd": 0.061871540000000017,
   "minutes": 9.5
  },
  {
@@ -1102,6 +1166,7 @@
   "status": "failed",
   "tokens": 258008,
   "reason": null,
+  "cost_usd": 0.009107120000000002,
   "minutes": 4.3
  },
  {
@@ -1119,6 +1184,7 @@
   "status": "token_budget",
   "tokens": 3001115,
   "reason": "budget",
+  "cost_usd": 0.05968678,
   "minutes": 5.3
  },
  {
@@ -1136,6 +1202,7 @@
   "status": "failed",
   "tokens": 233942,
   "reason": null,
+  "cost_usd": 0.01040236,
   "minutes": 4
  },
  {
@@ -1153,6 +1220,7 @@
   "status": "succeeded",
   "tokens": 736576,
   "reason": "all_done",
+  "cost_usd": 0.01726808,
   "minutes": 4.5
  },
  {
@@ -1170,6 +1238,7 @@
   "status": "failed",
   "tokens": 218356,
   "reason": null,
+  "cost_usd": 0.007907359999999999,
   "minutes": 3
  },
  {
@@ -1187,6 +1256,7 @@
   "status": "token_budget",
   "tokens": 3007295,
   "reason": "budget",
+  "cost_usd": 0.06219038,
   "minutes": 5.4
  },
  {
@@ -1204,6 +1274,7 @@
   "status": "failed",
   "tokens": 353221,
   "reason": null,
+  "cost_usd": 0.01159146,
   "minutes": 3.6
  },
  {
@@ -1221,6 +1292,7 @@
   "status": "token_budget",
   "tokens": 3007560,
   "reason": "budget",
+  "cost_usd": 0.06010056000000001,
   "minutes": 5.7
  },
  {
@@ -1238,6 +1310,7 @@
   "status": "failed",
   "tokens": 71205,
   "reason": null,
+  "cost_usd": 0.00333322,
   "minutes": 2.1
  },
  {
@@ -1255,6 +1328,7 @@
   "status": "failed",
   "tokens": 232196,
   "reason": "all_done",
+  "cost_usd": 0.0107076,
   "minutes": 2.1
  },
  {
@@ -1272,6 +1346,7 @@
   "status": "failed",
   "tokens": 329174,
   "reason": null,
+  "cost_usd": 0.010333720000000003,
   "minutes": 3.1
  },
  {
@@ -1289,6 +1364,7 @@
   "status": "succeeded",
   "tokens": 1569978,
   "reason": "all_done",
+  "cost_usd": 0.03665508000000001,
   "minutes": 4.8
  },
  {
@@ -1306,6 +1382,7 @@
   "status": "failed",
   "tokens": 478644,
   "reason": null,
+  "cost_usd": 0.013207199999999995,
   "minutes": 4.2
  },
  {
@@ -1323,6 +1400,7 @@
   "status": "failed",
   "tokens": 835234,
   "reason": "all_done",
+  "cost_usd": 0.029895320000000003,
   "minutes": 3.4
  },
  {
@@ -1340,6 +1418,7 @@
   "status": "failed",
   "tokens": 214839,
   "reason": null,
+  "cost_usd": 0.00784742,
   "minutes": 2.5
  },
  {
@@ -1357,6 +1436,7 @@
   "status": "failed",
   "tokens": 1934853,
   "reason": "all_done",
+  "cost_usd": 0.03883234000000001,
   "minutes": 5
  },
  {
@@ -1374,6 +1454,7 @@
   "status": "failed",
   "tokens": 327603,
   "reason": null,
+  "cost_usd": 0.0110227,
   "minutes": 4.4
  },
  {
@@ -1391,6 +1472,7 @@
   "status": "failed",
   "tokens": 1271954,
   "reason": "quiescent",
+  "cost_usd": 0.03596004,
   "minutes": 5
  },
  {
@@ -1408,6 +1490,7 @@
   "status": "failed",
   "tokens": 171115,
   "reason": null,
+  "cost_usd": 0.007660139999999999,
   "minutes": 2.8
  },
  {
@@ -1425,6 +1508,7 @@
   "status": "succeeded",
   "tokens": 1383220,
   "reason": "all_done",
+  "cost_usd": 0.02967968,
   "minutes": 5.3
  },
  {
@@ -1442,6 +1526,7 @@
   "status": "failed",
   "tokens": 104072,
   "reason": null,
+  "cost_usd": 0.003973119999999999,
   "minutes": 3
  },
  {
@@ -1459,6 +1544,7 @@
   "status": "failed",
   "tokens": 1177397,
   "reason": "quiescent",
+  "cost_usd": 0.027138739999999995,
   "minutes": 6.1
  },
  {
@@ -1476,6 +1562,7 @@
   "status": "failed",
   "tokens": 133274,
   "reason": null,
+  "cost_usd": 0.00557396,
   "minutes": 2.8
  },
  {
@@ -1493,6 +1580,7 @@
   "status": "token_budget",
   "tokens": 3006114,
   "reason": "budget",
+  "cost_usd": 0.06069644000000002,
   "minutes": 8.8
  },
  {
@@ -1510,6 +1598,7 @@
   "status": "failed",
   "tokens": 88416,
   "reason": null,
+  "cost_usd": 0.00385104,
   "minutes": 2.2
  },
  {
@@ -1527,6 +1616,7 @@
   "status": "failed",
   "tokens": 146687,
   "reason": "all_done",
+  "cost_usd": 0.004929739999999999,
   "minutes": 2.4
  },
  {
@@ -1544,6 +1634,7 @@
   "status": "failed",
   "tokens": 98452,
   "reason": null,
+  "cost_usd": 0.0046409599999999995,
   "minutes": 1.9
  },
  {
@@ -1561,6 +1652,7 @@
   "status": "succeeded",
   "tokens": 1369260,
   "reason": "all_done",
+  "cost_usd": 0.03475736,
   "minutes": 4.9
  },
  {
@@ -1578,6 +1670,7 @@
   "status": "failed",
   "tokens": 60304,
   "reason": null,
+  "cost_usd": 0.00307776,
   "minutes": 2.2
  },
  {
@@ -1595,6 +1688,7 @@
   "status": "token_budget",
   "tokens": 3006256,
   "reason": "budget",
+  "cost_usd": 0.06419928,
   "minutes": 6.7
  },
  {
@@ -1612,6 +1706,7 @@
   "status": "failed",
   "tokens": 105078,
   "reason": null,
+  "cost_usd": 0.00510932,
   "minutes": 2.3
  },
  {
@@ -1629,6 +1724,7 @@
   "status": "failed",
   "tokens": 518816,
   "reason": "all_done",
+  "cost_usd": 0.017221120000000003,
   "minutes": 3
  },
  {
@@ -1646,6 +1742,7 @@
   "status": "failed",
   "tokens": 111882,
   "reason": null,
+  "cost_usd": 0.00512532,
   "minutes": 2.5
  },
  {
@@ -1663,6 +1760,7 @@
   "status": "failed",
   "tokens": 310438,
   "reason": "all_done",
+  "cost_usd": 0.012558120000000002,
   "minutes": 3
  },
  {
@@ -1680,6 +1778,7 @@
   "status": "failed",
   "tokens": 98413,
   "reason": null,
+  "cost_usd": 0.0046340999999999995,
   "minutes": 2.9
  },
  {
@@ -1697,6 +1796,7 @@
   "status": "failed",
   "tokens": 557171,
   "reason": "all_done",
+  "cost_usd": 0.016503340000000002,
   "minutes": 2.6
  },
  {
@@ -1714,6 +1814,7 @@
   "status": "failed",
   "tokens": 86630,
   "reason": null,
+  "cost_usd": 0.00443388,
   "minutes": 2.2
  },
  {
@@ -1731,6 +1832,7 @@
   "status": "failed",
   "tokens": 426980,
   "reason": "all_done",
+  "cost_usd": 0.01544384,
   "minutes": 3.3
  },
  {
@@ -1748,6 +1850,7 @@
   "status": "succeeded",
   "tokens": 33778,
   "reason": null,
+  "cost_usd": 0.0025134,
   "minutes": 0.9
  },
  {
@@ -1765,6 +1868,7 @@
   "status": "succeeded",
   "tokens": 480693,
   "reason": "all_done",
+  "cost_usd": 0.01510146,
   "minutes": 1.9
  },
  {
@@ -1782,6 +1886,7 @@
   "status": "succeeded",
   "tokens": 91393,
   "reason": null,
+  "cost_usd": 0.00550186,
   "minutes": 2
  },
  {
@@ -1799,6 +1904,7 @@
   "status": "succeeded",
   "tokens": 983972,
   "reason": "all_done",
+  "cost_usd": 0.03342592,
   "minutes": 3.6
  },
  {
@@ -1816,6 +1922,7 @@
   "status": "failed",
   "tokens": 79464,
   "reason": null,
+  "cost_usd": 0.005485040000000001,
   "minutes": 1.8
  },
  {
@@ -1833,6 +1940,7 @@
   "status": "succeeded",
   "tokens": 577401,
   "reason": "all_done",
+  "cost_usd": 0.02275178,
   "minutes": 2.5
  },
  {
@@ -1850,6 +1958,7 @@
   "status": "failed",
   "tokens": 103692,
   "reason": null,
+  "cost_usd": 0.0054021600000000005,
   "minutes": 2
  },
  {
@@ -1867,6 +1976,7 @@
   "status": "succeeded",
   "tokens": 1932120,
   "reason": "all_done",
+  "cost_usd": 0.04682608,
   "minutes": 4.3
  },
  {
@@ -1884,6 +1994,7 @@
   "status": "succeeded",
   "tokens": 131169,
   "reason": null,
+  "cost_usd": 0.00633418,
   "minutes": 2.5
  },
  {
@@ -1901,6 +2012,7 @@
   "status": "token_budget",
   "tokens": 3001402,
   "reason": "budget",
+  "cost_usd": 0.06230348000000001,
   "minutes": 7.1
  },
  {
@@ -1918,6 +2030,7 @@
   "status": "succeeded",
   "tokens": 160306,
   "reason": null,
+  "cost_usd": 0.00777236,
   "minutes": 2.3
  },
  {
@@ -1935,6 +2048,7 @@
   "status": "succeeded",
   "tokens": 183301,
   "reason": "all_done",
+  "cost_usd": 0.00900874,
   "minutes": 2.7
  },
  {
@@ -1952,6 +2066,7 @@
   "status": "succeeded",
   "tokens": 135257,
   "reason": null,
+  "cost_usd": 0.00653522,
   "minutes": 2.3
  },
  {
@@ -1969,6 +2084,7 @@
   "status": "succeeded",
   "tokens": 1261660,
   "reason": "all_done",
+  "cost_usd": 0.031054000000000002,
   "minutes": 3.6
  },
  {
@@ -1986,6 +2102,7 @@
   "status": "failed",
   "tokens": 116940,
   "reason": null,
+  "cost_usd": 0.00581992,
   "minutes": 2
  },
  {
@@ -2003,6 +2120,7 @@
   "status": "token_budget",
   "tokens": 3002577,
   "reason": "budget",
+  "cost_usd": 0.06813417999999999,
   "minutes": 5.3
  },
  {
@@ -2020,6 +2138,7 @@
   "status": "succeeded",
   "tokens": 162564,
   "reason": null,
+  "cost_usd": 0.00654192,
   "minutes": 2.3
  },
  {
@@ -2037,6 +2156,7 @@
   "status": "succeeded",
   "tokens": 1659067,
   "reason": "all_done",
+  "cost_usd": 0.042909340000000004,
   "minutes": 4.2
  },
  {
@@ -2054,6 +2174,7 @@
   "status": "succeeded",
   "tokens": 135244,
   "reason": null,
+  "cost_usd": 0.0061727200000000005,
   "minutes": 2.2
  },
  {
@@ -2071,6 +2192,7 @@
   "status": "succeeded",
   "tokens": 2032383,
   "reason": "all_done",
+  "cost_usd": 0.0444287,
   "minutes": 7.5
  },
  {
@@ -2088,6 +2210,7 @@
   "status": "failed",
   "tokens": 135674,
   "reason": null,
+  "cost_usd": 0.0062466,
   "minutes": 2.2
  },
  {
@@ -2105,6 +2228,7 @@
   "status": "succeeded",
   "tokens": 879814,
   "reason": "all_done",
+  "cost_usd": 0.026279559999999993,
   "minutes": 3
  },
  {
@@ -2122,6 +2246,7 @@
   "status": "failed",
   "tokens": 144691,
   "reason": null,
+  "cost_usd": 0.006009819999999999,
   "minutes": 2.2
  },
  {
@@ -2139,6 +2264,7 @@
   "status": "succeeded",
   "tokens": 1407326,
   "reason": "all_done",
+  "cost_usd": 0.03424812000000001,
   "minutes": 5.2
  },
  {
@@ -2156,6 +2282,7 @@
   "status": "succeeded",
   "tokens": 183059,
   "reason": null,
+  "cost_usd": 0.0072761399999999995,
   "minutes": 2.5
  },
  {
@@ -2173,6 +2300,7 @@
   "status": "succeeded",
   "tokens": 988636,
   "reason": "all_done",
+  "cost_usd": 0.028930240000000003,
   "minutes": 5.4
  },
  {
@@ -2190,6 +2318,7 @@
   "status": "failed",
   "tokens": 111203,
   "reason": null,
+  "cost_usd": 0.00628422,
   "minutes": 1.9
  },
  {
@@ -2207,6 +2336,7 @@
   "status": "succeeded",
   "tokens": 862994,
   "reason": "all_done",
+  "cost_usd": 0.02582148,
   "minutes": 2.7
  },
  {
@@ -2224,6 +2354,7 @@
   "status": "token_budget",
   "tokens": 3005374,
   "reason": "budget",
+  "cost_usd": 0.05883356000000001,
   "minutes": 5.4
  },
  {
@@ -2241,6 +2372,7 @@
   "status": "failed",
   "tokens": 1304816,
   "reason": "all_done",
+  "cost_usd": 0.0289964,
   "minutes": 4.2
  },
  {
@@ -2258,6 +2390,7 @@
   "status": "failed",
   "tokens": 185071,
   "reason": "all_done",
+  "cost_usd": 0.007246860000000001,
   "minutes": 2.4
  },
  {
@@ -2275,6 +2408,7 @@
   "status": "succeeded",
   "tokens": 2267808,
   "reason": "all_done",
+  "cost_usd": 0.04740264000000001,
   "minutes": 7.1
  },
  {
@@ -2292,6 +2426,7 @@
   "status": "succeeded",
   "tokens": 513178,
   "reason": "all_done",
+  "cost_usd": 0.014939639999999997,
   "minutes": 4.7
  },
  {
@@ -2309,6 +2444,7 @@
   "status": "token_budget",
   "tokens": 3009569,
   "reason": "budget",
+  "cost_usd": 0.06273753999999998,
   "minutes": 7.8
  },
  {
@@ -2326,6 +2462,7 @@
   "status": "succeeded",
   "tokens": 284557,
   "reason": "all_done",
+  "cost_usd": 0.00978794,
   "minutes": 2.7
  },
  {
@@ -2343,6 +2480,7 @@
   "status": "succeeded",
   "tokens": 60337,
   "reason": "quiescent",
+  "cost_usd": 0.0030813,
   "minutes": 1.3
  },
  {
@@ -2360,6 +2498,7 @@
   "status": "succeeded",
   "tokens": 1604401,
   "reason": "quiescent",
+  "cost_usd": 0.03728234,
   "minutes": 5
  },
  {
@@ -2377,6 +2516,7 @@
   "status": "failed",
   "tokens": 99515,
   "reason": "all_done",
+  "cost_usd": 0.00429294,
   "minutes": 2.7
  },
  {
@@ -2394,6 +2534,7 @@
   "status": "succeeded",
   "tokens": 2409561,
   "reason": "all_done",
+  "cost_usd": 0.054496659999999995,
   "minutes": 8.8
  },
  {
@@ -2411,6 +2552,7 @@
   "status": "succeeded",
   "tokens": 181227,
   "reason": "all_done",
+  "cost_usd": 0.008269659999999998,
   "minutes": 2.3
  },
  {
@@ -2428,6 +2570,7 @@
   "status": "succeeded",
   "tokens": 601098,
   "reason": "all_done",
+  "cost_usd": 0.021041160000000003,
   "minutes": 4.9
  },
  {
@@ -2445,6 +2588,7 @@
   "status": "succeeded",
   "tokens": 279918,
   "reason": "all_done",
+  "cost_usd": 0.00879316,
   "minutes": 3.1
  },
  {
@@ -2462,6 +2606,7 @@
   "status": "token_budget",
   "tokens": 3016694,
   "reason": "budget",
+  "cost_usd": 0.06380716,
   "minutes": 6
  },
  {
@@ -2479,6 +2624,7 @@
   "status": "succeeded",
   "tokens": 2941293,
   "reason": "all_done",
+  "cost_usd": 0.06049889999999999,
   "minutes": 7
  },
  {
@@ -2496,6 +2642,7 @@
   "status": "succeeded",
   "tokens": 212550,
   "reason": "all_done",
+  "cost_usd": 0.00788516,
   "minutes": 2.6
  },
  {
@@ -2513,6 +2660,7 @@
   "status": "failed",
   "tokens": 780779,
   "reason": "all_done",
+  "cost_usd": 0.0224887,
   "minutes": 4.6
  },
  {
@@ -2530,6 +2678,7 @@
   "status": "succeeded",
   "tokens": 172657,
   "reason": "all_done",
+  "cost_usd": 0.0077837800000000006,
   "minutes": 3
  },
  {
@@ -2547,6 +2696,7 @@
   "status": "succeeded",
   "tokens": 2807553,
   "reason": "all_done",
+  "cost_usd": 0.057462740000000005,
   "minutes": 5.5
  },
  {
@@ -2564,6 +2714,7 @@
   "status": "failed",
   "tokens": 270137,
   "reason": "all_done",
+  "cost_usd": 0.0104069,
   "minutes": 3.2
  },
  {
@@ -2581,6 +2732,7 @@
   "status": "failed",
   "tokens": 185436,
   "reason": null,
+  "cost_usd": 0.007279120000000001,
   "minutes": 3.1
  },
  {
@@ -2598,6 +2750,7 @@
   "status": "failed",
   "tokens": 98248,
   "reason": null,
+  "cost_usd": 0.00534224,
   "minutes": 2.3
  },
  {
@@ -2615,6 +2768,7 @@
   "status": "failed",
   "tokens": 254910,
   "reason": null,
+  "cost_usd": 0.008140119999999999,
   "minutes": 2.3
  },
  {
@@ -2632,6 +2786,7 @@
   "status": "failed",
   "tokens": 537748,
   "reason": "all_done",
+  "cost_usd": 0.01911456,
   "minutes": 5.6
  },
  {
@@ -2649,6 +2804,7 @@
   "status": "failed",
   "tokens": 595422,
   "reason": "all_done",
+  "cost_usd": 0.013741240000000002,
   "minutes": 4
  },
  {
@@ -2666,6 +2822,7 @@
   "status": "failed",
   "tokens": 252976,
   "reason": "all_done",
+  "cost_usd": 0.008633920000000002,
   "minutes": 4.7
  },
  {
@@ -2683,6 +2840,7 @@
   "status": "succeeded",
   "tokens": 1211116,
   "reason": "all_done",
+  "cost_usd": 0.02634056,
   "minutes": 3.9
  },
  {
@@ -2700,6 +2858,7 @@
   "status": "succeeded",
   "tokens": 2470669,
   "reason": "all_done",
+  "cost_usd": 0.04673178,
   "minutes": 6
  },
  {
@@ -2717,6 +2876,7 @@
   "status": "failed",
   "tokens": 1087580,
   "reason": "all_done",
+  "cost_usd": 0.02807488,
   "minutes": 6.4
  },
  {
@@ -2734,6 +2894,7 @@
   "status": "failed",
   "tokens": 326943,
   "reason": "all_done",
+  "cost_usd": 0.010687739999999998,
   "minutes": 2.9
  },
  {
@@ -2751,6 +2912,7 @@
   "status": "token_budget",
   "tokens": 3014994,
   "reason": "budget",
+  "cost_usd": 0.058741079999999994,
   "minutes": 9.9
  },
  {
@@ -2768,6 +2930,7 @@
   "status": "failed",
   "tokens": 674891,
   "reason": "all_done",
+  "cost_usd": 0.01796854,
   "minutes": 5.5
  },
  {
@@ -2785,6 +2948,7 @@
   "status": "token_budget",
   "tokens": 3027009,
   "reason": "budget",
+  "cost_usd": 0.05903562,
   "minutes": 5.4
  },
  {
@@ -2802,6 +2966,7 @@
   "status": "token_budget",
   "tokens": 3003788,
   "reason": "budget",
+  "cost_usd": 0.05841696,
   "minutes": 7.8
  },
  {
@@ -2819,6 +2984,7 @@
   "status": "succeeded",
   "tokens": 246422,
   "reason": "quiescent",
+  "cost_usd": 0.010035160000000001,
   "minutes": 2.6
  },
  {
@@ -2836,6 +3002,7 @@
   "status": "succeeded",
   "tokens": 1647479,
   "reason": "all_done",
+  "cost_usd": 0.03899821999999999,
   "minutes": 5.9
  },
  {
@@ -2853,6 +3020,7 @@
   "status": "succeeded",
   "tokens": 2548536,
   "reason": "all_done",
+  "cost_usd": 0.06006376,
   "minutes": 6.2
  },
  {
@@ -2870,6 +3038,7 @@
   "status": "succeeded",
   "tokens": 276983,
   "reason": "all_done",
+  "cost_usd": 0.01074414,
   "minutes": 3.3
  },
  {
@@ -2887,6 +3056,7 @@
   "status": "succeeded",
   "tokens": 781847,
   "reason": "all_done",
+  "cost_usd": 0.022674700000000002,
   "minutes": 3.1
  },
  {
@@ -2904,6 +3074,7 @@
   "status": "succeeded",
   "tokens": 1617934,
   "reason": "all_done",
+  "cost_usd": 0.04898755999999999,
   "minutes": 4.8
  },
  {
@@ -2921,6 +3092,7 @@
   "status": "succeeded",
   "tokens": 718401,
   "reason": "all_done",
+  "cost_usd": 0.02376946,
   "minutes": 3.6
  },
  {
@@ -2938,6 +3110,7 @@
   "status": "succeeded",
   "tokens": 260794,
   "reason": "all_done",
+  "cost_usd": 0.00841924,
   "minutes": 2.6
  },
  {
@@ -2955,6 +3128,7 @@
   "status": "succeeded",
   "tokens": 1258575,
   "reason": "all_done",
+  "cost_usd": 0.033835899999999995,
   "minutes": 5.1
  },
  {
@@ -2972,6 +3146,7 @@
   "status": "succeeded",
   "tokens": 1233042,
   "reason": "all_done",
+  "cost_usd": 0.03208004,
   "minutes": 3.8
  },
  {
@@ -2989,6 +3164,7 @@
   "status": "succeeded",
   "tokens": 1056925,
   "reason": "all_done",
+  "cost_usd": 0.0312193,
   "minutes": 2.9
  },
  {
@@ -3006,6 +3182,7 @@
   "status": "succeeded",
   "tokens": 685528,
   "reason": "all_done",
+  "cost_usd": 0.02114432,
   "minutes": 2.9
  },
  {
@@ -3023,6 +3200,7 @@
   "status": "succeeded",
   "tokens": 1334216,
   "reason": "all_done",
+  "cost_usd": 0.03552352,
   "minutes": 4.2
  },
  {
@@ -3040,6 +3218,7 @@
   "status": "succeeded",
   "tokens": 307549,
   "reason": "all_done",
+  "cost_usd": 0.0095997,
   "minutes": 2.8
  },
  {
@@ -3057,6 +3236,7 @@
   "status": "failed",
   "tokens": 175343,
   "reason": null,
+  "cost_usd": 0.006651500000000001,
   "minutes": 3.6
  },
  {
@@ -3074,6 +3254,7 @@
   "status": "failed",
   "tokens": 182191,
   "reason": null,
+  "cost_usd": 0.008796860000000002,
   "minutes": 3.2
  },
  {
@@ -3091,6 +3272,7 @@
   "status": "failed",
   "tokens": 247718,
   "reason": null,
+  "cost_usd": 0.00757236,
   "minutes": 2.3
  },
  {
@@ -3108,6 +3290,7 @@
   "status": "succeeded",
   "tokens": 222679,
   "reason": "all_done",
+  "cost_usd": 0.007473260000000001,
   "minutes": 2.5
  },
  {
@@ -3125,6 +3308,7 @@
   "status": "failed",
   "tokens": 242733,
   "reason": "all_done",
+  "cost_usd": 0.009638020000000002,
   "minutes": 2.5
  },
  {
@@ -3142,6 +3326,7 @@
   "status": "failed",
   "tokens": 284589,
   "reason": "all_done",
+  "cost_usd": 0.00811906,
   "minutes": 2.4
  },
  {
@@ -3159,6 +3344,7 @@
   "status": "succeeded",
   "tokens": 228707,
   "reason": "all_done",
+  "cost_usd": 0.00943838,
   "minutes": 2.8
  },
  {
@@ -3176,6 +3362,7 @@
   "status": "succeeded",
   "tokens": 1009598,
   "reason": "quiescent",
+  "cost_usd": 0.02964116,
   "minutes": 3
  },
  {
@@ -3193,6 +3380,7 @@
   "status": "succeeded",
   "tokens": 1555783,
   "reason": "all_done",
+  "cost_usd": 0.03756021999999999,
   "minutes": 4.2
  },
  {
@@ -3210,6 +3398,7 @@
   "status": "succeeded",
   "tokens": 290082,
   "reason": "all_done",
+  "cost_usd": 0.0109362,
   "minutes": 2.9
  },
  {
@@ -3227,6 +3416,7 @@
   "status": "failed",
   "tokens": 178041,
   "reason": "quiescent",
+  "cost_usd": 0.0068061000000000016,
   "minutes": 2.3
  },
  {
@@ -3244,6 +3434,7 @@
   "status": "succeeded",
   "tokens": 2939980,
   "reason": "all_done",
+  "cost_usd": 0.0631852,
   "minutes": 6.2
  },
  {
@@ -3261,6 +3452,7 @@
   "status": "token_budget",
   "tokens": 3006875,
   "reason": "budget",
+  "cost_usd": 0.06277750000000003,
   "minutes": 5.9
  },
  {
@@ -3278,6 +3470,7 @@
   "status": "succeeded",
   "tokens": 1245730,
   "reason": "all_done",
+  "cost_usd": 0.025835800000000003,
   "minutes": 7.4
  },
  {
@@ -3295,6 +3488,7 @@
   "status": "succeeded",
   "tokens": 2311005,
   "reason": "all_done",
+  "cost_usd": 0.053155060000000004,
   "minutes": 11.1
  },
  {
@@ -3312,6 +3506,7 @@
   "status": "failed",
   "tokens": 1868038,
   "reason": "all_done",
+  "cost_usd": 0.039641560000000006,
   "minutes": 8.1
  },
  {
@@ -3329,6 +3524,7 @@
   "status": "succeeded",
   "tokens": 550490,
   "reason": "all_done",
+  "cost_usd": 0.01591084,
   "minutes": 5
  },
  {
@@ -3346,6 +3542,7 @@
   "status": "succeeded",
   "tokens": 184811,
   "reason": "all_done",
+  "cost_usd": 0.007507340000000001,
   "minutes": 2.6
  },
  {
@@ -3363,6 +3560,7 @@
   "status": "succeeded",
   "tokens": 1045041,
   "reason": "all_done",
+  "cost_usd": 0.030005620000000004,
   "minutes": 2.9
  },
  {
@@ -3380,6 +3578,7 @@
   "status": "succeeded",
   "tokens": 1041115,
   "reason": "all_done",
+  "cost_usd": 0.027355580000000004,
   "minutes": 2.9
  },
  {
@@ -3397,6 +3596,7 @@
   "status": "failed",
   "tokens": 186201,
   "reason": "all_done",
+  "cost_usd": 0.008050900000000001,
   "minutes": 2.2
  },
  {
@@ -3414,6 +3614,7 @@
   "status": "succeeded",
   "tokens": 326819,
   "reason": "all_done",
+  "cost_usd": 0.011751499999999996,
   "minutes": 3
  },
  {
@@ -3431,6 +3632,7 @@
   "status": "succeeded",
   "tokens": 1078554,
   "reason": "quiescent",
+  "cost_usd": 0.029696680000000003,
   "minutes": 3.1
  },
  {
@@ -3448,6 +3650,7 @@
   "status": "succeeded",
   "tokens": 836899,
   "reason": "all_done",
+  "cost_usd": 0.02270062,
   "minutes": 3.7
  },
  {
@@ -3465,6 +3668,7 @@
   "status": "succeeded",
   "tokens": 156507,
   "reason": "all_done",
+  "cost_usd": 0.008607019999999998,
   "minutes": 2.6
  },
  {
@@ -3482,6 +3686,7 @@
   "status": "succeeded",
   "tokens": 305654,
   "reason": "all_done",
+  "cost_usd": 0.010749400000000003,
   "minutes": 2.9
  },
  {
@@ -3499,6 +3704,7 @@
   "status": "token_budget",
   "tokens": 3000095,
   "reason": "budget",
+  "cost_usd": 0.06005093999999999,
   "minutes": 4
  },
  {
@@ -3516,6 +3722,7 @@
   "status": "succeeded",
   "tokens": 282047,
   "reason": "all_done",
+  "cost_usd": 0.00912302,
   "minutes": 2.9
  },
  {
@@ -3533,6 +3740,7 @@
   "status": "succeeded",
   "tokens": 558969,
   "reason": "all_done",
+  "cost_usd": 0.018807860000000003,
   "minutes": 3.1
  },
  {
@@ -3550,6 +3758,7 @@
   "status": "succeeded",
   "tokens": 1747832,
   "reason": "all_done",
+  "cost_usd": 0.04134656,
   "minutes": 3.9
  },
  {
@@ -3567,6 +3776,7 @@
   "status": "succeeded",
   "tokens": 145829,
   "reason": "all_done",
+  "cost_usd": 0.0068277,
   "minutes": 2.3
  },
  {
@@ -3584,6 +3794,7 @@
   "status": "succeeded",
   "tokens": 619686,
   "reason": "quiescent",
+  "cost_usd": 0.014885480000000001,
   "minutes": 3.8
  },
  {
@@ -3601,6 +3812,7 @@
   "status": "succeeded",
   "tokens": 933807,
   "reason": "all_done",
+  "cost_usd": 0.024237020000000005,
   "minutes": 5.3
  },
  {
@@ -3618,6 +3830,7 @@
   "status": "failed",
   "tokens": 246525,
   "reason": "quiescent",
+  "cost_usd": 0.008312979999999998,
   "minutes": 3.1
  },
  {
@@ -3635,6 +3848,7 @@
   "status": "succeeded",
   "tokens": 1014420,
   "reason": "all_done",
+  "cost_usd": 0.02413808,
   "minutes": 4.8
  },
  {
@@ -3652,6 +3866,7 @@
   "status": "succeeded",
   "tokens": 978652,
   "reason": "all_done",
+  "cost_usd": 0.022305199999999997,
   "minutes": 5.6
  },
  {
@@ -3669,6 +3884,7 @@
   "status": "failed",
   "tokens": 443074,
   "reason": "all_done",
+  "cost_usd": 0.01268292,
   "minutes": 1.1
  },
  {
@@ -3686,6 +3902,7 @@
   "status": "failed",
   "tokens": 1391769,
   "reason": "all_done",
+  "cost_usd": 0.03440074,
   "minutes": 4.9
  },
  {
@@ -3703,6 +3920,7 @@
   "status": "succeeded",
   "tokens": 1301684,
   "reason": "all_done",
+  "cost_usd": 0.02799288,
   "minutes": 7.4
  },
  {
@@ -3720,6 +3938,7 @@
   "status": "succeeded",
   "tokens": 1350080,
   "reason": "all_done",
+  "cost_usd": 0.031884319999999994,
   "minutes": 4.5
  },
  {
@@ -3737,6 +3956,7 @@
   "status": "succeeded",
   "tokens": 2348640,
   "reason": "all_done",
+  "cost_usd": 0.04705936000000002,
   "minutes": 12.6
  },
  {
@@ -3754,6 +3974,7 @@
   "status": "succeeded",
   "tokens": 1193571,
   "reason": "all_done",
+  "cost_usd": 0.03457438,
   "minutes": 7.4
  },
  {
@@ -3771,6 +3992,7 @@
   "status": "failed",
   "tokens": 980149,
   "reason": "all_done",
+  "cost_usd": 0.021906339999999996,
   "minutes": 2
  },
  {
@@ -3788,6 +4010,7 @@
   "status": "token_budget",
   "tokens": 3021610,
   "reason": "budget",
+  "cost_usd": 0.05408979999999998,
   "minutes": 12.3
  },
  {
@@ -3805,6 +4028,7 @@
   "status": "failed",
   "tokens": 1519338,
   "reason": "all_done",
+  "cost_usd": 0.03087052,
   "minutes": 2.2
  },
  {
@@ -3822,6 +4046,7 @@
   "status": "token_budget",
   "tokens": 3035155,
   "reason": "budget",
+  "cost_usd": 0.052223580000000006,
   "minutes": 12.1
  },
  {
@@ -3839,6 +4064,7 @@
   "status": "succeeded",
   "tokens": 2001017,
   "reason": "quiescent",
+  "cost_usd": 0.04816554000000001,
   "minutes": 9.9
  },
  {
@@ -3856,6 +4082,7 @@
   "status": "token_budget",
   "tokens": 3026758,
   "reason": "budget",
+  "cost_usd": 0.0594738,
   "minutes": 5.6
  },
  {
@@ -3873,6 +4100,7 @@
   "status": "timeout",
   "tokens": 2782419,
   "reason": "timeout",
+  "cost_usd": 0.06617774000000001,
   "minutes": 18
  },
  {
@@ -3890,6 +4118,7 @@
   "status": "failed",
   "tokens": 1866384,
   "reason": "all_done",
+  "cost_usd": 0.0447476,
   "minutes": 5.1
  },
  {
@@ -3907,6 +4136,7 @@
   "status": "succeeded",
   "tokens": 1738927,
   "reason": "all_done",
+  "cost_usd": 0.04101093999999999,
   "minutes": 12.1
  },
  {
@@ -3924,6 +4154,7 @@
   "status": "failed",
   "tokens": 1312767,
   "reason": "quiescent",
+  "cost_usd": 0.03330318,
   "minutes": 3.3
  },
  {
@@ -3941,6 +4172,7 @@
   "status": "succeeded",
   "tokens": 1451160,
   "reason": "all_done",
+  "cost_usd": 0.03452399999999999,
   "minutes": 9.7
  },
  {
@@ -3958,6 +4190,7 @@
   "status": "succeeded",
   "tokens": 974617,
   "reason": "quiescent",
+  "cost_usd": 0.0229773,
   "minutes": 6.3
  },
  {
@@ -3975,6 +4208,7 @@
   "status": "token_budget",
   "tokens": 3008976,
   "reason": "budget",
+  "cost_usd": 0.057189920000000005,
   "minutes": 5.1
  },
  {
@@ -3992,6 +4226,7 @@
   "status": "failed",
   "tokens": 1503014,
   "reason": "all_done",
+  "cost_usd": 0.03526356,
   "minutes": 6.2
  },
  {
@@ -4009,6 +4244,7 @@
   "status": "token_budget",
   "tokens": 3019345,
   "reason": "budget",
+  "cost_usd": 0.05165897999999999,
   "minutes": 12.1
  },
  {
@@ -4026,6 +4262,7 @@
   "status": "failed",
   "tokens": 1039208,
   "reason": "quiescent",
+  "cost_usd": 0.02706416,
   "minutes": 6.6
  },
  {
@@ -4043,6 +4280,7 @@
   "status": "token_budget",
   "tokens": 3017591,
   "reason": "budget",
+  "cost_usd": 0.06504998,
   "minutes": 5.9
  },
  {
@@ -4060,6 +4298,7 @@
   "status": "token_budget",
   "tokens": 3003436,
   "reason": "budget",
+  "cost_usd": 0.07003048,
   "minutes": 6.9
  },
  {
@@ -4077,6 +4316,7 @@
   "status": "succeeded",
   "tokens": 1203845,
   "reason": "quiescent",
+  "cost_usd": 0.03217442000000001,
   "minutes": 5.7
  },
  {
@@ -4094,6 +4334,7 @@
   "status": "succeeded",
   "tokens": 2919549,
   "reason": "all_done",
+  "cost_usd": 0.05444217999999999,
   "minutes": 12.4
  },
  {
@@ -4111,6 +4352,7 @@
   "status": "failed",
   "tokens": 1295207,
   "reason": "all_done",
+  "cost_usd": 0.03464118,
   "minutes": 6.1
  },
  {
@@ -4128,6 +4370,7 @@
   "status": "succeeded",
   "tokens": 2704896,
   "reason": "all_done",
+  "cost_usd": 0.05253039999999999,
   "minutes": 12.7
  },
  {
@@ -4145,6 +4388,7 @@
   "status": "succeeded",
   "tokens": 1407234,
   "reason": "quiescent",
+  "cost_usd": 0.0289834,
   "minutes": 7.6
  },
  {
@@ -4162,6 +4406,7 @@
   "status": "token_budget",
   "tokens": 3038310,
   "reason": "budget",
+  "cost_usd": 0.06352371999999998,
   "minutes": 10
  },
  {
@@ -4179,6 +4424,7 @@
   "status": "token_budget",
   "tokens": 3022208,
   "reason": "budget",
+  "cost_usd": 0.05416712000000001,
   "minutes": 9.4
  },
  {
@@ -4196,6 +4442,7 @@
   "status": "failed",
   "tokens": 265421,
   "reason": "quiescent",
+  "cost_usd": 0.008461300000000001,
   "minutes": 2.5
  },
  {
@@ -4213,6 +4460,7 @@
   "status": "succeeded",
   "tokens": 2067065,
   "reason": "all_done",
+  "cost_usd": 0.044236339999999985,
   "minutes": 11.4
  },
  {
@@ -4230,6 +4478,7 @@
   "status": "failed",
   "tokens": 304930,
   "reason": "all_done",
+  "cost_usd": 0.01069212,
   "minutes": 2.8
  },
  {
@@ -4247,6 +4496,7 @@
   "status": "succeeded",
   "tokens": 2734129,
   "reason": "all_done",
+  "cost_usd": 0.05267242000000001,
   "minutes": 13.1
  },
  {
@@ -4264,6 +4514,7 @@
   "status": "failed",
   "tokens": 603543,
   "reason": "quiescent",
+  "cost_usd": 0.014974779999999998,
   "minutes": 4
  },
  {
@@ -4281,6 +4532,7 @@
   "status": "succeeded",
   "tokens": 1374052,
   "reason": "all_done",
+  "cost_usd": 0.0347528,
   "minutes": 9.4
  },
  {
@@ -4298,6 +4550,7 @@
   "status": "succeeded",
   "tokens": 360196,
   "reason": "all_done",
+  "cost_usd": 0.009466559999999999,
   "minutes": 2.6
  },
  {
@@ -4315,6 +4568,7 @@
   "status": "succeeded",
   "tokens": 1149475,
   "reason": "all_done",
+  "cost_usd": 0.028662539999999993,
   "minutes": 8.1
  },
  {
@@ -4332,6 +4586,7 @@
   "status": "succeeded",
   "tokens": 2568152,
   "reason": "all_done",
+  "cost_usd": 0.05030039999999999,
   "minutes": 13.8
  },
  {
@@ -4349,6 +4604,7 @@
   "status": "failed",
   "tokens": 195131,
   "reason": "all_done",
+  "cost_usd": 0.00848798,
   "minutes": 2.3
  },
  {
@@ -4366,6 +4622,7 @@
   "status": "token_budget",
   "tokens": 3029013,
   "reason": "budget",
+  "cost_usd": 0.05366314000000002,
   "minutes": 12.3
  },
  {
@@ -4383,6 +4640,7 @@
   "status": "failed",
   "tokens": 627172,
   "reason": "all_done",
+  "cost_usd": 0.01782568,
   "minutes": 5.1
  },
  {
@@ -4400,6 +4658,7 @@
   "status": "succeeded",
   "tokens": 1540845,
   "reason": "all_done",
+  "cost_usd": 0.03519706000000001,
   "minutes": 11.3
  },
  {
@@ -4417,6 +4676,7 @@
   "status": "failed",
   "tokens": 206758,
   "reason": "quiescent",
+  "cost_usd": 0.00715604,
   "minutes": 2
  },
  {
@@ -4434,6 +4694,7 @@
   "status": "succeeded",
   "tokens": 833036,
   "reason": "all_done",
+  "cost_usd": 0.023417519999999997,
   "minutes": 7.6
  },
  {
@@ -4451,6 +4712,7 @@
   "status": "succeeded",
   "tokens": 2023372,
   "reason": "all_done",
+  "cost_usd": 0.041598480000000014,
   "minutes": 10.9
  },
  {
@@ -4468,6 +4730,7 @@
   "status": "failed",
   "tokens": 332498,
   "reason": "quiescent",
+  "cost_usd": 0.010677319999999999,
   "minutes": 3.4
  },
  {
@@ -4485,6 +4748,7 @@
   "status": "token_budget",
   "tokens": 3041117,
   "reason": "budget",
+  "cost_usd": 0.05448418,
   "minutes": 13.8
  },
  {
@@ -4502,6 +4766,7 @@
   "status": "failed",
   "tokens": 728461,
   "reason": "all_done",
+  "cost_usd": 0.0163505,
   "minutes": 4.3
  },
  {
@@ -4519,6 +4784,7 @@
   "status": "succeeded",
   "tokens": 1290932,
   "reason": "all_done",
+  "cost_usd": 0.029491679999999996,
   "minutes": 8.5
  },
  {
@@ -4536,6 +4802,7 @@
   "status": "failed",
   "tokens": 224890,
   "reason": "all_done",
+  "cost_usd": 0.007254999999999999,
   "minutes": 2.1
  },
  {
@@ -4553,6 +4820,7 @@
   "status": "succeeded",
   "tokens": 1229987,
   "reason": "all_done",
+  "cost_usd": 0.031698460000000005,
   "minutes": 13.6
  },
  {
@@ -4570,6 +4838,7 @@
   "status": "succeeded",
   "tokens": 1763535,
   "reason": "all_done",
+  "cost_usd": 0.0381275,
   "minutes": 14.1
  },
  {
@@ -4587,6 +4856,7 @@
   "status": "succeeded",
   "tokens": 759792,
   "reason": "all_done",
+  "cost_usd": 0.02029024,
   "minutes": 6.1
  },
  {
@@ -4604,6 +4874,7 @@
   "status": "succeeded",
   "tokens": 314368,
   "reason": "all_done",
+  "cost_usd": 0.01148648,
   "minutes": 3.9
  },
  {
@@ -4621,6 +4892,7 @@
   "status": "succeeded",
   "tokens": 536934,
   "reason": "all_done",
+  "cost_usd": 0.01699244,
   "minutes": 5.7
  },
  {
@@ -4638,6 +4910,7 @@
   "status": "succeeded",
   "tokens": 427069,
   "reason": "all_done",
+  "cost_usd": 0.01301802,
   "minutes": 8.9
  },
  {
@@ -4655,6 +4928,7 @@
   "status": "succeeded",
   "tokens": 468794,
   "reason": "all_done",
+  "cost_usd": 0.019534360000000004,
   "minutes": 5.9
  },
  {
@@ -4672,6 +4946,7 @@
   "status": "succeeded",
   "tokens": 1556734,
   "reason": "all_done",
+  "cost_usd": 0.03604884,
   "minutes": 12.3
  },
  {
@@ -4689,6 +4964,7 @@
   "status": "token_budget",
   "tokens": 3051658,
   "reason": "budget",
+  "cost_usd": 0.0555162,
   "minutes": 9.3
  },
  {
@@ -4706,6 +4982,7 @@
   "status": "succeeded",
   "tokens": 109344,
   "reason": "all_done",
+  "cost_usd": 0.0035870400000000005,
   "minutes": 1.4
  },
  {
@@ -4723,6 +5000,7 @@
   "status": "succeeded",
   "tokens": 30099,
   "reason": null,
+  "cost_usd": 0.00185046,
   "minutes": 0.8
  },
  {
@@ -4740,6 +5018,7 @@
   "status": "succeeded",
   "tokens": 302178,
   "reason": "all_done",
+  "cost_usd": 0.010077079999999999,
   "minutes": 4.3
  },
  {
@@ -4757,6 +5036,7 @@
   "status": "failed",
   "tokens": 62489,
   "reason": null,
+  "cost_usd": 0.00339026,
   "minutes": 1.2
  },
  {
@@ -4774,6 +5054,7 @@
   "status": "succeeded",
   "tokens": 116734,
   "reason": "quiescent",
+  "cost_usd": 0.004669800000000001,
   "minutes": 2.2
  },
  {
@@ -4791,6 +5072,7 @@
   "status": "succeeded",
   "tokens": 39346,
   "reason": null,
+  "cost_usd": 0.0021902,
   "minutes": 0.8
  },
  {
@@ -4808,6 +5090,7 @@
   "status": "succeeded",
   "tokens": 85467,
   "reason": "all_done",
+  "cost_usd": 0.0036770199999999996,
   "minutes": 1.2
  },
  {
@@ -4825,6 +5108,7 @@
   "status": "failed",
   "tokens": 165966,
   "reason": null,
+  "cost_usd": 0.00490972,
   "minutes": 1.3
  },
  {
@@ -4842,6 +5126,7 @@
   "status": "succeeded",
   "tokens": 561565,
   "reason": "all_done",
+  "cost_usd": 0.016760579999999997,
   "minutes": 7.7
  },
  {
@@ -4859,6 +5144,7 @@
   "status": "succeeded",
   "tokens": 25769,
   "reason": null,
+  "cost_usd": 0.00256322,
   "minutes": 0.8
  },
  {
@@ -4876,6 +5162,7 @@
   "status": "succeeded",
   "tokens": 62228,
   "reason": "all_done",
+  "cost_usd": 0.00329048,
   "minutes": 1.2
  },
  {
@@ -4893,6 +5180,7 @@
   "status": "succeeded",
   "tokens": 45167,
   "reason": null,
+  "cost_usd": 0.00256358,
   "minutes": 0.8
  },
  {
@@ -4910,6 +5198,7 @@
   "status": "succeeded",
   "tokens": 148441,
   "reason": "quiescent",
+  "cost_usd": 0.0066086600000000014,
   "minutes": 4
  },
  {
@@ -4927,6 +5216,7 @@
   "status": "succeeded",
   "tokens": 31270,
   "reason": null,
+  "cost_usd": 0.00193036,
   "minutes": 0.9
  },
  {
@@ -4944,6 +5234,7 @@
   "status": "succeeded",
   "tokens": 236490,
   "reason": "all_done",
+  "cost_usd": 0.01004148,
   "minutes": 4.9
  },
  {
@@ -4961,6 +5252,7 @@
   "status": "succeeded",
   "tokens": 28781,
   "reason": null,
+  "cost_usd": 0.00205242,
   "minutes": 1.3
  },
  {
@@ -4978,6 +5270,7 @@
   "status": "succeeded",
   "tokens": 91156,
   "reason": "all_done",
+  "cost_usd": 0.00483616,
   "minutes": 2.3
  },
  {
@@ -4995,6 +5288,7 @@
   "status": "succeeded",
   "tokens": 90083,
   "reason": null,
+  "cost_usd": 0.0034983799999999997,
   "minutes": 1.3
  },
  {
@@ -5012,6 +5306,7 @@
   "status": "succeeded",
   "tokens": 279130,
   "reason": "all_done",
+  "cost_usd": 0.008350200000000002,
   "minutes": 3.2
  },
  {
@@ -5029,6 +5324,7 @@
   "status": "succeeded",
   "tokens": 75171,
   "reason": null,
+  "cost_usd": 0.0033491000000000003,
   "minutes": 1.1
  },
  {
@@ -5046,6 +5342,7 @@
   "status": "succeeded",
   "tokens": 801240,
   "reason": "all_done",
+  "cost_usd": 0.020973199999999994,
   "minutes": 11.3
  },
  {
@@ -5063,6 +5360,7 @@
   "status": "succeeded",
   "tokens": 30661,
   "reason": null,
+  "cost_usd": 0.00231898,
   "minutes": 0.8
  },
  {
@@ -5080,6 +5378,7 @@
   "status": "succeeded",
   "tokens": 460672,
   "reason": "all_done",
+  "cost_usd": 0.015282399999999998,
   "minutes": 8.5
  },
  {
@@ -5097,6 +5396,7 @@
   "status": "succeeded",
   "tokens": 24748,
   "reason": null,
+  "cost_usd": 0.00152864,
   "minutes": 1
  },
  {
@@ -5114,6 +5414,7 @@
   "status": "succeeded",
   "tokens": 84682,
   "reason": "all_done",
+  "cost_usd": 0.00511764,
   "minutes": 1.9
  },
  {
@@ -5131,6 +5432,7 @@
   "status": "succeeded",
   "tokens": 35345,
   "reason": null,
+  "cost_usd": 0.0023176200000000003,
   "minutes": 1
  },
  {
@@ -5148,6 +5450,7 @@
   "status": "succeeded",
   "tokens": 83136,
   "reason": "quiescent",
+  "cost_usd": 0.00492712,
   "minutes": 1.7
  },
  {
@@ -5165,6 +5468,7 @@
   "status": "succeeded",
   "tokens": 43779,
   "reason": null,
+  "cost_usd": 0.0023702200000000006,
   "minutes": 1.1
  },
  {
@@ -5182,6 +5486,7 @@
   "status": "succeeded",
   "tokens": 394051,
   "reason": "all_done",
+  "cost_usd": 0.012915020000000004,
   "minutes": 8
  },
  {
@@ -5199,6 +5504,7 @@
   "status": "succeeded",
   "tokens": 30561,
   "reason": null,
+  "cost_usd": 0.00182466,
   "minutes": 0.8
  },
  {
@@ -5216,6 +5522,7 @@
   "status": "succeeded",
   "tokens": 88134,
   "reason": "all_done",
+  "cost_usd": 0.0044162,
   "minutes": 1.7
  },
  {
@@ -5233,6 +5540,7 @@
   "status": "succeeded",
   "tokens": 46826,
   "reason": null,
+  "cost_usd": 0.00308972,
   "minutes": 1
  },
  {
@@ -5250,6 +5558,7 @@
   "status": "succeeded",
   "tokens": 1248385,
   "reason": "all_done",
+  "cost_usd": 0.031058580000000002,
   "minutes": 9.7
  },
  {
@@ -5267,6 +5576,7 @@
   "status": "succeeded",
   "tokens": 26443,
   "reason": null,
+  "cost_usd": 0.0017874199999999999,
   "minutes": 0.7
  },
  {
@@ -5284,6 +5594,7 @@
   "status": "succeeded",
   "tokens": 410900,
   "reason": "quiescent",
+  "cost_usd": 0.012920399999999999,
   "minutes": 9
  },
  {
@@ -5301,6 +5612,7 @@
   "status": "succeeded",
   "tokens": 31647,
   "reason": null,
+  "cost_usd": 0.0020090999999999998,
   "minutes": 0.7
  },
  {
@@ -5318,6 +5630,7 @@
   "status": "succeeded",
   "tokens": 151844,
   "reason": "all_done",
+  "cost_usd": 0.00592264,
   "minutes": 4.4
  },
  {
@@ -5335,6 +5648,7 @@
   "status": "succeeded",
   "tokens": 169458,
   "reason": "all_done",
+  "cost_usd": 0.00747604,
   "minutes": 4.8
  },
  {
@@ -5352,6 +5666,7 @@
   "status": "succeeded",
   "tokens": 104438,
   "reason": "all_done",
+  "cost_usd": 0.00509764,
   "minutes": 4.4
  },
  {
@@ -5369,6 +5684,7 @@
   "status": "succeeded",
   "tokens": 118031,
   "reason": "all_done",
+  "cost_usd": 0.00660302,
   "minutes": 2.7
  },
  {
@@ -5386,6 +5702,7 @@
   "status": "succeeded",
   "tokens": 186422,
   "reason": "all_done",
+  "cost_usd": 0.007152440000000001,
   "minutes": 3.3
  },
  {
@@ -5403,6 +5720,7 @@
   "status": "succeeded",
   "tokens": 576699,
   "reason": "all_done",
+  "cost_usd": 0.015092139999999999,
   "minutes": 5.2
  },
  {
@@ -5420,6 +5738,7 @@
   "status": "succeeded",
   "tokens": 168620,
   "reason": "all_done",
+  "cost_usd": 0.00567664,
   "minutes": 2.1
  },
  {
@@ -5437,6 +5756,7 @@
   "status": "succeeded",
   "tokens": 154912,
   "reason": "quiescent",
+  "cost_usd": 0.006882879999999999,
   "minutes": 6.2
  },
  {
@@ -5454,6 +5774,7 @@
   "status": "succeeded",
   "tokens": 350186,
   "reason": "all_done",
+  "cost_usd": 0.009555,
   "minutes": 4.5
  },
  {
@@ -5471,6 +5792,7 @@
   "status": "token_budget",
   "tokens": 6057851,
   "reason": "budget",
+  "cost_usd": 0.10496037999999999,
   "minutes": 22.8
  },
  {
@@ -5488,6 +5810,7 @@
   "status": "token_budget",
   "tokens": 6024073,
   "reason": "budget",
+  "cost_usd": 0.08462938000000002,
   "minutes": 12.1
  },
  {
@@ -5505,6 +5828,7 @@
   "status": "token_budget",
   "tokens": 6009052,
   "reason": "budget",
+  "cost_usd": 0.09601848000000003,
   "minutes": 18
  },
  {
@@ -5522,6 +5846,7 @@
   "status": "token_budget",
   "tokens": 6018378,
   "reason": "budget",
+  "cost_usd": 0.09066579999999998,
   "minutes": 20.1
  },
  {
@@ -5539,6 +5864,7 @@
   "status": "token_budget",
   "tokens": 6015716,
   "reason": "budget",
+  "cost_usd": 0.09880983999999995,
   "minutes": 19.2
  },
  {
@@ -5556,6 +5882,7 @@
   "status": "token_budget",
   "tokens": 6042391,
   "reason": "budget",
+  "cost_usd": 0.09341254,
   "minutes": 16.5
  },
  {
@@ -5573,6 +5900,7 @@
   "status": "token_budget",
   "tokens": 6028368,
   "reason": "budget",
+  "cost_usd": 0.11444183999999999,
   "minutes": 7.7
  },
  {
@@ -5590,6 +5918,7 @@
   "status": "token_budget",
   "tokens": 6031041,
   "reason": "budget",
+  "cost_usd": 0.11462994000000001,
   "minutes": 6.3
  },
  {
@@ -5607,6 +5936,7 @@
   "status": "succeeded",
   "tokens": 600092,
   "reason": "all_done",
+  "cost_usd": 0.014102959999999998,
   "minutes": 11.5
  },
  {
@@ -5624,6 +5954,7 @@
   "status": "token_budget",
   "tokens": 3011226,
   "reason": "budget",
+  "cost_usd": 0.06702732,
   "minutes": 6.4
  },
  {
@@ -5641,6 +5972,7 @@
   "status": "token_budget",
   "tokens": 6007582,
   "reason": "budget",
+  "cost_usd": 0.11540043999999999,
   "minutes": 9.3
  },
  {
@@ -5658,6 +5990,7 @@
   "status": "token_budget",
   "tokens": 6016173,
   "reason": "budget",
+  "cost_usd": 0.10967218,
   "minutes": 7.3
  },
  {
@@ -5675,6 +6008,7 @@
   "status": "token_budget",
   "tokens": 6029813,
   "reason": "budget",
+  "cost_usd": 0.11242714,
   "minutes": 7.2
  },
  {
@@ -5692,6 +6026,7 @@
   "status": "token_budget",
   "tokens": 6003484,
   "reason": "budget",
+  "cost_usd": 0.10708448000000001,
   "minutes": 7.6
  },
  {
@@ -5709,6 +6044,7 @@
   "status": "succeeded",
   "tokens": 693655,
   "reason": "all_done",
+  "cost_usd": 0.017672539999999997,
   "minutes": 8
  },
  {
@@ -5726,6 +6062,7 @@
   "status": "succeeded",
   "tokens": 2216688,
   "reason": "all_done",
+  "cost_usd": 0.05721736000000001,
   "minutes": 7.3
  },
  {
@@ -5743,6 +6080,7 @@
   "status": "succeeded",
   "tokens": 320502,
   "reason": "all_done",
+  "cost_usd": 0.00898868,
   "minutes": 5.4
  },
  {
@@ -5760,6 +6098,7 @@
   "status": "succeeded",
   "tokens": 890541,
   "reason": "all_done",
+  "cost_usd": 0.03014906,
   "minutes": 5.4
  },
  {
@@ -5777,6 +6116,7 @@
   "status": "succeeded",
   "tokens": 133795,
   "reason": "all_done",
+  "cost_usd": 0.005666140000000001,
   "minutes": 4.2
  },
  {
@@ -5794,6 +6134,7 @@
   "status": "succeeded",
   "tokens": 1648217,
   "reason": "all_done",
+  "cost_usd": 0.043823619999999994,
   "minutes": 9.6
  },
  {
@@ -5811,6 +6152,7 @@
   "status": "succeeded",
   "tokens": 877433,
   "reason": "all_done",
+  "cost_usd": 0.02234305999999999,
   "minutes": 12
  },
  {
@@ -5828,6 +6170,7 @@
   "status": "succeeded",
   "tokens": 2994901,
   "reason": "quiescent",
+  "cost_usd": 0.06815874,
   "minutes": 8.7
  },
  {
@@ -5845,6 +6188,7 @@
   "status": "succeeded",
   "tokens": 490437,
   "reason": "quiescent",
+  "cost_usd": 0.01434378,
   "minutes": 5.2
  },
  {
@@ -5862,6 +6206,7 @@
   "status": "succeeded",
   "tokens": 1619840,
   "reason": "all_done",
+  "cost_usd": 0.044028,
   "minutes": 7.3
  },
  {
@@ -5879,6 +6224,7 @@
   "status": "succeeded",
   "tokens": 1127664,
   "reason": "all_done",
+  "cost_usd": 0.024950320000000012,
   "minutes": 13.5
  },
  {
@@ -5896,6 +6242,7 @@
   "status": "token_budget",
   "tokens": 3011894,
   "reason": "budget",
+  "cost_usd": 0.06947315999999999,
   "minutes": 11.5
  },
  {
@@ -5913,6 +6260,7 @@
   "status": "succeeded",
   "tokens": 114939,
   "reason": "all_done",
+  "cost_usd": 0.00523806,
   "minutes": 2.5
  },
  {
@@ -5930,6 +6278,7 @@
   "status": "succeeded",
   "tokens": 2559693,
   "reason": "all_done",
+  "cost_usd": 0.061193220000000006,
   "minutes": 12.5
  },
  {
@@ -5947,6 +6296,7 @@
   "status": "succeeded",
   "tokens": 906636,
   "reason": "all_done",
+  "cost_usd": 0.02273568,
   "minutes": 11.9
  },
  {
@@ -5964,6 +6314,7 @@
   "status": "token_budget",
   "tokens": 3021208,
   "reason": "budget",
+  "cost_usd": 0.06573112,
   "minutes": 9.4
  },
  {
@@ -5981,6 +6332,7 @@
   "status": "succeeded",
   "tokens": 447124,
   "reason": "all_done",
+  "cost_usd": 0.013311280000000002,
   "minutes": 7.5
  },
  {
@@ -5998,6 +6350,7 @@
   "status": "token_budget",
   "tokens": 3013599,
   "reason": "budget",
+  "cost_usd": 0.06641414000000001,
   "minutes": 9.3
  },
  {
@@ -6015,6 +6368,7 @@
   "status": "succeeded",
   "tokens": 1161796,
   "reason": "quiescent",
+  "cost_usd": 0.025141440000000008,
   "minutes": 12.6
  },
  {
@@ -6032,6 +6386,7 @@
   "status": "succeeded",
   "tokens": 1501765,
   "reason": "all_done",
+  "cost_usd": 0.03869386,
   "minutes": 5.9
  },
  {
@@ -6049,6 +6404,7 @@
   "status": "succeeded",
   "tokens": 123735,
   "reason": "all_done",
+  "cost_usd": 0.00539814,
   "minutes": 1.7
  },
  {
@@ -6066,6 +6422,7 @@
   "status": "succeeded",
   "tokens": 2168285,
   "reason": "quiescent",
+  "cost_usd": 0.05231554000000001,
   "minutes": 9.6
  },
  {
@@ -6083,6 +6440,7 @@
   "status": "token_budget",
   "tokens": 6020798,
   "reason": "budget",
+  "cost_usd": 0.11449291999999998,
   "minutes": 7.5
  },
  {
@@ -6100,6 +6458,7 @@
   "status": "succeeded",
   "tokens": 65988,
   "reason": "all_done",
+  "cost_usd": 0.00393288,
   "minutes": 3
  },
  {
@@ -6117,6 +6476,7 @@
   "status": "succeeded",
   "tokens": 539625,
   "reason": "all_done",
+  "cost_usd": 0.014326340000000002,
   "minutes": 9.3
  },
  {
@@ -6134,6 +6494,7 @@
   "status": "succeeded",
   "tokens": 2259356,
   "reason": "all_done",
+  "cost_usd": 0.054392800000000005,
   "minutes": 7.2
  },
  {
@@ -6151,6 +6512,7 @@
   "status": "succeeded",
   "tokens": 1907422,
   "reason": "all_done",
+  "cost_usd": 0.037369240000000005,
   "minutes": 15.1
  },
  {
@@ -6168,6 +6530,7 @@
   "status": "succeeded",
   "tokens": 142165,
   "reason": "all_done",
+  "cost_usd": 0.00536898,
   "minutes": 3.7
  },
  {
@@ -6185,6 +6548,7 @@
   "status": "token_budget",
   "tokens": 3020418,
   "reason": "budget",
+  "cost_usd": 0.06932964,
   "minutes": 12.8
  },
  {
@@ -6202,6 +6566,7 @@
   "status": "token_budget",
   "tokens": 6037239,
   "reason": "budget",
+  "cost_usd": 0.11658157999999999,
   "minutes": 7.7
  },
  {
@@ -6219,6 +6584,7 @@
   "status": "token_budget",
   "tokens": 6037957,
   "reason": "budget",
+  "cost_usd": 0.11527922000000002,
   "minutes": 7.9
  },
  {
@@ -6236,6 +6602,7 @@
   "status": "succeeded",
   "tokens": 195053,
   "reason": "all_done",
+  "cost_usd": 0.00624626,
   "minutes": 2.9
  },
  {
@@ -6253,6 +6620,7 @@
   "status": "succeeded",
   "tokens": 58157,
   "reason": "all_done",
+  "cost_usd": 0.00385442,
   "minutes": 2.3
  },
  {
@@ -6270,6 +6638,7 @@
   "status": "token_budget",
   "tokens": 3024476,
   "reason": "budget",
+  "cost_usd": 0.0648064,
   "minutes": 7.4
  },
  {
@@ -6287,6 +6656,7 @@
   "status": "succeeded",
   "tokens": 265741,
   "reason": "all_done",
+  "cost_usd": 0.008898340000000001,
   "minutes": 4.1
  },
  {
@@ -6304,6 +6674,7 @@
   "status": "token_budget",
   "tokens": 3003561,
   "reason": "budget",
+  "cost_usd": 0.08852794,
   "minutes": 4.7
  },
  {
@@ -6321,6 +6692,7 @@
   "status": "succeeded",
   "tokens": 1121330,
   "reason": "all_done",
+  "cost_usd": 0.024686679999999996,
   "minutes": 9.4
  },
  {
@@ -6338,6 +6710,7 @@
   "status": "succeeded",
   "tokens": 386817,
   "reason": "all_done",
+  "cost_usd": 0.012084420000000002,
   "minutes": 8.5
  },
  {
@@ -6355,6 +6728,7 @@
   "status": "token_budget",
   "tokens": 3039317,
   "reason": "budget",
+  "cost_usd": 0.06691522,
   "minutes": 13.5
  },
  {
@@ -6372,6 +6746,7 @@
   "status": "succeeded",
   "tokens": 1237052,
   "reason": "all_done",
+  "cost_usd": 0.02510816,
   "minutes": 13.8
  },
  {
@@ -6389,6 +6764,7 @@
   "status": "succeeded",
   "tokens": 1021210,
   "reason": "all_done",
+  "cost_usd": 0.022970200000000007,
   "minutes": 12.7
  },
  {
@@ -6406,6 +6782,7 @@
   "status": "token_budget",
   "tokens": 3008228,
   "reason": "budget",
+  "cost_usd": 0.06648288,
   "minutes": 9.8
  },
  {
@@ -6423,6 +6800,7 @@
   "status": "succeeded",
   "tokens": 907771,
   "reason": "all_done",
+  "cost_usd": 0.020967179999999995,
   "minutes": 10.8
  },
  {
@@ -6440,6 +6818,7 @@
   "status": "token_budget",
   "tokens": 3016735,
   "reason": "budget",
+  "cost_usd": 0.0886883,
   "minutes": 5
  },
  {
@@ -6457,6 +6836,7 @@
   "status": "succeeded",
   "tokens": 240175,
   "reason": "all_done",
+  "cost_usd": 0.007216939999999999,
   "minutes": 4.8
  },
  {
@@ -6474,6 +6854,7 @@
   "status": "token_budget",
   "tokens": 3021300,
   "reason": "budget",
+  "cost_usd": 0.09152679999999999,
   "minutes": 4.6
  },
  {
@@ -6491,6 +6872,7 @@
   "status": "succeeded",
   "tokens": 196490,
   "reason": "all_done",
+  "cost_usd": 0.007641080000000001,
   "minutes": 5
  },
  {
@@ -6508,6 +6890,7 @@
   "status": "token_budget",
   "tokens": 3023811,
   "reason": "budget",
+  "cost_usd": 0.09069061999999999,
   "minutes": 4.7
  },
  {
@@ -6525,6 +6908,7 @@
   "status": "succeeded",
   "tokens": 1013236,
   "reason": "all_done",
+  "cost_usd": 0.02278968,
   "minutes": 7.9
  },
  {
@@ -6542,6 +6926,7 @@
   "status": "succeeded",
   "tokens": 616648,
   "reason": "all_done",
+  "cost_usd": 0.015653280000000002,
   "minutes": 8.5
  },
  {
@@ -6559,6 +6944,7 @@
   "status": "token_budget",
   "tokens": 3006085,
   "reason": "budget",
+  "cost_usd": 0.06535962000000001,
   "minutes": 15.9
  },
  {
@@ -6576,6 +6962,7 @@
   "status": "succeeded",
   "tokens": 101855,
   "reason": "all_done",
+  "cost_usd": 0.00569982,
   "minutes": 3
  },
  {
@@ -6593,6 +6980,7 @@
   "status": "succeeded",
   "tokens": 262153,
   "reason": "all_done",
+  "cost_usd": 0.00978466,
   "minutes": 9.9
  },
  {
@@ -6610,6 +6998,7 @@
   "status": "succeeded",
   "tokens": 2474602,
   "reason": "all_done",
+  "cost_usd": 0.05865356000000001,
   "minutes": 11.8
  },
  {
@@ -6627,6 +7016,7 @@
   "status": "succeeded",
   "tokens": 131031,
   "reason": "all_done",
+  "cost_usd": 0.005384780000000001,
   "minutes": 3.2
  },
  {
@@ -6644,6 +7034,7 @@
   "status": "token_budget",
   "tokens": 3011947,
   "reason": "budget",
+  "cost_usd": 0.08654173999999999,
   "minutes": 4.4
  },
  {
@@ -6661,6 +7052,7 @@
   "status": "succeeded",
   "tokens": 206767,
   "reason": "all_done",
+  "cost_usd": 0.00767262,
   "minutes": 3
  },
  {
@@ -6678,6 +7070,7 @@
   "status": "token_budget",
   "tokens": 3015376,
   "reason": "budget",
+  "cost_usd": 0.09098736000000002,
   "minutes": 5.2
  },
  {
@@ -6695,6 +7088,7 @@
   "status": "succeeded",
   "tokens": 164982,
   "reason": "all_done",
+  "cost_usd": 0.006242999999999999,
   "minutes": 2.8
  },
  {
@@ -6712,6 +7106,7 @@
   "status": "token_budget",
   "tokens": 3006137,
   "reason": "budget",
+  "cost_usd": 0.09239178000000002,
   "minutes": 6.4
  },
  {
@@ -6729,6 +7124,7 @@
   "status": "succeeded",
   "tokens": 196956,
   "reason": "all_done",
+  "cost_usd": 0.00736536,
   "minutes": 6
  },
  {
@@ -6746,6 +7142,7 @@
   "status": "succeeded",
   "tokens": 174348,
   "reason": "all_done",
+  "cost_usd": 0.00619592,
   "minutes": 3.6
  },
  {
@@ -6763,6 +7160,7 @@
   "status": "token_budget",
   "tokens": 3003565,
   "reason": "budget",
+  "cost_usd": 0.06691202,
   "minutes": 12.8
  },
  {
@@ -6780,6 +7178,7 @@
   "status": "succeeded",
   "tokens": 716769,
   "reason": "all_done",
+  "cost_usd": 0.015112100000000002,
   "minutes": 6.4
  },
  {
@@ -6797,6 +7196,7 @@
   "status": "succeeded",
   "tokens": 248812,
   "reason": "all_done",
+  "cost_usd": 0.010026560000000002,
   "minutes": 3.6
  },
  {
@@ -6814,6 +7214,7 @@
   "status": "token_budget",
   "tokens": 3016238,
   "reason": "budget",
+  "cost_usd": 0.06936812,
   "minutes": 11.5
  },
  {
@@ -6831,6 +7232,7 @@
   "status": "succeeded",
   "tokens": 138618,
   "reason": "all_done",
+  "cost_usd": 0.0051630800000000004,
   "minutes": 2.6
  },
  {
@@ -6848,6 +7250,7 @@
   "status": "token_budget",
   "tokens": 3017076,
   "reason": "budget",
+  "cost_usd": 0.09364744000000001,
   "minutes": 4.5
  },
  {
@@ -6865,6 +7268,7 @@
   "status": "succeeded",
   "tokens": 256202,
   "reason": "all_done",
+  "cost_usd": 0.00796124,
   "minutes": 3.7
  },
  {
@@ -6882,6 +7286,7 @@
   "status": "token_budget",
   "tokens": 3008380,
   "reason": "budget",
+  "cost_usd": 0.08953728,
   "minutes": 4.4
  },
  {
@@ -6899,6 +7304,7 @@
   "status": "succeeded",
   "tokens": 66115,
   "reason": "all_done",
+  "cost_usd": 0.0038827000000000006,
   "minutes": 2
  },
  {
@@ -6916,6 +7322,7 @@
   "status": "succeeded",
   "tokens": 2792386,
   "reason": "all_done",
+  "cost_usd": 0.06791412,
   "minutes": 10.3
  },
  {
@@ -6933,6 +7340,7 @@
   "status": "succeeded",
   "tokens": 1375811,
   "reason": "all_done",
+  "cost_usd": 0.028422699999999995,
   "minutes": 13.7
  },
  {
@@ -6950,6 +7358,7 @@
   "status": "succeeded",
   "tokens": 2435141,
   "reason": "all_done",
+  "cost_usd": 0.05962362,
   "minutes": 8.6
  },
  {
@@ -6967,6 +7376,7 @@
   "status": "succeeded",
   "tokens": 314586,
   "reason": "quiescent",
+  "cost_usd": 0.0098342,
   "minutes": 2.9
  },
  {
@@ -6984,6 +7394,7 @@
   "status": "succeeded",
   "tokens": 2496372,
   "reason": "all_done",
+  "cost_usd": 0.056922640000000024,
   "minutes": 7.1
  },
  {
@@ -7001,6 +7412,7 @@
   "status": "succeeded",
   "tokens": 311755,
   "reason": "quiescent",
+  "cost_usd": 0.01129878,
   "minutes": 5.3
  },
  {
@@ -7018,6 +7430,7 @@
   "status": "succeeded",
   "tokens": 721673,
   "reason": "all_done",
+  "cost_usd": 0.023715380000000005,
   "minutes": 3.5
  },
  {
@@ -7035,6 +7448,7 @@
   "status": "succeeded",
   "tokens": 81848,
   "reason": "quiescent",
+  "cost_usd": 0.0036683999999999996,
   "minutes": 2
  },
  {
@@ -7052,6 +7466,7 @@
   "status": "token_budget",
   "tokens": 3008674,
   "reason": "budget",
+  "cost_usd": 0.06521196000000001,
   "minutes": 9.2
  },
  {
@@ -7069,6 +7484,7 @@
   "status": "succeeded",
   "tokens": 503446,
   "reason": "all_done",
+  "cost_usd": 0.015776759999999997,
   "minutes": 6.9
  },
  {
@@ -7086,6 +7502,7 @@
   "status": "succeeded",
   "tokens": 904548,
   "reason": "all_done",
+  "cost_usd": 0.025910959999999997,
   "minutes": 4.2
  },
  {
@@ -7103,6 +7520,7 @@
   "status": "succeeded",
   "tokens": 389244,
   "reason": "all_done",
+  "cost_usd": 0.012700239999999998,
   "minutes": 6.5
  },
  {
@@ -7120,6 +7538,7 @@
   "status": "succeeded",
   "tokens": 2728517,
   "reason": "all_done",
+  "cost_usd": 0.06579258,
   "minutes": 8.2
  },
  {
@@ -7137,6 +7556,7 @@
   "status": "succeeded",
   "tokens": 118931,
   "reason": "all_done",
+  "cost_usd": 0.0052211,
   "minutes": 3.8
  },
  {
@@ -7154,6 +7574,7 @@
   "status": "succeeded",
   "tokens": 769246,
   "reason": "all_done",
+  "cost_usd": 0.02419404,
   "minutes": 3.9
  },
  {
@@ -7171,6 +7592,7 @@
   "status": "succeeded",
   "tokens": 898071,
   "reason": "all_done",
+  "cost_usd": 0.023088299999999996,
   "minutes": 7.4
  },
  {
@@ -7188,6 +7610,7 @@
   "status": "succeeded",
   "tokens": 1761479,
   "reason": "all_done",
+  "cost_usd": 0.04641854000000001,
   "minutes": 5.7
  },
  {
@@ -7205,6 +7628,7 @@
   "status": "succeeded",
   "tokens": 89147,
   "reason": "all_done",
+  "cost_usd": 0.0041192600000000005,
   "minutes": 2.3
  },
  {
@@ -7222,6 +7646,7 @@
   "status": "succeeded",
   "tokens": 900318,
   "reason": "quiescent",
+  "cost_usd": 0.02665332,
   "minutes": 6
  },
  {
@@ -7239,6 +7664,7 @@
   "status": "succeeded",
   "tokens": 189759,
   "reason": "all_done",
+  "cost_usd": 0.005818139999999999,
   "minutes": 3.4
  },
  {
@@ -7256,6 +7682,7 @@
   "status": "token_budget",
   "tokens": 3023332,
   "reason": "budget",
+  "cost_usd": 0.05941128,
   "minutes": 11.6
  },
  {
@@ -7273,6 +7700,7 @@
   "status": "succeeded",
   "tokens": 467854,
   "reason": "all_done",
+  "cost_usd": 0.013385320000000001,
   "minutes": 4.7
  },
  {
@@ -7290,6 +7718,7 @@
   "status": "token_budget",
   "tokens": 3012693,
   "reason": "budget",
+  "cost_usd": 0.06355337999999999,
   "minutes": 11.1
  },
  {
@@ -7307,6 +7736,7 @@
   "status": "succeeded",
   "tokens": 1111725,
   "reason": "all_done",
+  "cost_usd": 0.024499379999999998,
   "minutes": 10
  },
  {
@@ -7324,6 +7754,7 @@
   "status": "succeeded",
   "tokens": 2635927,
   "reason": "all_done",
+  "cost_usd": 0.057364700000000005,
   "minutes": 11.7
  },
  {
@@ -7341,6 +7772,7 @@
   "status": "succeeded",
   "tokens": 159216,
   "reason": "quiescent",
+  "cost_usd": 0.00622544,
   "minutes": 5.9
  },
  {
@@ -7358,6 +7790,7 @@
   "status": "succeeded",
   "tokens": 2288307,
   "reason": "all_done",
+  "cost_usd": 0.054009020000000005,
   "minutes": 13
  },
  {
@@ -7375,6 +7808,7 @@
   "status": "succeeded",
   "tokens": 439452,
   "reason": "quiescent",
+  "cost_usd": 0.01432336,
   "minutes": 8.9
  },
  {
@@ -7392,6 +7826,7 @@
   "status": "token_budget",
   "tokens": 3029944,
   "reason": "budget",
+  "cost_usd": 0.05940624,
   "minutes": 10
  },
  {
@@ -7409,6 +7844,7 @@
   "status": "succeeded",
   "tokens": 132895,
   "reason": "all_done",
+  "cost_usd": 0.006282620000000001,
   "minutes": 3.1
  },
  {
@@ -7426,6 +7862,7 @@
   "status": "succeeded",
   "tokens": 1404192,
   "reason": "all_done",
+  "cost_usd": 0.03690503999999999,
   "minutes": 8.8
  },
  {
@@ -7443,6 +7880,7 @@
   "status": "succeeded",
   "tokens": 589635,
   "reason": "all_done",
+  "cost_usd": 0.01625574,
   "minutes": 7.8
  },
  {
@@ -7460,6 +7898,7 @@
   "status": "succeeded",
   "tokens": 2182349,
   "reason": "all_done",
+  "cost_usd": 0.04922458,
   "minutes": 15.1
  },
  {
@@ -7477,6 +7916,7 @@
   "status": "succeeded",
   "tokens": 350737,
   "reason": "all_done",
+  "cost_usd": 0.010124340000000003,
   "minutes": 5.1
  },
  {
@@ -7494,6 +7934,7 @@
   "status": "succeeded",
   "tokens": 1297917,
   "reason": "all_done",
+  "cost_usd": 0.0329473,
   "minutes": 9.8
  },
  {
@@ -7511,6 +7952,7 @@
   "status": "token_budget",
   "tokens": 6011488,
   "reason": "budget",
+  "cost_usd": 0.09051791999999995,
   "minutes": 14.6
  },
  {
@@ -7528,6 +7970,7 @@
   "status": "succeeded",
   "tokens": 27505,
   "reason": "all_done",
+  "cost_usd": 0.00199922,
   "minutes": 0.8
  },
  {
@@ -7545,6 +7988,7 @@
   "status": "succeeded",
   "tokens": 33265,
   "reason": null,
+  "cost_usd": 0.0030351399999999995,
   "minutes": 1.3
  },
  {
@@ -7562,6 +8006,7 @@
   "status": "succeeded",
   "tokens": 266863,
   "reason": "all_done",
+  "cost_usd": 0.00710598,
   "minutes": 0.9
  },
  {
@@ -7579,6 +8024,7 @@
   "status": "succeeded",
   "tokens": 95624,
   "reason": "quiescent",
+  "cost_usd": 0.0052707200000000004,
   "minutes": 2.2
  },
  {
@@ -7596,6 +8042,7 @@
   "status": "succeeded",
   "tokens": 36316,
   "reason": "all_done",
+  "cost_usd": 0.00201256,
   "minutes": 0.6
  },
  {
@@ -7613,6 +8060,7 @@
   "status": "succeeded",
   "tokens": 28504,
   "reason": null,
+  "cost_usd": 0.0019261600000000001,
   "minutes": 0.6
  },
  {
@@ -7630,6 +8078,7 @@
   "status": "succeeded",
   "tokens": 82992,
   "reason": "all_done",
+  "cost_usd": 0.0033476799999999996,
   "minutes": 0.6
  },
  {
@@ -7647,6 +8096,7 @@
   "status": "succeeded",
   "tokens": 73381,
   "reason": "quiescent",
+  "cost_usd": 0.0033922600000000007,
   "minutes": 1.4
  },
  {
@@ -7664,6 +8114,7 @@
   "status": "succeeded",
   "tokens": 29150,
   "reason": "all_done",
+  "cost_usd": 0.00232108,
   "minutes": 0.5
  },
  {
@@ -7681,6 +8132,7 @@
   "status": "succeeded",
   "tokens": 22336,
   "reason": null,
+  "cost_usd": 0.00211288,
   "minutes": 0.6
  },
  {
@@ -7698,6 +8150,7 @@
   "status": "succeeded",
   "tokens": 42677,
   "reason": "all_done",
+  "cost_usd": 0.00218738,
   "minutes": 0.9
  },
  {
@@ -7715,6 +8168,7 @@
   "status": "succeeded",
   "tokens": 195007,
   "reason": "all_done",
+  "cost_usd": 0.00860678,
   "minutes": 3
  },
  {
@@ -7732,6 +8186,7 @@
   "status": "succeeded",
   "tokens": 176887,
   "reason": "all_done",
+  "cost_usd": 0.008112860000000001,
   "minutes": 2.4
  },
  {
@@ -7749,6 +8204,7 @@
   "status": "succeeded",
   "tokens": 95808,
   "reason": null,
+  "cost_usd": 0.00716048,
   "minutes": 2.9
  },
  {
@@ -7766,6 +8222,7 @@
   "status": "succeeded",
   "tokens": 184947,
   "reason": "all_done",
+  "cost_usd": 0.007949979999999999,
   "minutes": 2.9
  },
  {
@@ -7783,6 +8240,7 @@
   "status": "succeeded",
   "tokens": 1181838,
   "reason": "quiescent",
+  "cost_usd": 0.03134363999999999,
   "minutes": 9.3
  },
  {
@@ -7800,6 +8258,7 @@
   "status": "token_budget",
   "tokens": 6098022,
   "reason": "budget",
+  "cost_usd": 0.09018060000000001,
   "minutes": 13.9
  },
  {
@@ -7817,6 +8276,7 @@
   "status": "token_budget",
   "tokens": 6068568,
   "reason": "budget",
+  "cost_usd": 0.08675447999999998,
   "minutes": 12.2
  },
  {
@@ -7834,6 +8294,7 @@
   "status": "succeeded",
   "tokens": 72922,
   "reason": "all_done",
+  "cost_usd": 0.00436732,
   "minutes": 2
  },
  {
@@ -7851,6 +8312,7 @@
   "status": "succeeded",
   "tokens": 36089,
   "reason": null,
+  "cost_usd": 0.00314634,
   "minutes": 1.3
  },
  {
@@ -7868,6 +8330,7 @@
   "status": "succeeded",
   "tokens": 90644,
   "reason": "all_done",
+  "cost_usd": 0.005571680000000001,
   "minutes": 2
  },
  {
@@ -7885,6 +8348,7 @@
   "status": "succeeded",
   "tokens": 337106,
   "reason": "all_done",
+  "cost_usd": 0.013145559999999999,
   "minutes": 3.9
  },
  {
@@ -7902,6 +8366,7 @@
   "status": "succeeded",
   "tokens": 118950,
   "reason": "all_done",
+  "cost_usd": 0.005607799999999999,
   "minutes": 2
  },
  {
@@ -7919,6 +8384,7 @@
   "status": "succeeded",
   "tokens": 79049,
   "reason": null,
+  "cost_usd": 0.0048743400000000004,
   "minutes": 2.1
  },
  {
@@ -7936,6 +8402,7 @@
   "status": "succeeded",
   "tokens": 102375,
   "reason": "quiescent",
+  "cost_usd": 0.0065936599999999995,
   "minutes": 2
  },
  {
@@ -7953,6 +8420,7 @@
   "status": "succeeded",
   "tokens": 1103827,
   "reason": "quiescent",
+  "cost_usd": 0.029474299999999995,
   "minutes": 9.1
  },
  {
@@ -7970,6 +8438,7 @@
   "status": "succeeded",
   "tokens": 27976,
   "reason": "quiescent",
+  "cost_usd": 0.0020629600000000004,
   "minutes": 0.8
  },
  {
@@ -7987,6 +8456,7 @@
   "status": "succeeded",
   "tokens": 22278,
   "reason": null,
+  "cost_usd": 0.00216676,
   "minutes": 0.8
  },
  {
@@ -8004,6 +8474,7 @@
   "status": "succeeded",
   "tokens": 21371,
   "reason": "quiescent",
+  "cost_usd": 0.0021679,
   "minutes": 0.7
  },
  {
@@ -8021,6 +8492,7 @@
   "status": "succeeded",
   "tokens": 46232,
   "reason": "all_done",
+  "cost_usd": 0.00307672,
   "minutes": 1.4
  },
  {
@@ -8038,6 +8510,7 @@
   "status": "succeeded",
   "tokens": 36201,
   "reason": "all_done",
+  "cost_usd": 0.0019866600000000003,
   "minutes": 0.6
  },
  {
@@ -8055,6 +8528,7 @@
   "status": "succeeded",
   "tokens": 27765,
   "reason": null,
+  "cost_usd": 0.0015740199999999998,
   "minutes": 0.6
  },
  {
@@ -8072,6 +8546,7 @@
   "status": "succeeded",
   "tokens": 43956,
   "reason": "all_done",
+  "cost_usd": 0.00243128,
   "minutes": 1
  },
  {
@@ -8089,6 +8564,7 @@
   "status": "succeeded",
   "tokens": 57984,
   "reason": "all_done",
+  "cost_usd": 0.00301464,
   "minutes": 1.4
  },
  {
@@ -8106,6 +8582,7 @@
   "status": "succeeded",
   "tokens": 38163,
   "reason": "all_done",
+  "cost_usd": 0.00237366,
   "minutes": 0.8
  },
  {
@@ -8123,6 +8600,7 @@
   "status": "succeeded",
   "tokens": 44466,
   "reason": null,
+  "cost_usd": 0.00224404,
   "minutes": 0.7
  },
  {
@@ -8140,6 +8618,7 @@
   "status": "succeeded",
   "tokens": 37292,
   "reason": "all_done",
+  "cost_usd": 0.0023951199999999997,
   "minutes": 1
  },
  {
@@ -8157,6 +8636,7 @@
   "status": "succeeded",
   "tokens": 48684,
   "reason": "all_done",
+  "cost_usd": 0.00350176,
   "minutes": 2
  },
  {
@@ -8174,6 +8654,7 @@
   "status": "succeeded",
   "tokens": 184264,
   "reason": "all_done",
+  "cost_usd": 0.010484640000000002,
   "minutes": 4.5
  },
  {
@@ -8191,6 +8672,7 @@
   "status": "succeeded",
   "tokens": 317409,
   "reason": null,
+  "cost_usd": 0.011630099999999999,
   "minutes": 4.4
  },
  {
@@ -8208,6 +8690,7 @@
   "status": "succeeded",
   "tokens": 122235,
   "reason": "quiescent",
+  "cost_usd": 0.006013419999999999,
   "minutes": 2.3
  },
  {
@@ -8225,6 +8708,7 @@
   "status": "succeeded",
   "tokens": 800909,
   "reason": "quiescent",
+  "cost_usd": 0.025793299999999995,
   "minutes": 12.9
  },
  {
@@ -8242,6 +8726,7 @@
   "status": "succeeded",
   "tokens": 89898,
   "reason": "all_done",
+  "cost_usd": 0.0045854,
   "minutes": 1.6
  },
  {
@@ -8259,6 +8744,7 @@
   "status": "succeeded",
   "tokens": 71542,
   "reason": null,
+  "cost_usd": 0.0055416400000000005,
   "minutes": 2.2
  },
  {
@@ -8276,6 +8762,7 @@
   "status": "succeeded",
   "tokens": 86065,
   "reason": "all_done",
+  "cost_usd": 0.00612706,
   "minutes": 2.6
  },
  {
@@ -8293,6 +8780,7 @@
   "status": "succeeded",
   "tokens": 388543,
   "reason": "quiescent",
+  "cost_usd": 0.011916140000000004,
   "minutes": 3.6
  },
  {
@@ -8310,6 +8798,7 @@
   "status": "succeeded",
   "tokens": 77431,
   "reason": "quiescent",
+  "cost_usd": 0.00444982,
   "minutes": 1.6
  },
  {
@@ -8327,6 +8816,7 @@
   "status": "succeeded",
   "tokens": 89858,
   "reason": null,
+  "cost_usd": 0.005151080000000001,
   "minutes": 2
  },
  {
@@ -8344,6 +8834,7 @@
   "status": "succeeded",
   "tokens": 89448,
   "reason": "all_done",
+  "cost_usd": 0.00532592,
   "minutes": 2.3
  },
  {
@@ -8361,6 +8852,7 @@
   "status": "succeeded",
   "tokens": 1285654,
   "reason": "all_done",
+  "cost_usd": 0.03258588000000001,
   "minutes": 10.5
  },
  {
@@ -8378,6 +8870,7 @@
   "status": "succeeded",
   "tokens": 39507,
   "reason": "all_done",
+  "cost_usd": 0.00274702,
   "minutes": 1.8
  },
  {
@@ -8395,6 +8888,7 @@
   "status": "succeeded",
   "tokens": 25113,
   "reason": null,
+  "cost_usd": 0.0020259400000000004,
   "minutes": 1.4
  },
  {
@@ -8412,6 +8906,7 @@
   "status": "succeeded",
   "tokens": 35611,
   "reason": "all_done",
+  "cost_usd": 0.00262846,
   "minutes": 1.4
  },
  {
@@ -8429,6 +8924,7 @@
   "status": "succeeded",
   "tokens": 68029,
   "reason": "all_done",
+  "cost_usd": 0.0046457799999999995,
   "minutes": 1.8
  },
  {
@@ -8446,6 +8942,7 @@
   "status": "succeeded",
   "tokens": 45192,
   "reason": "all_done",
+  "cost_usd": 0.00244392,
   "minutes": 1
  },
  {
@@ -8463,6 +8960,7 @@
   "status": "succeeded",
   "tokens": 28270,
   "reason": null,
+  "cost_usd": 0.00171532,
   "minutes": 0.6
  },
  {
@@ -8480,6 +8978,7 @@
   "status": "succeeded",
   "tokens": 67416,
   "reason": "all_done",
+  "cost_usd": 0.0031444,
   "minutes": 0.5
  },
  {
@@ -8497,6 +8996,7 @@
   "status": "succeeded",
   "tokens": 78958,
   "reason": "all_done",
+  "cost_usd": 0.0037747600000000003,
   "minutes": 1.7
  },
  {
@@ -8514,6 +9014,7 @@
   "status": "succeeded",
   "tokens": 28900,
   "reason": "quiescent",
+  "cost_usd": 0.0018372,
   "minutes": 0.6
  },
  {
@@ -8531,6 +9032,7 @@
   "status": "succeeded",
   "tokens": 55215,
   "reason": null,
+  "cost_usd": 0.00278222,
   "minutes": 1.4
  },
  {
@@ -8548,6 +9050,7 @@
   "status": "succeeded",
   "tokens": 35212,
   "reason": "all_done",
+  "cost_usd": 0.00218688,
   "minutes": 1
  },
  {
@@ -8565,6 +9068,7 @@
   "status": "succeeded",
   "tokens": 59664,
   "reason": "all_done",
+  "cost_usd": 0.004178640000000001,
   "minutes": 1.7
  },
  {
@@ -8582,6 +9086,7 @@
   "status": "succeeded",
   "tokens": 325136,
   "reason": "all_done",
+  "cost_usd": 0.012092960000000002,
   "minutes": 4.3
  },
  {
@@ -8599,6 +9104,7 @@
   "status": "succeeded",
   "tokens": 88662,
   "reason": null,
+  "cost_usd": 0.0059206,
   "minutes": 2.3
  },
  {
@@ -8616,6 +9122,7 @@
   "status": "failed",
   "tokens": 177408,
   "reason": "all_done",
+  "cost_usd": 0.00864448,
   "minutes": 2.7
  },
  {
@@ -8633,6 +9140,7 @@
   "status": "succeeded",
   "tokens": 1054399,
   "reason": "all_done",
+  "cost_usd": 0.026598619999999993,
   "minutes": 11
  },
  {
@@ -8650,6 +9158,7 @@
   "status": "succeeded",
   "tokens": 47453,
   "reason": "all_done",
+  "cost_usd": 0.0036737799999999998,
   "minutes": 1.5
  },
  {
@@ -8667,6 +9176,7 @@
   "status": "succeeded",
   "tokens": 78083,
   "reason": null,
+  "cost_usd": 0.00750758,
   "minutes": 2.9
  },
  {
@@ -8684,6 +9194,7 @@
   "status": "succeeded",
   "tokens": 62202,
   "reason": "all_done",
+  "cost_usd": 0.0043958800000000004,
   "minutes": 1.5
  },
  {
@@ -8701,6 +9212,7 @@
   "status": "succeeded",
   "tokens": 576413,
   "reason": "all_done",
+  "cost_usd": 0.01688762,
   "minutes": 10.6
  },
  {
@@ -8718,6 +9230,7 @@
   "status": "succeeded",
   "tokens": 119844,
   "reason": "all_done",
+  "cost_usd": 0.005865760000000001,
   "minutes": 2.4
  },
  {
@@ -8735,6 +9248,7 @@
   "status": "succeeded",
   "tokens": 142741,
   "reason": null,
+  "cost_usd": 0.007136740000000001,
   "minutes": 2.6
  },
  {
@@ -8752,6 +9266,7 @@
   "status": "succeeded",
   "tokens": 92327,
   "reason": "all_done",
+  "cost_usd": 0.0061255,
   "minutes": 2
  },
  {
@@ -8769,6 +9284,7 @@
   "status": "succeeded",
   "tokens": 343458,
   "reason": "quiescent",
+  "cost_usd": 0.014310039999999998,
   "minutes": 5.7
  },
  {
@@ -8786,6 +9302,7 @@
   "status": "succeeded",
   "tokens": 36381,
   "reason": "all_done",
+  "cost_usd": 0.00230394,
   "minutes": 1
  },
  {
@@ -8803,6 +9320,7 @@
   "status": "succeeded",
   "tokens": 89379,
   "reason": "all_done",
+  "cost_usd": 0.0051175000000000005,
   "minutes": 2.7
  },
  {
@@ -8820,6 +9338,7 @@
   "status": "succeeded",
   "tokens": 27988,
   "reason": "quiescent",
+  "cost_usd": 0.0021084800000000002,
   "minutes": 0.6
  },
  {
@@ -8837,6 +9356,7 @@
   "status": "succeeded",
   "tokens": 97656,
   "reason": "all_done",
+  "cost_usd": 0.004137439999999999,
   "minutes": 2.1
  },
  {
@@ -8854,6 +9374,7 @@
   "status": "succeeded",
   "tokens": 28151,
   "reason": "all_done",
+  "cost_usd": 0.00189126,
   "minutes": 0.6
  },
  {
@@ -8871,6 +9392,7 @@
   "status": "succeeded",
   "tokens": 100524,
   "reason": "all_done",
+  "cost_usd": 0.005067199999999999,
   "minutes": 1.9
  },
  {
@@ -8888,6 +9410,7 @@
   "status": "succeeded",
   "tokens": 150372,
   "reason": "all_done",
+  "cost_usd": 0.006280399999999999,
   "minutes": 2.1
  },
  {
@@ -8905,6 +9428,7 @@
   "status": "succeeded",
   "tokens": 896860,
   "reason": "all_done",
+  "cost_usd": 0.023766559999999996,
   "minutes": 7.1
  },
  {
@@ -8922,6 +9446,7 @@
   "status": "succeeded",
   "tokens": 63752,
   "reason": "all_done",
+  "cost_usd": 0.005023359999999999,
   "minutes": 2
  },
  {
@@ -8939,6 +9464,7 @@
   "status": "succeeded",
   "tokens": 256020,
   "reason": "all_done",
+  "cost_usd": 0.01120256,
   "minutes": 3.5
  },
  {
@@ -8956,6 +9482,7 @@
   "status": "succeeded",
   "tokens": 83754,
   "reason": "quiescent",
+  "cost_usd": 0.00575268,
   "minutes": 1.8
  },
  {
@@ -8973,6 +9500,7 @@
   "status": "succeeded",
   "tokens": 573565,
   "reason": "quiescent",
+  "cost_usd": 0.017478340000000002,
   "minutes": 5.9
  },
  {
@@ -8990,6 +9518,7 @@
   "status": "succeeded",
   "tokens": 37935,
   "reason": "all_done",
+  "cost_usd": 0.00246894,
   "minutes": 3.5
  },
  {
@@ -9007,6 +9536,7 @@
   "status": "succeeded",
   "tokens": 81799,
   "reason": "quiescent",
+  "cost_usd": 0.005127179999999999,
   "minutes": 2.5
  },
  {
@@ -9024,6 +9554,7 @@
   "status": "succeeded",
   "tokens": 35082,
   "reason": "all_done",
+  "cost_usd": 0.00204068,
   "minutes": 0.6
  },
  {
@@ -9041,6 +9572,7 @@
   "status": "succeeded",
   "tokens": 130632,
   "reason": "all_done",
+  "cost_usd": 0.0056084,
   "minutes": 3.7
  },
  {
@@ -9058,6 +9590,7 @@
   "status": "succeeded",
   "tokens": 27876,
   "reason": "quiescent",
+  "cost_usd": 0.00190712,
   "minutes": 0.8
  },
  {
@@ -9075,6 +9608,7 @@
   "status": "succeeded",
   "tokens": 67644,
   "reason": "quiescent",
+  "cost_usd": 0.003992160000000001,
   "minutes": 2.8
  },
  {
@@ -9092,6 +9626,7 @@
   "status": "succeeded",
   "tokens": 178793,
   "reason": "all_done",
+  "cost_usd": 0.009028579999999998,
   "minutes": 3.4
  },
  {
@@ -9109,6 +9644,7 @@
   "status": "succeeded",
   "tokens": 1406826,
   "reason": "all_done",
+  "cost_usd": 0.032062120000000006,
   "minutes": 8.7
  },
  {
@@ -9126,6 +9662,7 @@
   "status": "succeeded",
   "tokens": 78101,
   "reason": "all_done",
+  "cost_usd": 0.005185220000000001,
   "minutes": 2.2
  },
  {
@@ -9143,6 +9680,7 @@
   "status": "succeeded",
   "tokens": 231457,
   "reason": "all_done",
+  "cost_usd": 0.009494100000000002,
   "minutes": 3.5
  },
  {
@@ -9160,6 +9698,7 @@
   "status": "succeeded",
   "tokens": 97834,
   "reason": "all_done",
+  "cost_usd": 0.006273000000000001,
   "minutes": 1.8
  },
  {
@@ -9177,6 +9716,7 @@
   "status": "succeeded",
   "tokens": 1522330,
   "reason": "all_done",
+  "cost_usd": 0.03615532,
   "minutes": 10.6
  },
  {
@@ -9194,6 +9734,7 @@
   "status": "succeeded",
   "tokens": 32128,
   "reason": "all_done",
+  "cost_usd": 0.00224536,
   "minutes": 0.9
  },
  {
@@ -9211,6 +9752,7 @@
   "status": "succeeded",
   "tokens": 178804,
   "reason": "all_done",
+  "cost_usd": 0.00794744,
   "minutes": 3.6
  },
  {
@@ -9228,6 +9770,7 @@
   "status": "succeeded",
   "tokens": 36917,
   "reason": "all_done",
+  "cost_usd": 0.00203946,
   "minutes": 0.7
  },
  {
@@ -9245,6 +9788,7 @@
   "status": "succeeded",
   "tokens": 333562,
   "reason": "all_done",
+  "cost_usd": 0.009284839999999999,
   "minutes": 3.8
  },
  {
@@ -9262,6 +9806,7 @@
   "status": "succeeded",
   "tokens": 100546,
   "reason": "all_done",
+  "cost_usd": 0.00461884,
   "minutes": 1.6
  },
  {
@@ -9279,6 +9824,7 @@
   "status": "succeeded",
   "tokens": 57624,
   "reason": "all_done",
+  "cost_usd": 0.0032744000000000002,
   "minutes": 1.5
  },
  {
@@ -9296,6 +9842,7 @@
   "status": "succeeded",
   "tokens": 258908,
   "reason": "all_done",
+  "cost_usd": 0.0091104,
   "minutes": 2.8
  },
  {
@@ -9313,6 +9860,7 @@
   "status": "succeeded",
   "tokens": 539471,
   "reason": "all_done",
+  "cost_usd": 0.018435180000000002,
   "minutes": 8.4
  },
  {
@@ -9330,6 +9878,7 @@
   "status": "failed",
   "tokens": 107028,
   "reason": "all_done",
+  "cost_usd": 0.006431760000000001,
   "minutes": 2.7
  },
  {
@@ -9347,6 +9896,7 @@
   "status": "succeeded",
   "tokens": 280552,
   "reason": "all_done",
+  "cost_usd": 0.01057016,
   "minutes": 3.8
  },
  {
@@ -9364,6 +9914,7 @@
   "status": "succeeded",
   "tokens": 105282,
   "reason": "all_done",
+  "cost_usd": 0.006218040000000001,
   "minutes": 1.9
  },
  {
@@ -9381,6 +9932,7 @@
   "status": "succeeded",
   "tokens": 1054017,
   "reason": "all_done",
+  "cost_usd": 0.029683540000000005,
   "minutes": 8.5
  },
  {
@@ -9398,6 +9950,7 @@
   "status": "succeeded",
   "tokens": 183315,
   "reason": null,
+  "cost_usd": 0.0079359,
   "minutes": 3.6
  },
  {
@@ -9415,6 +9968,7 @@
   "status": "succeeded",
   "tokens": 402022,
   "reason": "all_done",
+  "cost_usd": 0.012862360000000002,
   "minutes": 4.2
  },
  {
@@ -9432,6 +9986,7 @@
   "status": "succeeded",
   "tokens": 562210,
   "reason": "all_done",
+  "cost_usd": 0.020165480000000003,
   "minutes": 7.7
  },
  {
@@ -9449,6 +10004,7 @@
   "status": "succeeded",
   "tokens": 1373545,
   "reason": "all_done",
+  "cost_usd": 0.031780819999999994,
   "minutes": 9.8
  },
  {
@@ -9466,6 +10022,7 @@
   "status": "succeeded",
   "tokens": 1544678,
   "reason": "all_done",
+  "cost_usd": 0.037627320000000006,
   "minutes": 12.6
  },
  {
@@ -9483,6 +10040,7 @@
   "status": "succeeded",
   "tokens": 94248,
   "reason": null,
+  "cost_usd": 0.0065128799999999995,
   "minutes": 3.7
  },
  {
@@ -9500,6 +10058,7 @@
   "status": "succeeded",
   "tokens": 1271565,
   "reason": "all_done",
+  "cost_usd": 0.0303121,
   "minutes": 10.1
  },
  {
@@ -9517,6 +10076,7 @@
   "status": "succeeded",
   "tokens": 1108483,
   "reason": "all_done",
+  "cost_usd": 0.027485500000000003,
   "minutes": 9.8
  },
  {
@@ -9534,6 +10094,7 @@
   "status": "succeeded",
   "tokens": 2014263,
   "reason": "all_done",
+  "cost_usd": 0.04039285999999999,
   "minutes": 10.1
  },
  {
@@ -9551,6 +10112,7 @@
   "status": "succeeded",
   "tokens": 1210915,
   "reason": "quiescent",
+  "cost_usd": 0.030394540000000005,
   "minutes": 8.4
  },
  {
@@ -9568,6 +10130,7 @@
   "status": "succeeded",
   "tokens": 76914,
   "reason": null,
+  "cost_usd": 0.00667708,
   "minutes": 2.7
  },
  {
@@ -9585,6 +10148,7 @@
   "status": "succeeded",
   "tokens": 1274343,
   "reason": "all_done",
+  "cost_usd": 0.03331622000000001,
   "minutes": 9.8
  },
  {
@@ -9602,6 +10166,7 @@
   "status": "succeeded",
   "tokens": 534843,
   "reason": "quiescent",
+  "cost_usd": 0.01875414,
   "minutes": 6.3
  },
  {
@@ -9619,6 +10184,7 @@
   "status": "succeeded",
   "tokens": 908127,
   "reason": "all_done",
+  "cost_usd": 0.026982299999999997,
   "minutes": 8.9
  },
  {
@@ -9636,6 +10202,7 @@
   "status": "succeeded",
   "tokens": 1905980,
   "reason": "all_done",
+  "cost_usd": 0.04361487999999999,
   "minutes": 11.1
  },
  {
@@ -9653,6 +10220,7 @@
   "status": "succeeded",
   "tokens": 276285,
   "reason": null,
+  "cost_usd": 0.009082179999999999,
   "minutes": 2.7
  },
  {
@@ -9670,6 +10238,7 @@
   "status": "succeeded",
   "tokens": 848362,
   "reason": "quiescent",
+  "cost_usd": 0.025680600000000005,
   "minutes": 8.4
  },
  {
@@ -9687,6 +10256,7 @@
   "status": "succeeded",
   "tokens": 804330,
   "reason": "quiescent",
+  "cost_usd": 0.02312148,
   "minutes": 6
  },
  {
@@ -9704,6 +10274,7 @@
   "status": "succeeded",
   "tokens": 1065088,
   "reason": "all_done",
+  "cost_usd": 0.028887439999999997,
   "minutes": 8.8
  },
  {
@@ -9721,6 +10292,7 @@
   "status": "succeeded",
   "tokens": 1257700,
   "reason": "all_done",
+  "cost_usd": 0.0296148,
   "minutes": 8.4
  },
  {
@@ -9738,6 +10310,7 @@
   "status": "succeeded",
   "tokens": 55506,
   "reason": null,
+  "cost_usd": 0.0031132399999999998,
   "minutes": 2.3
  },
  {
@@ -9755,6 +10328,7 @@
   "status": "succeeded",
   "tokens": 217367,
   "reason": "all_done",
+  "cost_usd": 0.00795006,
   "minutes": 4.4
  },
  {
@@ -9772,6 +10346,7 @@
   "status": "failed",
   "tokens": 272642,
   "reason": null,
+  "cost_usd": 0.008642760000000001,
   "minutes": 2.4
  },
  {
@@ -9789,6 +10364,7 @@
   "status": "succeeded",
   "tokens": 1196160,
   "reason": "all_done",
+  "cost_usd": 0.030820479999999997,
   "minutes": 9.1
  },
  {
@@ -9806,6 +10382,7 @@
   "status": "succeeded",
   "tokens": 113353,
   "reason": null,
+  "cost_usd": 0.00729018,
   "minutes": 2.6
  },
  {
@@ -9823,6 +10400,7 @@
   "status": "succeeded",
   "tokens": 124122,
   "reason": "all_done",
+  "cost_usd": 0.0059593200000000015,
   "minutes": 2.4
  },
  {
@@ -9840,6 +10418,7 @@
   "status": "succeeded",
   "tokens": 35110,
   "reason": null,
+  "cost_usd": 0.0022045999999999997,
   "minutes": 1.5
  },
  {
@@ -9857,6 +10436,7 @@
   "status": "succeeded",
   "tokens": 505756,
   "reason": "all_done",
+  "cost_usd": 0.015245679999999994,
   "minutes": 9.5
  },
  {
@@ -9874,6 +10454,7 @@
   "status": "succeeded",
   "tokens": 84561,
   "reason": null,
+  "cost_usd": 0.0074616199999999995,
   "minutes": 2.5
  },
  {
@@ -9891,6 +10472,7 @@
   "status": "succeeded",
   "tokens": 2217661,
   "reason": "all_done",
+  "cost_usd": 0.04269970000000001,
   "minutes": 12.3
  },
  {
@@ -9908,6 +10490,7 @@
   "status": "succeeded",
   "tokens": 83289,
   "reason": null,
+  "cost_usd": 0.006437779999999999,
   "minutes": 2.3
  },
  {
@@ -9925,6 +10508,7 @@
   "status": "succeeded",
   "tokens": 203608,
   "reason": "all_done",
+  "cost_usd": 0.008042800000000001,
   "minutes": 2.7
  },
  {
@@ -9942,6 +10526,7 @@
   "status": "succeeded",
   "tokens": 119135,
   "reason": null,
+  "cost_usd": 0.00523206,
   "minutes": 1.5
  },
  {
@@ -9959,6 +10544,7 @@
   "status": "succeeded",
   "tokens": 76133,
   "reason": "all_done",
+  "cost_usd": 0.00425146,
   "minutes": 3.3
  },
  {
@@ -9976,6 +10562,7 @@
   "status": "succeeded",
   "tokens": 97798,
   "reason": null,
+  "cost_usd": 0.007666040000000001,
   "minutes": 2.4
  },
  {
@@ -9993,6 +10580,7 @@
   "status": "succeeded",
   "tokens": 1752752,
   "reason": "all_done",
+  "cost_usd": 0.04126712,
   "minutes": 13.3
  },
  {
@@ -10010,6 +10598,7 @@
   "status": "succeeded",
   "tokens": 54805,
   "reason": null,
+  "cost_usd": 0.00449978,
   "minutes": 3
  },
  {
@@ -10027,6 +10616,7 @@
   "status": "succeeded",
   "tokens": 96228,
   "reason": "all_done",
+  "cost_usd": 0.00720272,
   "minutes": 4.8
  },
  {
@@ -10044,6 +10634,7 @@
   "status": "succeeded",
   "tokens": 346571,
   "reason": null,
+  "cost_usd": 0.012851899999999998,
   "minutes": 4
  },
  {
@@ -10061,6 +10652,7 @@
   "status": "succeeded",
   "tokens": 5048672,
   "reason": "all_done",
+  "cost_usd": 0.08383904000000003,
   "minutes": 26.7
  },
  {
@@ -10078,6 +10670,7 @@
   "status": "succeeded",
   "tokens": 260675,
   "reason": null,
+  "cost_usd": 0.0085403,
   "minutes": 2.1
  },
  {
@@ -10095,6 +10688,7 @@
   "status": "token_budget",
   "tokens": 6039077,
   "reason": "budget",
+  "cost_usd": 0.10416594000000001,
   "minutes": 20.1
  },
  {
@@ -10112,6 +10706,7 @@
   "status": "succeeded",
   "tokens": 255324,
   "reason": null,
+  "cost_usd": 0.00861688,
   "minutes": 2.2
  },
  {
@@ -10129,6 +10724,7 @@
   "status": "token_budget",
   "tokens": 6076894,
   "reason": "budget",
+  "cost_usd": 0.09760579999999999,
   "minutes": 22.5
  },
  {
@@ -10146,6 +10742,7 @@
   "status": "succeeded",
   "tokens": 97135,
   "reason": "all_done",
+  "cost_usd": 0.00394814,
   "minutes": 1.8
  },
  {
@@ -10163,6 +10760,7 @@
   "status": "succeeded",
   "tokens": 1359035,
   "reason": "all_done",
+  "cost_usd": 0.033786460000000004,
   "minutes": 13.1
  },
  {
@@ -10180,6 +10778,7 @@
   "status": "succeeded",
   "tokens": 185598,
   "reason": "all_done",
+  "cost_usd": 0.007327720000000001,
   "minutes": 1.7
  },
  {
@@ -10197,6 +10796,7 @@
   "status": "succeeded",
   "tokens": 583660,
   "reason": "quiescent",
+  "cost_usd": 0.01817464,
   "minutes": 4.4
  },
  {
@@ -10214,6 +10814,7 @@
   "status": "succeeded",
   "tokens": 40024,
   "reason": "all_done",
+  "cost_usd": 0.0025934400000000002,
   "minutes": 1.6
  },
  {
@@ -10231,6 +10832,7 @@
   "status": "succeeded",
   "tokens": 68757,
   "reason": "quiescent",
+  "cost_usd": 0.00420058,
   "minutes": 1.3
  },
  {
@@ -10248,6 +10850,7 @@
   "status": "succeeded",
   "tokens": 128404,
   "reason": "quiescent",
+  "cost_usd": 0.00606952,
   "minutes": 1.1
  },
  {
@@ -10265,6 +10868,7 @@
   "status": "succeeded",
   "tokens": 310784,
   "reason": "all_done",
+  "cost_usd": 0.01079024,
   "minutes": 2.3
  },
  {
@@ -10282,6 +10886,7 @@
   "status": "succeeded",
   "tokens": 65896,
   "reason": "all_done",
+  "cost_usd": 0.00318232,
   "minutes": 2.5
  },
  {
@@ -10299,6 +10904,7 @@
   "status": "succeeded",
   "tokens": 239816,
   "reason": "quiescent",
+  "cost_usd": 0.009707280000000002,
   "minutes": 5.1
  },
  {
@@ -10316,6 +10922,7 @@
   "status": "succeeded",
   "tokens": 166533,
   "reason": "all_done",
+  "cost_usd": 0.007085220000000001,
   "minutes": 1.7
  },
  {
@@ -10333,6 +10940,7 @@
   "status": "succeeded",
   "tokens": 2309043,
   "reason": "all_done",
+  "cost_usd": 0.05015101999999999,
   "minutes": 11.5
  },
  {
@@ -10350,6 +10958,7 @@
   "status": "succeeded",
   "tokens": 83034,
   "reason": "all_done",
+  "cost_usd": 0.00340988,
   "minutes": 1.2
  },
  {
@@ -10367,6 +10976,7 @@
   "status": "succeeded",
   "tokens": 80896,
   "reason": "all_done",
+  "cost_usd": 0.0038636799999999995,
   "minutes": 3.1
  },
  {
@@ -10384,6 +10994,7 @@
   "status": "succeeded",
   "tokens": 150097,
   "reason": "all_done",
+  "cost_usd": 0.0059573000000000004,
   "minutes": 1.6
  },
  {
@@ -10401,6 +11012,7 @@
   "status": "succeeded",
   "tokens": 730184,
   "reason": "all_done",
+  "cost_usd": 0.024255359999999997,
   "minutes": 4.4
  },
  {
@@ -10418,6 +11030,7 @@
   "status": "succeeded",
   "tokens": 41276,
   "reason": "all_done",
+  "cost_usd": 0.0031723999999999997,
   "minutes": 1.5
  },
  {
@@ -10435,6 +11048,7 @@
   "status": "succeeded",
   "tokens": 102831,
   "reason": "all_done",
+  "cost_usd": 0.00470326,
   "minutes": 3.7
  },
  {
@@ -10452,6 +11066,7 @@
   "status": "succeeded",
   "tokens": 192038,
   "reason": "all_done",
+  "cost_usd": 0.00856092,
   "minutes": 2.2
  },
  {
@@ -10469,6 +11084,7 @@
   "status": "token_budget",
   "tokens": 3018762,
   "reason": "budget",
+  "cost_usd": 0.06354348000000001,
   "minutes": 11.5
  },
  {
@@ -10486,6 +11102,7 @@
   "status": "succeeded",
   "tokens": 43575,
   "reason": "all_done",
+  "cost_usd": 0.00224638,
   "minutes": 0.8
  },
  {
@@ -10503,6 +11120,7 @@
   "status": "succeeded",
   "tokens": 107558,
   "reason": "quiescent",
+  "cost_usd": 0.004561240000000001,
   "minutes": 2.1
  },
  {
@@ -10520,6 +11138,7 @@
   "status": "succeeded",
   "tokens": 89233,
   "reason": "quiescent",
+  "cost_usd": 0.004944260000000001,
   "minutes": 1
  },
  {
@@ -10537,6 +11156,7 @@
   "status": "succeeded",
   "tokens": 336128,
   "reason": "all_done",
+  "cost_usd": 0.012120559999999999,
   "minutes": 4.7
  },
  {
@@ -10554,6 +11174,7 @@
   "status": "token_budget",
   "tokens": 6037960,
   "reason": "budget",
+  "cost_usd": 0.08706672,
   "minutes": 12.8
  },
  {
@@ -10571,6 +11192,7 @@
   "status": "succeeded",
   "tokens": 2538921,
   "reason": "quiescent",
+  "cost_usd": 0.051493220000000006,
   "minutes": 15.4
  },
  {
@@ -10588,6 +11210,7 @@
   "status": "succeeded",
   "tokens": 4875855,
   "reason": "quiescent",
+  "cost_usd": 0.07818854000000001,
   "minutes": 13.6
  },
  {
@@ -10605,6 +11228,7 @@
   "status": "failed",
   "tokens": 0,
   "reason": "quiescent",
+  "cost_usd": 0,
   "minutes": 0
  },
  {
@@ -10622,6 +11246,7 @@
   "status": "succeeded",
   "tokens": 0,
   "reason": "quiescent",
+  "cost_usd": 0,
   "minutes": 0
  },
  {
@@ -10639,6 +11264,7 @@
   "status": "failed",
   "tokens": 0,
   "reason": "quiescent",
+  "cost_usd": 0,
   "minutes": 0
  },
  {
@@ -10656,6 +11282,7 @@
   "status": "succeeded",
   "tokens": 794238,
   "reason": "all_done",
+  "cost_usd": 0.018783799999999996,
   "minutes": 6.5
  },
  {
@@ -10673,6 +11300,7 @@
   "status": "succeeded",
   "tokens": 287205,
   "reason": "all_done",
+  "cost_usd": 0.010231700000000002,
   "minutes": 5.2
  },
  {
@@ -10690,6 +11318,7 @@
   "status": "succeeded",
   "tokens": 5668281,
   "reason": "all_done",
+  "cost_usd": 0.1418277,
   "minutes": 3.8
  },
  {
@@ -10707,6 +11336,7 @@
   "status": "succeeded",
   "tokens": 5110126,
   "reason": "all_done",
+  "cost_usd": 0.13473508,
   "minutes": 4.3
  },
  {
@@ -10724,6 +11354,7 @@
   "status": "succeeded",
   "tokens": 4993724,
   "reason": "all_done",
+  "cost_usd": 0.14129656000000002,
   "minutes": 5.5
  },
  {
@@ -10741,6 +11372,7 @@
   "status": "token_budget",
   "tokens": 12033378,
   "reason": "budget",
+  "cost_usd": 0.24326452000000004,
   "minutes": 5.5
  },
  {
@@ -10758,6 +11390,7 @@
   "status": "succeeded",
   "tokens": 7334381,
   "reason": "all_done",
+  "cost_usd": 0.16793218000000001,
   "minutes": 5.6
  },
  {
@@ -10775,6 +11408,7 @@
   "status": "token_budget",
   "tokens": 12056453,
   "reason": "budget",
+  "cost_usd": 0.25847682,
   "minutes": 6.3
  },
  {
@@ -10792,6 +11426,7 @@
   "status": "succeeded",
   "tokens": 48491,
   "reason": "all_done",
+  "cost_usd": 0.00309406,
   "minutes": 1.2
  },
  {
@@ -10809,6 +11444,7 @@
   "status": "succeeded",
   "tokens": 5473768,
   "reason": "all_done",
+  "cost_usd": 0.1382484,
   "minutes": 4.5
  },
  {
@@ -10826,6 +11462,7 @@
   "status": "succeeded",
   "tokens": 3579258,
   "reason": "quiescent",
+  "cost_usd": 0.09548844,
   "minutes": 3.5
  },
  {
@@ -10843,6 +11480,7 @@
   "status": "succeeded",
   "tokens": 6730306,
   "reason": "all_done",
+  "cost_usd": 0.16285971999999996,
   "minutes": 7.6
  },
  {
@@ -10860,6 +11498,7 @@
   "status": "succeeded",
   "tokens": 7760651,
   "reason": "quiescent",
+  "cost_usd": 0.17383525999999996,
   "minutes": 9.2
  },
  {
@@ -10877,6 +11516,7 @@
   "status": "succeeded",
   "tokens": 10129721,
   "reason": "all_done",
+  "cost_usd": 0.22650354,
   "minutes": 7.6
  },
  {
@@ -10894,6 +11534,7 @@
   "status": "succeeded",
   "tokens": 5261985,
   "reason": "all_done",
+  "cost_usd": 0.14186282000000003,
   "minutes": 4.3
  },
  {
@@ -10911,6 +11552,7 @@
   "status": "succeeded",
   "tokens": 9133019,
   "reason": "all_done",
+  "cost_usd": 0.19048326000000002,
   "minutes": 7.7
  },
  {
@@ -10928,6 +11570,7 @@
   "status": "token_budget",
   "tokens": 12027814,
   "reason": "budget",
+  "cost_usd": 0.24220915999999998,
   "minutes": 7.1
  },
  {
@@ -10945,6 +11588,7 @@
   "status": "succeeded",
   "tokens": 10817356,
   "reason": "all_done",
+  "cost_usd": 0.24258184000000002,
   "minutes": 8.2
  },
  {
@@ -10962,6 +11606,7 @@
   "status": "token_budget",
   "tokens": 12004057,
   "reason": "budget",
+  "cost_usd": 0.24775354000000005,
   "minutes": 6.7
  },
  {
@@ -10979,6 +11624,7 @@
   "status": "token_budget",
   "tokens": 12002512,
   "reason": "budget",
+  "cost_usd": 0.2526616,
   "minutes": 7.6
  },
  {
@@ -10996,6 +11642,7 @@
   "status": "token_budget",
   "tokens": 12000950,
   "reason": "budget",
+  "cost_usd": 0.23775332000000002,
   "minutes": 6.6
  },
  {
@@ -11013,6 +11660,7 @@
   "status": "succeeded",
   "tokens": 66404,
   "reason": "all_done",
+  "cost_usd": 0.0034604,
   "minutes": 1.4
  },
  {
@@ -11030,6 +11678,7 @@
   "status": "succeeded",
   "tokens": 2068569,
   "reason": "all_done",
+  "cost_usd": 0.06790658000000001,
   "minutes": 2.4
  },
  {
@@ -11047,6 +11696,7 @@
   "status": "succeeded",
   "tokens": 4089903,
   "reason": "all_done",
+  "cost_usd": 0.10323990000000001,
   "minutes": 5.3
  },
  {
@@ -11064,6 +11714,7 @@
   "status": "succeeded",
   "tokens": 4542137,
   "reason": "all_done",
+  "cost_usd": 0.12213498,
   "minutes": 5.8
  },
  {
@@ -11081,6 +11732,7 @@
   "status": "succeeded",
   "tokens": 9032171,
   "reason": "all_done",
+  "cost_usd": 0.19321549999999998,
   "minutes": 6
  },
  {
@@ -11098,6 +11750,7 @@
   "status": "succeeded",
   "tokens": 3241023,
   "reason": "all_done",
+  "cost_usd": 0.09093390000000001,
   "minutes": 4.4
  },
  {
@@ -11115,6 +11768,7 @@
   "status": "succeeded",
   "tokens": 10187907,
   "reason": "all_done",
+  "cost_usd": 0.20046118,
   "minutes": 9.4
  },
  {
@@ -11132,6 +11786,7 @@
   "status": "succeeded",
   "tokens": 11009125,
   "reason": "all_done",
+  "cost_usd": 0.16388561999999998,
   "minutes": 24.9
  },
  {
@@ -11149,6 +11804,7 @@
   "status": "token_budget",
   "tokens": 24056426,
   "reason": "budget",
+  "cost_usd": 0.41511676000000003,
   "minutes": 7.4
  },
  {
@@ -11166,6 +11822,7 @@
   "status": "token_budget",
   "tokens": 24036859,
   "reason": "budget",
+  "cost_usd": 0.42475237999999993,
   "minutes": 7.1
  },
  {
@@ -11183,6 +11840,7 @@
   "status": "succeeded",
   "tokens": 10611429,
   "reason": "all_done",
+  "cost_usd": 0.15669729999999987,
   "minutes": 26.9
  },
  {
@@ -11200,6 +11858,7 @@
   "status": "token_budget",
   "tokens": 24041007,
   "reason": "budget",
+  "cost_usd": 0.43465294,
   "minutes": 7
  },
  {
@@ -11217,6 +11876,7 @@
   "status": "token_budget",
   "tokens": 24030035,
   "reason": "budget",
+  "cost_usd": 0.41602486,
   "minutes": 7.3
  },
  {
@@ -11234,6 +11894,7 @@
   "status": "token_budget",
   "tokens": 24115876,
   "reason": "budget",
+  "cost_usd": 0.32336576,
   "minutes": 43.4
  },
  {
@@ -11251,6 +11912,7 @@
   "status": "token_budget",
   "tokens": 24043677,
   "reason": "budget",
+  "cost_usd": 0.43757362,
   "minutes": 7.8
  },
  {
@@ -11268,6 +11930,7 @@
   "status": "token_budget",
   "tokens": 24056933,
   "reason": "budget",
+  "cost_usd": 0.42601658000000003,
   "minutes": 7.4
  },
  {
@@ -11285,6 +11948,7 @@
   "status": "token_budget",
   "tokens": 24003676,
   "reason": "budget",
+  "cost_usd": 0.43517232000000006,
   "minutes": 7.7
  },
  {
@@ -11302,6 +11966,7 @@
   "status": "token_budget",
   "tokens": 24000219,
   "reason": "budget",
+  "cost_usd": 0.42880414,
   "minutes": 7.9
  },
  {
@@ -11319,6 +11984,7 @@
   "status": "token_budget",
   "tokens": 24152309,
   "reason": "budget",
+  "cost_usd": 0.30447241999999997,
   "minutes": 31.2
  },
  {
@@ -11336,6 +12002,7 @@
   "status": "succeeded",
   "tokens": 10209797,
   "reason": "quiescent",
+  "cost_usd": 0.15873546,
   "minutes": 26.3
  },
  {
@@ -11353,6 +12020,7 @@
   "status": "succeeded",
   "tokens": 624106,
   "reason": "all_done",
+  "cost_usd": 0.019717239999999997,
   "minutes": 8.4
  },
  {
@@ -11370,6 +12038,7 @@
   "status": "token_budget",
   "tokens": 12023113,
   "reason": "budget",
+  "cost_usd": 0.23972033999999995,
   "minutes": 6.1
  },
  {
@@ -11387,6 +12056,7 @@
   "status": "succeeded",
   "tokens": 5532705,
   "reason": "all_done",
+  "cost_usd": 0.14855146,
   "minutes": 11.8
  },
  {
@@ -11404,6 +12074,7 @@
   "status": "succeeded",
   "tokens": 69546,
   "reason": "all_done",
+  "cost_usd": 0.004819,
   "minutes": 1.8
  },
  {
@@ -11421,6 +12092,7 @@
   "status": "succeeded",
   "tokens": 7357763,
   "reason": "all_done",
+  "cost_usd": 0.18637566,
   "minutes": 8.5
  },
  {
@@ -11438,6 +12110,7 @@
   "status": "succeeded",
   "tokens": 10926992,
   "reason": "all_done",
+  "cost_usd": 0.22987848,
   "minutes": 7.6
  },
  {
@@ -11455,6 +12128,7 @@
   "status": "succeeded",
   "tokens": 1233903,
   "reason": "all_done",
+  "cost_usd": 0.028577899999999993,
   "minutes": 11.1
  },
  {
@@ -11472,6 +12146,7 @@
   "status": "succeeded",
   "tokens": 11457757,
   "reason": "all_done",
+  "cost_usd": 0.24699194000000005,
   "minutes": 13.5
  },
  {
@@ -11489,6 +12164,7 @@
   "status": "token_budget",
   "tokens": 12034645,
   "reason": "budget",
+  "cost_usd": 0.24647681999999999,
   "minutes": 8.6
  },
  {
@@ -11506,6 +12182,7 @@
   "status": "succeeded",
   "tokens": 58771,
   "reason": "all_done",
+  "cost_usd": 0.0036328600000000003,
   "minutes": 1.5
  },
  {
@@ -11523,6 +12200,7 @@
   "status": "succeeded",
   "tokens": 2913308,
   "reason": "all_done",
+  "cost_usd": 0.09166984,
   "minutes": 5.4
  },
  {
@@ -11540,6 +12218,7 @@
   "status": "succeeded",
   "tokens": 8485240,
   "reason": "all_done",
+  "cost_usd": 0.19413032000000002,
   "minutes": 6.7
  },
  {
@@ -11557,6 +12236,7 @@
   "status": "succeeded",
   "tokens": 76261,
   "reason": "all_done",
+  "cost_usd": 0.0045803400000000005,
   "minutes": 1.9
  },
  {
@@ -11574,6 +12254,7 @@
   "status": "succeeded",
   "tokens": 38946,
   "reason": "all_done",
+  "cost_usd": 0.00206212,
   "minutes": 0.6
  },
  {
@@ -11591,6 +12272,7 @@
   "status": "succeeded",
   "tokens": 41098,
   "reason": "all_done",
+  "cost_usd": 0.0025977200000000004,
   "minutes": 0.7
  },
  {
@@ -11608,6 +12290,7 @@
   "status": "succeeded",
   "tokens": 61060,
   "reason": "all_done",
+  "cost_usd": 0.0035834400000000002,
   "minutes": 2.2
  },
  {
@@ -11625,6 +12308,7 @@
   "status": "succeeded",
   "tokens": 41714,
   "reason": "all_done",
+  "cost_usd": 0.0022878000000000004,
   "minutes": 0.9
  },
  {
@@ -11642,6 +12326,7 @@
   "status": "succeeded",
   "tokens": 35289,
   "reason": "all_done",
+  "cost_usd": 0.0021029800000000004,
   "minutes": 0.6
  },
  {
@@ -11659,6 +12344,7 @@
   "status": "succeeded",
   "tokens": 2938800,
   "reason": "all_done",
+  "cost_usd": 0.05627008,
   "minutes": 20.3
  },
  {
@@ -11676,6 +12362,7 @@
   "status": "succeeded",
   "tokens": 2215539,
   "reason": "all_done",
+  "cost_usd": 0.053680540000000006,
   "minutes": 29.9
  },
  {
@@ -11693,6 +12380,7 @@
   "status": "succeeded",
   "tokens": 6277139,
   "reason": "all_done",
+  "cost_usd": 0.12908622000000003,
   "minutes": 23.6
  },
  {
@@ -11710,6 +12398,7 @@
   "status": "succeeded",
   "tokens": 218936,
   "reason": "all_done",
+  "cost_usd": 0.00716616,
   "minutes": 2.8
  },
  {
@@ -11727,6 +12416,7 @@
   "status": "succeeded",
   "tokens": 249719,
   "reason": "all_done",
+  "cost_usd": 0.01092454,
   "minutes": 4.1
  },
  {
@@ -11744,6 +12434,7 @@
   "status": "succeeded",
   "tokens": 2485527,
   "reason": "all_done",
+  "cost_usd": 0.06360262000000001,
   "minutes": 17.1
  },
  {
@@ -11761,6 +12452,7 @@
   "status": "succeeded",
   "tokens": 109970,
   "reason": "all_done",
+  "cost_usd": 0.00563132,
   "minutes": 2.5
  },
  {
@@ -11778,6 +12470,7 @@
   "status": "succeeded",
   "tokens": 445707,
   "reason": "all_done",
+  "cost_usd": 0.018916380000000003,
   "minutes": 7.3
  },
  {
@@ -11795,6 +12488,7 @@
   "status": "succeeded",
   "tokens": 4338661,
   "reason": "all_done",
+  "cost_usd": 0.10128145999999998,
   "minutes": 21.4
  },
  {
@@ -11812,6 +12506,7 @@
   "status": "succeeded",
   "tokens": 82067,
   "reason": "all_done",
+  "cost_usd": 0.0044443,
   "minutes": 2.4
  },
  {
@@ -11829,6 +12524,7 @@
   "status": "succeeded",
   "tokens": 218409,
   "reason": "all_done",
+  "cost_usd": 0.010582099999999999,
   "minutes": 4.5
  },
  {
@@ -11846,6 +12542,7 @@
   "status": "succeeded",
   "tokens": 2792507,
   "reason": "all_done",
+  "cost_usd": 0.07041437999999998,
   "minutes": 14.4
  },
  {
@@ -11863,6 +12560,7 @@
   "status": "succeeded",
   "tokens": 159855,
   "reason": "all_done",
+  "cost_usd": 0.00649278,
   "minutes": 2.7
  },
  {
@@ -11880,6 +12578,7 @@
   "status": "succeeded",
   "tokens": 552180,
   "reason": "quiescent",
+  "cost_usd": 0.019408479999999995,
   "minutes": 9.1
  },
  {
@@ -11897,6 +12596,7 @@
   "status": "succeeded",
   "tokens": 2887418,
   "reason": "all_done",
+  "cost_usd": 0.06901788,
   "minutes": 11
  },
  {
@@ -11914,6 +12614,7 @@
   "status": "succeeded",
   "tokens": 225721,
   "reason": "all_done",
+  "cost_usd": 0.00773082,
   "minutes": 2.7
  },
  {
@@ -11931,6 +12632,7 @@
   "status": "succeeded",
   "tokens": 305488,
   "reason": "all_done",
+  "cost_usd": 0.01185984,
   "minutes": 4.6
  },
  {
@@ -11948,6 +12650,7 @@
   "status": "succeeded",
   "tokens": 598591,
   "reason": "all_done",
+  "cost_usd": 0.019515900000000003,
   "minutes": 6.2
  }
 ]
