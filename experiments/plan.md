@@ -1789,7 +1789,23 @@ Round 16 stage D left only expr below 0.85. A subagent chose 12 candidates with 
 - Every AUD run entered all 3 agents and used revivals (2–9 per run, 5–28 posts).
 - C1TR used both relays in 5 of 6 runs. In one planning run the second instance ended without `done` (quiescent).
 - Predictions: C1TR not decided against C1T, as predicted, but with the margin on shop2 rather than planning. AUD against C1TR not decided, as predicted. Spend: C1TR was 1.0–1.4× C1T (predicted 2–3×) and AUD 4–11× (predicted 3–5×).
-- The transcript analysis also waits for the screen to end (no bulk reads while runs are live).
+
+**Findings from the transcripts** ([report](reports/2026-10-05-round17-traces-analysis.md), model output; post and revival counts, relay edits, the quiescent run and the NOTES reads checked by hand; the version replay not re-run):
+- **Later contexts changed little.** From the replay: relays changed the graded final in 1 of 6 runs (+0.037 on planning, 0 on shop2). Audits raised the author's state at its first `done` by +0.047 on average (+0.112, +0.005, +0.023). Both effects are smaller than the spread between runs of one arm.
+- **The shop2 margins come from the first draft.** C1TR's 0.491 run reached it within its first instance (checked: the relays made 0 edits). AUD's 0.592 run had 0.503 at 0.8 minutes. A finding from one auditor's private experiments, integrated by the woken author, added about +0.07, and the author's own tuning added +0.08. It is the one case of a woken author using an auditor's finding.
+- **Relays checked validity and timing only.** 5 of 11 relay instances made no edit, and none built an input larger than the example. Two relays quoted a cost of 7.5× the naive level on the large example and still called it verified.
+- **Testing at the stated production size happened in 1 of 18 runs** (an AUD auditor, 90 sessions). It found a 56.6 s overrun, and the fix was grade-neutral.
+- **AUD's spend is mostly revived turns** (53–87% of its tokens; 13 of 35 revival turns made no edit). Auditors edited the code themselves more than they asked the author (30–85% of deliverable edits in 5 of 6 runs). Two runs ended when every agent had used its 3 revivals, with the last edits unreviewed.
+- **Relay mechanics:** relays fire only on `done`, so a second instance that ended its turn in text closed the run with 51 minutes and 11.5M tokens left. The handoff is only the previous `done` reason: `NOTES-wren.md` never existed, and relays tried to read it 11 times.
+- **shop2 zeros:** all are valid schedules at or above the grader's naive cost (Giffler–Thompson with a weighted-shortest-processing-time rule, hidden). The provided `instance_large.json` ranks all nine runs' final programs in the same order as the hidden grade.
+- No agent mentioned the clock or the tokens line.
+- **Hypotheses in the report** (not pre-registered):
+  - a cost-reference norm: build a second, different simple method and keep the cheaper;
+  - a same-context audit, a single steer at the first `done` with no fresh instance;
+  - a production-size self-test norm;
+  - parallel private first drafts selected by cost on the provided large instance;
+  - AUD with `revive: 1`.
+  The subagent flags the cost-reference and production-size norms as close to the no-grading-hints rule. They need care: they may refer only to what the contract states.
 
 ### Round 17 stage S result: DeepSWE screen (2026-10-05 01:33; batches 23:55–01:31, code `497b6d9`)
 
