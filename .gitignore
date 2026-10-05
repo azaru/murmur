@@ -24,6 +24,7 @@ archive/*.tar.xz
 !experiments/deepswe/*.sh
 !experiments/deepswe/run
 !experiments/deepswe/README.md
+!experiments/deepswe/traces*.md
 !experiments/deepswe/refs/*.json
 !experiments/deepswe/results/*.json
 experiments/deepswe/runs/
