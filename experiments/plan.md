@@ -2063,6 +2063,14 @@ Only wave 1 of repetition 0 is valid: ST, ST-tail and ST-file, one batch each. T
 - **Spend:** valid 75.2M and $1.27; invalid 25.5M and $0.57, spent but not counted; 100.7M and $1.84 in total. The quota stop came after about 475M tokens since 06:03 UTC, in rounds 18 and 19 together.
 - **Resuming.** `batch19.sh` skips any batch with a `results/*.json`, so moving the three invalid run directories aside (the driver reuses `runs/<id>/` and would mix the old files with the new ones), deleting `STOP19` and restarting it would rerun wave 2 of repetition 0 and all of repetition 1: 9 batches, at most 288M and about $4.7 at this round's ~$0.016 per million. The quota's reset time is not known.
 
+## 2026-10-05 17:43: the user's direction after rounds 18 and 19, and a communication diagnosis (no measurement)
+
+The user declined both proposed next steps (resuming round 19 and a round on stopping): "the swarm is not communicating effectively; that is what we must find". A subagent diagnosed communication in all 54 twelve-agent runs from rounds 15–19 ([report](reports/2026-10-05-swarm-communication-diagnosis.md), model output; key claims checked by hand). Its ranking, by cost:
+1. **Silent departures.** A `done` reason is visible only through the `team` tool, which the ST profiles do not offer and no agent called in any run. Teammates keep addressing agents who left (swift in round 18 r1 was named in 50 posts over 99 minutes after its `done`), and a repository claimed by a departed agent stays unowned: 11 of the 20 DeepSWE repository-runs below 0.5 ended with their last editor gone and nobody continuing, with 4–113 minutes left.
+2. **`done` read as "my slice is done".** 35 of 58 `done` reasons admit partial scope; one agent called `done` saying it "will continue with the assigned Scriggo task".
+3. **Stale or retracted claims.** A claim in prose keeps counting after it is retracted or its author leaves (round 19 ST: robin's expr claim, retracted at 0.6 minutes, was still cited at 32; expr scored 0.04). The board tail froze such claims on screen. The task list was the only mechanism that released a claim automatically, on `done`.
+Delivery speed is not a problem (median 4–5 s from post to attach). The requirements for a fix: show a departure to everyone from facts murmur has, not from the leaver's goodwill; let an agent see goal-level state (untouched or orphaned work, who is active) before it leaves; keep one current owner statement per unit of work. All without tests, without the grader, and without assigning work.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
