@@ -1,0 +1,6 @@
+{
+  "messaging": false,
+  "writeGuard": true,
+  "clock": true,
+  "systemPromptAppend": "Keep working until every requested change is implemented and verified. Do not settle for a partial implementation, and do not stop because the work is large. Before you call done, re-read every task and check each requirement with your own tests; if anything is missing or failing, keep going."
+}

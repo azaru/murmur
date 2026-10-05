@@ -1889,6 +1889,54 @@ C1T, one run per task, `isolated` arm, three batches of four, 48M shared and 90 
   - "No binary 1 on oxvg or scriggo" holds, and there is none anywhere.
 - **Coordination summary:** [`deepswe/traces17.md`](deepswe/traces17.md). The swarm made 949–1031 tool calls and 141–182 posts, with all 12 agents active.
 
+## Round 18: the DeepSWE batch on ten tasks, the clock deciding, and a single agent told not to stop (fixed before measuring, 2026-10-05 08:03; the user's design)
+
+**The user's requests, in reply to the round 17 proposal:**
+- Run the batch again, without the tokens line, which did nothing.
+- Raise whatever stopped the swarm. It was the token cap (32M in 12–14 of 120 minutes), so the cap goes; the user chose no practical cap, so the 120-minute clock decides.
+- Only ST and a single agent.
+- Give the single agent an instruction that insists it must not stop, and only to it.
+- Use many more tasks at once: 10.
+- Docker raised to 24 GB and 10 CPUs (from 16 GB and 8).
+
+**Question.** On a batch of ten real repository tasks with the clock as the only limit, does a 12-agent swarm beat one agent that is told to keep working until everything is done?
+
+**Arms:**
+- **ST** = `n12-stagger` (12 equals, post-only board, staggered entry, write guard, clock; no tokens line), driver arm `swarm`.
+- **C1P** = `solo-clock-persist`, new: `solo-clock` (one agent, write guard, clock) plus a system-prompt addition: "Keep working until every requested change is implemented and verified. Do not settle for a partial implementation, and do not stop because the work is large. Before you call done, re-read every task and check each requirement with your own tests; if anything is missing or failing, keep going." The instruction is generic: it names no test, grader or score. Smoke on `examples/hello.json` (run deleted): the text is in the system prompt, and the run ended all_done.
+
+**Tasks** (C1T's isolated partial score in round 16 D or round 17 S):
+- The five from round 17 E: expr (0.671), oxvg (0.000), scriggo (0.000), tengo (0.440), wasmi (0.636).
+- Five more where the isolated agent never got the binary reward: scc (0.903), participle (0.955), dasel (0.973), fastapi (0.977), cattrs (0.972).
+- All ten have validated refs.
+
+**Execution.** `experiments/deepswe/batch18.sh`: 120 minutes and a 400M token cap per batch (set so high that the clock decides), 5 GB and 2 CPUs per sidecar, k=2. Both arms of a repetition run at the same time (20 sidecars). Repetition 0 runs first. On the usage-limit error the batch is invalid and the script stops.
+
+**Rule** (per-task means over k=2, then the mean over the ten tasks):
+- ST **beats** C1P if the ten-task mean is ≥ +0.05 above and ST is above on at least 6 of 10 tasks;
+- **loses** if ≤ −0.05 below and below on at least 6 of 10;
+- otherwise **not decided**.
+- If only repetition 0 is valid (quota), it is reported as k=1 with no verdict.
+
+**Descriptive:**
+- tokens, minutes and end reason per batch; binary rewards;
+- whether C1P stops early despite the instruction, and its `done` reason;
+- how the swarm spreads over the ten tasks (`traces18.md`);
+- comparison with round 17 E on the five shared tasks (another hour and cap, so descriptive).
+
+**Predictions:**
+- C1P works much longer than round 17's C1T (more than 3.1M and 20 minutes) but still calls `done` before the clock with tasks unfinished.
+- ST uses most of the 120 minutes and covers more tasks.
+- ST beats C1P by the rule, and neither arm touches oxvg.
+
+**Estimate:** ST spent about 2.4M per minute in round 17 E, so a full 120 minutes could cost up to ~290M per batch; C1P perhaps 10–50M. k=2 would be ~400–700M, more than one quota window, so the quota may stop the round after repetition 0.
+
+**Known threats:**
+- The two arms differ in two things at once, the swarm and the instruction. That is the design: the control is strengthened on purpose.
+- 20 sidecars share 10 Docker CPUs, slowing builds for both arms alike.
+- The tasks were chosen with C1T's isolated scores (another profile), and five of them are near its ceiling when run alone.
+- Twelve agents spending for 120 minutes in one hub is untested.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
