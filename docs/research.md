@@ -6,6 +6,8 @@ This is the curated record of every experiment run with murmur so far: the quest
 
 **Direction (2026-10-03, after round 14).** The user restated the goal: the only goal is a better swarm and knowing when a swarm is useful, now with 12 agents. Every lever tested with an oracle is to be re-tested without one ([lever recount](../experiments/reports/2026-10-03-lever-recount.md)).
 
+**Status (2026-10-05, after round 17).** Two rule wins for multi-agent configurations, both with caveats. On planning and shop2, three agents entering in turn with a board (AUD) beat one agent (C1T), but the margin is on shop2 where C1T scored 0 three times, and fresh-context relays (C1TR) are not decided against either. The transcripts credit the first draft more than the audit. On a five-task DeepSWE batch, 12 agents (STT) beat one agent sharing the same budget, but the single agent quit within 20 minutes with 90% of the budget unused. The common thread with rounds 11, 16 and side test U is that a single agent's stopping judgement, not its budget or its partners, sets most outcomes. See [Round 17](#round-17-a-fresh-context-audit-and-the-first-deepswe-batch-swarmtest-271m-deepswe-screen-461m-and-batch-703m-tokens-code-73ff3e7-497b6d9-37213a7).
+
 **Status (2026-10-04, after round 16).** On the difficulty tasks (planning and shop2) at a shared 12M cap, 12 agents with staggered entry and the tokens line (STT) are not decided against one agent with the clock and the tokens line (C1T): 0.545 against 0.524, at 17× the spend. A threaded board (STH) loses to C1T. The transcript report finds a good deliverable within 1–2 minutes (from its version replay, not re-run by hand), with most of the swarm's spend going to reviewers re-reading the one file. Nobody tests on inputs larger than the example. Telling one agent its budget is unlimited changes nothing: it stops within two minutes because it judges itself finished. The DeepSWE calibration left one usable task under partial credit, so the batch needs new tasks. Candidate tests from a literature review are listed in `plan.md`. See [Round 16](#round-16-difficulty-tasks-at-equal-caps-threads-at-n12-an-unlimited-clock-and-deepswe-calibration-stage-a-727m-side-test-u-029m-stage-d-197m-tokens-code-b438df5-e5f402f-4833873).
 
 **Status (2026-10-04, after round 15 stage C, equal spend).** Stage B's swarm win on volume was mostly spend. Stage C gave one agent the time to spend the same 24M (a 60-minute clock) and showed every agent the tokens left. C1T (that single agent) scored 0.985 on ospec_green and 0.919 on ospec_brown, at k=1. STT (12 agents with staggered entry and the tokens line) scored 0.955 and 0.963. The rule says not decided, and both tasks are at the ceiling. The swarm's remaining advantage on these tasks is speed: it gets the same score 4–6× faster. No agent ever mentioned the tokens line, so whether it or the longer clock kept C1T working is open. The stage was closed early, and the user moved to quality-bound tasks calibrated against C1T, to find where coordination improves quality. See [Round 15 stage C](#round-15-stage-c-equal-spend-on-volume-closed-early-1546m-tokens-code-10e6f54).
@@ -19,6 +21,12 @@ This is the curated record of every experiment run with murmur so far: the quest
 **Status before the oracle problem (2026-10-02, after round 10, with an oracle): the evidence answers the question negatively for the tasks tested.** No swarm configuration has met the success criterion. Round 6 confirmed that the strongest results come from a *single* agent that keeps working: a one-line clock explains the best single agent, and once isolated agents get the same clock, the swarm's only win disappears. What remains open is whether coordination helps on tasks where a persistent single agent still has headroom. Rounds 7 and 8 rebuilt the panel around the clock agent: four planning and optimisation tasks where it stops on a green check short of the quality ceiling (panel D), and two medium OpenSpec projects where it runs out of tokens at about 0.45 (panel V). Rounds 9 and 10 put swarms against it on that panel: they lose on V, and on D they win only on one task, packing2, where the single agent sometimes stops early on a low score. A plain single agent that does not stop early matches them.
 
 ## TL;DR
+
+**Without an oracle, a fresh-context audit and a DeepSWE batch (round 17):**
+- **Audit (planning and shop2, 12M, k=3):** three agents who enter one at a time, each when the previous finishes, with a board and revival (AUD, 0.348), beat one agent with the clock and the tokens line (C1T, 0.238) by the rule, at about 6× its tokens. The same agent with two fresh-context relays (C1TR, 0.313) is not decided against either. The win rests on shop2, where C1T scored 0 three times. A quiet regrade confirmed every grade.
+- **From the transcripts, the audit itself added little:** +0.047 on average over the author's first `done`, about the same as the relays (+0.037 on planning). Most margins were set by the first draft. Later contexts checked that the program ran and met the time limit, almost never tested at the contract's production sizes (1 of 18 runs), and never used the provided large instance to compare costs, although its cost ranks every run in the order of the hidden grade.
+- **DeepSWE batch (five tasks where one agent stays below 0.85, 32M shared, 120 minutes, k=2):** 12 agents with staggered entry (STT, 0.408) beat one agent with the same budget (C1T, 0.045) by the rule. But C1T gave up after 14–19 minutes and 3.1M, saying the goal was not met. Given the same tasks one at a time, it scored 0.349 on them. Nobody touched the Rust task oxvg, and no batch reached the official binary reward on any task.
+- A DeepSWE screen of 12 harder candidates kept 4 below 0.85. Patch size predicted difficulty poorly.
 
 **Without an oracle, difficulty tasks at equal caps with the tokens left (round 16 stage A, planning and shop2, 12M, k=2):**
 - 12 agents with staggered entry (STT, 0.545 at 8.4M per run) do not beat one agent with the clock and the tokens line (C1T, 0.524 at 0.5M): not decided. The same swarm with a threaded board (STH, 0.470) loses to C1T and is not pronounced against STT.
@@ -536,6 +544,39 @@ Stage B left a confound: C1 stopped on its 30-minute clock with 13M unspent. Sta
 
 **Stage D (DeepSWE calibration).** C1T, one agent per task, four tasks in parallel (`isolated` arm), 48M shared and 90 minutes, k=2, partial credit (new tests' pass fraction × base tests' pass fraction). Means: termenv 1.000, fd 0.989, cattrs 0.972, expr 0.671. Every agent ended by itself, far below the cap. By the rule (exclude a task at ≥ 0.85) only expr stays, so the batch needs new tasks. fd r1 first scored 0 because cargo deleted the image's dev-dependency crates after a `cargo check` in the offline sidecar ([report](../experiments/reports/2026-10-04-deepswe-scorer-offline-fix.md)). The driver now disables that cleanup, and the saved diff rescores to 1.000.
 
+### Round 17: a fresh-context audit, and the first DeepSWE batch (swarmtest 27.1M, DeepSWE screen 46.1M and batch 70.3M tokens; code `73ff3e7`, `497b6d9`, `37213a7`)
+
+**Stage A, the audit.** Planning and shop2, 12M and 3720 s per run, k=3. Arms: C1T (one agent with the clock and the tokens line); C1TR (C1T plus `relay: 2`, so after each `done` a fresh instance takes the seat and is told to check the work against the spec); AUD (3 equals with a post-only board, entering one at a time by the new default-off lever `enterOnDone`, `revive: 3`, and one neutral briefing sentence telling late joiners to audit cold).
+
+| arm | planning | shop2 | mean | tokens per run (planning, shop2) |
+|---|---:|---:|---:|---|
+| C1T | 0.475 | 0.000 | 0.238 | 1.07M, 0.18M |
+| C1TR | 0.424 | 0.202 | 0.313 | 1.07M, 0.26M |
+| AUD | 0.499 | 0.197 | 0.348 | 4.50M, 1.96M |
+
+**Rules as applied:** AUD beats C1T (+0.110, above on both tasks). C1TR against C1T is not decided (+0.075, below on planning). AUD against C1TR is not decided (+0.035). A quiet regrade of all 18 final workspaces moved no run by more than 0.02.
+
+**From the transcripts** ([report](../experiments/reports/2026-10-05-round17-traces-analysis.md), model output; counts checked by hand, version replay not re-run):
+- Relays changed the graded final in 1 of 6 runs. Audits raised the author's first-`done` state by +0.047 on average. Both are smaller than the spread between runs.
+- The shop2 margins came from first drafts: C1TR's 0.491 was reached by its first instance (its relays made 0 edits), and AUD's 0.592 run had 0.503 within a minute. One woken author used one auditor's finding (+0.07).
+- Later contexts checked validity and timing. Two relays quoted a cost of 7.5× the naive level on the provided large instance and still called the work verified. Only 1 of 18 runs tested at the contract's production size.
+- 53–87% of AUD's tokens went to revived turns. The relay handoff is only the previous `done` reason, and a relay fires only on `done`, so one run ended with 51 minutes and 11.5M left.
+
+**Stage S, DeepSWE screen.** One C1T run on each of 12 new candidates (three batches of four in parallel, 48M and 90 minutes per batch). Four scored below 0.85: oxvg 0.000, scriggo 0.000, tengo 0.440 and wasmi 0.636. Both zeros were checked as real (the tests ran and failed on assertions).
+
+**Stage E, DeepSWE batch.** expr, oxvg, scriggo, tengo and wasmi in one workspace, 32M shared and 120 minutes (stage D's rule), k=2, both arms of a repetition at the same time.
+
+| task | STT, 12 agents | C1T, one agent | C1T isolated (stages D/S) |
+|---|---:|---:|---:|
+| expr | 0.335 | 0.063 | 0.671 |
+| oxvg | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.372 | 0.000 | 0.000 |
+| tengo | 0.901 | 0.027 | 0.440 |
+| wasmi | 0.432 | 0.136 | 0.636 |
+| mean | 0.408 | 0.045 | 0.349 |
+
+**Rule as applied:** STT beats C1T (+0.363, above on 4 of 5). STT hit the cap after 12–14 minutes. C1T stopped after 14–19 minutes with 3.1M, saying in both repetitions that the goal was not met. Nobody changed oxvg. No batch reached a binary reward of 1. Coordination counts are in [`deepswe/traces17.md`](../experiments/deepswe/traces17.md).
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -564,6 +605,9 @@ Stage B left a confound: C1 stopped on its 30-minute clock with 13M unspent. Sta
 | Roles chosen from a menu with sub-prompts, at n=12 | 15 A | **Not pronounced** (+0.09 against B); agents pick before reading, mostly builder |
 | Showing the tokens left keeps agents spending the budget | 15 C, 16 A | **Not separable on volume, not supported on difficulty**: C1T spent the whole 24M where C1 stopped at 11M, but its clock was also 60 minutes instead of 30. On planning and shop2 (16 A) C1T still stops at 0.06–1.2M of 12M. No agent mentioned the tokens line in any run |
 | Telling one agent its time and tokens are unlimited makes it work longer | 16 U | **Not supported** (one task, k=2): it stopped after 35–51 s, sooner than C1T (115–130 s), with no difference in score |
+| A fresh-context audit before the end raises quality, **without an oracle** | 17 A | **Supported by the rule for AUD against C1T (+0.110), but weakly**: it is shop2-led, relays are not decided against either arm, and the transcripts put the audit's own effect at about +0.05, near the relays' |
+| Coordination adds over fresh context alone (AUD against relays) | 17 A | **Not decided** (+0.035); one woken author used one auditor's finding |
+| A swarm covers a batch of real repository tasks better than one agent with the same budget | 17 E | **Supported by the rule (+0.363), mostly because the single agent gave up** at 14–19 minutes with 90% of the budget left; against the same agent on isolated tasks the swarm is +0.06 (descriptive) |
 | A threaded board helps 12 agents on difficulty tasks | 16 A | **Not supported**: STH loses to C1T (−0.054) and is not pronounced against STT. Threads collapse into one or two busy threads, and the board's share of calls rises from 29% to 46% |
 | A teammate keeps agents working the way the clock does, **without an oracle** | 14 (stage D) | **Not supported**: two agents without a clock stop at 1–2 minutes, like one |
 | A visible clock keeps a single agent working, **without an oracle** | 11 (R3, R4) | **Supported**: +0.255 with norms and +0.335 without them, 6 of 6 tasks each, at 4–10× the tokens on the contract tasks; agents never mention it |
@@ -584,6 +628,10 @@ Stage B left a confound: C1 stopped on its 30-minute clock with 13M unspent. Sta
 ## Threats to validity
 
 - **A visible oracle in every task (the main threat; it invalidates rounds 1–10 as evidence for real work).** All 31 swarmtest tasks declare `acceptance_command: npm run test`. The default briefing told agents to call done when it passes, and the main profiles' norms described hidden tests. The strongest findings (the clock, norms, persistence after green, selection by a printed score) may be artefacts of that oracle. They are hypotheses until re-tested oracle-free.
+- **Round 17:**
+  - Stage A: two tasks at k=3. The AUD win rests on shop2, where C1T scored 0 in all three runs and one agent's score is bimodal. AUD differs from C1TR in several ways at once (board, revival, named agents, briefing wording).
+  - The DeepSWE screen and the round 17 transcript analysis ran while other jobs were live. A quiet regrade showed no effect on stage A's grades. The subagent's version grading ran under load (±0.03).
+  - Stage E: five tasks at k=2. The single-agent control quit early, so the rule's verdict mostly measures stopping, not coordination. The isolated C1T numbers come from separate budgets and are a reference, not a control. Both arms ran at the same time on 8 Docker CPUs.
 - **Round 16:**
   - Stage A is 2 tasks at k=2. One agent's shop2 score is bimodal (C1T 0.565 and 0.547 in stage A, 0 and 0 in side test U three hours later), so one task can carry or erase any verdict. STH changes the board's tools and briefing together.
   - Side test U is one task at k=2, with all three arms running in the same window.
@@ -660,6 +708,9 @@ For each experiment: whether its question or theory was written down before meas
 | Round 16 stage A (difficulty, threads) | yes, committed before launch (`b438df5`) | `criba16-lanes.mjs` (stage A), `criba16/A-*.json` | `rows/runs.json` (seed 20261080), `round16-traces.md` | yes, `reports/2026-10-04-round16a-traces-analysis.md` | yes |
 | Round 16 side test U ("unlimited" clock) | yes, committed before launch (`e5f402f`) | `criba16-lanes.mjs` (stage U), `criba16/U-*.json` | `rows/runs.json` (seed 20261090), `round16-traces.md` | descriptive, in `plan.md` | yes |
 | Round 16 stage D (DeepSWE calibration) | yes, committed before launch (`b438df5`) | `deepswe/run-batch.mjs`, `deepswe/calib16.sh` | `deepswe/results/cal16-r{0,1}.json`, `cal16-r1-fd-rescore.json` | `reports/2026-10-04-deepswe-scorer-offline-fix.md`, in `plan.md` | yes (only expr stays) |
+| Round 17 stage A (audit) | yes, committed before launch (`73ff3e7`) | `criba17-lanes.mjs`, `criba17/` | `rows/runs.json` (seed 20261101), `round17-traces.md` | yes, `reports/2026-10-05-round17-traces-analysis.md` | yes |
+| Round 17 stage S (DeepSWE screen) | yes, committed before launch (`497b6d9`) | `deepswe/screen17.sh`, candidates in `reports/2026-10-04-deepswe-candidates.md` | `deepswe/results/scr17-b{1,2,3}.json` | in `plan.md` | yes (4 of 12 kept) |
+| Round 17 stage E (DeepSWE batch) | yes, committed before launch (`37213a7`) | `deepswe/batch17.sh` | `deepswe/results/e17-*.json`, `deepswe/traces17.md` | in `plan.md` | yes |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -686,11 +737,12 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the oracle audit and the build of the blind panel;
   - the round 11 phase 1 transcript analysis and the tool-usage audit;
   - the lever recount for 12-agent swarms and the round 15 transcript analyses (stages A, B and C);
-  - the round 16 stage A transcript analysis;
+  - the round 16 stage A and round 17 transcript analyses;
+  - the DeepSWE candidate selection for round 17;
   - the DeepSWE batch feasibility notes, driver build and offline-scorer fix (the driver and per-batch results are in `experiments/deepswe/`);
   - the literature review (eight source reviews and a synthesis).
-- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (685 runs in 367 campaigns, including 6 invalid ones: 5 from round 14's quota stop and 1 from round 15 stage C's): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
-- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12,13,15,16}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
+- [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (703 runs in 385 campaigns, including 6 invalid ones: 5 from round 14's quota stop and 1 from round 15 stage C's): campaign, seed, task, arm, score, tokens, status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
+- `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12,13,15,16,17}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).
