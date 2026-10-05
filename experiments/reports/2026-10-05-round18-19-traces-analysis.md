@@ -1,4 +1,4 @@
-This report is model output (subagent analysis of the transcripts). Claims marked ✓ were verified by hand by the main session (2026-10-05 14:20); the list below gives what was checked and one correction.
+This report is model output (subagent analysis of the transcripts). Claims marked ✓ were verified by hand by the main session (2026-10-05 13:57); the list below gives what was checked and one correction.
 
 **Verified by hand (main session):**
 - ✓ e18-swarm-r0: 12 `done` events from 11 agents (dunlin twice); lark has no `done`, its last message is a plain final text, and its last tool call is at 34.0 min.
