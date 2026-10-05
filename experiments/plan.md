@@ -1867,6 +1867,28 @@ C1T, one run per task, `isolated` arm, three batches of four, 48M shared and 90 
 - Running both arms at once shares 8 Docker CPUs between up to 10 sidecars, which slows builds (oxvg compiles in ~100 s) for both arms alike.
 - C1T's numbers from stages D and S come from a separate budget per task, so they are a reference, not a control.
 
+### Round 17 stage E result and rule applied (2026-10-05 02:38; batches 01:47–02:37, code `37213a7`)
+
+| task | STT r0 | STT r1 | STT mean | C1T r0 | C1T r1 | C1T mean | C1T isolated (stages D/S, reference) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| expr | 0.000 | 0.671 | 0.335 | 0.063 | 0.063 | 0.063 | 0.671 |
+| oxvg | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.745 | 0.000 | 0.372 | 0.000 | 0.000 | 0.000 | 0.000 |
+| tengo | 0.945 | 0.857 | 0.901 | 0.011 | 0.044 | 0.027 | 0.440 |
+| wasmi | 0.364 | 0.500 | 0.432 | 0.136 | 0.136 | 0.136 | 0.636 |
+| **five-task mean** | 0.411 | 0.406 | **0.408** | 0.042 | 0.049 | **0.045** | 0.349 |
+
+- **Spend:** STT hit the 32M cap after 13.9 and 12.2 minutes. C1T called `done` after 19.3 and 13.6 minutes, having spent 3.1M each time. In total 70.3M tokens, and no quota stop.
+- **Rule as written: STT beats C1T.** The five-task mean is +0.363, and STT is above on 4 of 5 tasks (oxvg tied at 0). No binary reward of 1 in any batch.
+- **But the margin is mostly C1T giving up.** In both repetitions C1T made small diffs on 3–4 tasks (0.5–3.3 KB) and called `done` saying the goal was not met: "The requested full feature sets ... remain unimplemented, so the overall goal is not fully met". It left about 100 minutes and 29M tokens unused. Given the same tasks one at a time (stages D and S, a separate budget each), the same agent scored 0.349 on these five with about 26M in total.
+- **STT against that isolated reference** (descriptive, not a control): 0.408 against 0.349 at similar total spend (32M against ~26M). It is above on scriggo and tengo and below on expr and wasmi.
+- **Nobody touched oxvg in any batch** (0 bytes of diff; 29–38 bash calls in the swarm, 10–12 by C1T). The swarm's expr rep 0 is 0 because the cap stopped it with the base tests broken (base fraction 0.013).
+- **Predictions:**
+  - "C1T runs out of the 120 minutes" is refuted: it stopped by itself within 20 minutes.
+  - "STT covers all five" is half right: four of five, never oxvg.
+  - "No binary 1 on oxvg or scriggo" holds, and there is none anywhere.
+- **Coordination summary:** [`deepswe/traces17.md`](deepswe/traces17.md). The swarm made 949–1031 tool calls and 141–182 posts, with all 12 agents active.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -1934,3 +1956,4 @@ C1T, one run per task, `isolated` arm, three batches of four, 48M shared and 90 
 | 2026-10-04 | round 16 stage D, DeepSWE calibration (batches `cal16-r0`, `cal16-r1`, `isolated` arm, code `4833873`; fd r1 rescored after a cargo cache fault) | C1T solo-clock-tokens n=1 per task | expr, termenv, cattrs, fd × 2, 48M shared, 90 min | 19.7M | means: termenv 1.000, fd 0.989, cattrs 0.972, expr 0.671 (partial credit) | three tasks excluded (≥ 0.85); only expr stays; stage E needs new tasks |
 | 2026-10-04/05 | round 17 (18 campaigns `20261004T210830Z-5a3ac503` → `20261004T220858Z-7ac6739b`, seed 20261101, code `73ff3e7`) | C1T solo-clock-tokens; C1TR solo-clock-tokens-relay2 (n=1); AUD n3-audit-tokens (n=3) | planning, shop2 × 3, 12M, 3720 s | 27.1M | means: AUD 0.348, C1TR 0.313, C1T 0.238 | AUD beats C1T (shop2-led); C1TR vs C1T and AUD vs C1TR not decided; quiet regrade confirms the grades |
 | 2026-10-04/05 | round 17 stage S, DeepSWE screen (batches `scr17-b1` to `scr17-b3`, `isolated` arm, code `497b6d9`) | C1T solo-clock-tokens n=1 per task | 12 candidates × 1, 48M shared per batch, 90 min | 46.1M | 4 below 0.85: oxvg 0, scriggo 0, tengo 0.44, wasmi 0.64 | those 4 plus expr go to stage E |
+| 2026-10-05 | round 17 stage E, DeepSWE batch (batches `e17-swarm-r0/r1`, `e17-solo-r0/r1`, code `37213a7`) | STT n12-stagger-tokens (n=12); C1T solo-clock-tokens (n=1) | expr, oxvg, scriggo, tengo, wasmi × 2, 32M shared, 120 min | 70.3M | five-task means: STT 0.408, C1T 0.045 (C1T gave up at 14–19 min with 3.1M) | STT beats C1T by the rule; the margin is mostly C1T stopping early |
