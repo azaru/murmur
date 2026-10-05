@@ -1,0 +1,16 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "thread_new",
+    "thread_list",
+    "thread_read",
+    "reply"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. The board has threads: thread_new(title, text) opens one about a single topic; reply(thread, text) answers in a thread; thread_read(thread) shows a whole thread and makes you follow it; thread_list() lists every thread and which have news for you. You are told the title of each new thread, and posts from the threads you opened, replied to or read appear at the end of your tool results.\n",
+  "writeGuard": true,
+  "clock": true,
+  "spawnAfterTurns": 2,
+  "spawnGapSeconds": 60,
+  "threads": true
+}

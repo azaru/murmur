@@ -143,6 +143,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     }
     const news = tasks?.news(name);
     if (news) lines.push(news);
+    if (profile.boardTail) {
+      const latest = new Map(board.messages.filter(m => m.from !== name).map(m => [m.from, m.text]));
+      if (latest.size) lines.push("[Latest post from each teammate]", ...[...latest].map(([from, text]) => `- ${from}: ${text.replace(/\s+/g, " ").slice(0, 100)}`));
+    }
     if (profile.clock) lines.push(profile.clockUnlimited ? "[time left: unlimited]" : `[${minutesLeft()} minutes left before the timeout]`);
     if (profile.clockTokens && profile.clockUnlimited) lines.push("[tokens left: unlimited]");
     else if (profile.clockTokens && task.budgetTokens) lines.push(`[${tokensLeft()} tokens left in the budget${task.agents > 1 ? " shared by all agents" : ""}]`);
@@ -220,6 +224,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       if (profile.spawnGapSeconds) setTimeout(() => openNext(name), profile.spawnGapSeconds * 1000).unref();
     }
     let prompt = briefing;
+    if (profile.sharedNotes) {
+      const notes = resolve(root(name), profile.sharedNotes);
+      prompt += existsSync(notes) ? `\n\nCurrent content of ${profile.sharedNotes}:\n\n${readFileSync(notes, "utf8")}` : `\n\n${profile.sharedNotes} does not exist yet.`;
+    }
     while (true) {
       member.working = true;
       await agent.session.prompt(prompt).catch(error => log("error", { agent: name, message: String(error) }));
@@ -262,7 +270,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
       appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
       extensionFactories: profile.delivery === "attach" || profile.notices || profile.writeGuard || profile.claimLease || profile.staleGuard
-        || profile.doneAfterGreen || profile.clock || profile.helpAfter || profile.taskList || branches ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
+        || profile.doneAfterGreen || profile.clock || profile.boardTail || profile.helpAfter || profile.taskList || branches ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
     });
     await loader.reload();
     const verify = async () => {

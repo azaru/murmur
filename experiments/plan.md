@@ -1937,6 +1937,64 @@ C1T, one run per task, `isolated` arm, three batches of four, 48M shared and 90 
 - The tasks were chosen with C1T's isolated scores (another profile), and five of them are near its ceiling when run alone.
 - Twelve agents spending for 120 minutes in one hub is untested.
 
+## Round 19: how the team shares state, on the five-task DeepSWE batch (fixed before measuring, 2026-10-05 08:12; the user asked for it)
+
+**The user's requests:**
+- Test the new delivery forms from the literature list (H3 and H3b) on the batch after round 18.
+- Test the threaded board too.
+- Test better instructions for using the board.
+- Asked whether agents creating and taking tasks was ever tested properly. Only once, in round 15 A, on one-deliverable tasks where the list was barely used, so a task-list arm is added here.
+- Report dollar cost, not only tokens, because the cache matters.
+
+**Question.** With everything else fixed (12 agents, staggered entry, the same five tasks and the same 32M), does the way the team shares state change what a swarm achieves on a batch of independent repository tasks?
+
+**Arms** (all 12 agents with staggered entry, write guard and clock; no tokens line):
+- **ST** = `n12-stagger`, the control: a post-only board, with new posts attached once to the next tool result.
+- **ST-tail** = `n12-stagger-tail`, new (H3b): ST plus, on every tool result, each teammate's latest post (its first 100 characters) as a view of the team's state. New default-off lever `boardTail`.
+- **ST-file** = `n12-stagger-file`, new (H3): no board tools. One shared file, `TEAM.md`, in the folder root, which the agents keep under 60 lines: who works on what, what is finished, what is missing, and verified facts. Its content is added to each agent's first prompt. New default-off lever `sharedNotes`.
+- **ST-threads** = `n12-stagger-threads`, new: round 16's STH without the tokens line. Threads replace `post`.
+- **ST-norms** = `n12-stagger-norms`, new: ST with a fuller board briefing: before starting a piece, read the board and post one line saying what you take, preferring work nobody has; when you finish or get stuck, post what you did with the command and its result; say so when you notice untaken work, and take it; keep posts short and factual, with no agreement or thanks.
+- **ST-tasks** = `n12-stagger-tasks`, new: ST plus round 15's shared task list (`tasks`, `task_add`, `task_take`, `task_done`, `task_drop`) and its briefing line.
+
+**Smoke tests** (3 agents on `examples/hello.json` with a line to share, from a copy of `src/`, runs deleted):
+- tail: the teammates' latest posts appeared in all three agents' tool results.
+- file: the third agent's first prompt carried `TEAM.md` as written by the first two, and all three kept it.
+- threads: threads were opened and answered.
+- norms: 21 posts.
+- The default profile on `examples/hello.json` passed. Unit tests pass.
+
+**Tasks:** round 17 E's five: expr, oxvg, scriggo, tengo, wasmi. In round 17 E, STT (ST with the tokens line) scored 0.411 and 0.406 there.
+
+**Execution.** `experiments/deepswe/batch19.sh` starts after round 18 (`no work left (batch18)`). 32M shared and 120 minutes per batch, so every arm spends the same tokens (round 17's swarm reached 32M in 12–14 minutes); 4 GB and 2 CPUs per sidecar; k=2. Each repetition runs two waves of three arms at the same time: ST, ST-tail and ST-file, then ST-threads, ST-norms and ST-tasks. Quota stop as before.
+
+**Rule** (per-task means over k=2, then the five-task mean), each arm against ST:
+- **better** if the five-task mean is ≥ +0.05 above and above on at least 3 of 5 tasks;
+- **worse** if ≤ −0.05 below and below on at least 3 of 5;
+- otherwise **not decided**.
+
+**Descriptive:**
+- cost in dollars (murmur's `costUsd`, from Pi's prices for gpt-6-luna: per million tokens, $0.10 input, $0.01 cache reads, $0.50 output) beside tokens;
+- the board's share of calls;
+- agents per repository and write/edit calls per repository (`traces19.md`), and whether anyone touches oxvg;
+- duplicate work (two or more agents rewriting the same file);
+- use of each mechanism: tail size, `TEAM.md` length and edits, threads, task-list items.
+
+**Predictions:**
+- ST-norms and ST-tasks spread agents over more tasks (oxvg touched) but are not decided on score.
+- ST-threads is not decided or worse (round 16).
+- ST-tail and ST-file are not decided.
+- At a fixed 32M none changes the score by 0.05 on 3 of 5 tasks: the swarm's limit here is spend per task, not coordination.
+
+**Estimate:** 6 arms × 2 × 32M = 384M tokens at most, about $6 at Pi's prices. More than one quota window, so the quota may stop it after repetition 0.
+
+**Known threats:**
+- k=2 on five tasks. Round 17 E's per-task scores swung from 0 to 0.745 between repetitions of one arm.
+- The two waves run at different times.
+- ST-file removes the board and adds the file at once. ST-norms changes only the briefing.
+- The task list and the file add their own instructions, so their arms change the wording too.
+
+**Cost reporting from now on.** `scripts/rows.mjs` now writes `cost_usd` per run (murmur's `costUsd`, or swarmtest's `cost_usd` for Pi runs). The batch driver's summary now writes `costUsd`, from round 19 on; earlier batch costs are in each run's `murmur/run/result.json`. As a check on round 17: the token ratios and the dollar ratios between arms are close, because cache reads are 77–96% of tokens in every arm. AUD against C1T is 4.2× in tokens and 4.3× in dollars on planning, and 10.9× and 8.5× on shop2. The DeepSWE swarm against the single agent is 10.3× in tokens and 10× in dollars.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

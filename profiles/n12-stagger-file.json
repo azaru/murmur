@@ -1,0 +1,11 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [],
+  "teamBriefing": "\nTeammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. There is no message board: the team shares one file, TEAM.md, in the folder root. Keep it short (under 60 lines) and current: what each of you is working on, what is finished, what is still missing, and facts you verified (the command and its result). Read it before choosing work, update it whenever your state changes, and prefer work nobody has taken. Its content when you join is shown below.\n",
+  "writeGuard": true,
+  "clock": true,
+  "spawnAfterTurns": 2,
+  "spawnGapSeconds": 60,
+  "sharedNotes": "TEAM.md"
+}

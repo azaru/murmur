@@ -258,7 +258,7 @@ async function real() {
   const git = a => spawnSync("git", a, { cwd: murmur, encoding: "utf8" }).stdout.trim();
   const scores = tasks.map(t => perTask[t.id].score ?? 0);
   const summary = { batch, arm, profile: opt.profile ?? "profiles/solo-clock-tokens.json", profileSha256: createHash("sha256").update(readFileSync(profilePath)).digest("hex").slice(0, 16),
-    agents, tasks: taskIds, tokenCap: tokens, timeoutMinutes: minutes, tokens: runs.reduce((a, r) => a + (r.result?.tokens ?? 0), 0), minutes: Math.round(minutesUsed * 10) / 10,
+    agents, tasks: taskIds, tokenCap: tokens, timeoutMinutes: minutes, tokens: runs.reduce((a, r) => a + (r.result?.tokens ?? 0), 0), costUsd: runs.reduce((a, r) => a + (r.result?.costUsd ?? 0), 0), minutes: Math.round(minutesUsed * 10) / 10,
     endReason: runs.map(r => r.result?.reason ?? `no result (hub exit ${r.code})`).join(","), cmdTimeoutSeconds: cmdTimeout, hubImage: opt["hub-image"], perTask,
     meanScore: scores.reduce((a, b) => a + b, 0) / scores.length, code: { commit: git(["rev-parse", "HEAD"]), srcDirty: git(["status", "--porcelain", "src"]) !== "" }, date: new Date().toISOString() };
   mkdirSync(join(here, "results"), { recursive: true });

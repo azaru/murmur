@@ -1,0 +1,12 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "post"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. post(text) messages all of them, and their posts appear at the end of your tool results. Use the board to avoid duplicated and missing work: before you start a piece of work, read what teammates have posted and post one line saying what you are taking, preferring work nobody has taken. When you finish a piece or get stuck, post what you did with the command you ran and its result. If you notice work that nobody has taken, say so and take it. Keep posts short and factual; do not post agreement or thanks.\n",
+  "writeGuard": true,
+  "clock": true,
+  "spawnAfterTurns": 2,
+  "spawnGapSeconds": 60
+}

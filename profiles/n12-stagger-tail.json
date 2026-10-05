@@ -1,0 +1,13 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "post"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. post(text) messages all of them, and their posts appear at the end of your tool results.\n",
+  "writeGuard": true,
+  "clock": true,
+  "spawnAfterTurns": 2,
+  "spawnGapSeconds": 60,
+  "boardTail": true
+}
