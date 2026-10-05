@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { appendFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, normalize, relative, resolve } from "node:path";
 import {
   type AgentSession, type CreateAgentSessionOptions, createAgentSession, DefaultResourceLoader,
@@ -95,6 +95,35 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   const digest = (path: string) => (existsSync(path) ? createHash("sha1").update(readFileSync(path)).digest("hex") : "");
   const evidence = new Map<string, { calls: number; firstGreen?: number; green?: boolean; stuck?: number; part?: string }>(); // per seat, reset by a relay
   const status = new Map<string, { ok: boolean; tail: string }>(); // latest run of each check, by anyone
+  // Edits through write/edit/append (not bash), by top-level folder of the workspace: for departure notices and the team status.
+  const folderEdits = new Map<string, { agent: string; at: number }>();
+  const agentEdits = new Map<string, { folders: Set<string>; last: string; at: number }>();
+  const left = new Map<string, number>(); // agent -> when it last called done
+  const ago = (at: number) => `${Math.round((Date.now() - at) / 60_000)} min ago`;
+  const sinceStart = (at: number) => `${((at - started) / 60_000).toFixed(1)} min`;
+  const recordEdit = (name: string, path: string) => {
+    const folder = relative(workspace, resolve(root(name), path)).split(/[\\/]/)[0];
+    if (!folder || folder === "..") return;
+    const now = Date.now(), mine = agentEdits.get(name) ?? { folders: new Set<string>(), last: folder, at: now };
+    mine.folders.add(folder), mine.last = folder, mine.at = now;
+    agentEdits.set(name, mine), folderEdits.set(folder, { agent: name, at: now });
+  };
+  const departure = (name: string, reason: string) => {
+    const mine = agentEdits.get(name);
+    const edited = mine ? `It used write/edit in ${[...mine.folders].join(", ")}, last ${ago(mine.at)}.` : "It used write/edit on no file.";
+    board.post(name, `(sent by murmur) ${name} called done and left the team for good, saying: "${reason}" ${edited} Its claims no longer hold.`);
+  };
+  const teamStatus = (name: string) => {
+    const agentsLine = names.filter(n => n !== name).map(n => {
+      const member = board.members.get(n)!, mine = agentEdits.get(n);
+      const gone = member.doneReason !== undefined;
+      const state = gone ? `left at ${sinceStart(left.get(n) ?? Date.now())}` : !entered.has(n) ? "not entered yet" : member.working ? "working" : "idle";
+      return `${n}: ${state}${mine && !gone ? `, last write/edit in ${mine.last} ${ago(mine.at)}` : ""}`;
+    });
+    const folders = readdirSync(workspace, { withFileTypes: true }).filter(e => e.isDirectory() && !e.name.startsWith(".")).map(e => e.name).sort();
+    const foldersLine = folders.map(f => { const edit = folderEdits.get(f); return `${f}: ${edit ? `last write/edit by ${edit.agent} ${ago(edit.at)}` : "no write/edit yet"}`; });
+    return [`[Team] ${agentsLine.join(" | ")}`, foldersLine.length ? `[Folders] ${foldersLine.join(" | ")}` : ""].filter(Boolean).join("\n");
+  };
   // A command runs a check when the check starts a statement (after time/timeout/env/VAR= wrappers) outside quotes and nothing
   // after it can mask its exit status. A check that itself contains quotes falls back to plain containment.
   const unquote = (text: string) => text.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
@@ -133,7 +162,12 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         board.notice(name, `${name} ran the acceptance check: ${failed ? `FAIL\n${tail}` : "PASS"}`);
       }
     }
-    if (event.toolName === "done" && output.startsWith("You are done")) tasks?.release(name);
+    if ((profile.departureNotice || profile.teamStatus) && ["write", "edit", "append"].includes(event.toolName) && !event.isError) recordEdit(name, String(event.input.path));
+    if (event.toolName === "done" && output.startsWith("You are done")) {
+      tasks?.release(name);
+      left.set(name, Date.now());
+      if (profile.departureNotice) departure(name, String(event.input.reason));
+    }
     const lines: string[] = [];
     const notices = profile.delivery === "attach" ? board.members.get(name)!.notices.splice(0) : [];
     const messages = profile.delivery === "attach" && board.unread(name).length ? board.inbox(name) : [];
@@ -147,6 +181,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       const latest = new Map(board.messages.filter(m => m.from !== name).map(m => [m.from, m.text]));
       if (latest.size) lines.push("[Latest post from each teammate]", ...[...latest].map(([from, text]) => `- ${from}: ${text.replace(/\s+/g, " ").slice(0, 100)}`));
     }
+    if (profile.teamStatus) lines.push(teamStatus(name));
     if (profile.clock) lines.push(profile.clockUnlimited ? "[time left: unlimited]" : `[${minutesLeft()} minutes left before the timeout]`);
     if (profile.clockTokens && profile.clockUnlimited) lines.push("[tokens left: unlimited]");
     else if (profile.clockTokens && task.budgetTokens) lines.push(`[${tokensLeft()} tokens left in the budget${task.agents > 1 ? " shared by all agents" : ""}]`);
@@ -270,7 +305,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
       appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
       extensionFactories: profile.delivery === "attach" || profile.notices || profile.writeGuard || profile.claimLease || profile.staleGuard
-        || profile.doneAfterGreen || profile.clock || profile.boardTail || profile.helpAfter || profile.taskList || branches ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
+        || profile.doneAfterGreen || profile.clock || profile.boardTail || profile.departureNotice || profile.teamStatus || profile.helpAfter || profile.taskList || branches ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
     });
     await loader.reload();
     const verify = async () => {

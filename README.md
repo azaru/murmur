@@ -136,6 +136,8 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
   - `enterOnDone`: staggered entry by finishing: each agent enters once the previous one ends its turn, and seats not yet entered keep the run going.
   - `boardTail`: every tool result ends with each teammate's latest post (its first 100 characters), as a view of the team's state.
   - `sharedNotes`: a file in the shared folder (for example `TEAM.md`) whose current content is added to each agent's first prompt.
+  - `departureNotice`: when an agent calls `done`, murmur posts once to everyone that it left, with its reason, the top-level folders it changed with write/edit/append and when it last did.
+  - `teamStatus`: every tool result ends with the team's state: each teammate working, idle, not entered yet or left (and when), and each top-level folder's last write/edit/append (who, how long ago) or none yet. Edits made through bash are not seen.
 - **Fresh context:**
   - `relay`: a new instance takes over the seat after `done`;
   - `relayContext`: or once turns grow past that many tokens.

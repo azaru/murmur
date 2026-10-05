@@ -2071,6 +2071,61 @@ The user declined both proposed next steps (resuming round 19 and a round on sto
 3. **Stale or retracted claims.** A claim in prose keeps counting after it is retracted or its author leaves (round 19 ST: robin's expr claim, retracted at 0.6 minutes, was still cited at 32; expr scored 0.04). The board tail froze such claims on screen. The task list was the only mechanism that released a claim automatically, on `done`.
 Delivery speed is not a problem (median 4–5 s from post to attach). The requirements for a fix: show a departure to everyone from facts murmur has, not from the leaver's goodwill; let an agent see goal-level state (untouched or orphaned work, who is active) before it leaves; keep one current owner statement per unit of work. All without tests, without the grader, and without assigning work.
 
+## Round 20: making the team's state visible, on the five-task DeepSWE batch (fixed before measuring, 2026-10-05 18:31; the user approved the proposal with "Ok")
+
+**Why.** The communication diagnosis (17:43 note) ranks silent departures first: a `done` is invisible to teammates in the ST profiles, so they keep addressing agents who left and leave their repositories unowned. Next come `done` read as "my part is done" and stale prose claims. Delivery speed is not the problem. This round tests mechanisms that make the team's state visible, derived from facts murmur already has (who called `done` and why, who changed which folder and when), with no tests, no grader and no assignment of work.
+
+**Question.** Does making departures and the team's state visible change how a 12-agent swarm coordinates and what it achieves on a batch of independent repository tasks?
+
+**Arms** (all 12 agents with staggered entry, write guard, clock and a post-only board; no tokens line):
+- **ST** = `n12-stagger`, the control.
+- **ST-depart** = `n12-stagger-depart`, new: ST plus the new default-off lever `departureNotice`. When an agent calls `done`, murmur posts once, from that agent: "(sent by murmur) X called done and left the team for good, saying: "<reason>" It used write/edit in <folders>, last N min ago. Its claims no longer hold." The profile also replaces `done`'s description (through `toolDescriptions`, no default change): "Leave the team for good. Your teammates will be told that you left, with your reason, and you will not be woken again. Call it only when the whole goal is met, not just your part, or to give up with the reason why the goal cannot be reached."
+- **ST-status** = `n12-stagger-status`, new: ST-depart plus the new default-off lever `teamStatus`. Every tool result ends with two lines: each teammate's state (working, idle, not entered yet, or left at minute M; for those still in, its last write/edit folder and how long ago), and each top-level folder's last write/edit (who, how long ago) or "no write/edit yet". Facts only: nothing suggests who should take what.
+- **ST-tasks** = `n12-stagger-tasks`, as in round 19 (invalid there): ST plus round 15's shared task list, whose items are released automatically when their holder calls `done`.
+
+**Smoke tests** (from `src/` with no campaign running; runs deleted):
+- A scripted 3-agent task (`n12-stagger-status`): wren calls `done` at once, finch claims the three folders and writes them, robin waits. The departure notice reached both others with the reason and "It used write/edit on no file"; the status lines showed "wren: left at 0.0 min", "robin: not entered yet", then "finch: idle, last write/edit in gamma 0 min ago" and each folder's last writer. A first version counted only folders changed through write/edit, and finch had written with bash, so the status said "untouched": the wording now says "write/edit" explicitly. In rounds 18–19, 8–15% of bash calls could modify files, mostly `gofmt -w` after an `edit`.
+- The default profile on `examples/trio.json` passed with no status or notice lines. Unit tests and typecheck pass.
+
+**Tasks:** round 17 E's five (expr, oxvg, scriggo, tengo, wasmi), as in round 19.
+
+**Execution.** `experiments/deepswe/batch20.sh`: 32M shared and 120 minutes per batch, 5 GB and 2 CPUs per sidecar, k=2. Each repetition runs two waves of two arms at the same time (10 sidecars, as in round 18): ST with ST-depart, then ST-status with ST-tasks. Quota stop as before (the batch is invalid and the script stops). Repetition 0 runs first; if only repetition 0 is valid, it is reported as k=1 with no verdict.
+
+**Primary read: process measures** (`experiments/deepswe/comm.py`, fixed with this commit, from `events.jsonl`; edits through bash are not seen):
+- **posts addressed to the departed:** posts by agents that address a teammate after it called `done` (its name followed by a comma, colon, slash or "please");
+- **departures of a last editor** and how many are **picked up** (another agent writes or edits in that repository before the run ends), with the median minutes to pick-up;
+- **untouched repositories** at the end.
+
+On round 19's and round 18's ST batches (descriptive baseline, other runs): addressed to the departed 38, 7 and 54; departures of a last editor 5, 8 and 10, picked up 2, 0 and 4.
+
+**Expected direction, per arm against ST (summed over both repetitions):**
+- ST-depart and ST-status: fewer posts addressed to the departed (at most half of ST's), and a larger share of departures picked up.
+- ST-status: also fewer untouched repositories, if ST has any.
+- ST-tasks: a larger share picked up, where the work was on the list.
+
+These are directions to read, not a rule: the counts are small (3–10 departures per batch).
+
+**Score rule** (as in round 19; per-task means over k=2, then the five-task mean), each arm against ST:
+- **better** if the mean is ≥ +0.05 above and above on at least 3 of 5 tasks;
+- **worse** if ≤ −0.05 below and below on at least 3 of 5;
+- otherwise **not decided**.
+
+**Descriptive:** cost in dollars beside tokens; minutes and end reason; `done` calls and when; the board's share of calls; agents and write/edit calls per repository (`traces20.md`); how agents react to notices and the status line (transcripts).
+
+**Predictions:**
+- ST-depart and ST-status meet the process directions; ST-tasks meets the pick-up direction weakly.
+- With `done` now described as leaving for good, ST-depart and ST-status agents call `done` later, so their runs reach the 32M cap more often than ST's.
+- No arm is better than ST by the score rule: on these five tasks ST alone has scored 0.17–0.77, and at 32M the cap still cuts most runs.
+
+**Estimate:** 4 arms × 2 × 32M = 256M tokens at most, about $4.1 at round 19's ~$0.016 per million; about three hours.
+
+**Known threats:**
+- k=2 on five tasks, and ST's own spread on them is 0.17–0.77.
+- ST-depart changes two things at once: the notice and `done`'s description. ST-status adds the status line on top. ST-tasks changes the briefing too.
+- The status line and the folder list in the notice see only write/edit/append, not bash edits. The workspace's `_tasks` folder shows as "no write/edit yet" for the whole run.
+- The 32M cap ends most runs in 28–40 minutes, which hides some abandonment; departures happen in minutes 1–7, so the mechanisms are exercised.
+- The two waves run at different times.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

@@ -1,0 +1,17 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "post"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. post(text) messages all of them, and their posts appear at the end of your tool results.\n",
+  "writeGuard": true,
+  "clock": true,
+  "spawnAfterTurns": 2,
+  "spawnGapSeconds": 60,
+  "departureNotice": true,
+  "toolDescriptions": {
+    "done": "Leave the team for good. Your teammates will be told that you left, with your reason, and you will not be woken again. Call it only when the whole goal is met, not just your part, or to give up with the reason why the goal cannot be reached."
+  },
+  "teamStatus": true
+}

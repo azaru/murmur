@@ -39,6 +39,8 @@ Start by reading your inbox and posting what you will work on. When told you hav
   /** Staggered start by turns: each agent enters once the previous one has finished this many model turns (assistant messages), or spawnGapSeconds after the previous one entered if that comes first. 0 is off. */ spawnAfterTurns: 0,
   /** Append each teammate's latest post (its first 100 characters) to every tool result, as a view of the team's state. */ boardTail: false,
   /** A file in the shared folder (for example TEAM.md) whose current content is added to each agent's first prompt. Empty is off. */ sharedNotes: "",
+  /** When an agent calls done, murmur posts once to everyone that it left, with its reason, the top-level folders it changed with write/edit/append and when it last did. */ departureNotice: false,
+  /** Append the team's state to every tool result: each teammate working, idle, not entered yet or left (and when), and each top-level folder's last write/edit/append (who, how long ago) or none yet. Edits made through bash are not seen. */ teamStatus: false,
   /** Staggered start by finishing: each agent enters once the previous one ends its turn (calls done or stops), and seats not yet entered keep the run going. */ enterOnDone: false,
   /** Menu agents may pick from with role(name); empty means no role tool. Never assigned. */ roles: {} as Record<string, { summary: string; instructions: string }>,
   /** How many times a new post may wake an agent that already called done. */ revive: 0,
@@ -67,7 +69,7 @@ export type Profile = typeof DEFAULT_PROFILE;
 const text = Type.Optional(Type.String()), flag = Type.Optional(Type.Boolean()), count = Type.Optional(Type.Integer({ minimum: 0 }));
 const ProfileSchema = Type.Object({
   briefing: text, teamBriefing: text, steer: text, wake: text, systemPromptAppend: text, sharedNotes: text,
-  messaging: flag, threads: flag, taskList: flag, doneGate: flag, notices: flag, append: flag, writeGuard: flag, staleGuard: flag, clock: flag, clockTokens: flag, clockUnlimited: flag, enterOnDone: flag, boardTail: flag, findings: flag,
+  messaging: flag, threads: flag, taskList: flag, doneGate: flag, notices: flag, append: flag, writeGuard: flag, staleGuard: flag, clock: flag, clockTokens: flag, clockUnlimited: flag, enterOnDone: flag, boardTail: flag, departureNotice: flag, teamStatus: flag, findings: flag,
   revive: count, doneAfterGreen: count, relay: count, relayContext: count, helpAfter: count,
   spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })), spawnAfterTurns: count, claimLease: Type.Optional(Type.Number({ minimum: 0 })),
   toolDescriptions: Type.Optional(Type.Record(Type.String(), Type.String())),
