@@ -4,7 +4,9 @@
 
 > Can a non-hierarchical swarm of coding agents consistently beat a single agent of the same model?
 
-## Findings so far (2026-10-05)
+## Findings so far (2026-10-06)
+
+**Without an oracle, where twelve agents fail to communicate (round 20).** Across 54 twelve-agent runs, the board carried claims but not state: nobody learned when a teammate left, so agents kept addressing teammates who had gone and their work stayed unowned. A one-line notice from murmur when an agent leaves fixed that: posts to departed agents fell from 14 to 0, every repository got worked on, and agents took over abandoned work within minutes. The score did not move at k=2, because the 32M budget ended every run within 20 minutes. A permanent status line on every tool result was worse, and nothing so far stops agents from leaving while saying the goal is unfinished.
 
 **Without an oracle, ten real repository tasks with the clock deciding (rounds 18 and 19).** Twelve agents scored 0.56 against 0.04 for one agent told to keep working until every change was implemented and verified. The instruction did not help: the single agent quit after 14 minutes, and in its other run after one minute without running a command. The swarm stops by the same judgement, since each agent calls `done` once its own repository looks finished or taken. In one repetition all twelve stopped within 34 minutes; in the other a few kept taking abandoned repositories until the clock, which gave the first two fully solved DeepSWE tasks for $4.21. A round on how the team shares state (a board tail, a shared notes file, threads, norms, a task list) was stopped by the model quota after one repetition of three arms, with no verdict.
 

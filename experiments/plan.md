@@ -2126,6 +2126,69 @@ These are directions to read, not a rule: the counts are small (3–10 departure
 - The 32M cap ends most runs in 28–40 minutes, which hides some abandonment; departures happen in minutes 1–7, so the mechanisms are exercised.
 - The two waves run at different times.
 
+## 2026-10-06: group science and game theory, candidate levers after round 20 (not pre-registered, no measurement)
+
+The user asked for a study of how human groups work and how to optimise them, of game theory, and of how both apply to murmur. Two subagent reviews ([game theory](reports/2026-10-06-lit-game-theory.md), [human groups part 2: handoffs, ownership, awareness, open source](reports/2026-10-06-lit-human-groups-coordination.md)), synthesised in [`reports/2026-10-06-group-science-game-theory.md`](reports/2026-10-06-group-science-game-theory.md) (model output, key claims checked by hand). The main points:
+- murmur is a team game (one shared payoff), so the losses are in the information structure, not in incentives. Payoff or responsibility text has no theoretical purchase, which matches the record. Levers are ranked by whether they act through information, tool mechanics or prompt text.
+- Round 20's notice and status line match both fields' advice. Two risks its predictions do not state, readable in its data:
+  - Visible departures may speed up a `done` cascade (stag hunt). Check `done` times against departure notices.
+  - Activity facts may herd agents. Check editors per repository.
+- Candidate levers after round 20, in order, each conditional on what round 20 shows:
+  1. A bounce on posts that name a departed agent.
+  2. An orphan flag in the folder line ("last writer left, nobody since").
+  3. A departure notice carrying what the leaver executed.
+  4. Take-over on lapse.
+  5. A structured `done`.
+- Allocation blindness (work going to repositories already good) has no oracle-free fix in either field.
+
+### Round 20 result and rule applied (2026-10-06 08:27; batches 2026-10-05 16:32 UTC to 2026-10-06 06:25 UTC, code `ed4fb54`)
+
+| task | ST r0 | ST r1 | ST mean | depart r0 | depart r1 | depart mean | status r0 | status r1 | status mean | tasks r0 | tasks r1 | tasks mean |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| expr | 0.987 | 0.000 | 0.494 | 0.329 | 0.848 | 0.588 | 0.658 | 0.063 | 0.361 | 0.848 | 0.342 | 0.595 |
+| oxvg | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.500 | 0.250 | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+| tengo | 0.989 | 0.945 | 0.967 | 0.253 | 0.747 | 0.500 | 0.317 | 0.846 | 0.582 | 0.011 | 0.934 | 0.473 |
+| wasmi | 0.364 | 0.364 | 0.364 | 0.364 | 0.491 | 0.428 | 0.364 | 0.136 | 0.250 | 0.773 | 0.500 | 0.636 |
+| **five-task mean** | 0.468 | 0.262 | **0.365** | 0.189 | 0.417 | **0.303** | 0.268 | 0.309 | **0.288** | 0.326 | 0.355 | **0.341** |
+| minutes | 19.8 | 15.4 | | 13.4 | 14.3 | | 11.8 | 14.5 | | 14.8 | 15.3 | |
+
+Every batch ended at the 32M cap, after 12–20 minutes ($0.49–0.53 each). In total 256.2M tokens and $4.11 for the eight valid batches, plus two failed runs with no tool call (below).
+
+**Rule as written** (each arm against ST):
+- **ST-depart** (departure notices and the new `done` description): −0.062, below on 1 of 5 tasks and above on 2: **not decided**.
+- **ST-status** (ST-depart plus the team status line): −0.076, below on 3 of 5 (expr, tengo, wasmi) and above on 1 (oxvg): **worse**.
+- **ST-tasks** (shared task list): −0.024: **not decided**.
+
+**Process measures** (`comm.py`, summed over both repetitions):
+
+| measure | ST | ST-depart | ST-status | ST-tasks |
+|---|---:|---:|---:|---:|
+| posts addressed to departed agents | 14 (8, 6) | 0 | 0 | 5 (2, 3) |
+| departures of a last editor, picked up | 3, 1 | 3, 1 | 2, 1 | 0, 0 |
+| untouched repositories at the end | 3 (oxvg twice, expr once) | 0 | 0 | 0 |
+| `done` calls before the cap | 14 (8, 6) | 10 (5, 5) | 6 (2, 4) | 7 (3, 4) |
+
+- **Against the pre-registered directions:**
+  - "At most half of ST's posts addressed to the departed" holds for ST-depart and ST-status (0 against 14).
+  - "A larger share of departures picked up" cannot be read: 2–3 departures of a last editor per arm, one picked up in each.
+  - "Fewer untouched repositories" holds for ST-status (0 against 3), and also for ST-depart and ST-tasks, which were not predicted to change it. Every arm except ST wrote in oxvg in both repetitions, and ST-status r1 scored 0.500 there, the first non-zero oxvg score in the project (3 of 6 new tests pass, base intact).
+- **Predictions:**
+  - "ST-depart and ST-status meet the process directions" holds for the first and third measures; the second is unreadable.
+  - "They call `done` later, so they reach the cap more often" cannot be tested as written, since every batch reached the cap. They called `done` less often before it (10 and 6 against ST's 14).
+  - "No arm is better by the score rule" holds; ST-status was worse.
+- **Suspicious zeros checked:** no infrastructure fault among the valid batches. Five scriggo zeros and one oxvg zero are diffs that do not compile at the cap (`build failed`, `could not compile`); the other zeros ran their tests and failed, or had an empty diff.
+- **Infrastructure failure, rerun:** the first runs of `e20-stagger-status-r1` and `e20-stagger-tasks-r1` started at 18:58 UTC when the model API was unreachable: every agent's first request ended "fetch failed", the runs went quiescent in under a minute with no tool call, and every diff was empty. The quota check in `batch20.sh` looks only for the usage-limit error, so the driver kept them (and the wave took four hours, mostly scoring empty workspaces under the outage). Both were moved to `runs/<id>-fetchfail/`, listed in `invalid20.txt`, and rerun on 2026-10-06 06:00–06:25 UTC with the same code and profiles. This changes the pairing in time for that wave (about 11 hours later than its repetition-1 partners).
+- **Runs were shorter than in round 19** (12–20 minutes against 28–40 for the same 32M), probably because ten sidecars instead of fifteen shared the Docker CPUs, so commands returned faster and agents spent faster.
+- **Coordination counts:** [`deepswe/traces20.md`](deepswe/traces20.md), generated with the new `deepswe/traces.py`.
+- **From the transcripts** ([report](reports/2026-10-06-round20-traces-analysis.md), model output; key claims checked by hand):
+  - **Agents read the departure notice as an ownership fact and act on it.** In ST-depart r1, tern posted "Wren has left ... I will take Tengo" within 0.6 minutes of the notice and edited Tengo from 5.8 (✓), and Tengo reached 0.75. In ST-status r1, four agents claimed oxvg within 0.2 minutes of wren's notice (✓), and two of them produced the 0.500. In ST, by contrast, linnet waited on kite, who had left at 2.2, and wrote at 12.4 "I won't edit oxvg without a clear handoff from Kite" (✓).
+  - **A notice is not enough when nobody is free.** In ST-depart r0 robin left Tengo at 7.1 after 15 edits, and nobody posted about Tengo or edited it afterwards (✓); four agents in that run never edited anything, three of them gone within 3 minutes.
+  - **The new `done` description did not change what `done` means to the agents.** No `done` in any arm claims the whole goal. With the new text, 8 of 10 ST-depart dones and 5 of 6 ST-status dones say the overall goal is not complete, and still call `done`. First `done` times stayed at 1.3–2.3 minutes. The drop in posts addressed to departed agents also reflects fewer departures (14, 10 and 6 `done` calls).
+  - **The status line costs work at a fixed cap.** It adds about 800 characters to every tool result. ST-status made fewer, larger model calls than ST (798 and 696 calls at 40–46k tokens each, against 895 and 838 at 36–38k) and fewer write/edit calls (80 and 78 against 143 and 109) (✓). No post quotes it. Coverage over repositories was the same as ST-depart's and ST-tasks' (all five touched). The arm's lower score fits this: its r0 ended at 11.4 minutes with Tengo unfinished.
+  - **The task list** released one item on `done` that was taken 0.2 minutes later (✓); otherwise its benefit was coverage.
+  - Remaining failures: `done` as "my slice", early exits, waiting for an owner who never answers, and four-way claim races after a notice.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -2196,3 +2259,4 @@ These are directions to read, not a rule: the counts are small (3–10 departure
 | 2026-10-05 | round 17 stage E, DeepSWE batch (batches `e17-swarm-r0/r1`, `e17-solo-r0/r1`, code `37213a7`) | STT n12-stagger-tokens (n=12); C1T solo-clock-tokens (n=1) | expr, oxvg, scriggo, tengo, wasmi × 2, 32M shared, 120 min | 70.3M | five-task means: STT 0.408, C1T 0.045 (C1T gave up at 14–19 min with 3.1M) | STT beats C1T by the rule; the margin is mostly C1T stopping early |
 | 2026-10-05 | round 18, DeepSWE batch (batches `e18-swarm-r0/r1`, `e18-solo-r0/r1`, code `7eeeca4` r0, `3c02043` r1) | ST n12-stagger (n=12); C1P solo-clock-persist (n=1) | 10 DeepSWE tasks × 2, 400M cap, 120 min | 375.5M ($4.86) | ten-task means: ST 0.563, C1P 0.038; C1P stopped at 13.9 and 1.3 min; ST r0 quiescent at 35 min, r1 to the clock | ST beats C1P by the rule; the margin is again the single agent stopping, and the swarm's two repetitions differ by 0.22 |
 | 2026-10-05 | round 19, DeepSWE batch, stopped by the quota (valid `e19-stagger-r0`, `e19-stagger-tail-r0`, `e19-stagger-file-r0`; invalid `e19-stagger-threads-r0`, `-norms-r0`, `-tasks-r0`; code `3c02043`) | ST n12-stagger, ST-tail n12-stagger-tail, ST-file n12-stagger-file (n=12, k=1) | expr, oxvg, scriggo, tengo, wasmi × 1, 32M, 120 min | 100.7M ($1.84; 25.5M invalid) | five-task means: ST 0.351, ST-tail 0.275, ST-file 0.234 | no rule applied (k=1, wave 2 invalid); resume or close is the user's call |
+| 2026-10-05/06 | round 20, DeepSWE batch (batches `e20-{stagger,stagger-depart,stagger-status,stagger-tasks}-r{0,1}`, code `ed4fb54`; two runs rerun after a model API outage) | ST n12-stagger, ST-depart n12-stagger-depart, ST-status n12-stagger-status, ST-tasks n12-stagger-tasks (n=12) | expr, oxvg, scriggo, tengo, wasmi × 2, 32M, 120 min | 256.2M ($4.11) | five-task means: ST 0.365, ST-depart 0.303, ST-status 0.288, ST-tasks 0.341; posts addressed to departed agents 14 / 0 / 0 / 5; untouched repositories 3 / 0 / 0 / 0 | ST-status worse by the rule; ST-depart and ST-tasks not decided; the notices remove talk to departed agents and every new arm covers every repository |

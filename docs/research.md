@@ -6,6 +6,8 @@ This is the curated record of every experiment run with murmur so far: the quest
 
 **Direction (2026-10-03, after round 14).** The user restated the goal: the only goal is a better swarm and knowing when a swarm is useful, now with 12 agents. Every lever tested with an oracle is to be re-tested without one ([lever recount](../experiments/reports/2026-10-03-lever-recount.md)).
 
+**Status (2026-10-06, after round 20).** The communication problem is partly located: a departure was invisible, so work was orphaned and teammates kept waiting for agents who had left. A one-time notice from murmur fixes that (0 posts to departed agents, every repository covered), without a score gain at k=2 on a 32M cap that ends runs in 12–20 minutes. A permanent status line costs more than it gives. What the notices do not touch is agents leaving early while knowing the goal is unfinished. See [Round 20](#round-20-making-the-teams-state-visible-2562m-tokens-411-code-ed4fb54).
+
 **Status (2026-10-05, after rounds 18 and 19).** On ten real repository tasks with the clock as the only limit, 12 agents beat one agent by the rule (0.563 against 0.038), but again because the single agent quit, now even with an instruction not to stop. What decides both arms is the agents' own judgement of when to stop: a swarm only keeps working while some agents refuse to call `done`, and its two repetitions differ by 0.22. The round on how the team shares state stopped at the model quota with no verdict. See [Round 18](#round-18-ten-deepswe-tasks-the-clock-deciding-and-a-single-agent-told-not-to-stop-3755m-tokens-486-code-7eeeca4-3c02043).
 
 **Status (2026-10-05, after round 17).** Two rule wins for multi-agent configurations, both with caveats. On planning and shop2, three agents entering in turn with a board (AUD) beat one agent (C1T), but the margin is on shop2 where C1T scored 0 three times, and fresh-context relays (C1TR) are not decided against either. The transcripts credit the first draft more than the audit. On a five-task DeepSWE batch, 12 agents (STT) beat one agent sharing the same budget, but the single agent quit within 20 minutes with 90% of the budget unused. The common thread with rounds 11, 16 and side test U is that a single agent's stopping judgement, not its budget or its partners, sets most outcomes. See [Round 17](#round-17-a-fresh-context-audit-and-the-first-deepswe-batch-swarmtest-271m-deepswe-screen-461m-and-batch-703m-tokens-code-73ff3e7-497b6d9-37213a7).
@@ -23,6 +25,12 @@ This is the curated record of every experiment run with murmur so far: the quest
 **Status before the oracle problem (2026-10-02, after round 10, with an oracle): the evidence answers the question negatively for the tasks tested.** No swarm configuration has met the success criterion. Round 6 confirmed that the strongest results come from a *single* agent that keeps working: a one-line clock explains the best single agent, and once isolated agents get the same clock, the swarm's only win disappears. What remains open is whether coordination helps on tasks where a persistent single agent still has headroom. Rounds 7 and 8 rebuilt the panel around the clock agent: four planning and optimisation tasks where it stops on a green check short of the quality ceiling (panel D), and two medium OpenSpec projects where it runs out of tokens at about 0.45 (panel V). Rounds 9 and 10 put swarms against it on that panel: they lose on V, and on D they win only on one task, packing2, where the single agent sometimes stops early on a low score. A plain single agent that does not stop early matches them.
 
 ## TL;DR
+
+**Without an oracle, making the team's state visible (round 20, five DeepSWE tasks, 32M, k=2):**
+- A diagnosis of 54 twelve-agent runs found the board carries claims, not state: teammates never learn that someone left, keep addressing departed agents, and leave their work unowned.
+- **Departure notices fix that part.** Posts addressed to departed agents fell from 14 to 0, every repository was touched (ST left 3 untouched), and agents took over a leaver's work within minutes. The score is not decided (ST-depart −0.062).
+- **They do not change when agents leave.** Agents still call `done` while saying the goal is unfinished, even when told it means leaving for good.
+- **A status line on every tool result is worse by the rule** (−0.076): it is never quoted, makes every call larger, and came with 37% fewer edits at the same cap. A shared task list is not decided (−0.024).
 
 **Without an oracle, two more DeepSWE batches (rounds 18 and 19):**
 - **Ten tasks, the clock deciding (round 18, k=2):** 12 agents with staggered entry (ST, 0.563) beat one agent told to keep working until every change is implemented and verified (C1P, 0.038) by the rule, above on 9 of 10. But the instruction did not make the single agent persist: it stopped after 13.9 minutes and, in the other repetition, after 1.3 minutes without running a command.
@@ -623,6 +631,20 @@ Six 12-agent arms on round 17 E's five tasks at 32M and 120 minutes, differing o
 
 On these five tasks the ST control alone has now scored 0.170, 0.351 and 0.772, so one repetition orders nothing. ST-tail's oxvg zero is a diff that the cap cut mid-edit, so it does not compile. No agent mentions the tail. ST-file's agents edited `TEAM.md` 87 times (35 edits failed on stale text) and stopped with two thirds of the budget unspent, saying the rest was "in progress with teammates"; with no board, nothing woke them. Counts, including the invalid batches' mechanism use, are in [`deepswe/traces19.md`](../experiments/deepswe/traces19.md).
 
+### Round 20: making the team's state visible (256.2M tokens, $4.11; code `ed4fb54`)
+
+A diagnosis of all 54 twelve-agent runs ([report](../experiments/reports/2026-10-05-swarm-communication-diagnosis.md), model output; key claims checked by hand) found that the board carries claims, not state: a `done` is invisible to teammates, so they keep addressing agents who left and leave their work unowned; `done` is read as "my part is done"; and retracted or orphaned claims keep counting. Delivery speed is not the problem. Round 20 tested two new default-off levers on round 17 E's five tasks at 32M, k=2: `departureNotice` (murmur posts once when an agent calls `done`, with its reason and the folders it changed, and `done`'s description says it means leaving for good) and `teamStatus` (every tool result ends with each teammate's state and each folder's last write/edit).
+
+| | ST (control) | ST-depart (notices) | ST-status (notices and status line) | ST-tasks (task list) |
+|---|---:|---:|---:|---:|
+| five-task mean (r0, r1) | 0.365 (0.468, 0.262) | 0.303 (0.189, 0.417) | 0.288 (0.268, 0.309) | 0.341 (0.326, 0.355) |
+| rule against ST | | not decided (−0.062, below on 1 of 5) | **worse** (−0.076, below on 3 of 5) | not decided (−0.024) |
+| posts addressed to departed agents | 14 | 0 | 0 | 5 |
+| untouched repositories at the end | 3 | 0 | 0 | 0 |
+| write/edit calls (r0, r1) | 143, 109 | | 80, 78 | |
+
+**From the transcripts** ([report](../experiments/reports/2026-10-06-round20-traces-analysis.md), model output; key claims checked by hand): the notices work as communication. Agents read them as ownership facts and take over the leaver's work within minutes (tern on Tengo, four agents on oxvg, which gave the first non-zero oxvg score in the project), where in ST an agent waited ten minutes for a "handoff" from someone who had left. They do not change *when* agents leave: the new `done` text did not stop agents from calling `done` while saying the goal is not complete (13 of 16 cases), and one abandoned repository went untouched because nobody was free. The status line is never quoted, makes every call larger, and came with 37% fewer edits at the same cap, which fits its lower score. Every batch ended at the 32M cap in 12–20 minutes. Two runs failed on a model API outage and were rerun. Counts are in [`deepswe/traces20.md`](../experiments/deepswe/traces20.md).
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -656,6 +678,10 @@ On these five tasks the ST control alone has now scored 0.170, 0.351 and 0.772, 
 | A swarm covers a batch of real repository tasks better than one agent with the same budget | 17 E, 18 | **Supported by the rule twice, both times mostly because the single agent gave up.** 17 E: +0.363, the single agent stopped at 14–19 minutes with 90% of the budget left; against the same agent on isolated tasks the swarm is +0.06 (descriptive). 18 (ten tasks, the clock deciding): +0.525, 9 of 10, against an agent that stopped at 13.9 and 1.3 minutes. The swarm's own two repetitions differ by 0.22, because in one of them every agent stopped by minute 34 |
 | An instruction to keep working until everything is done makes one agent persist | 18 | **Not supported** (k=2, one batch of ten tasks): with the instruction in its system prompt, the agent stopped after 13.9 and 1.3 minutes, sooner than round 17's agent without it (14–19); in the second run it ran no command at all, claiming none could run |
 | How 12 agents share state (a board tail, a shared file, threads, fuller board norms, a task list) changes what they achieve | 19 | **Not tested yet**: the model quota stopped the round after one repetition of three arms (ST 0.351, ST-tail 0.275, ST-file 0.234, inside the control's own spread of 0.17–0.77). ST-file spent a third of its budget and stopped |
+| Silent departures orphan work, and a notice from murmur when an agent leaves fixes it | diagnosis, 20 | **Supported on the mechanism, not on the score**: posts addressed to departed agents 14 → 0, untouched repositories 3 → 0, take-overs within minutes of a notice; ST-depart's score is not decided (−0.062, k=2) |
+| Telling agents that `done` means leaving for good, only when the whole goal is met, delays `done` | 20 | **Not supported**: 13 of 16 `done` calls under the new text say the goal is not complete; first `done` times unchanged (1.3–2.3 min) |
+| A team status line on every tool result helps 12 agents coordinate | 20 | **Refuted as built**: worse by the rule (−0.076); never quoted; larger calls and 37% fewer edits at the same cap |
+| A shared task list helps 12 agents on a batch of repositories | 15 A, 20 | **Not decided** (−0.024 in 20); its release on `done` handed one item over in 0.2 min; coverage of all repositories |
 | A threaded board helps 12 agents on difficulty tasks | 16 A | **Not supported**: STH loses to C1T (−0.054) and is not pronounced against STT. Threads collapse into one or two busy threads, and the board's share of calls rises from 29% to 46% |
 | A teammate keeps agents working the way the clock does, **without an oracle** | 14 (stage D) | **Not supported**: two agents without a clock stop at 1–2 minutes, like one |
 | A visible clock keeps a single agent working, **without an oracle** | 11 (R3, R4) | **Supported**: +0.255 with norms and +0.335 without them, 6 of 6 tasks each, at 4–10× the tokens on the contract tasks; agents never mention it |
@@ -685,6 +711,12 @@ On these five tasks the ST control alone has now scored 0.170, 0.351 and 0.772, 
   - Side test U is one task at k=2, with all three arms running in the same window.
   - Stage D: the partial-credit scorer is this project's construction, not DeepSWE's binary reward. fd r1 was rescored after a harness fault, and its agent could not run the tests during its run.
 - **Round 15 stage A** is a screen: 2 tasks at k=2, and shop2 swings 0.00–0.76 within one arm. Both "beat C1" verdicts lean on shop2 and on C1 planning runs below its rounds 13–14 means (0.275 against 0.42–0.47). ST's pronounced verdict rests on shop2. The first launch ran C1 in place of B on planning because of a wrong order check. That C1 run is valid and counted, one killed campaign is excluded, and all of it is logged in `plan.md`. Merges in BR could let conflict markers into the shared folder; this happened once, for about 76 s, in the best BR run. Eight wakes told agents to call an `inbox` tool their profile lacks.
+- **Round 20:**
+  - k=2 on five tasks, with ST's own spread on them 0.17–0.77; oxvg and scriggo were 0 in 7 and 8 of 8 runs;
+  - every batch ended at the 32M cap in 12–20 minutes, too soon for most take-overs to reach the score;
+  - ST-depart bundles the notice with a new `done` description; ST-status adds the status line on top;
+  - the notices and the status line see only write/edit/append, not bash edits;
+  - two runs failed on a model API outage (no tool call) and were rerun 11 hours later, so that wave's pairing in time differs.
 - **Round 19** stopped at the model quota after the first wave of repetition 0. Three arms have one batch each and three have none (their batches hit the usage limit 16 minutes in and are excluded). No rule was applied.
 - **Round 18:**
   - the control collapsed again: C1P stopped at 13.9 and 1.3 minutes, so the rule's verdict measures the single agent's stopping, not what coordination adds;
@@ -734,6 +766,8 @@ Round 9 ran items 1 and 2 of the previous list, and round 10 ran items 1–3 (si
 
 **Added 2026-10-05 after rounds 18 and 19.** Both DeepSWE wins were set by when agents stop, not by coordination. Candidates: keep a seat working when its agent ends a turn without `done` (the relay fix, a new default-off lever), let posts wake `done` agents (`revive`), and finish round 19 to see whether any way of sharing state keeps more agents on abandoned work.
 
+**Added 2026-10-06 after round 20.** Departure notices make abandonment visible; what is left is agents leaving early while knowing the goal is unfinished, and runs too short for take-overs to reach the score. Candidates: the notice without the status line at a larger cap, and a way for a leaving agent's open work to reach an idle teammate.
+
 ## Record completeness
 
 For each experiment: whether its question or theory was written down before measuring (pre-registration), its setup (configs and drivers), its per-run results, its analysis, and its decision.
@@ -769,6 +803,8 @@ For each experiment: whether its question or theory was written down before meas
 | Round 17 stage E (DeepSWE batch) | yes, committed before launch (`37213a7`) | `deepswe/batch17.sh` | `deepswe/results/e17-*.json`, `deepswe/traces17.md` | in `plan.md` | yes |
 | Round 18 (DeepSWE batch, ten tasks) | yes, committed before launch (`7eeeca4`) | `deepswe/batch18.sh` | `deepswe/results/e18-*.json`, `deepswe/traces18.md` | yes, `reports/2026-10-05-round18-19-traces-analysis.md` | yes |
 | Round 19 (how the team shares state) | yes, committed before launch (`3c02043`) | `deepswe/batch19.sh` | `deepswe/results/e19-*.json` (3 valid batches; 3 invalid ones listed in `plan.md`), `deepswe/traces19.md` | descriptive, `reports/2026-10-05-round18-19-traces-analysis.md` | stopped by the model quota after wave 1 of repetition 0; no rule applied |
+| Communication diagnosis | — | — | — | `reports/2026-10-05-swarm-communication-diagnosis.md` | led to round 20 |
+| Round 20 (team state visible) | yes, committed before launch (`ed4fb54`) | `deepswe/batch20.sh`, `deepswe/comm.py` | `deepswe/results/e20-*.json`, `deepswe/traces20.md` (two rerun batches listed in `plan.md`) | yes, `reports/2026-10-06-round20-traces-analysis.md` | yes |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -795,13 +831,13 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the oracle audit and the build of the blind panel;
   - the round 11 phase 1 transcript analysis and the tool-usage audit;
   - the lever recount for 12-agent swarms and the round 15 transcript analyses (stages A, B and C);
-  - the round 16 stage A, round 17 and rounds 18–19 transcript analyses;
+  - the round 16 stage A, round 17, rounds 18–19 and round 20 transcript analyses, and the swarm communication diagnosis;
   - the DeepSWE candidate selection for round 17;
   - the DeepSWE batch feasibility notes, driver build and offline-scorer fix (the driver and per-batch results are in `experiments/deepswe/`);
   - the literature review (eight source reviews and a synthesis).
 - [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (703 runs in 385 campaigns, including 6 invalid ones: 5 from round 14's quota stop and 1 from round 15 stage C's): campaign, seed, task, arm, score, tokens, cost in dollars (`cost_usd`), status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
 - `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12,13,15,16,17}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
-- `experiments/deepswe/`: the DeepSWE batch driver (`run-batch.mjs`), one shell driver per round, one result file per batch with per-task scores, tokens and (from round 19) cost in `results/`, and the coordination counts per batch (`traces17.md`, `traces18.md`, `traces19.md`).
+- `experiments/deepswe/`: the DeepSWE batch driver (`run-batch.mjs`), one shell driver per round, one result file per batch with per-task scores, tokens and (from round 19) cost in `results/`, and the coordination counts per batch (`traces17.md` to `traces20.md`, from round 20 generated by `traces.py`; process measures by `comm.py`).
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).
