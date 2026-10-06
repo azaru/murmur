@@ -2126,21 +2126,6 @@ These are directions to read, not a rule: the counts are small (3–10 departure
 - The 32M cap ends most runs in 28–40 minutes, which hides some abandonment; departures happen in minutes 1–7, so the mechanisms are exercised.
 - The two waves run at different times.
 
-## 2026-10-06: group science and game theory, candidate levers after round 20 (not pre-registered, no measurement)
-
-The user asked for a study of how human groups work and how to optimise them, of game theory, and of how both apply to murmur. Two subagent reviews ([game theory](reports/2026-10-06-lit-game-theory.md), [human groups part 2: handoffs, ownership, awareness, open source](reports/2026-10-06-lit-human-groups-coordination.md)), synthesised in [`reports/2026-10-06-group-science-game-theory.md`](reports/2026-10-06-group-science-game-theory.md) (model output, key claims checked by hand). The main points:
-- murmur is a team game (one shared payoff), so the losses are in the information structure, not in incentives. Payoff or responsibility text has no theoretical purchase, which matches the record. Levers are ranked by whether they act through information, tool mechanics or prompt text.
-- Round 20's notice and status line match both fields' advice. Two risks its predictions do not state, readable in its data:
-  - Visible departures may speed up a `done` cascade (stag hunt). Check `done` times against departure notices.
-  - Activity facts may herd agents. Check editors per repository.
-- Candidate levers after round 20, in order, each conditional on what round 20 shows:
-  1. A bounce on posts that name a departed agent.
-  2. An orphan flag in the folder line ("last writer left, nobody since").
-  3. A departure notice carrying what the leaver executed.
-  4. Take-over on lapse.
-  5. A structured `done`.
-- Allocation blindness (work going to repositories already good) has no oracle-free fix in either field.
-
 ### Round 20 result and rule applied (2026-10-06 08:27; batches 2026-10-05 16:32 UTC to 2026-10-06 06:25 UTC, code `ed4fb54`)
 
 | task | ST r0 | ST r1 | ST mean | depart r0 | depart r1 | depart mean | status r0 | status r1 | status mean | tasks r0 | tasks r1 | tasks mean |
@@ -2188,6 +2173,46 @@ Every batch ended at the 32M cap, after 12–20 minutes ($0.49–0.53 each). In 
   - **The status line costs work at a fixed cap.** It adds about 800 characters to every tool result. ST-status made fewer, larger model calls than ST (798 and 696 calls at 40–46k tokens each, against 895 and 838 at 36–38k) and fewer write/edit calls (80 and 78 against 143 and 109) (✓). No post quotes it. Coverage over repositories was the same as ST-depart's and ST-tasks' (all five touched). The arm's lower score fits this: its r0 ended at 11.4 minutes with Tengo unfinished.
   - **The task list** released one item on `done` that was taken 0.2 minutes later (✓); otherwise its benefit was coverage.
   - Remaining failures: `done` as "my slice", early exits, waiting for an owner who never answers, and four-way claim races after a notice.
+
+## 2026-10-06: group science and game theory, candidate levers after round 20 (not pre-registered, no measurement)
+
+The user asked for a study of how human groups work and how to optimise them, of game theory, and of how both apply to murmur. Two subagent reviews ([game theory](reports/2026-10-06-lit-game-theory.md), [human groups part 2: handoffs, ownership, awareness, open source](reports/2026-10-06-lit-human-groups-coordination.md)), synthesised in [`reports/2026-10-06-group-science-game-theory.md`](reports/2026-10-06-group-science-game-theory.md) (model output, key claims checked by hand). The main points:
+- murmur is a team game (one shared payoff), so the losses are in the information structure, not in incentives. Payoff or responsibility text has no theoretical purchase, which matches the record. Levers are ranked by whether they act through information, tool mechanics or prompt text.
+- Round 20's notice and status line match both fields' advice. Two risks its predictions do not state, readable in its data:
+  - Visible departures may speed up a `done` cascade (stag hunt). Check `done` times against departure notices.
+  - Activity facts may herd agents. Check editors per repository.
+- Candidate levers after round 20, in order, each conditional on what round 20 shows:
+  1. A bounce on posts that name a departed agent.
+  2. An orphan flag in the folder line ("last writer left, nobody since").
+  3. A departure notice carrying what the leaver executed.
+  4. Take-over on lapse.
+  5. A structured `done`.
+- Allocation blindness (work going to repositories already good) has no oracle-free fix in either field.
+
+**Deep pass and round 20 (2026-10-06, later the same day).** Six deeper reviews that read primary texts (`reports/2026-10-06-deep-*.md`), synthesised in [`reports/2026-10-06-group-science-game-theory-v2.md`](reports/2026-10-06-group-science-game-theory-v2.md) with 11 claims checked by hand. Checked against round 20's result, the theory's predictions came out as follows.
+- **Held:**
+  - Publishing a departure as a fact removed posts to departed agents.
+  - With zero cost of volunteering there are duplicate volunteers, not delay: a four-way claim race on oxvg.
+  - Prompt text did not change `done`.
+  - A notice helps only if someone is free.
+- **Not supported:**
+  - The stag-hunt cascade: fewer `done` calls with notices, not more.
+  - The need for a standing line beyond the one-time notice.
+- **The new lesson:** information broadcast on every tool result has a token cost at a fixed cap. This fits ST-status's loss, which is k=2 and confounded with run length. The lever order is now:
+  1. information delivered at the point of use (bounce, arrival brief);
+  2. tool mechanics (a standing rule for simultaneous claims);
+  3. information broadcast on every result, only if short;
+  4. prompt text.
+- **Two open questions for the user:**
+  - Whether agents may share a log of their own tests' exit codes (realism rule).
+  - The model covariate: conformity to declared consensus differs by model.
+
+## 2026-10-06 09:35: the base profile, new defaults, and k=3 as the norm (the user's decisions after the recap; no measurement)
+
+- **Base profile** [`profiles/n12-base.json`](../profiles/n12-base.json): ST (`n12-stagger`: post-only board delivered on tool results, staggered entry, write guard, clock) plus `departureNotice`, without round 20's `done` description, which changed nothing. The notice alone was not tested separately from that description; the transcripts give no reason to expect the description mattered.
+- **Defaults changed** (the user's OK: "cambia los default"; this commit): `delivery` "steer" → "attach"; `boardTools` all → `["post"]`; `teamBriefing` → ST's short version; `spawnAfterTurns` 0 → 2 and `spawnGapSeconds` 0 → 60; `writeGuard`, `clock` and `departureNotice` false → true. `departureNotice` now posts only with messaging on and more than one agent. Every profile that omits one of these keys behaves differently from this commit on: 27 profiles relied on the clock being off (among them `solo` and `no-messaging`), 25 on "steer" delivery, 13 on no write guard, 38 on the full board tool set. Their recorded results stay valid at their own commits; a new control that needs the old behaviour must say so explicitly in a new profile.
+- **k=3 is the norm** (AGENTS.md): every arm gets at least three repetitions per task; a round with less is a screen and gives no verdict.
+- Smoke: `examples/trio.json` with the new defaults (3 agents) entered staggered, carried the clock and posted two departure notices; `examples/hello.json` (1 agent) posted none. Unit tests and typecheck pass.
 
 ## Campaign registry
 

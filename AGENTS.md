@@ -9,7 +9,7 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 ## Layout
 
 - `src/` (small on purpose; see "Rules for changing murmur"): `swarm.ts` (run loop, sessions, hooks, relays), `board.ts` (board state and coordination tools), `profile.ts` (every tunable lever and its default), `tools.ts` (file tools), `tasklist.ts` (shared task list), `branches.ts` (branch per agent), `cli.ts`. Unit tests: `npm test`.
-- `profiles/*.json`: one file per experimental arm. `no-messaging.json` is the control.
+- `profiles/*.json`: one file per experimental arm. `n12-base.json` is the base (its values are the defaults since 2026-10-06); a single-agent control needs its own profile with `messaging: false`.
 - `scripts/arms.mjs`: paired comparison of two arms inside the same swarmtest campaign(s). `scripts/traces.mjs`: per-agent behaviour table (calls, board share, checks, calls after the first green, overwrites, steers) and why each agent stopped.
 - `examples/`: tiny task files for smoke tests (`trio.json` with 3 agents is the usual one).
 - `experiments/` (partly tracked: notebook, configs, drivers and aggregated results; logs, locks, `tmp/` and copied workspaces stay ignored, see `.gitignore`): `plan.md` (rules, findings, pre-registered rounds, campaign registry), `hard-tasks.md` (how benchmark tasks are built and calibrated), campaign configs, lane drivers and logs.
@@ -50,7 +50,7 @@ Rounds 1–10 (to 2026-10-02) gave every agent an oracle that real work does not
 
 - **Start from the current evidence:** read the TL;DR of `docs/research.md` before designing a round. Results and findings belong there and in `experiments/plan.md`, never in this file, which holds only stable working rules.
 - **Pre-register before measuring:** write the round's question, arms, tasks, k, budget and decision rule in `experiments/plan.md` before launching. Afterwards, apply the rule as written, add a row to the campaign registry, and write findings from the transcripts.
-- **One run orders nothing.** Use k≥2 and compare per-task means. Pi's own noise on one task spans 0.0–0.75.
+- **One run orders nothing. k=3 is the norm** (the user's rule, 2026-10-06): every arm gets at least three repetitions per task, and per-task means are compared. A round with less is a screen, says so in its pre-registration, and gives no verdict. Pi's own noise on one task spans 0.0–0.75, and the 12-agent control alone spanned 0.17–0.77 on the same five DeepSWE tasks.
 - **A run that hits its token cap stops the whole swarmtest campaign** (no resume). Put arms that may hit the cap in their own campaign, or use the lane drivers' `--per-arm` second pass (`experiments/criba3-lanes.mjs`). The per-run cap is 3M tokens (`token_budget`), and cache reads count toward it.
 - Every swarmtest campaign needs one single-agent competitor (Pi n=1, or a murmur n=1 control such as `c4g-guard`).
 - **Parallel lanes:** the `criba*-lanes.mjs` drivers run several campaigns at once (`nohup node <driver> <lane> &`), with a lock file per task × arm and done-detection by the campaign seed. Three to five concurrent campaigns have not affected graders so far.

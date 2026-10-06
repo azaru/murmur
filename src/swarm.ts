@@ -166,7 +166,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     if (event.toolName === "done" && output.startsWith("You are done")) {
       tasks?.release(name);
       left.set(name, Date.now());
-      if (profile.departureNotice) departure(name, String(event.input.reason));
+      if (profile.departureNotice && profile.messaging && names.length > 1) departure(name, String(event.input.reason));
     }
     const lines: string[] = [];
     const notices = profile.delivery === "attach" ? board.members.get(name)!.notices.splice(0) : [];

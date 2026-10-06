@@ -20,13 +20,10 @@ Goal:
 {goal}
 
 When you judge that the goal is met, call done(reason). If you conclude it cannot be reached, call done(reason) with the reason.`,
+  /** Since 2026-10-06 the defaults are the base profile (profiles/n12-base.json): a post-only board delivered on tool results,
+   * staggered entry, write guard, clock and departure notices. Before, every one of those was off and the board offered every tool. */
   teamBriefing: `
-Teammates: {teammates}. You all share this folder and this goal; nobody is in charge.
-Coordinate on the shared board:
-- post(text, thread?) sends a message to every teammate; inbox() returns the messages you have not read.
-- team() shows who is working, idle or done and which files they claim; budget() shows the shared spend.
-- claim(path) / release(path) announce which file you are editing (advisory; claim fails if someone else holds it).
-Start by reading your inbox and posting what you will work on. When told you have new messages, call inbox.
+Teammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. post(text) messages all of them, and their posts appear at the end of your tool results.
 `,
   steer: "You have new messages on the board; call inbox.",
   /** Prompt for an idle agent woken by a new post. If the profile keeps this default but offers no inbox, the wake carries the unread posts itself. */
@@ -35,31 +32,31 @@ Start by reading your inbox and posting what you will work on. When told you hav
   /** Replaces a tool's description: board tools, append, or the built-in tools in `tools` (those are then registered as murmur's own copy of Pi's tool). */
   toolDescriptions: {} as Record<string, string>,
   tools: ["read", "bash", "edit", "write"],
-  /** Staggered start: agent i starts i × this many seconds after the run starts. With spawnAfterTurns, the longest an agent waits after the previous one entered. */ spawnGapSeconds: 0,
-  /** Staggered start by turns: each agent enters once the previous one has finished this many model turns (assistant messages), or spawnGapSeconds after the previous one entered if that comes first. 0 is off. */ spawnAfterTurns: 0,
+  /** Staggered start: agent i starts i × this many seconds after the run starts. With spawnAfterTurns, the longest an agent waits after the previous one entered. */ spawnGapSeconds: 60,
+  /** Staggered start by turns: each agent enters once the previous one has finished this many model turns (assistant messages), or spawnGapSeconds after the previous one entered if that comes first. 0 is off. */ spawnAfterTurns: 2,
   /** Append each teammate's latest post (its first 100 characters) to every tool result, as a view of the team's state. */ boardTail: false,
   /** A file in the shared folder (for example TEAM.md) whose current content is added to each agent's first prompt. Empty is off. */ sharedNotes: "",
-  /** When an agent calls done, murmur posts once to everyone that it left, with its reason, the top-level folders it changed with write/edit/append and when it last did. */ departureNotice: false,
+  /** When an agent calls done, murmur posts once to everyone that it left, with its reason, the top-level folders it changed with write/edit/append and when it last did. */ departureNotice: true,
   /** Append the team's state to every tool result: each teammate working, idle, not entered yet or left (and when), and each top-level folder's last write/edit/append (who, how long ago) or none yet. Edits made through bash are not seen. */ teamStatus: false,
   /** Staggered start by finishing: each agent enters once the previous one ends its turn (calls done or stops), and seats not yet entered keep the run going. */ enterOnDone: false,
   /** Menu agents may pick from with role(name); empty means no role tool. Never assigned. */ roles: {} as Record<string, { summary: string; instructions: string }>,
   /** How many times a new post may wake an agent that already called done. */ revive: 0,
   /** done is refused while the agent has unread messages or the acceptance check fails. */ doneGate: false,
-  /** How posts reach a busy agent: "steer" interrupts it; "attach" appends them to its next tool result; "pull" waits for inbox. */ delivery: "steer" as "steer" | "attach" | "pull",
+  /** How posts reach a busy agent: "steer" interrupts it; "attach" appends them to its next tool result; "pull" waits for inbox. */ delivery: "attach" as "steer" | "attach" | "pull",
   /** Share each agent's file writes and acceptance-check runs with teammates; needs delivery "attach". */ notices: false,
   /** Offer append(path, content), which adds text to the end of a file and creates it if missing. */ append: false,
-  /** Refuse a write that looks like only part of an existing file (starts indented, or is shorter and starts differently). */ writeGuard: false,
+  /** Refuse a write that looks like only part of an existing file (starts indented, or is shorter and starts differently). */ writeGuard: true,
   /** Above 0, claims block other agents' write/edit and lapse after this many seconds without the holder writing. */ claimLease: 0,
   /** Refuse a write onto a file that changed since this agent last read or wrote it. */ staleGuard: false,
   /** Tool calls required after an agent's first passing check before done; its latest check must pass too. 0 is off. */ doneAfterGreen: 0,
-  /** Append the minutes left before the timeout to every tool result. */ clock: false,
+  /** Append the minutes left before the timeout to every tool result. */ clock: true,
   /** Append the tokens left in the run's token budget (budgetTokens), shared by all agents, to every tool result. */ clockTokens: false,
   /** With clock and/or clockTokens, print "unlimited" instead of the minutes and tokens left (the real limits still apply). */ clockUnlimited: false,
   /** How many fresh instances may take over each agent's seat after it calls done (a context reset, not a revival). */ relay: 0,
   /** Tokens per turn above which an agent with relays left is asked to write its handoff and call done. 0 is off. */ relayContext: 0,
   /** Offer finding(text, command): murmur runs the command and posts the claim with its real exit code and output. */ findings: false,
   /** Tool calls an agent makes while the acceptance check fails or has not run before the board hears it may need help; also posts when one finishes without a pass. 0 is off. */ helpAfter: 0,
-  /** Board tools offered when messaging is on; done is always offered. */ boardTools: BOARD_TOOLS,
+  /** Board tools offered when messaging is on; done is always offered. All of them: BOARD_TOOLS. */ boardTools: ["post"] as string[],
   /** Threaded board: agents open threads with thread_new and answer with reply instead of using post. Agents only receive the threads they follow (opened, replied to or read), plus a one-line announcement of each new thread. Offer the thread tools through boardTools. */ threads: false,
   /** Offer a shared task list (tasks, task_add, task_take, task_done, task_drop): any agent adds items and takes them, and an agent that calls done gives back what it had taken. murmur only keeps the list and appends its progress to tool results when it changes; nobody assigns. Works with messaging off. */ taskList: false,
   /** A git branch per agent, in its own worktree outside the shared folder, with merge (integrate into the shared folder, reporting conflicts) and update (bring others' merged work in). "required": every agent works in its branch, and done is refused once while it holds unmerged work. "optional": agents work in the shared folder and may open a branch with branch(). */ branches: "off" as "off" | "required" | "optional",
