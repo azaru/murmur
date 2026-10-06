@@ -6,6 +6,7 @@
 //   node experiments/deepswe/run-batch.mjs --tasks a,b,c --arm teams --teams 3 --profile profiles/n12-base.json --agents 3 --tokens 8000000 --minutes 120
 //        (T rival teams at once, each with all tasks, --agents and --tokens per team; each team reads the others' repositories
 //         read-only at /rivals/<team>/<task> and is told to finish above them and that they cannot see its work, which is false)
+//        --pool: --tokens is one budget shared by all teams instead of each team's own; a team stops when the sum is spent
 //   node experiments/deepswe/run-batch.mjs --tasks a,b --dry     (no model: checks the plumbing, then builds refs/<task>.json if missing)
 // Options: --id <batch id> --hub-image murmur:latest --sidecar-memory 3g --cmd-timeout 1200 (seconds per `run` command)
 //          --grade-parallel 1 --rewrite-refs
@@ -27,6 +28,7 @@ const secretsRoot = join(murmur, "tmp", "claude-deepswe");
 const { values: opt } = parseArgs({ options: {
   tasks: { type: "string" }, arm: { type: "string" }, profile: { type: "string" }, agents: { type: "string" },
   tokens: { type: "string" }, minutes: { type: "string" }, id: { type: "string" }, dry: { type: "boolean", default: false }, teams: { type: "string" },
+  pool: { type: "boolean", default: false },
   "hub-image": { type: "string", default: "murmur:latest" }, "sidecar-memory": { type: "string", default: "3g" },
   "cmd-timeout": { type: "string" }, "grade-parallel": { type: "string", default: "1" }, "rewrite-refs": { type: "boolean", default: false },
 } });
@@ -39,6 +41,7 @@ const profilePath = resolve(murmur, opt.profile ?? (arm === "swarm" ? "" : "prof
 const agents = arm === "swarm" || arm === "teams" ? Number(opt.agents) : 1;
 const teamCount = arm === "teams" ? Number(opt.teams) : 0;
 if (arm === "teams" && !(teamCount >= 2)) { console.error("the teams arm needs --teams >= 2"); process.exit(1); }
+if (opt.pool && arm !== "teams") { console.error("--pool needs the teams arm"); process.exit(1); }
 const tokens = Number(opt.tokens), minutes = Number(opt.minutes);
 if (!opt.dry && (!(agents >= 1) || !(tokens > 0) || !(minutes > 0) || !existsSync(profilePath) || profilePath === murmur + "/")) {
   console.error("need --tokens, --minutes, an existing --profile, and --agents for the swarm arm"); process.exit(1);
@@ -147,10 +150,11 @@ You can read and edit the repositories' files directly. Their toolchains are not
 It runs the command in that project's environment with the repository as working directory (for example: run ${unitTasks[0].id} "git status"). There is no network access there, and a command is stopped after ${Math.round(cmdTimeout / 60)} minutes. Several commands can run at once; the projects' environments have 2 CPUs each.`;
 }
 
-const ENTRY = `import { readFileSync } from "node:fs";
+const ENTRY = `import { existsSync, readFileSync } from "node:fs";
 import { runSwarm } from "./src/swarm.ts";
 const task = JSON.parse(readFileSync("/cfg/task.json", "utf8"));
-const result = await runSwarm(task, { runDir: "/murmur-run/run", workspace: "/work", checkTimeoutMs: 60_000 });
+const extra = existsSync("/cfg/run.json") ? JSON.parse(readFileSync("/cfg/run.json", "utf8")) : {};
+const result = await runSwarm(task, { runDir: "/murmur-run/run", workspace: "/work", checkTimeoutMs: 60_000, ...extra });
 console.log(\`murmur: \${result.status} (\${result.reason}), \${result.tokens} tokens\`);
 process.exit(0);
 `;
@@ -164,6 +168,7 @@ function runHub(u, cap, extraGoal = "") {
   writeFileSync(join(cfg, "task.json"), JSON.stringify({ goal: goalText(u.tasks) + extraGoal, provider: "openai-codex", model: "gpt-6-luna", thinking: "medium",
     done: "The change described for each project is implemented in its repository.", check: "true", agents, budgetTokens: cap, timeoutMinutes: minutes,
     profile: "/cfg/profile.json" }, null, 2));
+  if (opt.pool) writeFileSync(join(cfg, "run.json"), JSON.stringify({ sharedBudget: { dir: "/pool", name: u.unit } }));
   const secrets = join(secretsRoot, `secrets-${batch}-${u.unit}`);
   mkdirSync(secrets, { recursive: true });
   const auth = JSON.parse(readFileSync(join(homedir(), ".pi", "agent", "auth.json"), "utf8"));
@@ -268,6 +273,10 @@ async function real() {
     : arm === "teams" ? Array.from({ length: teamCount }, (_, i) => [`team${i + 1}`, tasks, tokens]) : [["b", tasks, tokens]];
   const prepared = await Promise.all(units.map(async ([name, ts, cap]) => ({ ...(await startUnit(name, ts)), cap })));
   if (arm === "teams") addRivalMounts(prepared);
+  if (opt.pool) { // every team's hub writes its token total to the shared pool folder and counts all of them
+    mkdirSync(join(out, "pool"), { recursive: true });
+    for (const u of prepared) u.hubMounts.push("-v", `${join(out, "pool")}:/pool`);
+  }
   const runs = await Promise.all(prepared.map(async u => ({ u, ...(await runHub(u, u.cap, arm === "teams" ? rivalText(u, prepared) : "")) })));
   if (arm === "teams") return teamsSummary(runs, started);
   const minutesUsed = (Date.now() - started) / 60_000;
@@ -310,7 +319,7 @@ async function teamsSummary(runs, started) {
   }
   const git = a => spawnSync("git", a, { cwd: murmur, encoding: "utf8" }).stdout.trim();
   const summary = { batch, arm, teams: teamCount, profile: opt.profile, profileSha256: createHash("sha256").update(readFileSync(profilePath)).digest("hex").slice(0, 16),
-    agentsPerTeam: agents, tasks: taskIds, tokenCapPerTeam: tokens, timeoutMinutes: minutes, minutes: Math.round(minutesUsed * 10) / 10,
+    agentsPerTeam: agents, tasks: taskIds, ...(opt.pool ? { tokenPool: tokens } : { tokenCapPerTeam: tokens }), timeoutMinutes: minutes, minutes: Math.round(minutesUsed * 10) / 10,
     tokens: runs.reduce((a, r) => a + (r.result?.tokens ?? 0), 0), costUsd: runs.reduce((a, r) => a + (r.result?.costUsd ?? 0), 0),
     cmdTimeoutSeconds: cmdTimeout, hubImage: opt["hub-image"], perTeam, code: { commit: git(["rev-parse", "HEAD"]), srcDirty: git(["status", "--porcelain", "src"]) !== "" }, date: new Date().toISOString() };
   mkdirSync(join(here, "results"), { recursive: true });

@@ -2302,6 +2302,40 @@ Every team ended at its 8M cap, after 11.6–26.6 minutes (a team's minutes run 
 
 **Record notes.** `experiments/rows/runs.json` is not regenerated: DeepSWE batches are not swarmtest runs, and their per-run data is `deepswe/results/e21-*.json` and `deepswe/traces21.md`. `deepswe/traces.py` now also reads team batches (one run per team directory).
 
+## Round 22: three rival teams of four sharing 32M, against one swarm of 12 with 32M, on the five-task DeepSWE batch (fixed before measuring, 2026-10-06 16:30; the user's design)
+
+**Why.** Round 21's teams of three had a quarter of a 12-agent swarm's agents and budget each, so they could not be compared with the earlier swarms. The user, in their words: "3 teams of 4 with 32 million tokens in total, to see whether they beat similar swarms with the group of rivals." The user chose, when asked: one pool of 32M shared by the three teams (not a cap per team), the mean of the three teams as the rivals' score, a new 12-agent swarm in the same round with k=3 as the comparison, and the "equals" sentence of the briefing fixed for this round only.
+
+**Question.** At the same agents (12) and the same total budget (32M), do three rival teams of four, told to finish above each other and able to read each other's work, score higher than one swarm of 12?
+
+**Arms:**
+- **Teams** (`--arm teams --teams 3 --agents 4 --pool --tokens 32000000`, profile `n12-base-peers.json`). As in round 21 (own hub and own copy of the five repositories per team, rivals readable at `/rivals/<team>/<project>`, the same rivalry text including the false "They cannot see your work"), with two changes: four agents per team, and one token pool. Each team writes its running token total to a shared folder and counts every team's total against the 32M (new optional run option `sharedBudget` in `src/swarm.ts`; without it nothing changes). Every team stops with reason `budget` once the sum passes 32M, so a fast team can spend what a slower one would have used. Agents are not told about the pool (the base profile shows no tokens line).
+- **Swarm** (`--arm swarm --agents 12 --tokens 32000000`, profile `n12-base-peers.json`): 12 agents in one swarm, the base profile: a post-only board delivered on tool results, staggered entry, write guard, clock and departure notices.
+- **Profile** `n12-base-peers.json` is `n12-base.json` with one sentence changed, because in round 21 teams of three read "Teammates: finch, robin, equals working…" as a fourth teammate named "equals". New text: "Teammates: {teammates}. You are all equals working on the same goal in this folder; nobody is in charge. …". Both arms use it, so the swarm arm differs from round 20's ST and from `n12-base` by that sentence; earlier swarm numbers are a reference, not a control.
+
+**Tasks:** round 17 E's five (expr, oxvg, scriggo, tengo, wasmi), as in rounds 19–21.
+
+**k=3** per arm. Order alternates by repetition (teams then swarm in r0 and r2, swarm then teams in r1). 120 minutes per run. Execution: `experiments/deepswe/batch22.sh`, sidecars 5 GB and 2 CPUs, quota stop as in round 21 (STOP22).
+
+**Score rule** (decided, k=3): the teams' score per task is the mean over the three teams, then over the three repetitions; the swarm's is its mean over the three repetitions. The teams are **better** if they are ≥ +0.05 higher on the five-task mean and higher on at least 3 of 5 tasks; **worse** if ≤ −0.05 and lower on at least 3 of 5; otherwise **not decided**. The best team of each repetition is also reported, labelled as chosen by the grader after the fact: nothing in the system could pick it without the grader.
+
+**What is read** (descriptive):
+- scores, tokens and minutes per team and per swarm run; each team's share of the pool and when the pool ran out;
+- `deepswe/rivals.py`: tool calls on `/rivals` per agent and over time, files copied whole from a rival, posts naming the other teams, first `done`, last write and end reason;
+- `deepswe/traces.py` for both arms;
+- from the transcripts (subagent): how teams use the rivals' work, whether any agent mentions "equals" as a teammate, and how agents talk about the rivalry.
+
+**Smoke test** (deleted afterwards): two teams of one agent on expr with `--pool` and a 0.4M pool; both must end on `budget` with neither reaching 0.4M on its own, so the sum is what binds. Plus `examples/trio.json` with the default profile; unit tests and typecheck.
+- Result: both teams ended on `budget` at 0.24M and 0.18M (sum 0.42M, 4% over the pool), so the sum bound, not a team's own share; both read the rival's folder (4 and 5 calls). `examples/trio.json` (default profile) entered staggered, posted three departure notices and ended `all_done`. Unit tests (10) and typecheck pass.
+
+**Estimate:** 64M per repetition, about 192M and $3 in total; six batches of about 30–60 minutes each including scoring, about 5 hours. The model quota stopped rounds 14 and 19; if it stops this one, the STOP22 file halts the driver and the round resumes later with the same script.
+
+**Known threats:**
+- The teams arm changes several things at once against the swarm: one swarm split into three, the rivalry text, the visibility of rivals, and the false claim. A difference cannot be assigned to one of them.
+- The rivals' score is the mean team; the best team is not available without the grader.
+- The pool lets one team starve the others, and teams check the pool only after each model message, so the real total lands somewhat above 32M.
+- No single-agent arm in this round; round 21's solo runs are a reference only.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

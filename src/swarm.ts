@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join, normalize, relative, resolve } from "node:path";
 import {
   type AgentSession, type CreateAgentSessionOptions, createAgentSession, DefaultResourceLoader,
@@ -18,7 +18,11 @@ export type Task = {
   budgetUsd?: number; budgetTokens?: number; timeoutMinutes: number; profile?: string;
   checks?: string[]; // per-part checks of a batch: each counts as a check run, and help follows the part an agent last checked
 };
-export type RunOptions = { runDir: string; workspace?: string; authPath?: string; checkTimeoutMs?: number };
+export type RunOptions = {
+  runDir: string; workspace?: string; authPath?: string; checkTimeoutMs?: number;
+  // Runs that share one token budget: each writes its own total to dir/name, and budgetTokens counts every run's total.
+  sharedBudget?: { dir: string; name: string };
+};
 export type EndReason = "all_done" | "quiescent" | "budget" | "timeout" | "error";
 type Agent = { name: string; session: AgentSession; briefing: string };
 
@@ -58,11 +62,26 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     }
     return { cost, tokens, usage };
   };
+  // Tokens counted against budgetTokens: this run's, plus the last total each run sharing the budget wrote.
+  const others = new Map<string, number>();
+  const pooled = (own: number) => {
+    const shared = opts.sharedBudget;
+    if (!shared) return own;
+    const tmp = join(shared.dir, `.${shared.name}.tmp`);
+    writeFileSync(tmp, String(own));
+    renameSync(tmp, join(shared.dir, shared.name)); // atomic, so a reader never sees a half-written number
+    for (const file of readdirSync(shared.dir)) {
+      if (file === shared.name || file.startsWith(".")) continue;
+      const total = Number(readFileSync(join(shared.dir, file), "utf8"));
+      if (total > 0) others.set(file, total);
+    }
+    return own + [...others.values()].reduce((a, b) => a + b, 0);
+  };
   const minutesLeft = () => Math.max(0, task.timeoutMinutes - (Date.now() - started) / 60_000).toFixed(1);
-  const tokensLeft = () => `${(Math.max(0, task.budgetTokens! - totals().tokens) / 1e6).toFixed(1)}M`;
+  const tokensLeft = () => `${(Math.max(0, task.budgetTokens! - pooled(totals().tokens)) / 1e6).toFixed(1)}M`;
   const budgetText = () => {
     const { cost, tokens } = totals();
-    const left = [task.budgetUsd && `$${(task.budgetUsd - cost).toFixed(4)}`, task.budgetTokens && `${task.budgetTokens - tokens} tokens`];
+    const left = [task.budgetUsd && `$${(task.budgetUsd - cost).toFixed(4)}`, task.budgetTokens && `${task.budgetTokens - pooled(tokens)} tokens`];
     return `Spent $${cost.toFixed(4)} and ${tokens} tokens. Remaining: ${left.filter(Boolean).join(", ") || "no limit"}; ${minutesLeft()} minutes before timeout.`;
   };
   // A {messages} placeholder delivers the unread posts inline and marks them read.
@@ -228,7 +247,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   };
   const checkBudget = () => {
     const { cost, tokens } = totals();
-    if ((task.budgetUsd && cost > task.budgetUsd) || (task.budgetTokens && tokens > task.budgetTokens)) end("budget");
+    if ((task.budgetUsd && cost > task.budgetUsd) || (task.budgetTokens && pooled(tokens) > task.budgetTokens)) end("budget");
   };
   // Called whenever a turn ends: the swarm is over once nobody is working.
   const evaluate = () => {
