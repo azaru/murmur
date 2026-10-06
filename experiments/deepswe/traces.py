@@ -13,8 +13,14 @@ from pathlib import Path
 RUNS = Path(__file__).parent / "runs"
 ts = lambda s: datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp() / 60
 
-for batch in sys.argv[1:]:
-    run = RUNS / batch / "b" / "murmur" / "run"
+# A batch has one run under b/, or one per team under team1/, team2/... (round 21).
+units = []
+for b in sys.argv[1:]:
+    if (RUNS / b / "b").exists(): units.append((b, RUNS / b / "b"))
+    else: units += [(f"{b} {d.name}", d) for d in sorted((RUNS / b).glob("team*"))]
+
+for batch, unit in units:
+    run = unit / "murmur" / "run"
     res = json.load(open(run / "result.json"))
     events = [json.loads(line) for line in open(run / "events.jsonl")]
     repos = [line.split(":")[0].strip("- ") for line in events[0]["task"]["goal"].split("\n") if line.startswith("- ")]

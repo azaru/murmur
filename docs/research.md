@@ -26,6 +26,12 @@ This is the curated record of every experiment run with murmur so far: the quest
 
 ## TL;DR
 
+**Without an oracle, three rival teams that can read each other's work (round 21, five DeepSWE tasks, 8M per team, k=2, a screen with no verdict):**
+- Three teams of three, told to finish above the others and (falsely) that the rivals cannot see them, average 0.169 against one agent's 0.015 (+0.154, higher on 4 of 5). As in rounds 17 E and 18, the margin is mostly the single agent stopping: it called `done` after 16.6 and 3.2 minutes, saying the work was unfinished.
+- Teams vary as much as arms do: 0.073–0.252 in one repetition, 0.025–0.294 in the other. oxvg reached 0.667, the project's best on that task, by a team's own work.
+- **The rivalry text changed little that is visible.** Agents read the rivals' folders (78 calls, mostly listings in the first minutes), copied two files whole and adopted code in three other cases, none of which scored above its source except one oxvg patch. Nobody restates the goal of beating the others, doubts the "unseen" claim, or mentions rivals when leaving.
+- The default briefing's "Teammates: finch, robin, equals working…" is read as a fourth teammate named "equals" in teams of three (17 posts).
+
 **Without an oracle, making the team's state visible (round 20, five DeepSWE tasks, 32M, k=2):**
 - A diagnosis of 54 twelve-agent runs found the board carries claims, not state: teammates never learn that someone left, keep addressing departed agents, and leave their work unowned.
 - **Departure notices fix that part.** Posts addressed to departed agents fell from 14 to 0, every repository was touched (ST left 3 untouched), and agents took over a leaver's work within minutes. The score is not decided (ST-depart −0.062).
@@ -645,6 +651,23 @@ A diagnosis of all 54 twelve-agent runs ([report](../experiments/reports/2026-10
 
 **From the transcripts** ([report](../experiments/reports/2026-10-06-round20-traces-analysis.md), model output; key claims checked by hand): the notices work as communication. Agents read them as ownership facts and take over the leaver's work within minutes (tern on Tengo, four agents on oxvg, which gave the first non-zero oxvg score in the project), where in ST an agent waited ten minutes for a "handoff" from someone who had left. They do not change *when* agents leave: the new `done` text did not stop agents from calling `done` while saying the goal is not complete (13 of 16 cases), and one abandoned repository went untouched because nobody was free. The status line is never quoted, makes every call larger, and came with 37% fewer edits at the same cap, which fits its lower score. Every batch ended at the 32M cap in 12–20 minutes. Two runs failed on a model API outage and were rerun. Counts are in [`deepswe/traces20.md`](../experiments/deepswe/traces20.md).
 
+### Round 21: three rival teams that can read each other's work (50.9M tokens, $0.82; code `46f2aff`)
+
+The user's design: three teams of three (the base profile `n12-base` inside each team), each with its own copy of round 17 E's five tasks and 8M tokens, told that their objective is to finish above the other two teams, that they can read the rivals' repositories read-only at `/rivals/<team>/<project>`, and, falsely, that the rivals cannot see their work. Against one agent with the clock (`solo-clock`, 8M), run after the teams. k=2, so a screen with no verdict.
+
+| | team1 | team2 | team3 | teams mean | solo |
+|---|---:|---:|---:|---:|---:|
+| five-task mean r0 | 0.073 | 0.188 | 0.252 | | 0.029 |
+| five-task mean r1 | 0.294 | 0.183 | 0.025 | | 0.000 |
+| mean over both | | | | **0.169** | **0.015** |
+| minutes (r0, r1) | 15.2, 22.1 | 26.6, 16.6 | 11.6, 24.7 | | 17.1, 3.2 |
+
+**Rule as written:** +0.154, higher on 4 of 5 tasks (scriggo 0 for everyone): the teams are above, as a screen. The best team of each repetition, chosen by the grader after the fact, averages 0.273. Every team ended at its 8M cap; the single agent quit after 1.5M and 1.1M of its 8M, saying the work was unfinished, and a solo `done` ends the run while one team member's does not. The margin is therefore mostly stopping, as in rounds 17 E and 18.
+
+**Use of the rivals' work** ([`deepswe/traces21.md`](../experiments/deepswe/traces21.md), from `deepswe/rivals.py`): 78 tool calls touched `/rivals` (about 5% of the teams' calls), 37 of them in the first 3 minutes and mostly listings or modification-time queries; 14 of 18 agents made at least one. Two files were copied whole (team3 took team1's Scriggo AST changes in r1; scriggo scored 0) and three partial adoptions are traced in the transcripts. Only one adopter scored above its source (r0 team2's oxvg, 0.5 against team1's 0.0, after a written critique of team1's patch). The two best results, oxvg 0.667 and tengo 0.835, were the teams' own work.
+
+**From the transcripts** ([report](../experiments/reports/2026-10-06-round21-transcripts.md), model output; key claims checked by hand): no agent doubts or tests the "unseen" claim, hides work or looks for its own team under `/rivals`; reasoning is recorded only as short titles, so belief and indifference cannot be told apart. No post or `done` reason restates the aim of beating the others. Leaving is unchanged: all six `done` calls by team members say the work is incomplete and none mentions the rivals. In teams of three, the default briefing "Teammates: finch, robin, equals working on the same goal" is read as a fourth teammate called "equals" (17 posts in 3 of 6 teams; none in round 20's 12-agent runs).
+
 ## Theories and their status
 
 | Theory | Test | Verdict |
@@ -681,6 +704,9 @@ A diagnosis of all 54 twelve-agent runs ([report](../experiments/reports/2026-10
 | Silent departures orphan work, and a notice from murmur when an agent leaves fixes it | diagnosis, 20 | **Supported on the mechanism, not on the score**: posts addressed to departed agents 14 → 0, untouched repositories 3 → 0, take-overs within minutes of a notice; ST-depart's score is not decided (−0.062, k=2) |
 | Telling agents that `done` means leaving for good, only when the whole goal is met, delays `done` | 20 | **Not supported**: 13 of 16 `done` calls under the new text say the goal is not complete; first `done` times unchanged (1.3–2.3 min) |
 | A team status line on every tool result helps 12 agents coordinate | 20 | **Refuted as built**: worse by the rule (−0.076); never quoted; larger calls and 37% fewer edits at the same cap |
+| Rival teams told to beat each other, who can read the rivals' work, do better than one agent | 21 | **Above as a screen** (+0.154, 4 of 5, k=2, no verdict); the margin is mostly the single agent quitting at 3–17 minutes |
+| Agents use visible rival work (copy, adapt, judge) when told to beat the rivals | 21 | **Weakly**: 78 calls on `/rivals`, mostly early listings; 2 files copied whole and 3 partial adoptions, one of which scored above its source |
+| Telling agents they are unseen by the rivals changes how they work | 21 | **No visible effect**: never doubted, tested or mentioned; reasoning is recorded only as titles, so belief cannot be read |
 | A shared task list helps 12 agents on a batch of repositories | 15 A, 20 | **Not decided** (−0.024 in 20); its release on `done` handed one item over in 0.2 min; coverage of all repositories |
 | A threaded board helps 12 agents on difficulty tasks | 16 A | **Not supported**: STH loses to C1T (−0.054) and is not pronounced against STT. Threads collapse into one or two busy threads, and the board's share of calls rises from 29% to 46% |
 | A teammate keeps agents working the way the clock does, **without an oracle** | 14 (stage D) | **Not supported**: two agents without a clock stop at 1–2 minutes, like one |
@@ -711,6 +737,12 @@ A diagnosis of all 54 twelve-agent runs ([report](../experiments/reports/2026-10
   - Side test U is one task at k=2, with all three arms running in the same window.
   - Stage D: the partial-credit scorer is this project's construction, not DeepSWE's binary reward. fd r1 was rescored after a harness fault, and its agent could not run the tests during its run.
 - **Round 15 stage A** is a screen: 2 tasks at k=2, and shop2 swings 0.00–0.76 within one arm. Both "beat C1" verdicts lean on shop2 and on C1 planning runs below its rounds 13–14 means (0.275 against 0.42–0.47). ST's pronounced verdict rests on shop2. The first launch ran C1 in place of B on planning because of a wrong order check. That C1 run is valid and counted, one killed campaign is excluded, and all of it is logged in `plan.md`. Merges in BR could let conflict markers into the shared folder; this happened once, for about 76 s, in the best BR run. Eight wakes told agents to call an `inbox` tool their profile lacks.
+- **Round 21:**
+  - k=2 on five tasks, a screen; scriggo 0 everywhere; teams of the same arm range 0.025–0.294;
+  - the solo arm ran after the teams, not at the same time, and quit at 3–17 minutes, so the rule mostly measures stopping; a solo `done` ends the run, a team member's does not;
+  - the teams arm changes team size, the rivalry text, the visibility of rivals and the false claim at once, against any earlier arm;
+  - copies are counted from identical final diffs plus the order of reads and writes; partial adoptions come from the transcript report;
+  - the default briefing's "equals" was misread as a teammate's name in 3 of 6 teams.
 - **Round 20:**
   - k=2 on five tasks, with ST's own spread on them 0.17–0.77; oxvg and scriggo were 0 in 7 and 8 of 8 runs;
   - every batch ended at the 32M cap in 12–20 minutes, too soon for most take-overs to reach the score;
@@ -805,6 +837,7 @@ For each experiment: whether its question or theory was written down before meas
 | Round 19 (how the team shares state) | yes, committed before launch (`3c02043`) | `deepswe/batch19.sh` | `deepswe/results/e19-*.json` (3 valid batches; 3 invalid ones listed in `plan.md`), `deepswe/traces19.md` | descriptive, `reports/2026-10-05-round18-19-traces-analysis.md` | stopped by the model quota after wave 1 of repetition 0; no rule applied |
 | Communication diagnosis | — | — | — | `reports/2026-10-05-swarm-communication-diagnosis.md` | led to round 20 |
 | Round 20 (team state visible) | yes, committed before launch (`ed4fb54`) | `deepswe/batch20.sh`, `deepswe/comm.py` | `deepswe/results/e20-*.json`, `deepswe/traces20.md` (two rerun batches listed in `plan.md`) | yes, `reports/2026-10-06-round20-traces-analysis.md` | yes |
+| Round 21 (rival teams) | yes, committed before launch (`46f2aff`) | `deepswe/batch21.sh`, `deepswe/run-batch.mjs` (`--arm teams`), `deepswe/rivals.py` | `deepswe/results/e21-*.json`, `deepswe/traces21.md` | yes, `reports/2026-10-06-round21-transcripts.md` | yes (screen, no verdict) |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -831,13 +864,13 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the oracle audit and the build of the blind panel;
   - the round 11 phase 1 transcript analysis and the tool-usage audit;
   - the lever recount for 12-agent swarms and the round 15 transcript analyses (stages A, B and C);
-  - the round 16 stage A, round 17, rounds 18–19 and round 20 transcript analyses, and the swarm communication diagnosis;
+  - the round 16 stage A, round 17, rounds 18–19, round 20 and round 21 transcript analyses, and the swarm communication diagnosis;
   - the DeepSWE candidate selection for round 17;
   - the DeepSWE batch feasibility notes, driver build and offline-scorer fix (the driver and per-batch results are in `experiments/deepswe/`);
   - the literature review (eight source reviews and a synthesis).
 - [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (703 runs in 385 campaigns, including 6 invalid ones: 5 from round 14's quota stop and 1 from round 15 stage C's): campaign, seed, task, arm, score, tokens, cost in dollars (`cost_usd`), status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
 - `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12,13,15,16,17}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
-- `experiments/deepswe/`: the DeepSWE batch driver (`run-batch.mjs`), one shell driver per round, one result file per batch with per-task scores, tokens and (from round 19) cost in `results/`, and the coordination counts per batch (`traces17.md` to `traces20.md`, from round 20 generated by `traces.py`; process measures by `comm.py`).
+- `experiments/deepswe/`: the DeepSWE batch driver (`run-batch.mjs`), one shell driver per round, one result file per batch with per-task scores, tokens and (from round 19) cost in `results/`, and the coordination counts per batch (`traces17.md` to `traces21.md`, from round 20 generated by `traces.py`; process measures by `comm.py`, and round 21's use of the rivals' work by `rivals.py`).
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).

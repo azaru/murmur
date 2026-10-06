@@ -2258,6 +2258,50 @@ The user asked for a study of how human groups work and how to optimise them, of
 - A team of three can empty early if its agents call `done`.
 - The teams arm changes several things at once against any earlier arm: team size, rivalry text, the visibility of rivals and the false claim.
 
+### Round 21 result and rule applied (2026-10-06 15:55; batches 08:58–11:26 UTC, code `46f2aff`)
+
+| task | team1 r0 | team2 r0 | team3 r0 | team1 r1 | team2 r1 | team3 r1 | **teams mean** | solo r0 | solo r1 | **solo mean** |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| expr | 0.000 | 0.063 | 0.063 | 0.000 | 0.063 | 0.127 | 0.053 | 0.000 | 0.000 | 0.000 |
+| oxvg | 0.000 | 0.500 | 0.000 | 0.667 | 0.000 | 0.000 | 0.194 | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+| tengo | 0.000 | 0.011 | 0.835 | 0.440 | 0.714 | 0.000 | 0.333 | 0.011 | 0.000 | 0.005 |
+| wasmi | 0.364 | 0.364 | 0.364 | 0.364 | 0.136 | 0.000 | 0.265 | 0.136 | 0.000 | 0.068 |
+| **five-task mean** | 0.073 | 0.188 | 0.252 | 0.294 | 0.183 | 0.025 | **0.169** | 0.029 | 0.000 | **0.015** |
+| minutes (own run) | 15.2 | 26.6 | 11.6 | 22.1 | 16.6 | 24.7 | | 17.1 | 3.2 | |
+| tokens | 8.0M | 8.1M | 8.0M | 8.0M | 8.0M | 8.0M | | 1.5M | 1.1M | |
+
+Every team ended at its 8M cap, after 11.6–26.6 minutes (a team's minutes run from its first event to its last; the batch's 27.8 and 25.8 minutes in `results/` include setup). The solo agent called `done` after 16.6 minutes (1.5M) and 3.2 minutes (1.1M). In total 50.9M tokens and $0.82 (teams 48.2M, solo 2.6M). No run failed and nothing was rerun.
+
+**Rule as written** (screen, k=2, no verdict): the teams' per-task mean is 0.169 against the solo arm's 0.015, **+0.154**, higher on 4 of 5 tasks (expr, oxvg, tengo, wasmi) and lower on none; scriggo is 0 for everyone. By the rule the teams are **above**. Under the k=3 norm this is a screen and gives no verdict.
+
+**Best team per repetition, chosen by the grader after the fact** (not something the system could deliver): team3 0.252 in r0, team1 0.294 in r1, mean 0.273. The spread inside one repetition is as large as between arms: 0.073–0.252 in r0, 0.025–0.294 in r1.
+
+**What drives the margin.** As in rounds 17 E and 18, it is mostly the single agent stopping. In both repetitions its `done` reason says the work is unfinished ("The requested end-to-end features remain incomplete…"; "…the four other projects' language/optimizer changes are not implemented; the scope is substantially larger than this partial pass"). A solo `done` ends the run, while one team member's `done` leaves two teammates working, so the arms also differ in how a single quitter ends the run.
+
+**Use of the rivals' work** (`deepswe/rivals.py`, in [`deepswe/traces21.md`](deepswe/traces21.md)):
+
+| | team1 r0 | team2 r0 | team3 r0 | team1 r1 | team2 r1 | team3 r1 |
+|---|---:|---:|---:|---:|---:|---:|
+| tool calls on `/rivals` (in the first 10 min) | 13 (12) | 16 (8) | 13 (8) | 8 (8) | 10 (10) | 18 (11) |
+| posts naming another team or rivals | 0 of 28 | 2 of 12 | 0 of 20 | 0 of 16 | 2 of 26 | 3 of 26 |
+| `done` calls (first at) | 1 (8.4 min) | 2 (2.6 min) | 0 | 2 (5.1 min) | 0 | 1 (1.5 min) |
+| last write | 14.7 min | 26.6 min | 11.4 min | 22.1 min | 16.3 min | 24.7 min |
+
+- 78 tool calls touched `/rivals` across the six teams, about 5% of all tool calls; 14 of 18 agents made at least one, and 37 fell in the first 3 minutes, mostly listings and modification-time queries.
+- **Files copied whole:** 2. In r1, team3 (finch) diffed its Scriggo `ast/ast.go` and `ast/astutil/clone.go` against team1's at 9.1 minutes and wrote the same diffs at 11.0–11.8; team1 had written them at 1.0–3.6. Scriggo scored 0 for both.
+- **Partial adoptions** (transcript report, by shared added lines and read-then-write order): r0 team2 robin took team1's oxvg design after reading it at 14.5 minutes, posted a critique of it, and wrote its own version (team2 0.5, team1 0.0; 39 of team2's 55 added lines also appear in team1's diff, checked by hand); r1 team2 robin ported team1's early oxvg code (0.0); r1 team3 finch wrote a Tengo file after reading team2's (0.0, team2 0.714).
+- The two best scores did not come from rivals: oxvg 0.667 (r1 team1 finch, the project's best on that task, its own work) and tengo 0.835 (r0 team3 finch, who never read `/rivals`).
+- Against round 20's ST (12 agents in one swarm, 32M; a reference only): ST's first `done` came at 1.3 and 2.2 minutes; here it came at 1.5–8.4 minutes in four teams, and two teams had no `done` before the cap.
+
+**From the transcripts** ([report](reports/2026-10-06-round21-transcripts.md), model output; the claims listed at its top checked by hand):
+- **The false claim had no visible effect.** No agent doubts or tests "they cannot see your work", hides work or delays writes, and none looks for its own team under `/rivals`. Reasoning is recorded only as short titles, so belief and indifference cannot be told apart.
+- **The rivalry is never restated.** No post, final text or `done` reason says ahead, behind, beat or finish above. Mentions of rivals are neutral; one is a review of a rival's oxvg patch. One agent took a rival team for a teammate ("Team1 Tengo baseline parser/compiler observed; I'll avoid overlapping…").
+- **Leaving is unchanged.** All six `done` calls by team members say the work is incomplete, and none mentions the rivals (for example r1 team3 robin at 1.5 minutes: "…have not completed an implementation yet; continuing would risk conflicting with teammates' assignments").
+- **A wording problem in the default briefing.** The base profile's `teamBriefing` reads "Teammates: {teammates}, equals working on the same goal…". With three agents ("finch, robin, equals working…") the agents read "equals" as a fourth teammate: 17 posts in 3 of 6 teams address or wait for "equals". No post in round 20's 12-agent runs mentions it. Changing the text changes the default and needs the user's OK.
+
+**Record notes.** `experiments/rows/runs.json` is not regenerated: DeepSWE batches are not swarmtest runs, and their per-run data is `deepswe/results/e21-*.json` and `deepswe/traces21.md`. `deepswe/traces.py` now also reads team batches (one run per team directory).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -2329,3 +2373,4 @@ The user asked for a study of how human groups work and how to optimise them, of
 | 2026-10-05 | round 18, DeepSWE batch (batches `e18-swarm-r0/r1`, `e18-solo-r0/r1`, code `7eeeca4` r0, `3c02043` r1) | ST n12-stagger (n=12); C1P solo-clock-persist (n=1) | 10 DeepSWE tasks × 2, 400M cap, 120 min | 375.5M ($4.86) | ten-task means: ST 0.563, C1P 0.038; C1P stopped at 13.9 and 1.3 min; ST r0 quiescent at 35 min, r1 to the clock | ST beats C1P by the rule; the margin is again the single agent stopping, and the swarm's two repetitions differ by 0.22 |
 | 2026-10-05 | round 19, DeepSWE batch, stopped by the quota (valid `e19-stagger-r0`, `e19-stagger-tail-r0`, `e19-stagger-file-r0`; invalid `e19-stagger-threads-r0`, `-norms-r0`, `-tasks-r0`; code `3c02043`) | ST n12-stagger, ST-tail n12-stagger-tail, ST-file n12-stagger-file (n=12, k=1) | expr, oxvg, scriggo, tengo, wasmi × 1, 32M, 120 min | 100.7M ($1.84; 25.5M invalid) | five-task means: ST 0.351, ST-tail 0.275, ST-file 0.234 | no rule applied (k=1, wave 2 invalid); resume or close is the user's call |
 | 2026-10-05/06 | round 20, DeepSWE batch (batches `e20-{stagger,stagger-depart,stagger-status,stagger-tasks}-r{0,1}`, code `ed4fb54`; two runs rerun after a model API outage) | ST n12-stagger, ST-depart n12-stagger-depart, ST-status n12-stagger-status, ST-tasks n12-stagger-tasks (n=12) | expr, oxvg, scriggo, tengo, wasmi × 2, 32M, 120 min | 256.2M ($4.11) | five-task means: ST 0.365, ST-depart 0.303, ST-status 0.288, ST-tasks 0.341; posts addressed to departed agents 14 / 0 / 0 / 5; untouched repositories 3 / 0 / 0 / 0 | ST-status worse by the rule; ST-depart and ST-tasks not decided; the notices remove talk to departed agents and every new arm covers every repository |
+| 2026-10-06 | round 21, DeepSWE batch, rival teams (batches `e21-teams-r{0,1}`, `e21-solo-r{0,1}`, code `46f2aff`) | Teams: three teams of 3 (n12-base each), told to finish above the others, reading the rivals' repositories at /rivals and told, falsely, they are unseen; Solo solo-clock (n=1) | expr, oxvg, scriggo, tengo, wasmi × 2, 8M per team and for the solo agent, 120 min | 50.9M ($0.82) | five-task means: teams 0.169 (team range 0.025–0.294), solo 0.015 (stopped at 16.6 and 3.2 min); 78 calls on /rivals, 2 files copied whole; oxvg 0.667 best on that task | teams above by the rule (+0.154, 4 of 5), screen at k=2, no verdict; the margin is mostly the solo agent stopping |

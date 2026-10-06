@@ -1,0 +1,323 @@
+{
+  "batch": "e21-teams-r0",
+  "arm": "teams",
+  "teams": 3,
+  "profile": "profiles/n12-base.json",
+  "profileSha256": "b69108cbf4314bdb",
+  "agentsPerTeam": 3,
+  "tasks": [
+    "expr-try-catch-errors",
+    "oxvg-structural-selector-preservation",
+    "scriggo-method-declarations",
+    "tengo-destructuring-bindings",
+    "wasmi-trap-coredumps"
+  ],
+  "tokenCapPerTeam": 8000000,
+  "timeoutMinutes": 120,
+  "minutes": 27.8,
+  "tokens": 24113507,
+  "costUsd": 0.38347998,
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTeam": {
+    "team1": {
+      "perTask": {
+        "expr-try-catch-errors": {
+          "diffBytes": 0,
+          "leakCheck": {
+            "ok": true,
+            "all": 1023,
+            "head": 1023,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "686643214052394fb41e743ccc34f4f3beedef46",
+            "log": "all=1023 | head=1023 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0,
+          "new_frac": 0,
+          "base_frac": 0.999371097434976,
+          "binary": 0,
+          "parsed": 66841
+        },
+        "oxvg-structural-selector-preservation": {
+          "diffBytes": 6462,
+          "leakCheck": {
+            "ok": true,
+            "all": 480,
+            "head": 480,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "575fa4f3ff89639d6a331d0dd4ea0c35f9ff9550",
+            "log": "all=480 | head=480 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0,
+          "new_frac": 0,
+          "base_frac": 0.9827586206896551,
+          "binary": 0,
+          "parsed": 68
+        },
+        "scriggo-method-declarations": {
+          "diffBytes": 8425,
+          "leakCheck": {
+            "ok": true,
+            "all": 5005,
+            "head": 5005,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "5a01b067130bd3bed36468ba6cc3c6e9b1b230e3",
+            "log": "all=5005 | head=5005 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0,
+          "new_frac": 0,
+          "base_frac": 0.9933014354066986,
+          "binary": 0,
+          "parsed": 1093
+        },
+        "tengo-destructuring-bindings": {
+          "diffBytes": 0,
+          "leakCheck": {
+            "ok": true,
+            "all": 344,
+            "head": 344,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "a8c6a82ceb4186b06c83b26a3a505bc5488c8063",
+            "log": "all=344 | head=344 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0,
+          "new_frac": 0,
+          "base_frac": 1,
+          "binary": 0,
+          "parsed": 224
+        },
+        "wasmi-trap-coredumps": {
+          "diffBytes": 10647,
+          "leakCheck": {
+            "ok": true,
+            "all": 1364,
+            "head": 1364,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "564a5c17e53ff516bdb4418a56b34dfb7c7da39d",
+            "log": "all=1364 | head=1364 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0.36363636363636365,
+          "new_frac": 0.36363636363636365,
+          "base_frac": 1,
+          "binary": 0,
+          "parsed": 80
+        }
+      },
+      "tokens": 8011397,
+      "costUsd": 0.13489762,
+      "endReason": "budget",
+      "meanScore": 0.07272727272727272
+    },
+    "team2": {
+      "perTask": {
+        "expr-try-catch-errors": {
+          "diffBytes": 1514,
+          "leakCheck": {
+            "ok": true,
+            "all": 1023,
+            "head": 1023,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "686643214052394fb41e743ccc34f4f3beedef46",
+            "log": "all=1023 | head=1023 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0.06326460326729856,
+          "new_frac": 0.06329113924050633,
+          "base_frac": 0.9995807316233173,
+          "binary": 0,
+          "parsed": 66855
+        },
+        "oxvg-structural-selector-preservation": {
+          "diffBytes": 5758,
+          "leakCheck": {
+            "ok": true,
+            "all": 480,
+            "head": 480,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "575fa4f3ff89639d6a331d0dd4ea0c35f9ff9550",
+            "log": "all=480 | head=480 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0.5,
+          "new_frac": 0.5,
+          "base_frac": 1,
+          "binary": 0,
+          "parsed": 69
+        },
+        "scriggo-method-declarations": {
+          "diffBytes": 4594,
+          "leakCheck": {
+            "ok": true,
+            "all": 5005,
+            "head": 5005,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "5a01b067130bd3bed36468ba6cc3c6e9b1b230e3",
+            "log": "all=5005 | head=5005 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0,
+          "new_frac": 0,
+          "base_frac": 0.9933014354066986,
+          "binary": 0,
+          "parsed": 1091
+        },
+        "tengo-destructuring-bindings": {
+          "diffBytes": 556,
+          "leakCheck": {
+            "ok": true,
+            "all": 344,
+            "head": 344,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "a8c6a82ceb4186b06c83b26a3a505bc5488c8063",
+            "log": "all=344 | head=344 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0.01098901098901099,
+          "new_frac": 0.01098901098901099,
+          "base_frac": 1,
+          "binary": 0,
+          "parsed": 224
+        },
+        "wasmi-trap-coredumps": {
+          "diffBytes": 6238,
+          "leakCheck": {
+            "ok": true,
+            "all": 1364,
+            "head": 1364,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "564a5c17e53ff516bdb4418a56b34dfb7c7da39d",
+            "log": "all=1364 | head=1364 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0.36363636363636365,
+          "new_frac": 0.36363636363636365,
+          "base_frac": 1,
+          "binary": 0,
+          "parsed": 80
+        }
+      },
+      "tokens": 8073521,
+      "costUsd": 0.11869434000000001,
+      "endReason": "budget",
+      "meanScore": 0.18757799557853463
+    },
+    "team3": {
+      "perTask": {
+        "expr-try-catch-errors": {
+          "diffBytes": 1453,
+          "leakCheck": {
+            "ok": true,
+            "all": 1023,
+            "head": 1023,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "686643214052394fb41e743ccc34f4f3beedef46",
+            "log": "all=1023 | head=1023 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0.06326460326729856,
+          "new_frac": 0.06329113924050633,
+          "base_frac": 0.9995807316233173,
+          "binary": 0,
+          "parsed": 66855
+        },
+        "oxvg-structural-selector-preservation": {
+          "diffBytes": 0,
+          "leakCheck": {
+            "ok": true,
+            "all": 480,
+            "head": 480,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "575fa4f3ff89639d6a331d0dd4ea0c35f9ff9550",
+            "log": "all=480 | head=480 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0,
+          "new_frac": 0,
+          "base_frac": 1,
+          "binary": 0,
+          "parsed": 68
+        },
+        "scriggo-method-declarations": {
+          "diffBytes": 3737,
+          "leakCheck": {
+            "ok": true,
+            "all": 5005,
+            "head": 5005,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "5a01b067130bd3bed36468ba6cc3c6e9b1b230e3",
+            "log": "all=5005 | head=5005 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0,
+          "new_frac": 0,
+          "base_frac": 0.9933014354066986,
+          "binary": 0,
+          "parsed": 1091
+        },
+        "tengo-destructuring-bindings": {
+          "diffBytes": 12233,
+          "leakCheck": {
+            "ok": true,
+            "all": 344,
+            "head": 344,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "a8c6a82ceb4186b06c83b26a3a505bc5488c8063",
+            "log": "all=344 | head=344 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0.8351648351648352,
+          "new_frac": 0.8351648351648352,
+          "base_frac": 1,
+          "binary": 0,
+          "parsed": 226
+        },
+        "wasmi-trap-coredumps": {
+          "diffBytes": 10098,
+          "leakCheck": {
+            "ok": true,
+            "all": 1364,
+            "head": 1364,
+            "unreachable": 0,
+            "refs": 0,
+            "remotes": 0,
+            "baseTree": "564a5c17e53ff516bdb4418a56b34dfb7c7da39d",
+            "log": "all=1364 | head=1364 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+          },
+          "score": 0.36363636363636365,
+          "new_frac": 0.36363636363636365,
+          "base_frac": 1,
+          "binary": 0,
+          "parsed": 82
+        }
+      },
+      "tokens": 8028589,
+      "costUsd": 0.12988802,
+      "endReason": "budget",
+      "meanScore": 0.2524131604136995
+    }
+  },
+  "code": {
+    "commit": "46f2aff61768579759eb44c49f1b81f8eaa99749",
+    "srcDirty": false
+  },
+  "date": "2026-10-06T09:52:59.720Z"
+}
