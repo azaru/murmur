@@ -2336,6 +2336,41 @@ Every team ended at its 8M cap, after 11.6–26.6 minutes (a team's minutes run 
 - The pool lets one team starve the others, and teams check the pool only after each model message, so the real total lands somewhat above 32M.
 - No single-agent arm in this round; round 21's solo runs are a reference only.
 
+### Round 22: stopped by the model quota in repetition 1 (2026-10-06 19:15; batches 15:11–17:11 UTC, code `aca4e9b`)
+
+- Valid so far: `e22-teams-r0` (teams 0.357, 0.276, 0.085; mean 0.239), `e22-swarm-r0` (0.320) and `e22-swarm-r1` (0.285). No rule is applied until all three repetitions are in.
+- The pool worked as designed in `e22-teams-r0`: the three teams spent 12.7M, 12.9M and 6.6M (32.19M in total, 0.6% over the pool), so one team got about half of what the others did.
+- `e22-teams-r1` hit "The usage limit has been reached" in all three teams after 16.2M; its summary is in `runs/e22-teams-r1-quota/summary-invalid.json` (contents of the untracked `invalid22.txt`: `e22-teams-r1`). It is excluded and will be rerun from scratch.
+- Resume: the same `batch22.sh` after deleting `STOP22`; it skips the batches that have a result. The resumed batches run hours after the first three, so the pairing in time differs.
+
+### Round 22 result: closed by the user with three valid batches (2026-10-06 19:40; batches 15:11–16:30 UTC, code `aca4e9b`)
+
+The user chose to close the round after the quota stop rather than resume it. Teams have one repetition and the swarm two, so **no rule is applied and there is no verdict**; the numbers below are a screen.
+
+| task | team1 r0 | team2 r0 | team3 r0 | **teams mean** | swarm r0 | swarm r1 | **swarm mean** |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| expr | 0.063 | 0.025 | 0.063 | 0.050 | 0.051 | 0.013 | 0.032 |
+| oxvg | 0.500 | 0.000 | 0.000 | 0.167 | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
+| tengo | 0.857 | 0.857 | 0.000 | 0.571 | 0.912 | 0.868 | 0.890 |
+| wasmi | 0.364 | 0.500 | 0.364 | 0.409 | 0.636 | 0.545 | 0.591 |
+| **five-task mean** | 0.357 | 0.276 | 0.085 | **0.239** | 0.320 | 0.285 | **0.303** |
+| tokens | 12.7M | 12.9M | 6.6M | 32.2M | 32.1M | 32.1M | |
+| minutes | 13.8 | 13.9 | 13.9 | | 12.4 | 11.7 | |
+
+- **Arithmetic of the rule, for reference only:** teams −0.063 against the swarm, higher on 2 tasks (expr, oxvg) and lower on 2 (tengo, wasmi); even at k=3 this pattern would be "not decided", since the rule needs 3 of 5. The best team, chosen by the grader after the fact, scored 0.357, above both swarm runs; the mean team did not.
+- **The pool bound and was uneven.** All three teams stopped together at 13.8–13.9 minutes when the sum passed 32M (32.19M, 0.6% over). team1 and team2 spent about 12.8M each and team3 6.6M, because three of team3's four agents had called `done` by 10.7 minutes.
+- 96.4M valid tokens ($1.56) plus 16.2M ($0.29) in the invalid `e22-teams-r1`.
+
+**Use of the rivals' work** (`deepswe/rivals.py`, in [`deepswe/traces22.md`](deepswe/traces22.md)): 48 tool calls on `/rivals` (team1 21, team2 17, team3 10), mostly early duplicate-work probes and reads at 7–10 minutes. One file was copied whole: team1 robin wrote team2's Scriggo `parser_test.go` after reading it, and posted "matching rival's parser approach" (scriggo 0 everywhere). From the transcripts, team2 wren adopted team1's Tengo compiler design within a minute of reading it (checked by hand), so team2's tengo 0.857 is not independent of team1's.
+
+**From the transcripts** ([report](reports/2026-10-06-round22-transcripts.md), model output; the claims listed at its top checked by hand):
+- **team3's low score is departures.** finch called `done` at 1.0 minutes with no edit ("Need implement Tengo; currently investigation only. Continue."), wren at 5.0 and lark at 10.7; tengo and oxvg were left untouched although team1's Tengo was readable from the start. robin, alone from minute 11, asked the departed teammates which task to take next.
+- **A team of four on five repositories is short-handed when one agent leaves early:** the repository of an agent who quit in the first two minutes scored 0 (team2's oxvg, team3's tengo). team1 kept all four agents and was the best team.
+- **The swarm's edge on wasmi** came from splitting the change across 3–4 agents (encoder, configuration, trap integration) with cross-checks, not from more testing. Its oxvg stayed at 0 in both runs, while team1's single agent reached 0.5.
+- **Rivalry and the false claim:** as in round 21, never restated, doubted or mentioned when leaving; the rivals' work was used as source material, silently.
+- **Briefing fix:** no agent addressed or waited for a teammate named "equals".
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -2408,3 +2443,4 @@ Every team ended at its 8M cap, after 11.6–26.6 minutes (a team's minutes run 
 | 2026-10-05 | round 19, DeepSWE batch, stopped by the quota (valid `e19-stagger-r0`, `e19-stagger-tail-r0`, `e19-stagger-file-r0`; invalid `e19-stagger-threads-r0`, `-norms-r0`, `-tasks-r0`; code `3c02043`) | ST n12-stagger, ST-tail n12-stagger-tail, ST-file n12-stagger-file (n=12, k=1) | expr, oxvg, scriggo, tengo, wasmi × 1, 32M, 120 min | 100.7M ($1.84; 25.5M invalid) | five-task means: ST 0.351, ST-tail 0.275, ST-file 0.234 | no rule applied (k=1, wave 2 invalid); resume or close is the user's call |
 | 2026-10-05/06 | round 20, DeepSWE batch (batches `e20-{stagger,stagger-depart,stagger-status,stagger-tasks}-r{0,1}`, code `ed4fb54`; two runs rerun after a model API outage) | ST n12-stagger, ST-depart n12-stagger-depart, ST-status n12-stagger-status, ST-tasks n12-stagger-tasks (n=12) | expr, oxvg, scriggo, tengo, wasmi × 2, 32M, 120 min | 256.2M ($4.11) | five-task means: ST 0.365, ST-depart 0.303, ST-status 0.288, ST-tasks 0.341; posts addressed to departed agents 14 / 0 / 0 / 5; untouched repositories 3 / 0 / 0 / 0 | ST-status worse by the rule; ST-depart and ST-tasks not decided; the notices remove talk to departed agents and every new arm covers every repository |
 | 2026-10-06 | round 21, DeepSWE batch, rival teams (batches `e21-teams-r{0,1}`, `e21-solo-r{0,1}`, code `46f2aff`) | Teams: three teams of 3 (n12-base each), told to finish above the others, reading the rivals' repositories at /rivals and told, falsely, they are unseen; Solo solo-clock (n=1) | expr, oxvg, scriggo, tengo, wasmi × 2, 8M per team and for the solo agent, 120 min | 50.9M ($0.82) | five-task means: teams 0.169 (team range 0.025–0.294), solo 0.015 (stopped at 16.6 and 3.2 min); 78 calls on /rivals, 2 files copied whole; oxvg 0.667 best on that task | teams above by the rule (+0.154, 4 of 5), screen at k=2, no verdict; the margin is mostly the solo agent stopping |
+| 2026-10-06 | round 22, DeepSWE batch, rival teams sharing a pool, closed after the quota stop (valid `e22-teams-r0`, `e22-swarm-r0`, `e22-swarm-r1`; invalid `e22-teams-r1`; code `aca4e9b`) | Teams: three teams of 4 (n12-base-peers), one 32M pool, rivalry text and /rivals as in round 21; Swarm: n12-base-peers n=12, 32M | expr, oxvg, scriggo, tengo, wasmi; teams × 1, swarm × 2; 120 min | 112.5M ($1.85; 16.2M invalid) | five-task means: teams 0.239 (0.357, 0.276, 0.085), swarm 0.303 (0.320, 0.285); pool split 12.7M / 12.9M / 6.6M | no rule applied (closed by the user at k=1 / k=2); the arithmetic would be not decided (2 of 5 each way) |
