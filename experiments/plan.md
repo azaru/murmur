@@ -2214,6 +2214,50 @@ The user asked for a study of how human groups work and how to optimise them, of
 - **k=3 is the norm** (AGENTS.md): every arm gets at least three repetitions per task; a round with less is a screen and gives no verdict.
 - Smoke: `examples/trio.json` with the new defaults (3 agents) entered staggered, carried the clock and posted two departure notices; `examples/hello.json` (1 agent) posted none. Unit tests and typecheck pass.
 
+## Round 21: three rival teams that can read each other's work, on the five-task DeepSWE batch (fixed before measuring, 2026-10-06 11:05; the user's design)
+
+**Why.** The user's design, in their words: "3 teams of 3, the prompt says specifically that the objective is to finish above the rest; they are told they can see the others but the others cannot see them (a lie); afterwards the three results are checked." The user chose the tasks, the budget and k.
+
+**Question.** What do three rival teams that are told to beat each other, and believe they watch the others unseen, score on the batch, and how do they use the rivals' work?
+
+**Arms:**
+- **Teams** (`--arm teams --teams 3`, profile `n12-base.json` with 3 agents per team; new in `run-batch.mjs`). There are three teams (team1, team2, team3), each with its own hub and its own copy of the five repositories. Inside a team the setup is the base profile: a post-only board delivered on tool results, staggered entry, write guard, clock and departure notices. Each team's goal is the usual batch goal, with this added:
+  > You are team1. 2 other teams, team2 and team3, are working on the same projects at the same time, each in its own copy of the repositories. Your objective is to finish above the other teams.
+  > You can read their current work, read-only, at /rivals/<team>/<project> (for example /rivals/team2/expr-try-catch-errors); it changes as they work. They cannot see your work.
+  - The last sentence is false: every team mounts the other two teams' repositories, read-only (Docker `:ro`).
+  - Teams cannot run commands in the rivals' environments (`run` reaches only their own), and have no channel between them.
+  - Each team has 8M tokens and 120 minutes, i.e. round 20's 32M for 12 agents, scaled to 3 agents. The three teams run at the same time.
+- **Solo** (C1, one agent with the clock; `solo-clock.json`): the same batch with 8M and 120 minutes, run after the teams of the same repetition so that it does not share the machine with them.
+
+**Tasks:** round 17 E's five (expr, oxvg, scriggo, tengo, wasmi), as in rounds 19–20.
+
+**k=2**, the user's choice. Under the k=3 norm (09:35 note) this round is a **screen with no verdict**. A third repetition can be added later with the same script.
+
+**Execution.** `experiments/deepswe/batch21.sh`, sidecars 5 GB and 2 CPUs. Per repetition: the three teams (15 sidecars), then the solo run (5 sidecars). Quota stop as in round 20 (STOP21).
+
+**Smoke test** (deleted):
+- Two teams of one agent on expr, 0.3M and 4 minutes.
+- From team1's hub, `/rivals/team2/expr-try-catch-errors` was readable, and writing there failed with "Read-only file system"; the team's own repository was writable.
+- Both agents read the rival's folder (2–3 reads each).
+- Each team was scored separately, and the summary has one block per team.
+
+**What is read** (descriptive, per team and repetition):
+- **Scores:** the three five-task means.
+- **Tokens and minutes.**
+- **Use of the rivals' work:** tool calls whose arguments mention `/rivals`, per agent and over time; files copied from a rival (identical content in the final diffs); posts that mention the other teams.
+- **When agents stop:** the first `done`, the last write, and the end reason, against round 20's ST (12 agents in one swarm, other time and budget, a reference only).
+- **From the transcripts:** whether agents believe the claim that they are unseen, and how they talk about the rivalry.
+
+**Score rule** (screen, reported but no verdict at k=2): the per-task mean over the three teams and both repetitions, against the solo arm's per-task mean. The teams count as above if they are ≥ +0.05 higher on the five-task mean and higher on at least 3 of 5 tasks; below if ≤ −0.05 and lower on at least 3 of 5; otherwise not decided. The best team of each repetition is also reported, labelled as chosen by the grader after the fact. That is not something the system could deliver, because nothing picks a team without the grader.
+
+**Estimate:** at most (3 × 8M + 8M) × 2 = 64M tokens, about $1 at round 20's rate; four batches of up to two hours each, plus scoring.
+
+**Known threats:**
+- k=2.
+- The solo arm runs at a different time from the teams.
+- A team of three can empty early if its agents call `done`.
+- The teams arm changes several things at once against any earlier arm: team size, rivalry text, the visibility of rivals and the false claim.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
