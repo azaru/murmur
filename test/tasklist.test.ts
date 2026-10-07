@@ -34,3 +34,14 @@ test("the progress line is shown only when it changed for that agent", () => {
   assert.equal(list.news("b"), "[task list: 0 open, 1 taken, 0 done]");
   assert.equal(list.news("b"), "");
 });
+
+test("an item can be handed to a teammate, who can give it back", () => {
+  const list = new TaskList(() => {});
+  list.add("a", "x"), list.add("a", "y");
+  list.assign("a", 1, "b");
+  assert.match(list.list(), /#1 \[taken by b, assigned by a\] x/);
+  list.take("c", 2);
+  assert.throws(() => list.assign("a", 2, "b"), /taken by c/);
+  list.drop("b", 1, "busy");
+  assert.match(list.list(), /#1 \[open\] x \(added by a\)/);
+});

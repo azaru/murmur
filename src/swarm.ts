@@ -90,10 +90,18 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   // The default wake tells the agent to call inbox; a profile that offers no inbox gets the unread posts in the wake itself.
   const wake = profile.wake === DEFAULT_PROFILE.wake && !profile.boardTools.includes("inbox")
     ? "You have new messages on the board:\n\n{messages}\n\nContinue toward the goal." : profile.wake;
+  // An agent that called done comes back on any new post while it has `revive` revivals left,
+  // or, with `reviveOnMention`, on every unread post that mentions @name or @all.
+  const mention = (name: string) => {
+    const texts = board.unread(name).map(m => m.text).filter(t => !t.startsWith("(sent by murmur)")); // notices name agents too
+    return texts.some(t => new RegExp(`@${name}\\b`, "i").test(t)) ? "name" : texts.some(t => /@all\b/i.test(t)) ? "all" : undefined;
+  };
+  const recall = new Set<string>(); // agents that called done and were since handed a task (taskAssign)
+  const recallable = (member: Member) => (profile.reviveOnMention && mention(member.name) !== undefined) || recall.has(member.name);
   // A new post steers a busy agent (once until it reads, unless delivered inline), wakes an idle one
   // and revives a done one while it has revivals left.
   const notify = (member: Member) => {
-    if (member.doneReason !== undefined && member.revivals >= profile.revive) return;
+    if (member.doneReason !== undefined && member.revivals >= profile.revive && !recallable(member)) return;
     const session = agents.find(a => a.name === member.name)?.session;
     if (!member.working) return member.wake?.();
     if (profile.delivery !== "steer") return; // attached to its next tool result, or left for it to pull
@@ -130,7 +138,9 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   const departure = (name: string, reason: string) => {
     const mine = agentEdits.get(name);
     const edited = mine ? `It used write/edit in ${[...mine.folders].join(", ")}, last ${ago(mine.at)}.` : "It used write/edit on no file.";
-    board.post(name, `(sent by murmur) ${name} called done and left the team for good, saying: "${reason}" ${edited} Its claims no longer hold.`);
+    const back = profile.reviveOnMention ? ` Mention @${name} in a post to call it back, or @all for everyone who left.`
+      : profile.taskAssign && tasks ? ` Handing it a task calls it back.` : "";
+    board.post(name, `(sent by murmur) ${name} called done and left the team${back ? "" : " for good"}, saying: "${reason}" ${edited} Its claims no longer hold.${back}`);
   };
   const teamStatus = (name: string) => {
     const agentsLine = names.filter(n => n !== name).map(n => {
@@ -299,8 +309,8 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         member.doneReason = undefined;
         continue;
       }
-      if (reason || (member.doneReason !== undefined && member.revivals >= profile.revive)) break;
-      if (!board.unread(name).length || member.doneReason !== undefined) {
+      if (reason || (member.doneReason !== undefined && member.revivals >= profile.revive && !profile.reviveOnMention && !(profile.taskAssign && tasks))) break;
+      if (!board.unread(name).length || (member.doneReason !== undefined && !recallable(member))) {
         evaluate();
         if (reason) break;
         await new Promise<void>(resolve => { member.wake = resolve; });
@@ -310,7 +320,8 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       if (member.doneReason !== undefined) {
         member.doneReason = undefined;
         member.revivals += 1;
-        log("revive", { agent: name });
+        const via = recall.delete(name) ? "task" : profile.reviveOnMention ? mention(name) ?? "post" : undefined;
+        log("revive", { agent: name, ...(via && { via }) });
       }
       log("wake", { agent: name });
       prompt = withMessages(wake, name);
@@ -333,7 +344,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       return { ok: check.exitCode === 0, output: check.output };
     };
     const tools = [...fileTools(profile, root(name)), ...boardTools(board, name, profile, verify, command => runCheck(command, root(name), 2 * 60_000)),
-      ...(tasks ? taskTools(tasks, name, profile.toolDescriptions) : []), ...(branches?.tools(name, profile.toolDescriptions) ?? [])];
+      ...(tasks ? taskTools(tasks, name, profile.toolDescriptions, profile.taskAssign ? { names, assigned: (to, id, title) => {
+        if (board.members.get(to)!.doneReason !== undefined) recall.add(to);
+        board.post(name, `(sent by murmur) ${name} handed task #${id} "${title}" to ${to}. ${to}: it is yours now; task_drop gives it back.`);
+      } } : undefined) : []), ...(branches?.tools(name, profile.toolDescriptions) ?? [])];
     const { session } = await createAgentSession({
       cwd: root(name), modelRuntime: runtime, model,
       thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],

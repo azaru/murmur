@@ -43,6 +43,8 @@ Teammates: {teammates}. You are all equals working on the same goal in this fold
   /** Staggered start by finishing: each agent enters once the previous one ends its turn (calls done or stops), and seats not yet entered keep the run going. */ enterOnDone: false,
   /** Menu agents may pick from with role(name); empty means no role tool. Never assigned. */ roles: {} as Record<string, { summary: string; instructions: string }>,
   /** How many times a new post may wake an agent that already called done. */ revive: 0,
+  /** A post that mentions @name, or @all, wakes an agent that already called done, every time. Its departure notice tells the team how. */ reviveOnMention: false,
+  /** With taskList: task_add takes an optional teammate (`for`) and task_assign hands an item to one. It is a request between equals: the teammate is told on the board, called back if it had called done, and can give the item back with task_drop. */ taskAssign: false,
   /** done is refused while the agent has unread messages or the acceptance check fails. */ doneGate: false,
   /** How posts reach a busy agent: "steer" interrupts it; "attach" appends them to its next tool result; "pull" waits for inbox. */ delivery: "attach" as "steer" | "attach" | "pull",
   /** Share each agent's file writes and acceptance-check runs with teammates; needs delivery "attach". */ notices: false,
@@ -68,7 +70,7 @@ export type Profile = typeof DEFAULT_PROFILE;
 const text = Type.Optional(Type.String()), flag = Type.Optional(Type.Boolean()), count = Type.Optional(Type.Integer({ minimum: 0 }));
 const ProfileSchema = Type.Object({
   briefing: text, teamBriefing: text, steer: text, wake: text, systemPromptAppend: text, sharedNotes: text,
-  messaging: flag, threads: flag, taskList: flag, doneGate: flag, notices: flag, append: flag, writeGuard: flag, staleGuard: flag, clock: flag, clockTokens: flag, clockUnlimited: flag, enterOnDone: flag, boardTail: flag, departureNotice: flag, teamStatus: flag, findings: flag,
+  messaging: flag, threads: flag, taskList: flag, doneGate: flag, notices: flag, append: flag, writeGuard: flag, staleGuard: flag, clock: flag, clockTokens: flag, clockUnlimited: flag, enterOnDone: flag, boardTail: flag, departureNotice: flag, teamStatus: flag, findings: flag, reviveOnMention: flag, taskAssign: flag,
   revive: count, doneAfterGreen: count, relay: count, relayContext: count, helpAfter: count,
   spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })), spawnAfterTurns: count, claimLease: Type.Optional(Type.Number({ minimum: 0 })),
   toolDescriptions: Type.Optional(Type.Record(Type.String(), Type.String())),

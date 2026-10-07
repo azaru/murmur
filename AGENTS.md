@@ -4,7 +4,7 @@ Guidance for coding agents working on murmur. README.md explains what murmur is;
 
 ## Project in one paragraph
 
-murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `openai-codex/gpt-6-luna`, thinking `medium`, OAuth) in one shared folder with an optional message board. It is deliberately small and **non-hierarchical**: nothing assigns roles or splits work. A role menu that agents pick from themselves, staggered entry, signals and finishing conditions are allowed; assigned roles, orchestrators and planners that hand out work are not. The research goal is a configuration that beats a single Pi agent consistently (criterion in `experiments/plan.md`).
+murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `openai-codex/gpt-6-luna`, thinking `medium`, OAuth) in one shared folder with an optional message board. It is deliberately small and **non-hierarchical**: nothing assigns roles or splits work. A role menu that agents pick from themselves, staggered entry, signals and finishing conditions are allowed, and so are requests between equals (any agent may hand a task to any other, who can give it back); assigned roles, fixed orchestrators and planners that hand out work are not. The research goal is a configuration that beats a single Pi agent consistently (criterion in `experiments/plan.md`).
 
 ## Layout
 

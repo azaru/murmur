@@ -123,6 +123,7 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
   - `spawnGapSeconds`: staggered entry by time;
   - `spawnAfterTurns`: staggered entry by turns: each agent enters once the previous one has made that many model turns, or `spawnGapSeconds` after it entered if that comes first;
   - `taskList`: a shared task list (`tasks`, `task_add`, `task_take`, `task_done`, `task_drop`) that any agent adds to and takes from; murmur only keeps it and shows its progress on tool results, and it works with the board off;
+  - `taskAssign`: with `taskList`, `task_add` takes an optional teammate (`for`) and `task_assign` hands an item to one, as a request between equals: the teammate is told on the board, called back if it had called `done`, and can give the item back;
   - `branches`: a git branch per agent in its own worktree, with `merge` (integrate into the shared folder, reporting conflicts) and `update`; `"required"` puts every agent in its branch, `"optional"` leaves agents in the shared folder with a `branch` tool;
   - `roles`: a menu agents pick from, never assigned.
 - **Delivery of posts:**
@@ -134,6 +135,7 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
   - `staleGuard`: refuses a `write` onto a file that changed since the agent last read it.
 - **Finishing:**
   - `revive`: how many times a new post may wake an agent that already called `done`;
+  - `reviveOnMention`: a post that mentions `@name`, or `@all`, wakes an agent that already called `done`, every time; its departure notice says so;
   - `doneGate`: no `done` with unread posts or a failing check;
   - `doneAfterGreen`: tool calls required after the first passing check;
   - `clock`: minutes left appended to tool results.

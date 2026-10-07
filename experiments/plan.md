@@ -2398,6 +2398,13 @@ The user chose to close the round after the quota stop rather than resume it. Te
 
 **Estimate:** 5 × 32M = 160M tokens, about $2.6; five batches of about 25 minutes each including scoring. The quota stopped round 22 after about 112M in one window, so this may need two windows.
 
+## 2026-10-07: two new default-off levers, `reviveOnMention` and `taskAssign` (the user's ideas against early departures; no measurement)
+
+- **`reviveOnMention`:** a post that mentions `@name`, or `@all`, wakes an agent that already called `done`, every time (the user rejected a cap and preferred this to seat relays). The departure notice says how ("Mention @wren in a post to call it back, or @all for everyone who left") and drops "for good". murmur's own notices do not count as mentions: the first smoke showed a notice's "@all" waking every departed agent in a loop until the budget ran out.
+- **`taskAssign`** (with `taskList`): `task_add` takes an optional teammate (`for`), and `task_assign` hands an open item, or one the assigner holds, to a teammate. It is a request between equals: the teammate is told on the board, woken if it had called `done`, and can give the item back with `task_drop`. AGENTS.md's non-hierarchy rule now names such requests as allowed (the user's decision); fixed orchestrators and planners stay out.
+- Both default off; with both off the code paths are the old ones. `revive` events log `via` (`name`, `all`, `task` or `post`) when one of them is on.
+- Smoke (deleted): three agents, two leaving at once: a post without a mention woke nobody, `@wren` woke only wren, `@all` woke both, and the run ended `all_done`. Two agents with the task list: wren left, finch handed it two items (`task_add for` and `task_assign`), and wren came back each time, did them and marked them done. `examples/trio.json` with the defaults is unchanged (three departure notices, `all_done`, no revival). Unit tests (11, one new for assignment) and typecheck pass.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
