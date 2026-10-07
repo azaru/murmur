@@ -2456,7 +2456,7 @@ The user chose to close the round after the quota stop rather than resume it. Te
 
 **Estimate:** 10 × 32M = 320M tokens, about $5; about 20–25 minutes per batch, 4 hours. The quota held for 160M on 2026-10-07 and stopped round 22 at about 112M, so this probably spans two or three windows.
 
-**Known threats:** the control is not paired in time; M and MT differ by the task list as well as by assignment, so MT's effect cannot be split between them; at k=5 effects smaller than about 0.25 stay undecided.
+**Known threats:** the code changed mid-round (`3e52e3e`, see the 2026-10-07 code review section: a mention arriving on a done result now recalls the agent instead of being lost; batches r0–r2 of M and r0–r1 of MT ran `cd5cfde`); the control is not paired in time; M and MT differ by the task list as well as by assignment, so MT's effect cannot be split between them; at k=5 effects smaller than about 0.25 stay undecided.
 
 ## 2026-10-07: code review of `src/`, `test/` and `scripts/`; two gaps closed (the user: "haz un review… quiero saber si algún fallo de la programación ha podido inducirnos a error"; then "planea y arréglalos")
 

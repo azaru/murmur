@@ -54,7 +54,7 @@ Checked and found sound: `tokens.total` includes cache reads (Pi `agent-session.
 covers the defaults; seats not yet entered count as working so the swarm cannot end early; the `quiescent` rule only ends when no idle
 agent has unread posts; the shared-budget pool writes atomically; the write guard applies to `write` only, as documented.
 
-## Suggested fixes (not applied)
+## Fixes (applied in `3e52e3e`; see the 2026-10-07 review section of `experiments/plan.md`)
 
 1. On `message_end` with an assistant `stopReason === "error"` whose message is not the abort, log `model_error` with the message and
    report it in `result.json`, so the adapter and batch driver can mark the run invalid without grepping transcripts (or `end("error")`).
