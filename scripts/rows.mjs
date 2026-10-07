@@ -23,7 +23,7 @@ for (const campaign of readdirSync(root).sort()) {
       campaign, run, seed: config.seed, campaign_stop: stop_reason ?? null, task: r.task, system: r.system,
       variant: r.variant ?? null, agents: r.agents, repetition: r.repetition, score: r.grade?.score ?? null,
       passed: r.grade?.passed ?? null, status: r.result?.status ?? null, tokens: r.result?.tokens?.total ?? null,
-      reason: existsSync(murmur) ? json(murmur).reason : null, cost_usd: existsSync(murmur) ? json(murmur).costUsd ?? null : r.result?.cost_usd ?? null, minutes: r.process?.elapsed_seconds ? +(r.process.elapsed_seconds / 60).toFixed(1) : null,
+      reason: existsSync(murmur) ? json(murmur).reason : null, model_errors: existsSync(murmur) ? json(murmur).modelErrors?.length ?? null : null, cost_usd: existsSync(murmur) ? json(murmur).costUsd ?? null : r.result?.cost_usd ?? null, minutes: r.process?.elapsed_seconds ? +(r.process.elapsed_seconds / 60).toFixed(1) : null,
     });
   }
 }

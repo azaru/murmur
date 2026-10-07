@@ -109,7 +109,7 @@ docker run --rm -v "$PWD/runs:/murmur/runs" -v "$PWD/examples:/murmur/examples:r
 
 #### Profile
 
-A profile holds everything an experiment may tune; the defaults are in `src/profile.ts`. Since 2026-10-06 the defaults are the base profile, [`profiles/n12-base.json`](profiles/n12-base.json): a post-only board whose posts arrive on tool results (`delivery: "attach"`, `boardTools: ["post"]`), staggered entry (`spawnAfterTurns: 2`, `spawnGapSeconds: 60`), `writeGuard`, `clock` and `departureNotice` on. Before that date all of these were off and the board offered every tool, so an older profile that omits one of them behaved differently at its own commit.
+A profile holds everything an experiment may tune; the defaults are in `src/profile.ts`. Since 2026-10-06 the defaults are the base profile, [`profiles/n12-base-peers.json`](profiles/n12-base-peers.json) (the round 23 baseline; `n12-base.json` keeps the earlier team sentence): a post-only board whose posts arrive on tool results (`delivery: "attach"`, `boardTools: ["post"]`), staggered entry (`spawnAfterTurns: 2`, `spawnGapSeconds: 60`), `writeGuard`, `clock` and `departureNotice` on. Before that date all of these were off and the board offered every tool, so an older profile that omits one of them behaved differently at its own commit.
 
 - **Prompts:**
   - `briefing` and `teamBriefing` templates;

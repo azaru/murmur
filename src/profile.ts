@@ -20,7 +20,8 @@ Goal:
 {goal}
 
 When you judge that the goal is met, call done(reason). If you conclude it cannot be reached, call done(reason) with the reason.`,
-  /** Since 2026-10-06 the defaults are the base profile (profiles/n12-base.json): a post-only board delivered on tool results,
+  /** Since 2026-10-06 the defaults are the base profile (profiles/n12-base-peers.json, the round 23 baseline; n12-base.json keeps
+   * the earlier team sentence): a post-only board delivered on tool results,
    * staggered entry, write guard, clock and departure notices. Before, every one of those was off and the board offered every tool.
    * Since 2026-10-07 the team sentence reads "You are all equals" (teams of three read the old "{teammates}, equals working" as a
    * teammate named equals), and the briefing no longer says "in a swarm", which misled a single agent. */
@@ -99,6 +100,9 @@ export function loadProfile(path?: string): Profile {
   const unoffered = Object.keys(profile.toolDescriptions).find(t => (BUILTIN_TOOLS.includes(t) && !profile.tools.includes(t)) || (t === "append" && !profile.append)
     || (TASK_TOOLS.includes(t) && !profile.taskList) || (BRANCH_TOOLS.includes(t) && (profile.branches === "off" || (t === "branch" && profile.branches !== "optional"))));
   if (unoffered) throw new Error(`profile ${path}: toolDescriptions.${unoffered} describes a tool the profile does not offer`);
+  if (profile.taskAssign && !profile.taskList) throw new Error(`profile ${path}: taskAssign needs taskList`);
+  if (profile.reviveOnMention && !profile.messaging) throw new Error(`profile ${path}: reviveOnMention needs messaging`);
+  if (profile.notices && profile.delivery !== "attach") throw new Error(`profile ${path}: notices need delivery "attach"`);
   if (profile.threads && profile.boardTools.includes("post")) throw new Error(`profile ${path}: with threads, boardTools cannot offer post (use thread_new and reply)`);
   if (profile.threads && profile.messaging && !THREAD_TOOLS.every(t => profile.boardTools.includes(t))) throw new Error(`profile ${path}: with threads, boardTools must offer ${THREAD_TOOLS.join(", ")}`);
   return profile;

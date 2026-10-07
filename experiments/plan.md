@@ -2458,6 +2458,21 @@ The user chose to close the round after the quota stop rather than resume it. Te
 
 **Known threats:** the control is not paired in time; M and MT differ by the task list as well as by assignment, so MT's effect cannot be split between them; at k=5 effects smaller than about 0.25 stay undecided.
 
+## 2026-10-07: code review of `src/`, `test/` and `scripts/`; two gaps closed (the user: "haz un review… quiero saber si algún fallo de la programación ha podido inducirnos a error"; then "planea y arréglalos")
+
+The full review is `experiments/reports/2026-10-07-code-review-src-test-scripts.md`. Verdict: no sign that a bug flipped a round's verdict. Two gaps affected or could affect results, and both had been contained by process, not code:
+
+- **Model errors were invisible to murmur.** A turn that ends with `stopReason: "error"` resolved like a normal stop: no event, the agent idle, a single-agent run ending `quiescent`. 560 October swarmtest runs: 0 murmur `error` events, 125 transcripts ending in an error; 119 are the aborts of `end()` (all in `budget`/`timeout` runs), 6 are "The usage limit has been reached" in single-agent arms (`solo-clock`, one agent with the clock, and `solo-clock-tokens`), all six already invalidated by hand above because the batch driver greps the transcripts. Round 23 and round 24 batches: none.
+- **The `done` result carried unread posts and the clock.** After the departure notice told the team the agent left "for good", `attach` appended fresh posts to "You are done. End your turn now." and marked them read. In 12 of 560 runs an agent kept working after `done` (79 calls, 29 bash/write/edit; the clear case `20261004T…-22928c54/run-0001`, `n12-tasks`, dunlin: 44 calls, 19 writes). Round 23 and round 24: none. With `reviveOnMention` a mention arriving on the done result was consumed and could not recall the agent (none observed in e24 r0–r2).
+
+**Changes** (`src/`, copied over in one step while `e24-mention-r2` ran; running containers had already loaded the old code):
+- `swarm.ts`: after a turn, a last assistant message with `stopReason: "error"` logs `model_error {agent, message}` and `result.json` gets `modelErrors`; the run goes on as before (the user can invalidate post hoc; `rows.mjs` has a `model_errors` column and the swarmtest adapter passes the list in `metadata.model_errors`). `attach` appends nothing to a done result and leaves posts unread, so a mention recalls through the normal path. A `tool` for a member whose `doneReason` is set also logs `work_after_done`. The check detector is `checkMatcher()` (exported, tested); a newline that starts another statement now counts as masking the exit status (it did not).
+- `profile.ts`: `taskAssign` needs `taskList`, `reviveOnMention` needs `messaging`, `notices` need `delivery: "attach"` (no existing profile violates these). Comment and docs (`AGENTS.md`, `README.md`) now name `n12-base-peers.json` as the base: `n12-base.json` keeps the old team sentence and must not be cloned.
+- `scripts/traces.mjs`: relayed transcripts (`name.N`) find their done reason.
+- Tests: `test/checks.test.ts`; 13 pass. Smoke: `examples/trio.json` with the defaults from the copy (`runs/20261007-115700-6b38`, deleted): passed, `all_done` in 3 agents, 121k tokens, every done result is exactly "You are done. End your turn now.", no `work_after_done`, `modelErrors: []`.
+
+**Deviation in round 24:** batches `e24-mention-r0..r2` and `e24-mtasks-r0..r1` ran code `cd5cfde`; the remaining batches run the commit of these changes (the user chose "ahora"). The only behavioural difference for the arms is that a mention arriving on a done result now recalls the agent instead of being lost; none was observed in the five batches run so far. The baseline is unaffected in behaviour (0 work-after-done cases, no revivals).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

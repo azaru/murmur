@@ -76,7 +76,7 @@ for (const dir of dirs) {
         `${((record.result?.tokens?.total ?? 0) / 1e6).toFixed(2)}M`, ((record.process?.elapsed_seconds ?? 0) / 60).toFixed(1), end];
       console.log(`| ${[...head, agent, s.calls, s.calls ? Math.round(100 * s.board / s.calls) : 0, s.checks,
         s.firstGreen ?? "-", s.firstGreen === null ? "-" : s.afterGreen, s.last, s.overwrites, s.nudges].join(" | ")} |`);
-      const doneReason = result?.agents?.find(a => a.name === agent)?.doneReason;
+      const doneReason = result?.agents?.find(a => a.name === agent.replace(/\.\d+$/, ""))?.doneReason; // relayed transcripts are name.N
       stops.push(`- ${runId} ${label(record)} ${agent}: ${doneReason ? `done: ${oneLine(doneReason, 200)}` : `last text: ${oneLine(s.final, 200)}`}`);
     }
   }

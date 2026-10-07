@@ -47,6 +47,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   let agents: Agent[] = [];
   const retired: { name: string; session: AgentSession }[] = []; // sessions replaced by a relay
   let reason: EndReason | undefined;
+  const modelErrors: { agent: string; message: string }[] = []; // turns that ended on a model error (after Pi's own retries)
   // Staggered entry by turns: seat i opens when seat i-1 reaches spawnAfterTurns turns, ends a turn, or entered spawnGapSeconds ago.
   const gates = names.map(() => { let open = () => {}; const opened = new Promise<void>(resolve => { open = resolve; }); return { opened, open }; });
   const openNext = (name: string) => gates[names.indexOf(name) + 1]?.open();
@@ -153,17 +154,12 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     const foldersLine = folders.map(f => { const edit = folderEdits.get(f); return `${f}: ${edit ? `last write/edit by ${edit.agent} ${ago(edit.at)}` : "no write/edit yet"}`; });
     return [`[Team] ${agentsLine.join(" | ")}`, foldersLine.length ? `[Folders] ${foldersLine.join(" | ")}` : ""].filter(Boolean).join("\n");
   };
-  // A command runs a check when the check starts a statement (after time/timeout/env/VAR= wrappers) outside quotes and nothing
-  // after it can mask its exit status. A check that itself contains quotes falls back to plain containment.
-  const unquote = (text: string) => text.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
-  const checks = [...(task.checks ?? []), task.check].map(check => {
-    const at = new RegExp(`(?:^|[;&|(\\n])\\s*(?:(?:time|timeout\\s+\\S+|env|\\w+=\\S*)\\s+)*${unquote(check).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=$|[\\s;&|)<>])([^]*)`);
-    return { check, runs: (command: string) => { const match = unquote(command).match(at);
-      return /['"]/.test(check) ? command.includes(check) : !!match && !/[;|\n]/.test(match[1].trim()); } };
-  });
+  const checks = [...(task.checks ?? []), task.check].map(check => ({ check, runs: checkMatcher(check) }));
   const help = (name: string, what: string, part: string) => (log("help", { agent: name, what, part }), board.post(name, `(sent by murmur) ${name} ${what}${task.checks ? ` (${part})` : ""}. ${status.get(part)
     ? `The check's latest run failed:\n${status.get(part)!.tail}` : "Nobody has run the acceptance check yet."}\nIf you can spare the time, offer help on the board or take a look.`, "help"));
   // With delivery "attach", unread posts and notices ride on the agent's next tool result instead of costing a turn.
+  // Nothing rides on a done result: the agent is leaving, so posts stay unread (a mention can still recall it) and it gets no
+  // fresh reason to keep working after the team was told it left.
   const attach = (name: string, event: ToolResultEvent) => {
     const output = event.content.map(c => (c.type === "text" ? c.text : "")).join("");
     const ran = event.toolName === "bash" || event.toolName === "finding" ? checks.find(c => c.runs(String(event.input.command)))?.check : undefined;
@@ -196,6 +192,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       tasks?.release(name);
       left.set(name, Date.now());
       if (profile.departureNotice && profile.messaging && names.length > 1) departure(name, String(event.input.reason));
+      return undefined;
     }
     const lines: string[] = [];
     const notices = profile.delivery === "attach" ? board.members.get(name)!.notices.splice(0) : [];
@@ -296,6 +293,13 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       member.working = true;
       await agent.session.prompt(prompt).catch(error => log("error", { agent: name, message: String(error) }));
       member.working = false;
+      // A model error ends the turn like a normal stop (Pi returns the error as the last assistant message); record it so the run
+      // is not read as the agent choosing to stop. Aborts by end() are not model errors.
+      const last = agent.session.messages.at(-1);
+      if (!reason && last?.role === "assistant" && last.stopReason === "error") {
+        modelErrors.push({ agent: name, message: last.errorMessage ?? "unknown error" });
+        log("model_error", { agent: name, message: last.errorMessage });
+      }
       if (profile.spawnAfterTurns || profile.enterOnDone) openNext(name);
       if (!reason && member.doneReason !== undefined && relays < profile.relay) {
         // A fresh instance takes the seat: same name and board history, empty context.
@@ -360,7 +364,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     }
     let handoff = false; // asked this instance to hand off its long context
     session.subscribe(event => {
-      if (event.type === "tool_execution_start") log("tool", { agent: name, tool: event.toolName, args: event.args });
+      if (event.type === "tool_execution_start") {
+        log("tool", { agent: name, tool: event.toolName, args: event.args });
+        if (board.members.get(name)!.doneReason !== undefined && event.toolName !== "done") log("work_after_done", { agent: name, tool: event.toolName });
+      }
       if (event.type === "message_end" && event.message.role === "assistant") {
         const { input, output, totalTokens, cost } = event.message.usage;
         log("usage", { agent: name, input, output, total: totalTokens, cost: cost.total });
@@ -400,7 +407,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   const { cost, tokens, usage } = totals();
   const result = {
     status: check.exitCode === 0 ? "passed" : "failed",
-    reason, check, costUsd: cost, tokens, usage, durationMs: Date.now() - started, ...(unmerged && { unmerged }),
+    reason, check, costUsd: cost, tokens, usage, durationMs: Date.now() - started, modelErrors, ...(unmerged && { unmerged }),
     agents: [...board.members.values()].map(m => {
       const stats = [...agents, ...retired].filter(a => a.name === m.name).map(a => a.session.getSessionStats());
       return { name: m.name, done: m.doneReason !== undefined, doneReason: m.doneReason, relays: stats.length - 1,
@@ -423,6 +430,21 @@ function briefing(task: Task, profile: Profile, name: string, names: string[]) {
   const roles = Object.entries(profile.roles).map(([role, { summary }]) => `- ${role}: ${summary}`).join("\n");
   const team = profile.messaging ? render(profile.teamBriefing, { teammates, roles }) : "";
   return render(profile.briefing, { name, teammates, team, goal: task.goal, done: task.done, check: task.check });
+}
+
+/**
+ * Does a shell command run the check? Yes when the check starts a statement (after time/timeout/env/VAR= wrappers) outside quotes
+ * and nothing after it can mask its exit status. A check that itself contains quotes falls back to plain containment.
+ */
+export function checkMatcher(check: string) {
+  const unquote = (text: string) => text.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+  const at = new RegExp(`(?:^|[;&|(\\n])\\s*(?:(?:time|timeout\\s+\\S+|env|\\w+=\\S*)\\s+)*${unquote(check).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=$|[\\s;&|)<>])([^]*)`);
+  return (command: string) => {
+    if (/['"]/.test(check)) return command.includes(check);
+    const match = unquote(command).match(at);
+    // Only spaces and tabs are trimmed at the front, so a newline that starts another statement still counts as masking.
+    return !!match && !/[;|\n]/.test(match[1].replace(/^[ \t]+/, "").trimEnd());
+  };
 }
 
 function runCheck(command: string, cwd: string, timeoutMs: number) {

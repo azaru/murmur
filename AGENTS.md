@@ -9,7 +9,7 @@ murmur runs N Pi coding agents (SDK `@earendil-works/pi-coding-agent`, model `op
 ## Layout
 
 - `src/` (small on purpose; see "Rules for changing murmur"): `swarm.ts` (run loop, sessions, hooks, relays), `board.ts` (board state and coordination tools), `profile.ts` (every tunable lever and its default), `tools.ts` (file tools), `tasklist.ts` (shared task list), `branches.ts` (branch per agent), `cli.ts`. Unit tests: `npm test`.
-- `profiles/*.json`: one file per experimental arm. `n12-base.json` is the base (its values are the defaults since 2026-10-06); a single-agent control needs its own profile with `messaging: false`.
+- `profiles/*.json`: one file per experimental arm. `n12-base-peers.json` is the base and the round 23 baseline (its values are the defaults since 2026-10-07; `n12-base.json` keeps the earlier team sentence, so do not clone it); a single-agent control needs its own profile with `messaging: false`.
 - `scripts/arms.mjs`: paired comparison of two arms inside the same swarmtest campaign(s). `scripts/traces.mjs`: per-agent behaviour table (calls, board share, checks, calls after the first green, overwrites, steers) and why each agent stopped.
 - `examples/`: tiny task files for smoke tests (`trio.json` with 3 agents is the usual one).
 - `experiments/` (partly tracked: notebook, configs, drivers and aggregated results; logs, locks, `tmp/` and copied workspaces stay ignored, see `.gitignore`): `plan.md` (rules, findings, pre-registered rounds, campaign registry), `hard-tasks.md` (how benchmark tasks are built and calibrated), campaign configs, lane drivers and logs.
