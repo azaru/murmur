@@ -2425,6 +2425,18 @@ The user chose to close the round after the quota stop rather than resume it. Te
 - **The noise is large against the rule's threshold.** Runs of the same arm span 0.19–0.52 (sd 0.135). For an arm at k=3 against this baseline at k=5, the standard error of the difference in five-task means is about 0.10, twice the ±0.05 threshold; the 3-of-5 condition guards only partly. Single verdicts from the rule should be read with that in mind.
 - No transcript analysis: nothing anomalous beyond the scriggo score. Counts are in [`deepswe/traces23.md`](deepswe/traces23.md).
 
+## 2026-10-07: a decision rule that fits the spread (the user: "fix the rule if needed and make the spread clear"; no arm has been compared with the baseline yet)
+
+- **The spread.** Five identical runs of the baseline (round 23) gave five-task means of 0.257, 0.518, 0.356, 0.194 and 0.458 (sd 0.135). Per task the sd is 0.27–0.34 (oxvg is 0 everywhere). The ±0.05 rule used since round 15 sits far inside that: at k=3 against k=5 the standard error of a difference is about 0.10.
+- **The new rule** (replaces the one in round 23's pre-registration, before any arm was compared with it), applied by `experiments/deepswe/compare.py`:
+  - each batch is one observation, its five-task mean;
+  - Δ = arm mean − baseline mean; p = exact two-sided permutation test over every split of the runs;
+  - **better** if p < 0.05, Δ > 0 and higher on at least 3 of 5 per-task means; **worse** if p < 0.05, Δ < 0 and lower on at least 3 of 5; otherwise **not decided**;
+  - a 95% bootstrap interval for Δ is reported with every comparison.
+- **What it can see.** Shifting baseline-like runs by a constant, the smallest decidable shift is about +0.25 at k=5 and +0.30 at k=3; at k=2 nothing (the smallest possible p is 0.33). Detecting +0.10 would need about 29 runs per arm. **New arms against the baseline therefore run k=5.**
+- **Earlier verdicts.** Every DeepSWE verdict so far came from k=2 per arm (rounds 17 E, 18, 20, 21) and could not be decided under this rule. The large ones (12 agents against a single agent that quit early: 0.41 against 0.05, 0.56 against 0.04) are far outside the spread; the ones between swarm variants (round 20's −0.024 to −0.076) are inside it.
+- Check on old data: round 22's swarm (2 runs, 0.303) against the baseline gives Δ −0.054, interval [−0.164, +0.051], p = 0.67, not decided.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
