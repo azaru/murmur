@@ -1,0 +1,53 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "post",
+    "role"
+  ],
+  "teamBriefing": "\nTeammates: {teammates}. You are all equals working on the same goal in this folder; nobody is in charge and nobody owns a project: anyone may work on any project, and several of you may work on the same one. post(text) messages all of them, and their posts appear at the end of your tool results.\n\nBefore you start, look at the projects and the board, then take a role with role(name), which gives you its instructions and tells the team. The goal is every project implemented and verified, not one part of it: when your role has nothing left to do, take another role instead of calling done. Roles:\n{roles}\n",
+  "writeGuard": true,
+  "clock": true,
+  "spawnAfterTurns": 2,
+  "spawnGapSeconds": 60,
+  "departureNotice": true,
+  "roles": {
+    "builder": {
+      "summary": "implement part of a project's change",
+      "instructions": "Pick a project, or a part of one, that still needs code, and post which part you are building so that others can join or avoid duplicating it. Implement it against the task description. Build the project and run its existing tests with run before you post that it works. If a teammate is building the same part, agree on the board who does what, or take another part."
+    },
+    "researcher": {
+      "summary": "find where and how a project's change should be made, and tell the builders",
+      "instructions": "Pick a project whose code nobody has mapped yet. Read its task description and the code the change touches: the files, functions and data structures involved, and how similar existing features are implemented. Post a short map (files, functions, a suggested approach) for the builders, and answer their questions about the code."
+    },
+    "reviewer": {
+      "summary": "read a teammate's change against the task description and report concrete defects",
+      "instructions": "Pick a project with changes in progress (run <project> \"git diff\"). Read the change against the task description, requirement by requirement. Post each concrete defect with its file, line and reason, naming the author. Fix small, clear defects yourself when nobody is editing that file."
+    },
+    "verifier": {
+      "summary": "build every project and run its existing tests, and report breakage at once",
+      "instructions": "Go through the projects in turn: build each one and run its existing test suite with run. When a build or an existing test breaks, post it at once to whoever edited it last, with the command and the failing output. Keep cycling through the projects while teammates work: a change that breaks the build or existing tests is not done."
+    },
+    "tester": {
+      "summary": "write your own tests for what the task description asks, and try to break the change",
+      "instructions": "Pick a project with a change in progress. From its task description, list the behaviours, edge cases and error cases it asks for. Write tests for them in the project's own test style, run them, and post each failure with the command that reproduces it. Keep the tests that pass in the project as regression tests."
+    },
+    "integrator": {
+      "summary": "make the parts of one project's change work together",
+      "instructions": "Pick a project where several teammates are changing different parts (for example parser, compiler and runtime). Make sure the parts agree on names, types and data shapes, that the whole project builds, and that the feature works end to end. Reconcile mismatches and tell the authors what you changed."
+    },
+    "fixer": {
+      "summary": "fix failures that teammates report",
+      "instructions": "Watch the board for reported failures: broken builds, failing tests, defects found by reviewers and testers. Take one, post that you are on it, reproduce it with run, fix it, and post the fix with the command that now passes."
+    },
+    "scout": {
+      "summary": "find where the batch is not advancing and say so",
+      "instructions": "Look across all the projects: which have no changes yet, which have stalled, and which requirements of a task description nobody is covering. Post the gaps concretely (project, missing part, what you found). Do not hand out work; if a gap stays open, take another role and fill it yourself."
+    },
+    "finisher": {
+      "summary": "keep every project building and passing its existing tests as time or budget runs out",
+      "instructions": "Check that each project builds and passes its existing tests. Where a change is half done and breaks the build or existing tests, finish it if that is quick; otherwise revert just the broken part and tell its author. A smaller change that works is better than a larger one that does not."
+    }
+  },
+  "clockEffective": true
+}

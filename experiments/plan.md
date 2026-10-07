@@ -2518,6 +2518,25 @@ Transcript analysis: [report](reports/2026-10-07-round24-transcripts.md) (model 
 - Smoke (deleted): one agent looping `sleep 4; date` with 120k and 10 minutes switched to the budget line after 30 s and reached 0 when the budget ran out at 4.2 minutes; early estimates run high (6.8 shown at 0.6 minutes, 3.6 real) because turns grow more expensive as the context grows.
 - **Fix found by the roles smoke:** a profile with `roles` but without "role" in `boardTools` silently offered no role tool (since 2026-10-06, `boardTools` defaults to `["post"]`). `loadProfile` now rejects it; `c2-roles.json`, which relied on the old default, no longer loads.
 
+## Round 25: roles without owners, and a clock that counts the budget, against the fixed baseline (fixed before measuring, 2026-10-07 19:25; the user's design, "lanza")
+
+**Why.** In rounds 23–24 most early departures gave the same reason: every repository already had an owner, so there was nothing left for the agent. The user: drop ownership, and add roles beyond building (builder, verifier, reviewer, researcher, plus five more identified from observed failures: tester, integrator, fixer, scout, finisher), chosen on entry after looking at the state, and switched instead of leaving. Separately, the clock reads about 100 minutes left while the budget runs out at 10–20 minutes, so agents never see the end coming; `clockEffective` (commit `7e3c32b`) shows the minutes until the budget runs out at the current pace.
+
+**Arms** (12 agents in one swarm, 32M, 120 minutes, five DeepSWE tasks, k=5 each):
+- **R** (`profiles/n12-roles9.json`): the baseline profile with a new team sentence ("nobody owns a project: anyone may work on any project…"; "Before you start, look at the projects and the board, then take a role…; when your role has nothing left to do, take another role instead of calling done") and a nine-role menu (`role` tool; the briefing shows one line per role, the instructions come when the role is taken).
+- **RC** (`profiles/n12-roles9-clock.json`): R plus `clockEffective`.
+- **Control:** the round 23 baseline, not rerun (code since: default-off levers, `3e52e3e`'s done-result change and model-error logging, and profile validation).
+
+**Rule** (`experiments/deepswe/compare.py`): each arm against the baseline: better if the exact permutation test on per-run five-task means gives p < 0.05, Δ > 0 and higher on at least 3 of 5 tasks; worse symmetric; otherwise not decided. RC against R is descriptive only.
+
+**What is read:** role choices per agent and over time (`role` tool calls), switches, `done` calls and when (first `done`, departures within 4 minutes, zero-edit departures), the clock line agents saw and whether anyone mentions the time or budget, write/edit spread over the repositories, and a transcript analysis (subagent): whether agents still leave because "everything is covered", what each role actually did, and whether finishers reverted or repaired broken work near the end.
+
+**Smoke:** `examples/trio.json` with `n12-roles9-clock`: every agent took a role on entry and switched roles before leaving (10 `role` calls: builder, reviewer, tester, verifier, finisher). The first smoke offered no role tool (the `boardTools` default); fixed and validated in `7e3c32b`. Unit tests (13) and typecheck pass.
+
+**Estimate:** 10 × 32M = 320M tokens, about $5; about 4 hours.
+
+**Known threats:** the control is not paired in time and ran slightly older code; R changes the team sentence and adds the roles at once, so its effect cannot be split between them; RC differs from R only by the clock line; at k=5 only differences of about ±0.25 are decidable.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
