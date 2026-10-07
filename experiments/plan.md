@@ -2437,6 +2437,27 @@ The user chose to close the round after the quota stop rather than resume it. Te
 - **Earlier verdicts.** Every DeepSWE verdict so far came from k=2 per arm (rounds 17 E, 18, 20, 21) and could not be decided under this rule. The large ones (12 agents against a single agent that quit early: 0.41 against 0.05, 0.56 against 0.04) are far outside the spread; the ones between swarm variants (round 20's −0.024 to −0.076) are inside it.
 - Check on old data: round 22's swarm (2 runs, 0.303) against the baseline gives Δ −0.054, interval [−0.164, +0.051], p = 0.67, not decided.
 
+## Round 24: calling departed agents back, against the fixed baseline (fixed before measuring, 2026-10-07 11:25; the user's levers, "sigue")
+
+**Why.** Early `done` calls left work unowned in rounds 21–22. The user rejected seat relays and proposed letting teammates call a departed agent back by naming it (`@name`, `@all`), and handing tasks to a teammate, who is told and woken. Both levers are in `src/` since `3252fd8`, default off.
+
+**Arms** (12 agents in one swarm, 32M, 120 minutes, five DeepSWE tasks, k=5 each):
+- **M** (`profiles/n12-mention.json`): the baseline profile plus `reviveOnMention`. A post that mentions `@name` or `@all` wakes an agent that called `done`, every time; the departure notice says so.
+- **MT** (`profiles/n12-mention-tasks.json`): M plus the shared task list with `taskAssign` (`task_add` with `for`, `task_assign`; the teammate is told, woken if it had left, and can drop the item).
+- **Control:** the fixed baseline, round 23 (`e23-base-r0` to `r4`, code `0b0e12c`); it is not rerun. The code changed since only by default-off levers.
+
+**Rule** (2026-10-07, `experiments/deepswe/compare.py`): each arm against the baseline separately: **better** if the exact permutation test on per-run five-task means gives p < 0.05, Δ > 0 and higher on at least 3 of 5 tasks; **worse** symmetric; otherwise **not decided**. With this spread only differences of about ±0.25 can be decided. MT against M is reported descriptively only.
+
+**What is read** (descriptive): revivals per run and what caused them (`via` in `revive` events: `name`, `all`, `task`); posts that mention `@`; task-list use (items added, handed over, dropped, done); `done` calls, first `done` and work after a revival (writes by revived agents); `deepswe/traces.py` counts. A transcript analysis (subagent) after the runs: who calls whom back and why, whether revived agents work or leave again, and whether `@all` is used as a habit.
+
+**Execution:** `experiments/deepswe/batch24.sh`, the arms alternating (M r0, MT r0, M r1, …), sidecars 5 GB and 2 CPUs, quota stop STOP24 (resume with the same script).
+
+**Smoke:** the levers were smoke-tested when added (`3252fd8`). `examples/trio.json` with `n12-mention-tasks` loads, offers the task tools including `task_assign` in `<tools>`, and its departure notices no longer say "for good".
+
+**Estimate:** 10 × 32M = 320M tokens, about $5; about 20–25 minutes per batch, 4 hours. The quota held for 160M on 2026-10-07 and stopped round 22 at about 112M, so this probably spans two or three windows.
+
+**Known threats:** the control is not paired in time; M and MT differ by the task list as well as by assignment, so MT's effect cannot be split between them; at k=5 effects smaller than about 0.25 stay undecided.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
