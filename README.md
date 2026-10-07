@@ -143,6 +143,7 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
   - `doneGate`: no `done` with unread posts or a failing check;
   - `doneAfterGreen`: tool calls required after the first passing check;
   - `clock`: minutes left appended to tool results.
+  - `clockEffective`: with `clock`, when the token budget would run out before the timeout at the pace of the last two minutes, the clock shows the minutes until then;
   - `clockTokens`: tokens left in the run's budget, shared by the whole swarm, appended to tool results.
   - `clockUnlimited`: the clock and tokens lines say "unlimited" instead of the real amounts left; the real limits still apply.
   - `enterOnDone`: staggered entry by finishing: each agent enters once the previous one ends its turn, and seats not yet entered keep the run going.

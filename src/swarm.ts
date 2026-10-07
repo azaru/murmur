@@ -78,6 +78,17 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     }
     return own + [...others.values()].reduce((a, b) => a + b, 0);
   };
+  // clockEffective: minutes until the budget runs out at the pace of about the last two minutes, if that comes before the timeout.
+  const spend: { at: number; tokens: number }[] = [];
+  const budgetMinutesLeft = () => {
+    const now = Date.now(), tokens = pooled(totals().tokens);
+    spend.push({ at: now, tokens });
+    while (spend.length > 1 && now - spend[1].at > 120_000) spend.shift();
+    const { at, tokens: before } = spend[0];
+    if (!task.budgetTokens || now - at < 30_000 || tokens <= before) return undefined; // too early to measure a pace
+    const left = (task.budgetTokens - tokens) / ((tokens - before) / ((now - at) / 60_000));
+    return left < task.timeoutMinutes - (now - started) / 60_000 ? Math.max(0, left) : undefined;
+  };
   const minutesLeft = () => Math.max(0, task.timeoutMinutes - (Date.now() - started) / 60_000).toFixed(1);
   const tokensLeft = () => `${(Math.max(0, task.budgetTokens! - pooled(totals().tokens)) / 1e6).toFixed(1)}M`;
   const budgetText = () => {
@@ -208,7 +219,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       if (latest.size) lines.push("[Latest post from each teammate]", ...[...latest].map(([from, text]) => `- ${from}: ${text.replace(/\s+/g, " ").slice(0, 100)}`));
     }
     if (profile.teamStatus) lines.push(teamStatus(name));
-    if (profile.clock) lines.push(profile.clockUnlimited ? "[time left: unlimited]" : `[${minutesLeft()} minutes left before the timeout]`);
+    const budgetFirst = profile.clock && profile.clockEffective && !profile.clockUnlimited ? budgetMinutesLeft() : undefined;
+    if (profile.clock) lines.push(profile.clockUnlimited ? "[time left: unlimited]" : budgetFirst !== undefined
+      ? `[about ${budgetFirst.toFixed(1)} minutes left: at ${task.agents > 1 ? "the team's" : "your"} current pace the ${task.agents > 1 ? "shared " : ""}budget runs out before the timeout]`
+      : `[${minutesLeft()} minutes left before the timeout]`);
     if (profile.clockTokens && profile.clockUnlimited) lines.push("[tokens left: unlimited]");
     else if (profile.clockTokens && task.budgetTokens) lines.push(`[${tokensLeft()} tokens left in the budget${task.agents > 1 ? " shared by all agents" : ""}]`);
     const text = lines.filter(Boolean).join("\n");

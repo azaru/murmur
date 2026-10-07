@@ -2511,6 +2511,13 @@ All ten batches ended at the 32M cap after 9.7–19.6 minutes; 320.4M tokens, $5
 
 Transcript analysis: [report](reports/2026-10-07-round24-transcripts.md) (model output; the claims listed at its top checked by hand). Counts: [`deepswe/traces24.md`](deepswe/traces24.md).
 
+## 2026-10-07: `clockEffective`, a clock that counts the budget (the user asked whether the tokens line deserved another test; no measurement)
+
+- **Why not the tokens line again.** `clockTokens` ("[12.3M tokens left in the budget shared by all agents]") was tested in round 15 C (confounded with a longer clock), round 16 A (no effect: the single agent still stopped at 0.06–1.2M of 12M) and round 17 E (STT 0.408 on this batch, inside the spread). No agent ever mentioned it. In the DeepSWE swarms the clock reads about 100 minutes left while the budget runs out at 10–20 minutes, so agents never know when the end is.
+- **New default-off lever `clockEffective`** (with `clock`): when the token budget would run out before the timeout at the pace of about the last two minutes (pooled with `sharedBudget` if set), the clock line reads "[about 6.8 minutes left: at the team's current pace the shared budget runs out before the timeout]"; before 30 s of pace it shows the timeout as usual.
+- Smoke (deleted): one agent looping `sleep 4; date` with 120k and 10 minutes switched to the budget line after 30 s and reached 0 when the budget ran out at 4.2 minutes; early estimates run high (6.8 shown at 0.6 minutes, 3.6 real) because turns grow more expensive as the context grows.
+- **Fix found by the roles smoke:** a profile with `roles` but without "role" in `boardTools` silently offered no role tool (since 2026-10-06, `boardTools` defaults to `["post"]`). `loadProfile` now rejects it; `c2-roles.json`, which relied on the old default, no longer loads.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
