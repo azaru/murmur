@@ -2471,7 +2471,7 @@ The full review is `experiments/reports/2026-10-07-code-review-src-test-scripts.
 - `scripts/traces.mjs`: relayed transcripts (`name.N`) find their done reason.
 - Tests: `test/checks.test.ts`; 13 pass. Smoke: `examples/trio.json` with the defaults from the copy (`runs/20261007-115700-6b38`, deleted): passed, `all_done` in 3 agents, 121k tokens, every done result is exactly "You are done. End your turn now.", no `work_after_done`, `modelErrors: []`.
 
-**Deviation in round 24:** batches `e24-mention-r0..r2` and `e24-mtasks-r0..r1` ran code `cd5cfde`; the remaining batches run the commit of these changes (the user chose "ahora"). The only behavioural difference for the arms is that a mention arriving on a done result now recalls the agent instead of being lost; none was observed in the five batches run so far. The baseline is unaffected in behaviour (0 work-after-done cases, no revivals).
+**Deviation in round 24:** batches `e24-mention-r0..r2` and `e24-mtasks-r0..r1` ran code `cd5cfde`; the remaining batches run `3e52e3e` (the user chose "ahora"). The only behavioural difference for the arms is that a mention arriving on a done result now recalls the agent instead of being lost; none was observed in the five batches run so far. The baseline is unaffected in behaviour (0 work-after-done cases, no revivals).
 
 ## Campaign registry
 
