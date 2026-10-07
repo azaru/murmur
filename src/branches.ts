@@ -60,18 +60,18 @@ export class Branches {
   }
 
   tools(name: string, toolDescriptions: Record<string, string>) {
-    const tool = (tool: string, text: string) => ({ name: tool, label: tool, description: toolDescriptions[tool] ?? text });
-    const branch = defineTool({ ...tool("branch", "Create your own branch: a private copy of the shared folder, at an absolute path, where you can work without affecting teammates. merge integrates it into the shared folder. Optional: you may also work in the shared folder directly."),
+    const tool = (tool: string, text: string, promptSnippet: string) => ({ name: tool, label: tool, description: toolDescriptions[tool] ?? text, promptSnippet });
+    const branch = defineTool({ ...tool("branch", "Create your own branch: a private copy of the shared folder, at an absolute path, where you can work without affecting teammates. merge integrates it into the shared folder. Optional: you may also work in the shared folder directly.", "Create your own branch of the shared folder"),
       parameters: Type.Object({}),
       execute: async () => {
         const fresh = !existsSync(this.path(name));
         if (fresh) this.create(name);
         return reply(`${fresh ? "Created your branch" : "You already have a branch"} at ${this.path(name)}. Work there with absolute paths (and cd into it in bash); the shared folder does not see those changes until you call merge.`);
       } });
-    const merge = defineTool({ ...tool("merge", "Integrate your branch into the shared folder: commits your changes, brings in what teammates merged since, and if that has no conflicts makes the shared folder match your branch. On conflicts nothing reaches the shared folder: fix the conflict markers in your copy and call merge again."),
+    const merge = defineTool({ ...tool("merge", "Integrate your branch into the shared folder: commits your changes, brings in what teammates merged since, and if that has no conflicts makes the shared folder match your branch. On conflicts nothing reaches the shared folder: fix the conflict markers in your copy and call merge again.", "Integrate your branch into the shared folder"),
       parameters: Type.Object({ message: Type.String({ description: "What your changes do" }) }),
       execute: async (_id, { message }) => reply(this.merge(name, message)) });
-    const update = defineTool({ ...tool("update", "Bring what teammates merged into the shared folder into your branch, keeping your own changes. Reports conflicts, which you fix in your copy."),
+    const update = defineTool({ ...tool("update", "Bring what teammates merged into the shared folder into your branch, keeping your own changes. Reports conflicts, which you fix in your copy.", "Bring teammates' merged work into your branch"),
       parameters: Type.Object({}),
       execute: async () => reply(this.update(name)) });
     return [...(this.mode === "optional" ? [branch] : []), merge, update];

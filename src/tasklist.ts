@@ -77,19 +77,19 @@ export const TASK_TOOLS = ["tasks", "task_add", "task_take", "task_done", "task_
 const reply = (text: string) => ({ content: [{ type: "text" as const, text }], details: {} });
 
 export function taskTools(list: TaskList, agent: string, toolDescriptions: Record<string, string>) {
-  const tool = (name: string, text: string) => ({ name, label: name, description: toolDescriptions[name] ?? text });
+  const tool = (name: string, text: string, promptSnippet: string) => ({ name, label: name, description: toolDescriptions[name] ?? text, promptSnippet });
   const id = Type.Integer({ minimum: 1, description: "Task number, as in #3" });
   return [
-    defineTool({ ...tool("tasks", "Show the shared task list: every item with its state (open, taken by whom, done) and notes."),
+    defineTool({ ...tool("tasks", "Show the shared task list: every item with its state (open, taken by whom, done) and notes.", "Show the shared task list"),
       parameters: Type.Object({}), async execute() { return reply(list.list() || "The task list is empty."); } }),
-    defineTool({ ...tool("task_add", "Add an item to the shared task list for anyone to take, yourself included."),
-      parameters: Type.Object({ title: Type.String({ description: "Short description of the work" }), details: Type.Optional(Type.String()) }),
+    defineTool({ ...tool("task_add", "Add an item to the shared task list for anyone to take, yourself included.", "Add an item to the shared task list"),
+      parameters: Type.Object({ title: Type.String({ description: "Short description of the work" }), details: Type.Optional(Type.String({ description: "Anything a taker needs to know" })) }),
       async execute(_id, { title, details }) { return reply(`Added #${list.add(agent, title, details)}.`); } }),
-    defineTool({ ...tool("task_take", "Take an open item from the task list: it shows as taken by you until you mark it done or drop it. Fails if someone else has taken it."),
+    defineTool({ ...tool("task_take", "Take an open item from the task list: it shows as taken by you until you mark it done or drop it. Fails if someone else has taken it.", "Take an open item from the task list"),
       parameters: Type.Object({ id }), async execute(_id, { id }) { list.take(agent, id); return reply(`You have taken #${id}.`); } }),
-    defineTool({ ...tool("task_done", "Mark an item you have taken as done, with a short note on what you did."),
+    defineTool({ ...tool("task_done", "Mark an item you have taken as done, optionally with a short note on what you did.", "Mark an item you took as done"),
       parameters: Type.Object({ id, note: Type.Optional(Type.String()) }), async execute(_id, { id, note }) { list.finish(agent, id, note); return reply(`#${id} is done.`); } }),
-    defineTool({ ...tool("task_drop", "Give back an item you have taken, unfinished, so someone else can take it."),
+    defineTool({ ...tool("task_drop", "Give back an item you have taken, unfinished, so someone else can take it.", "Give back an item you took, unfinished"),
       parameters: Type.Object({ id, note: Type.Optional(Type.String({ description: "Why, or what is left" })) }),
       async execute(_id, { id, note }) { list.drop(agent, id, note); return reply(`#${id} is open again.`); } }),
   ];

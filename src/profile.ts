@@ -14,16 +14,18 @@ export const KNOWN_BOARD_TOOLS = [...BOARD_TOOLS, ...THREAD_TOOLS];
 export const DEFAULT_PROFILE = {
   messaging: true,
   /** No test or check is assumed: real work may have none. {done} and {check} stay available to profiles that want them. */
-  briefing: `You are {name}, an agent in a swarm. You work in the current directory; stay inside it.
+  briefing: `You are {name}, an agent. You work in the current directory; stay inside it.
 {team}
 Goal:
 {goal}
 
 When you judge that the goal is met, call done(reason). If you conclude it cannot be reached, call done(reason) with the reason.`,
   /** Since 2026-10-06 the defaults are the base profile (profiles/n12-base.json): a post-only board delivered on tool results,
-   * staggered entry, write guard, clock and departure notices. Before, every one of those was off and the board offered every tool. */
+   * staggered entry, write guard, clock and departure notices. Before, every one of those was off and the board offered every tool.
+   * Since 2026-10-07 the team sentence reads "You are all equals" (teams of three read the old "{teammates}, equals working" as a
+   * teammate named equals), and the briefing no longer says "in a swarm", which misled a single agent. */
   teamBriefing: `
-Teammates: {teammates}, equals working on the same goal in this folder; nobody is in charge. post(text) messages all of them, and their posts appear at the end of your tool results.
+Teammates: {teammates}. You are all equals working on the same goal in this folder; nobody is in charge. post(text) messages all of them, and their posts appear at the end of your tool results.
 `,
   steer: "You have new messages on the board; call inbox.",
   /** Prompt for an idle agent woken by a new post. If the profile keeps this default but offers no inbox, the wake carries the unread posts itself. */

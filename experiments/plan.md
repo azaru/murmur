@@ -2371,6 +2371,16 @@ The user chose to close the round after the quota stop rather than resume it. Te
 - **Rivalry and the false claim:** as in round 21, never restated, doubted or mentioned when leaving; the rivals' work was used as source material, silently.
 - **Briefing fix:** no agent addressed or waited for a teammate named "equals".
 
+## 2026-10-07: tool descriptions and briefing corrections become defaults (the user's decision: "integra las descripciones", "las correcciones pasan a default"; no measurement)
+
+- **Tool descriptions** (reviewed against the code on 2026-10-06 in a copy, now in `src/board.ts`, `src/branches.ts`, `src/tasklist.ts`):
+  - Every coordination tool now has a one-line snippet, so Pi lists it in the system prompt's `<tools>` section. Before, only Pi's own tools and `append` were listed there; `post`, `done` and the rest appeared only as tool definitions.
+  - Four descriptions that were false or incomplete are fixed: `claim` now depends on `claimLease`; `finding` runs the command in the agent's working folder; `team` mentions roles; `budget` mentions the minutes left.
+  - `done` says "when you judge that the goal is met" instead of "when the definition of done is met". Smaller wording changes in `post` (the `thread` parameter), `task_add`, `task_done` and `role`.
+- **Briefing:** "You are {name}, an agent." instead of "…, an agent in a swarm.", which misled a single agent. The default `teamBriefing` reads "Teammates: {teammates}. You are all equals working on the same goal…", as in `n12-base-peers` (round 22): teams of three read the old "{teammates}, equals working…" as a teammate named equals.
+- **Effect:** every profile that does not override these texts sees a different prompt from this commit on, including `n12-base` (its explicit old `teamBriefing` stays) and `solo-clock`. Earlier results stay valid at their own commits; comparisons across this commit are references, not controls.
+- Smoke: `examples/trio.json` (3 agents, staggered, three departure notices, `all_done`) and `examples/hello.json` (1 agent) show the new briefing and the coordination tools in `<tools>`. Unit tests (10) and typecheck pass.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

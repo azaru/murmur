@@ -163,10 +163,11 @@ export class Board {
 const reply = (text: string) => ({ content: [{ type: "text" as const, text }], details: {} });
 
 /** Coordination tools for one agent; only `done` when messaging is off. */
-export function boardTools(board: Board, agent: string, { messaging, threads, toolDescriptions, roles, doneGate, findings, boardTools: offered }: Profile, verify: Verify, run: Run) {
+export function boardTools(board: Board, agent: string, { messaging, threads, toolDescriptions, roles, doneGate, findings, claimLease, boardTools: offered }: Profile, verify: Verify, run: Run) {
   const describe = (name: string, text: string) => toolDescriptions[name] ?? text;
-  const tool = (name: string, text: string) => ({ name, label: name, description: describe(name, text) });
-  const done = defineTool({ ...tool("done", "Finish your work in the swarm. Call it when the definition of done is met, or to give up with the reason why the goal cannot be reached."),
+  // The snippet is the tool's line in the system prompt's tool list; without one Pi leaves the tool out of that list.
+  const tool = (name: string, text: string, promptSnippet: string) => ({ name, label: name, description: describe(name, text), promptSnippet });
+  const done = defineTool({ ...tool("done", "Finish your work in the swarm. Call it when you judge that the goal is met, or to give up with the reason why it cannot be reached.", "Finish your work, or give up with the reason"),
     parameters: Type.Object({ reason: Type.String({ description: "Why you are finishing" }) }),
     async execute(_id, { reason }) {
       const unread = doneGate ? board.unread(agent).length : 0;
@@ -178,7 +179,7 @@ export function boardTools(board: Board, agent: string, { messaging, threads, to
     } });
   if (!messaging) return [done];
   const menu = Object.keys(roles);
-  const role = defineTool({ ...tool("role", `Take a role from the menu, or switch to another one: returns its instructions and tells the team. Roles: ${menu.join(", ")}.`),
+  const role = defineTool({ ...tool("role", `Take a role from the menu, or switch to another one: returns its instructions and tells the team. Roles: ${menu.join(", ")}.`, "Take a role from the menu, or switch to another"),
     parameters: Type.Object({ name: Type.String() }),
     async execute(_id, { name }) {
       if (!roles[name]) throw new Error(`unknown role ${name} (roles: ${menu.join(", ")})`);
@@ -186,7 +187,7 @@ export function boardTools(board: Board, agent: string, { messaging, threads, to
       board.post(agent, `I take the role ${name}.`);
       return reply(roles[name].instructions);
     } });
-  const finding = defineTool({ ...tool("finding", "Share something you verified: murmur runs the command in the shared folder and posts your claim to every teammate with the command's real exit code and output."),
+  const finding = defineTool({ ...tool("finding", "Share something you verified: the command runs in your working folder, and your claim is posted to every teammate with the command's real exit code and output.", "Post a verified claim to the team with a command's real output"),
     parameters: Type.Object({ text: Type.String({ description: "What you found" }), command: Type.String({ description: "A shell command whose output shows it" }) }),
     async execute(_id, { text, command }) {
       const { exitCode, output } = await run(command);
@@ -196,37 +197,39 @@ export function boardTools(board: Board, agent: string, { messaging, threads, to
   const path = Type.Object({ path: Type.String({ description: "File path relative to the working directory" }) });
   const threadId = Type.Object({ thread: Type.String({ description: "Thread id, such as t3" }) });
   const threadTools = [
-    defineTool({ ...tool("thread_new", "Open a thread on the board about one topic, with its first post. Teammates are told its title and follow it by reading or replying."),
+    defineTool({ ...tool("thread_new", "Open a thread on the board about one topic, with its first post. Teammates are told its title and follow it by reading or replying.", "Open a board thread on one topic"),
       parameters: Type.Object({ title: Type.String({ description: "Short topic" }), text: Type.String() }),
       async execute(_id, { title, text }) { return reply(`Opened thread ${board.open(agent, title, text)}. You follow it: replies arrive with your tool results.`); } }),
-    defineTool({ ...tool("thread_list", "List every thread with its title, author and, for you, how many posts are new or whether you do not follow it."),
+    defineTool({ ...tool("thread_list", "List every thread with its title, author and, for you, how many posts are new or whether you do not follow it.", "List the board's threads"),
       parameters: Type.Object({}), async execute() { return reply(board.listThreads(agent) || "No threads yet."); } }),
-    defineTool({ ...tool("thread_read", "Read a whole thread and follow it from now on."), parameters: threadId,
+    defineTool({ ...tool("thread_read", "Read a whole thread and follow it from now on.", "Read a board thread and follow it"), parameters: threadId,
       async execute(_id, { thread }) {
         const { id, title, author, posts } = board.read(agent, thread);
         return reply(`Thread ${id}, "${title}", opened by ${author}:\n\n${formatMessages(posts)}`);
       } }),
-    defineTool({ ...tool("reply", "Add a post to a thread, and see what others posted in it since you last read it."),
+    defineTool({ ...tool("reply", "Add a post to a thread, and see what others posted in it since you last read it.", "Post in a board thread"),
       parameters: Type.Object({ thread: Type.String({ description: "Thread id, such as t3" }), text: Type.String() }),
       async execute(_id, { thread, text }) {
         const missed = board.reply(agent, thread, text);
         return reply(missed.length ? `Posted. Since you last read this thread:\n\n${formatMessages(missed)}` : "Posted.");
       } }),
   ];
-  const post = defineTool({ ...tool("post", "Post a message to every teammate on the shared board. Use an optional thread label to group a conversation."),
-    parameters: Type.Object({ text: Type.String(), thread: Type.Optional(Type.String()) }),
+  const post = defineTool({ ...tool("post", "Post a message to every teammate on the shared board. Use an optional thread label to group a conversation.", "Message every teammate on the shared board"),
+    parameters: Type.Object({ text: Type.String(), thread: Type.Optional(Type.String({ description: "Label shown as [label] before the post" })) }),
     async execute(_id, { text, thread }) { board.post(agent, text, thread); return reply("Posted."); } });
   return [
     ...(threads ? threadTools : [post]),
-    defineTool({ ...tool("inbox", "Read the board messages from teammates that you have not read yet."), parameters: Type.Object({}),
+    defineTool({ ...tool("inbox", "Read the board messages from teammates that you have not read yet.", "Read your unread board messages"), parameters: Type.Object({}),
       async execute() { const messages = board.inbox(agent); return reply(messages.length ? formatMessages(messages) : "No new messages."); } }),
-    defineTool({ ...tool("team", "Show every agent's state (working, idle or done with its reason) and the files it claims."),
+    defineTool({ ...tool("team", "Show every agent's state (working, idle or done with its reason), its role if it took one, and the files it claims.", "Show each teammate's state, role and claimed files"),
       parameters: Type.Object({}), async execute() { return reply(board.team(agent)); } }),
-    defineTool({ ...tool("budget", "Show the swarm's shared spend and what remains of its budget."),
+    defineTool({ ...tool("budget", "Show the swarm's shared spend, what remains of its budget, and the minutes left before the timeout.", "Show the shared spend, remaining budget and time"),
       parameters: Type.Object({}), async execute() { return reply(board.budget()); } }),
-    defineTool({ ...tool("claim", "Announce that you are editing a file. Fails if another agent holds it. Advisory only: it does not lock the file."),
+    defineTool({ ...tool("claim", `Announce that you are editing a file. Fails if another agent holds it. ${claimLease
+      ? `While you hold it, teammates' write and edit on it are refused; the claim lapses after ${claimLease} s without you writing the file.`
+      : "Advisory only: it does not lock the file."}`, "Claim a file you are editing"),
       parameters: path, async execute(_id, { path }) { board.claim(agent, normalize(path)); return reply(`You hold ${normalize(path)}.`); } }),
-    defineTool({ ...tool("release", "Release a file you claimed."),
+    defineTool({ ...tool("release", "Release a file you claimed.", "Release a file you claimed"),
       parameters: path, async execute(_id, { path }) { board.release(agent, normalize(path)); return reply(`Released ${normalize(path)}.`); } }),
     ...(menu.length ? [role] : []),
     ...(findings ? [finding] : []),
