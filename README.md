@@ -6,6 +6,8 @@
 
 ## Findings so far (2026-10-06)
 
+**A fixed baseline (round 23).** One swarm of twelve agents with the current defaults scores 0.36 on the five real repository tasks (five runs, 0.19 to 0.52). Later experiments are compared with it instead of rerunning a control each time.
+
 **Without an oracle, rival teams against one swarm at equal size and budget (round 22, closed early, no verdict).** Splitting twelve agents and 32M tokens into three rival teams of four gave 0.24 on average against 0.30 for one swarm of twelve. The best team reached 0.36, but nothing could pick it without the grader. Small teams lost whole repositories when one agent quit in the first minutes.
 
 **Without an oracle, three rival teams (round 21, a screen at k=2).** Three teams of three, each told to finish above the others and able to read the rivals' work, scored 0.17 against 0.02 for one agent on five real repository tasks. The single agent again quit early, saying the work was unfinished, which explains most of the gap. The teams looked at the rivals' folders mostly in the first minutes, copied little, and never talked about winning; teams of the same setup ranged from 0.03 to 0.29.

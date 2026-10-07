@@ -2405,6 +2405,26 @@ The user chose to close the round after the quota stop rather than resume it. Te
 - Both default off; with both off the code paths are the old ones. `revive` events log `via` (`name`, `all`, `task` or `post`) when one of them is on.
 - Smoke (deleted): three agents, two leaving at once: a post without a mention woke nobody, `@wren` woke only wren, `@all` woke both, and the run ended `all_done`. Two agents with the task list: wren left, finch handed it two items (`task_add for` and `task_assign`), and wren came back each time, did them and marked them done. `examples/trio.json` with the defaults is unchanged (three departure notices, `all_done`, no revival). Unit tests (11, one new for assignment) and typecheck pass.
 
+### Round 23 result: the baseline (2026-10-07 10:40; batches 06:30–08:28 UTC, code `0b0e12c`)
+
+| task | r0 | r1 | r2 | r3 | r4 | **mean** | sd | min–max |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| expr | 0.202 | 0.544 | 0.557 | 0.000 | 0.797 | **0.420** | 0.316 | 0.00–0.80 |
+| oxvg | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | **0.000** | 0.000 | 0.00–0.00 |
+| scriggo | 0.000 | 0.750 | 0.000 | 0.000 | 0.000 | **0.150** | 0.335 | 0.00–0.75 |
+| tengo | 0.945 | 0.934 | 0.857 | 0.154 | 0.857 | **0.749** | 0.336 | 0.15–0.95 |
+| wasmi | 0.136 | 0.364 | 0.364 | 0.818 | 0.636 | **0.464** | 0.266 | 0.14–0.82 |
+| **five-task mean** | 0.257 | 0.518 | 0.356 | 0.194 | 0.458 | **0.357** | 0.135 | 0.19–0.52 |
+| minutes | 24.6 | 16.6 | 14.6 | 12.7 | 13.7 | | | |
+| `done` calls (by minute 5) | 3 (0) | 7 (6) | 7 (6) | 6 (1) | 6 (2) | | | |
+
+- All five runs ended at the 32M cap; 160.3M tokens and $2.52 in total. No run failed and the quota held.
+- **This is the reference for later arms** under the rule fixed in the pre-registration (≥ +0.05 on the five-task mean and higher on at least 3 of 5 per-task means). The levers added after it (`reviveOnMention`, `taskAssign`, commit `3252fd8`) are default-off, so it stays valid.
+- r1 scored scriggo 0.75, the first non-zero scriggo score in the project (two writers, heron and wren). oxvg stayed at 0 in all five runs.
+- Early departures did not track the score here: the best run (r1, 0.518) had 6 of its 7 `done` calls by minute 5, the worst (r3, 0.194) 1 of 6.
+- **The noise is large against the rule's threshold.** Runs of the same arm span 0.19–0.52 (sd 0.135). For an arm at k=3 against this baseline at k=5, the standard error of the difference in five-task means is about 0.10, twice the ±0.05 threshold; the 3-of-5 condition guards only partly. Single verdicts from the rule should be read with that in mind.
+- No transcript analysis: nothing anomalous beyond the scriggo score. Counts are in [`deepswe/traces23.md`](deepswe/traces23.md).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -2478,3 +2498,4 @@ The user chose to close the round after the quota stop rather than resume it. Te
 | 2026-10-05/06 | round 20, DeepSWE batch (batches `e20-{stagger,stagger-depart,stagger-status,stagger-tasks}-r{0,1}`, code `ed4fb54`; two runs rerun after a model API outage) | ST n12-stagger, ST-depart n12-stagger-depart, ST-status n12-stagger-status, ST-tasks n12-stagger-tasks (n=12) | expr, oxvg, scriggo, tengo, wasmi × 2, 32M, 120 min | 256.2M ($4.11) | five-task means: ST 0.365, ST-depart 0.303, ST-status 0.288, ST-tasks 0.341; posts addressed to departed agents 14 / 0 / 0 / 5; untouched repositories 3 / 0 / 0 / 0 | ST-status worse by the rule; ST-depart and ST-tasks not decided; the notices remove talk to departed agents and every new arm covers every repository |
 | 2026-10-06 | round 21, DeepSWE batch, rival teams (batches `e21-teams-r{0,1}`, `e21-solo-r{0,1}`, code `46f2aff`) | Teams: three teams of 3 (n12-base each), told to finish above the others, reading the rivals' repositories at /rivals and told, falsely, they are unseen; Solo solo-clock (n=1) | expr, oxvg, scriggo, tengo, wasmi × 2, 8M per team and for the solo agent, 120 min | 50.9M ($0.82) | five-task means: teams 0.169 (team range 0.025–0.294), solo 0.015 (stopped at 16.6 and 3.2 min); 78 calls on /rivals, 2 files copied whole; oxvg 0.667 best on that task | teams above by the rule (+0.154, 4 of 5), screen at k=2, no verdict; the margin is mostly the solo agent stopping |
 | 2026-10-06 | round 22, DeepSWE batch, rival teams sharing a pool, closed after the quota stop (valid `e22-teams-r0`, `e22-swarm-r0`, `e22-swarm-r1`; invalid `e22-teams-r1`; code `aca4e9b`) | Teams: three teams of 4 (n12-base-peers), one 32M pool, rivalry text and /rivals as in round 21; Swarm: n12-base-peers n=12, 32M | expr, oxvg, scriggo, tengo, wasmi; teams × 1, swarm × 2; 120 min | 112.5M ($1.85; 16.2M invalid) | five-task means: teams 0.239 (0.357, 0.276, 0.085), swarm 0.303 (0.320, 0.285); pool split 12.7M / 12.9M / 6.6M | no rule applied (closed by the user at k=1 / k=2); the arithmetic would be not decided (2 of 5 each way) |
+| 2026-10-07 | round 23, the fixed baseline (batches `e23-base-r0` to `r4`, code `0b0e12c`) | Baseline: n12-base-peers n=12 (the defaults of `03aa568`) | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.3M ($2.52) | five-task mean 0.357 (sd 0.135, 0.19–0.52); per task expr 0.420, oxvg 0, scriggo 0.150, tengo 0.749, wasmi 0.464 | reference for later arms; rerun only when defaults, model, tasks or setup change |

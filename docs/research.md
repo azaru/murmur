@@ -26,6 +26,8 @@ This is the curated record of every experiment run with murmur so far: the quest
 
 ## TL;DR
 
+**A fixed baseline (round 23, five DeepSWE tasks, 32M, k=5):** one swarm of 12 with the current defaults scores 0.357 on average (sd 0.135, runs 0.19–0.52; per task expr 0.420, oxvg 0, scriggo 0.150, tengo 0.749, wasmi 0.464). Later arms run only their own batches and are compared with it. The spread between identical runs is large: at k=3 against this baseline, the standard error of a difference is about 0.10, twice the decision rule's ±0.05.
+
 **Without an oracle, rival teams against one swarm at the same agents and budget (round 22, five DeepSWE tasks, 12 agents and 32M each side; closed after a quota stop, no verdict):**
 - Three teams of four sharing one 32M pool averaged 0.239 (one repetition) against 0.303 for one swarm of 12 (two repetitions). The best team, picked by the grader after the fact, scored 0.357; the mean team did not beat the swarm.
 - The teams' weak point is departures: a team of four on five repositories loses a whole repository when one agent quits in the first minutes, and one team lost three of four agents by minute 11 (0.085). The swarm absorbed its early departures.
@@ -673,6 +675,17 @@ The user's design: three teams of three (the base profile `n12-base` inside each
 
 **From the transcripts** ([report](../experiments/reports/2026-10-06-round21-transcripts.md), model output; key claims checked by hand): no agent doubts or tests the "unseen" claim, hides work or looks for its own team under `/rivals`; reasoning is recorded only as short titles, so belief and indifference cannot be told apart. No post or `done` reason restates the aim of beating the others. Leaving is unchanged: all six `done` calls by team members say the work is incomplete and none mentions the rivals. In teams of three, the default briefing "Teammates: finch, robin, equals working on the same goal" is read as a fourth teammate called "equals" (17 posts in 3 of 6 teams; none in round 20's 12-agent runs).
 
+### Round 23: the fixed baseline (160.3M tokens, $2.52; code `0b0e12c`)
+
+The user asked for one reference to compare everything against instead of rerunning a control each round. After the tool descriptions and the briefing corrections became defaults (commit `03aa568`), one swarm of 12 (`n12-base-peers`, equal to the defaults) ran the five-task DeepSWE batch at 32M, five times.
+
+| | expr | oxvg | scriggo | tengo | wasmi | five-task mean |
+|---|---:|---:|---:|---:|---:|---:|
+| mean of 5 | 0.420 | 0 | 0.150 | 0.749 | 0.464 | **0.357** |
+| sd | 0.316 | 0 | 0.335 | 0.336 | 0.266 | 0.135 |
+
+All runs ended at the cap in 13–25 minutes. One run scored scriggo 0.75, the first non-zero scriggo score in the project. The best run had 6 of its 7 `done` calls by minute 5, so early departures did not track the score here. A later arm is compared with these per-task means by the usual rule; the baseline is rerun only when the defaults, the model, the tasks or the batch setup change (default-off levers do not count). Counts are in [`deepswe/traces23.md`](../experiments/deepswe/traces23.md).
+
 ### Round 22: three rival teams of four sharing 32M against one swarm of 12 (112.5M tokens, $1.85, of which 16.2M invalid; code `aca4e9b`)
 
 The user's design: the same 12 agents and 32M split into three rival teams of four (round 21's rivalry text and readable `/rivals`, one token pool shared by the three teams through a new optional run option `sharedBudget`), against one swarm of 12 with 32M. Both arms use `n12-base-peers`, the base profile with the briefing's "equals" sentence fixed. Planned k=3; the model quota stopped the second teams batch, and the user closed the round with three valid batches.
@@ -756,6 +769,7 @@ No rule is applied (k=1 for the teams). The rule's arithmetic would give −0.06
   - Side test U is one task at k=2, with all three arms running in the same window.
   - Stage D: the partial-credit scorer is this project's construction, not DeepSWE's binary reward. fd r1 was rescored after a harness fault, and its agent could not run the tests during its run.
 - **Round 15 stage A** is a screen: 2 tasks at k=2, and shop2 swings 0.00–0.76 within one arm. Both "beat C1" verdicts lean on shop2 and on C1 planning runs below its rounds 13–14 means (0.275 against 0.42–0.47). ST's pronounced verdict rests on shop2. The first launch ran C1 in place of B on planning because of a wrong order check. That C1 run is valid and counted, one killed campaign is excluded, and all of it is logged in `plan.md`. Merges in BR could let conflict markers into the shared folder; this happened once, for about 76 s, in the best BR run. Eight wakes told agents to call an `inbox` tool their profile lacks.
+- **Round 23 (baseline):** later arms are no longer paired in time with their control, so drift in the model service between days goes into each comparison; runs of the baseline itself span 0.19–0.52, so the rule's ±0.05 is about half the standard error of a k=3 comparison.
 - **Round 22:**
   - closed after a quota stop: teams k=1, swarm k=2, so no rule applies; the three valid batches ran within 80 minutes, the invalid one is excluded;
   - the teams arm changes several things at once against the swarm (one swarm split into three, the rivalry text, visible rivals, the false claim, one shared pool);
@@ -863,6 +877,7 @@ For each experiment: whether its question or theory was written down before meas
 | Round 20 (team state visible) | yes, committed before launch (`ed4fb54`) | `deepswe/batch20.sh`, `deepswe/comm.py` | `deepswe/results/e20-*.json`, `deepswe/traces20.md` (two rerun batches listed in `plan.md`) | yes, `reports/2026-10-06-round20-traces-analysis.md` | yes |
 | Round 21 (rival teams) | yes, committed before launch (`46f2aff`) | `deepswe/batch21.sh`, `deepswe/run-batch.mjs` (`--arm teams`), `deepswe/rivals.py` | `deepswe/results/e21-*.json`, `deepswe/traces21.md` | yes, `reports/2026-10-06-round21-transcripts.md` | yes (screen, no verdict) |
 | Round 22 (rival teams sharing a pool vs one swarm) | yes, committed before launch (`aca4e9b`) | `deepswe/batch22.sh`, `deepswe/run-batch.mjs` (`--pool`), `profiles/n12-base-peers.json` | `deepswe/results/e22-*.json` (3 valid; the invalid batch listed in `plan.md`), `deepswe/traces22.md` | yes, `reports/2026-10-06-round22-transcripts.md` | closed by the user after the quota stop, no rule applied |
+| Round 23 (fixed baseline) | yes, committed before launch (`0b0e12c`) | `deepswe/batch23.sh`, `profiles/n12-base-peers.json` | `deepswe/results/e23-base-r{0..4}.json`, `deepswe/traces23.md` | descriptive, in `plan.md` | yes (the reference for later arms) |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -895,7 +910,7 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the literature review (eight source reviews and a synthesis).
 - [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (703 runs in 385 campaigns, including 6 invalid ones: 5 from round 14's quota stop and 1 from round 15 stage C's): campaign, seed, task, arm, score, tokens, cost in dollars (`cost_usd`), status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
 - `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12,13,15,16,17}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
-- `experiments/deepswe/`: the DeepSWE batch driver (`run-batch.mjs`), one shell driver per round, one result file per batch with per-task scores, tokens and (from round 19) cost in `results/`, and the coordination counts per batch (`traces17.md` to `traces22.md`, from round 20 generated by `traces.py`; process measures by `comm.py`, and round 21's use of the rivals' work by `rivals.py`).
+- `experiments/deepswe/`: the DeepSWE batch driver (`run-batch.mjs`), one shell driver per round, one result file per batch with per-task scores, tokens and (from round 19) cost in `results/`, and the coordination counts per batch (`traces17.md` to `traces23.md`, from round 20 generated by `traces.py`; process measures by `comm.py`, and round 21's use of the rivals' work by `rivals.py`).
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).
