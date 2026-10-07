@@ -2473,6 +2473,44 @@ The full review is `experiments/reports/2026-10-07-code-review-src-test-scripts.
 
 **Deviation in round 24:** batches `e24-mention-r0..r2` and `e24-mtasks-r0..r1` ran code `cd5cfde`; the remaining batches run `3e52e3e` (the user chose "ahora"). The only behavioural difference for the arms is that a mention arriving on a done result now recalls the agent instead of being lost; none was observed in the five batches run so far. The baseline is unaffected in behaviour (0 work-after-done cases, no revivals).
 
+### Round 24 result and rule applied (2026-10-07 15:50; batches 09:19–13:14 UTC, code `cd5cfde` and, from `e24-mtasks-r2` on, `3e52e3e`)
+
+| task | baseline (k=5) | M mean (sd) | MT mean (sd) |
+|---|---:|---:|---:|
+| expr | 0.420 | 0.658 (0.386) | 0.542 (0.292) |
+| oxvg | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.150 | 0.278 (0.397) | 0.000 |
+| tengo | 0.749 | 0.879 (0.069) | 0.818 (0.104) |
+| wasmi | 0.464 | 0.355 (0.356) | 0.491 (0.333) |
+| **five-task mean** | **0.357** (sd 0.135) | **0.434** (sd 0.186) | **0.370** (sd 0.090) |
+| runs | 0.257, 0.518, 0.356, 0.194, 0.458 | 0.543, 0.639, 0.491, 0.171, 0.326 | 0.418, 0.325, 0.504, 0.311, 0.291 |
+
+All ten batches ended at the 32M cap after 9.7–19.6 minutes; 320.4M tokens, $5.03. No run failed, no model error, and the quota held.
+
+**Rule as written** (`compare.py`, each arm against the baseline):
+- **M** (`reviveOnMention`): Δ +0.077, 95% interval [−0.111, +0.256], p = 0.46, higher on 3 of 5 tasks: **not decided**.
+- **MT** (M plus the task list with `taskAssign`): Δ +0.013, interval [−0.112, +0.141], p = 0.85: **not decided**.
+- MT against M (descriptive): Δ −0.064, p = 0.50.
+
+**What the levers did** (events; revivals by cause from the `revive` events):
+
+| | r0 | r1 | r2 | r3 | r4 |
+|---|---|---|---|---|---|
+| M: `done` calls (first) | 8 (1.2) | 6 (0.6) | 3 (7.8) | 5 (1.6) | 4 (1.0) |
+| M: revivals | 1 name | 1 name | 0 | 1 name | 2 name |
+| MT: `done` calls (first) | 5 (1.7) | 8 (1.4) | 8 (1.6) | 4 (2.3) | 4 (1.6) |
+| MT: revivals | 0 | 3 name, 4 all | 0 | 0 | 1 name |
+| MT: items added / handed over / done | 13 / 10 / 4 | 10 / 6 / 0 | 11 / 6 / 3 | 9 / 6 / 0 | 0 / 0 / 0 |
+
+- **Calling back works but is rarely used.** Of 174 `@name` mentions in agents' posts, 8 reached an agent that had left, and nearly each one revived it. Revived agents worked: 4–30 write/edit calls after their revival, and in M r0 plover, called back to "rejoin" on expr at 4.0 minutes, built the parser slice of a run that scored expr 1.0. Agents treat a departure as final: they take over the leaver's repository ("Finch called done on oxvg, so I'll take over oxvg") rather than call it back. Only two callbacks were deliberate; `@all` was used once (MT r1, 15.0 minutes), woke four agents who offered the same slice, and added nothing (wasmi 0: the patch broke the existing tests).
+- **Early departures are unchanged.** 0–6 agents per run still leave within 4 minutes with no edit, for the baseline's reason ("All five repositories have active owners…"), and the levers do not touch that decision: nobody calls back an agent that left because there was nothing for it to do.
+- **The task list is used as a plan.** The first agent to enter writes a five-item list and hands every item out at 0.2–0.5 minutes; a second agent often builds a competing list, and duplicates are dropped. Few items reach `task_done` (7 of 43). No revival came through a task: every hand-over went to an agent still present. In MT r4 nobody used the list.
+- The spread between runs of the same arm is as large as before (M 0.17–0.64): M r3 (0.171) spread wasmi over five agents and ended with three repositories that did not compile at the cap.
+
+**Deviation.** The code changed mid-round (`3e52e3e`, see the 2026-10-07 code review section): batches M r0–r2 and MT r0–r1 ran `cd5cfde`, the rest `3e52e3e`, whose done result no longer carries unread posts. No revival was lost to the old behaviour in the first five batches (noted at the time), and no agent worked after `done` in any batch.
+
+Transcript analysis: [report](reports/2026-10-07-round24-transcripts.md) (model output; the claims listed at its top checked by hand). Counts: [`deepswe/traces24.md`](deepswe/traces24.md).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -2547,3 +2585,4 @@ The full review is `experiments/reports/2026-10-07-code-review-src-test-scripts.
 | 2026-10-06 | round 21, DeepSWE batch, rival teams (batches `e21-teams-r{0,1}`, `e21-solo-r{0,1}`, code `46f2aff`) | Teams: three teams of 3 (n12-base each), told to finish above the others, reading the rivals' repositories at /rivals and told, falsely, they are unseen; Solo solo-clock (n=1) | expr, oxvg, scriggo, tengo, wasmi × 2, 8M per team and for the solo agent, 120 min | 50.9M ($0.82) | five-task means: teams 0.169 (team range 0.025–0.294), solo 0.015 (stopped at 16.6 and 3.2 min); 78 calls on /rivals, 2 files copied whole; oxvg 0.667 best on that task | teams above by the rule (+0.154, 4 of 5), screen at k=2, no verdict; the margin is mostly the solo agent stopping |
 | 2026-10-06 | round 22, DeepSWE batch, rival teams sharing a pool, closed after the quota stop (valid `e22-teams-r0`, `e22-swarm-r0`, `e22-swarm-r1`; invalid `e22-teams-r1`; code `aca4e9b`) | Teams: three teams of 4 (n12-base-peers), one 32M pool, rivalry text and /rivals as in round 21; Swarm: n12-base-peers n=12, 32M | expr, oxvg, scriggo, tengo, wasmi; teams × 1, swarm × 2; 120 min | 112.5M ($1.85; 16.2M invalid) | five-task means: teams 0.239 (0.357, 0.276, 0.085), swarm 0.303 (0.320, 0.285); pool split 12.7M / 12.9M / 6.6M | no rule applied (closed by the user at k=1 / k=2); the arithmetic would be not decided (2 of 5 each way) |
 | 2026-10-07 | round 23, the fixed baseline (batches `e23-base-r0` to `r4`, code `0b0e12c`) | Baseline: n12-base-peers n=12 (the defaults of `03aa568`) | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.3M ($2.52) | five-task mean 0.357 (sd 0.135, 0.19–0.52); per task expr 0.420, oxvg 0, scriggo 0.150, tengo 0.749, wasmi 0.464 | reference for later arms; rerun only when defaults, model, tasks or setup change |
+| 2026-10-07 | round 24, calling departed agents back (batches `e24-mention-r0..r4`, `e24-mtasks-r0..r4`; code `cd5cfde`, from `e24-mtasks-r2` `3e52e3e`) | M n12-mention, MT n12-mention-tasks (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5 each, 32M, 120 min | 320.4M ($5.03) | five-task means: M 0.434 (0.17–0.64), MT 0.370 (0.29–0.50), baseline 0.357; revivals M 5, MT 8 (4 by one @all); 8 of 174 mentions reached a departed agent | both not decided (p 0.46 and 0.85); callbacks work but are rarely used, early departures unchanged |

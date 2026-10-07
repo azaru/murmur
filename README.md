@@ -6,6 +6,8 @@
 
 ## Findings so far (2026-10-06)
 
+**Without an oracle, calling departed agents back (round 24, k=5 against the baseline).** Letting teammates wake an agent that left by naming it scored 0.43 against the baseline's 0.36, and adding task hand-overs 0.37; neither difference is outside the run-to-run spread. Revived agents did go back to work, but agents rarely called anyone back: they took over the leaver's work instead.
+
 **A fixed baseline (round 23).** One swarm of twelve agents with the current defaults scores 0.36 on the five real repository tasks (five runs, 0.19 to 0.52). Later experiments are compared with it instead of rerunning a control each time.
 
 **Without an oracle, rival teams against one swarm at equal size and budget (round 22, closed early, no verdict).** Splitting twelve agents and 32M tokens into three rival teams of four gave 0.24 on average against 0.30 for one swarm of twelve. The best team reached 0.36, but nothing could pick it without the grader. Small teams lost whole repositories when one agent quit in the first minutes.

@@ -26,6 +26,8 @@ This is the curated record of every experiment run with murmur so far: the quest
 
 ## TL;DR
 
+**Calling departed agents back (round 24, against the fixed baseline, k=5 each):** letting a post with `@name` or `@all` wake an agent that called `done` (M, 0.434) and adding a task list with hand-overs (MT, 0.370) are both not decided against the baseline (0.357; p 0.46 and 0.85). The mechanism works when used (revived agents went back to work), but only 8 of 174 mentions reached a departed agent: agents treat a departure as final and take over the leaver's repository. Early departures are unchanged, because agents leave when every repository already has an owner, and nobody calls back someone who left for lack of work. The task list became a plan written by the first agent in.
+
 **A fixed baseline (round 23, five DeepSWE tasks, 32M, k=5):** one swarm of 12 with the current defaults scores 0.357 on average (sd 0.135, runs 0.19–0.52; per task expr 0.420, oxvg 0, scriggo 0.150, tengo 0.749, wasmi 0.464). Later arms run only their own batches and are compared with it. The spread between identical runs is large (0.19–0.52), so the ±0.05 rule was replaced by an exact permutation test on per-run means (`deepswe/compare.py`, p < 0.05 and the same direction on 3 of 5 tasks). At k=5 it can decide only differences of about ±0.25, and none of the earlier k=2 DeepSWE verdicts would be decided under it; the large swarm-against-quitting-agent gaps (rounds 17 E, 18) are far outside the spread, the swarm-variant differences of round 20 are inside it.
 
 **Without an oracle, rival teams against one swarm at the same agents and budget (round 22, five DeepSWE tasks, 12 agents and 32M each side; closed after a quota stop, no verdict):**
@@ -675,6 +677,18 @@ The user's design: three teams of three (the base profile `n12-base` inside each
 
 **From the transcripts** ([report](../experiments/reports/2026-10-06-round21-transcripts.md), model output; key claims checked by hand): no agent doubts or tests the "unseen" claim, hides work or looks for its own team under `/rivals`; reasoning is recorded only as short titles, so belief and indifference cannot be told apart. No post or `done` reason restates the aim of beating the others. Leaving is unchanged: all six `done` calls by team members say the work is incomplete and none mentions the rivals. In teams of three, the default briefing "Teammates: finch, robin, equals working on the same goal" is read as a fourth teammate called "equals" (17 posts in 3 of 6 teams; none in round 20's 12-agent runs).
 
+### Round 24: calling departed agents back (320.4M tokens, $5.03; code `cd5cfde`, then `3e52e3e`)
+
+Two default-off levers from the user, each at k=5 against the round 23 baseline: **M** (`reviveOnMention`: a post mentioning `@name` or `@all` wakes an agent that called `done`, every time; the departure notice says so) and **MT** (M plus the shared task list with `taskAssign`: `task_add` for a teammate and `task_assign`, the teammate told and woken if it had left).
+
+| | expr | oxvg | scriggo | tengo | wasmi | five-task mean (runs) |
+|---|---:|---:|---:|---:|---:|---|
+| baseline | 0.420 | 0 | 0.150 | 0.749 | 0.464 | **0.357** (0.19–0.52) |
+| M | 0.658 | 0 | 0.278 | 0.879 | 0.355 | **0.434** (0.17–0.64), p = 0.46, not decided |
+| MT | 0.542 | 0 | 0 | 0.818 | 0.491 | **0.370** (0.29–0.50), p = 0.85, not decided |
+
+**From the transcripts** ([report](../experiments/reports/2026-10-07-round24-transcripts.md), model output; key claims checked by hand; counts in [`deepswe/traces24.md`](../experiments/deepswe/traces24.md)): revivals were 5 in M and 8 in MT, nearly every mention of a departed agent revived it, and revived agents worked (one, called back to "rejoin" on expr, built the parser of a run that scored expr 1.0). But only 8 of 174 mentions went to agents who had left: teammates take over a leaver's repository instead of calling it back. `@all` was used once and woke four agents who offered the same slice. Agents still leave within minutes when every repository has an owner, so the levers do not reach the early departures. With the task list, the first agent in writes a five-item plan and hands it out within half a minute; few items are finished (7 of 43), and no hand-over went to a departed agent. The code changed mid-round (the `done` result no longer carries unread posts); no revival was lost to the old behaviour.
+
 ### Round 23: the fixed baseline (160.3M tokens, $2.52; code `0b0e12c`)
 
 The user asked for one reference to compare everything against instead of rerunning a control each round. After the tool descriptions and the briefing corrections became defaults (commit `03aa568`), one swarm of 12 (`n12-base-peers`, equal to the defaults) ran the five-task DeepSWE batch at 32M, five times.
@@ -737,6 +751,8 @@ No rule is applied (k=1 for the teams). The rule's arithmetic would give −0.06
 | A team status line on every tool result helps 12 agents coordinate | 20 | **Refuted as built**: worse by the rule (−0.076); never quoted; larger calls and 37% fewer edits at the same cap |
 | Rival teams told to beat each other, who can read the rivals' work, do better than one agent | 21 | **Above as a screen** (+0.154, 4 of 5, k=2, no verdict); the margin is mostly the single agent quitting at 3–17 minutes |
 | Agents use visible rival work (copy, adapt, judge) when told to beat the rivals | 21 | **Weakly**: 78 calls on `/rivals`, mostly early listings; 2 files copied whole and 3 partial adoptions, one of which scored above its source |
+| Letting teammates call a departed agent back by name (`@name`, `@all`) keeps work going | 24 | **Not decided** (+0.077, p = 0.46, k=5): works when used, but only 8 of 174 mentions reach a departed agent; early departures unchanged |
+| Peer task hand-over with a task list helps 12 agents | 24 | **Not decided** (+0.013, p = 0.85): the list becomes a plan written by the first agent; 7 of 43 items finished |
 | Splitting 12 agents and 32M into three rival teams beats one swarm of 12 | 22 | **Not measured** (closed after the quota stop at k=1 for teams): 0.239 against 0.303; best team 0.357 after the fact; small teams lose a repository when one agent quits early |
 | Telling agents they are unseen by the rivals changes how they work | 21 | **No visible effect**: never doubted, tested or mentioned; reasoning is recorded only as titles, so belief cannot be read |
 | A shared task list helps 12 agents on a batch of repositories | 15 A, 20 | **Not decided** (−0.024 in 20); its release on `done` handed one item over in 0.2 min; coverage of all repositories |
@@ -769,6 +785,7 @@ No rule is applied (k=1 for the teams). The rule's arithmetic would give −0.06
   - Side test U is one task at k=2, with all three arms running in the same window.
   - Stage D: the partial-credit scorer is this project's construction, not DeepSWE's binary reward. fd r1 was rescored after a harness fault, and its agent could not run the tests during its run.
 - **Round 15 stage A** is a screen: 2 tasks at k=2, and shop2 swings 0.00–0.76 within one arm. Both "beat C1" verdicts lean on shop2 and on C1 planning runs below its rounds 13–14 means (0.275 against 0.42–0.47). ST's pronounced verdict rests on shop2. The first launch ran C1 in place of B on planning because of a wrong order check. That C1 run is valid and counted, one killed campaign is excluded, and all of it is logged in `plan.md`. Merges in BR could let conflict markers into the shared folder; this happened once, for about 76 s, in the best BR run. Eight wakes told agents to call an `inbox` tool their profile lacks.
+- **Round 24:** the code changed mid-round (`3e52e3e`: the `done` result no longer carries unread posts) after five of ten batches; M and MT differ by the task list as well as by hand-over; at k=5 only differences of about ±0.25 are decidable.
 - **Round 23 (baseline):** later arms are no longer paired in time with their control, so drift in the model service between days goes into each comparison; runs of the baseline itself span 0.19–0.52, so the old ±0.05 rule was about half the standard error of a k=3 comparison; the permutation rule that replaced it decides only differences of about ±0.25 at k=5.
 - **Round 22:**
   - closed after a quota stop: teams k=1, swarm k=2, so no rule applies; the three valid batches ran within 80 minutes, the invalid one is excluded;
@@ -878,6 +895,7 @@ For each experiment: whether its question or theory was written down before meas
 | Round 21 (rival teams) | yes, committed before launch (`46f2aff`) | `deepswe/batch21.sh`, `deepswe/run-batch.mjs` (`--arm teams`), `deepswe/rivals.py` | `deepswe/results/e21-*.json`, `deepswe/traces21.md` | yes, `reports/2026-10-06-round21-transcripts.md` | yes (screen, no verdict) |
 | Round 22 (rival teams sharing a pool vs one swarm) | yes, committed before launch (`aca4e9b`) | `deepswe/batch22.sh`, `deepswe/run-batch.mjs` (`--pool`), `profiles/n12-base-peers.json` | `deepswe/results/e22-*.json` (3 valid; the invalid batch listed in `plan.md`), `deepswe/traces22.md` | yes, `reports/2026-10-06-round22-transcripts.md` | closed by the user after the quota stop, no rule applied |
 | Round 23 (fixed baseline) | yes, committed before launch (`0b0e12c`) | `deepswe/batch23.sh`, `profiles/n12-base-peers.json` | `deepswe/results/e23-base-r{0..4}.json`, `deepswe/traces23.md` | descriptive, in `plan.md` | yes (the reference for later arms) |
+| Round 24 (calling departed agents back) | yes, committed before launch (`cd5cfde`) | `deepswe/batch24.sh`, `profiles/n12-mention.json`, `profiles/n12-mention-tasks.json` | `deepswe/results/e24-*.json`, `deepswe/traces24.md` | yes, `reports/2026-10-07-round24-transcripts.md` | yes (both not decided) |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -904,13 +922,13 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the oracle audit and the build of the blind panel;
   - the round 11 phase 1 transcript analysis and the tool-usage audit;
   - the lever recount for 12-agent swarms and the round 15 transcript analyses (stages A, B and C);
-  - the round 16 stage A, round 17, rounds 18–19, round 20, round 21 and round 22 transcript analyses, and the swarm communication diagnosis;
+  - the round 16 stage A, round 17, rounds 18–19, round 20 to round 24 transcript analyses, and the swarm communication diagnosis;
   - the DeepSWE candidate selection for round 17;
   - the DeepSWE batch feasibility notes, driver build and offline-scorer fix (the driver and per-batch results are in `experiments/deepswe/`);
   - the literature review (eight source reviews and a synthesis).
 - [`experiments/rows/runs.json`](../experiments/rows/runs.json): one row per swarmtest run since murmur started (703 runs in 385 campaigns, including 6 invalid ones: 5 from round 14's quota stop and 1 from round 15 stage C's): campaign, seed, task, arm, score, tokens, cost in dollars (`cost_usd`), status and end reason. Regenerate with `node scripts/rows.mjs ../swarmtest/runs --since 20260930`.
 - `experiments/criba{1,2,3,5,6,7,8}-traces.md`, `experiments/round{9,10,11,12,13,15,16,17}-traces.md`: per-agent behaviour tables from `scripts/traces.mjs`: calls, board share, checks, calls after the first green, and why each agent stopped.
-- `experiments/deepswe/`: the DeepSWE batch driver (`run-batch.mjs`), one shell driver per round, one result file per batch with per-task scores, tokens and (from round 19) cost in `results/`, and the coordination counts per batch (`traces17.md` to `traces23.md`, from round 20 generated by `traces.py`; process measures by `comm.py`, and round 21's use of the rivals' work by `rivals.py`).
+- `experiments/deepswe/`: the DeepSWE batch driver (`run-batch.mjs`), one shell driver per round, one result file per batch with per-task scores, tokens and (from round 19) cost in `results/`, and the coordination counts per batch (`traces17.md` to `traces24.md`, from round 20 generated by `traces.py`; process measures by `comm.py`, and round 21's use of the rivals' work by `rivals.py`).
 - `experiments/criba1-rows.json`, `criba12-rows.json`: the aggregated tables used for the criba 1–2 decisions.
 - `experiments/*.json`, `experiments/criba*/`, `experiments/*-lanes.mjs`: swarmtest campaign configs and the parallel lane drivers.
 - `experiments/batch/`: the round 5B–7 driver (`run-batch.mjs`, `lane.sh`), one `batch-result.json` per batch (including calibration and failed batches), and the coordination events per batch (`traces.md`).
