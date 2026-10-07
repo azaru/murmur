@@ -2381,6 +2381,23 @@ The user chose to close the round after the quota stop rather than resume it. Te
 - **Effect:** every profile that does not override these texts sees a different prompt from this commit on, including `n12-base` (its explicit old `teamBriefing` stays) and `solo-clock`. Earlier results stay valid at their own commits; comparisons across this commit are references, not controls.
 - Smoke: `examples/trio.json` (3 agents, staggered, three departure notices, `all_done`) and `examples/hello.json` (1 agent) show the new briefing and the coordination tools in `<tools>`. Unit tests (10) and typecheck pass.
 
+## Round 23: the fixed baseline, one swarm of 12 on the five-task DeepSWE batch, k=5 (fixed before measuring, 2026-10-07 08:35; the user asked for it)
+
+**Why.** The user, in their words: "we need a baseline to compare everything against instead of duplicating launches every time." Until now every round reran its own control. The user chose, when asked, one swarm of 12 at k=5, and to test levers against early departures only after the baseline.
+
+**What is measured.** One arm, no lever under test:
+- **Baseline** (`--arm swarm --agents 12 --tokens 32000000`, profile `n12-base-peers.json`, which now equals the defaults): 12 agents in one swarm, a post-only board delivered on tool results, staggered entry, write guard, clock and departure notices, with the tool descriptions and briefing of commit `03aa568`.
+- Tasks: round 17 E's five (expr, oxvg, scriggo, tengo, wasmi). 120 minutes per run. k=5 (`e23-base-r0` to `r4`). Execution: `experiments/deepswe/batch23.sh`, sidecars 5 GB and 2 CPUs, quota stop STOP23 (resumed with the same script; batches with a result are skipped).
+
+**What is recorded:** per-task and five-task means over the five runs, their min–max and standard deviation, tokens, minutes and end reasons; `deepswe/traces.py` counts; first `done` and departures per run. No transcript analysis unless something is anomalous.
+
+**How later rounds use it** (fixed now, before measuring):
+- A later arm runs only its own batches (k≥3) on the same five tasks, 32M and 120 minutes, and is compared with the baseline's per-task means: **better** if ≥ +0.05 on the five-task mean and higher on at least 3 of 5 tasks; **worse** if ≤ −0.05 and lower on at least 3 of 5; otherwise **not decided**.
+- The baseline is measured again only when something it depends on changes: a default in `src/` that alters prompts or behaviour (new default-off levers do not count), the model, the task set, or the batch setup (budget, minutes, sidecars). Each later result records its code commit, so a stale comparison is visible.
+- Known cost of this choice: a later arm is no longer paired in time with its control, so drift in the model service between days goes into the comparison.
+
+**Estimate:** 5 × 32M = 160M tokens, about $2.6; five batches of about 25 minutes each including scoring. The quota stopped round 22 after about 112M in one window, so this may need two windows.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
