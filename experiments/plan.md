@@ -2667,6 +2667,48 @@ Transcript analysis: [report](reports/2026-10-08-round26-transcripts.md) (model 
 
 **Known threats:** RW changes four things against RT at once (weights, shared holding, decomposition first, take-the-heaviest), so a difference cannot be assigned to one of them; agents may inflate weights or decompose the same project twice (seen in the smoke); shared holding may bring more same-file collisions (wasmi r0 in round 26); the control is not paired in time; at k=5 only differences of about ±0.25 are decidable.
 
+### Round 27 result and rule applied (2026-10-08 13:45; batches 10:01–11:25 UTC, code `7e54b16`)
+
+| task | baseline (k=5) | RT (round 26) | RW mean (sd) |
+|---|---:|---:|---:|
+| expr | 0.420 | 0.352 | 0.369 (0.341) |
+| oxvg | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.150 | 0.140 | 0.093 (0.208) |
+| tengo | 0.749 | 0.752 | 0.886 (0.082) |
+| wasmi | 0.464 | 0.218 | 0.409 (0.356) |
+| **five-task mean** | **0.357** | **0.292** | **0.351** (0.100) |
+| runs | 0.257, 0.518, 0.356, 0.194, 0.458 | 0.438, 0.257, 0.088, 0.349, 0.330 | 0.192, 0.431, 0.355, 0.337, 0.442 |
+
+160.2M tokens, $2.67. Every run ended at the 32M cap after 8.7–11.8 minutes. No run failed, no model error, and the quota held.
+
+**Rule as written** (`compare.py` against the baseline): Δ −0.005, 95% interval [−0.138, +0.122], p = 0.91, higher on 1 of 5 tasks and lower on 3: **not decided**. Against RT (descriptive): Δ +0.059, p = 0.43, higher on 3 (tengo, wasmi, expr) and lower on 1 (scriggo).
+
+**Process** (events; short scripts over `events.jsonl`, role at a call = the agent's latest `role` call):
+
+| | baseline | RT | RW |
+|---|---|---|---|
+| first roles (of 60) | — | builder 49 | builder 51, scout 5, researcher 2, tester 1, verifier 1 |
+| builder share of tool calls per run | — | 48–79% | 57–85% |
+| `done` calls per run | 3–7 | 0 | 0–1 |
+| write/edit calls per run | 125–165 | 119–150 | 104–183 |
+| task items per run | — | 4–12 | 16–25 |
+
+- **Weights were inflated:** of 97 items, 70 had weight 7 or more and 32 had weight 10 (1: 1, 3: 6, 4: 8, 5: 7, 6: 5, 7: 11, 8: 22, 9: 5, 10: 32). Projects were mostly decomposed into two to six items within the first minute, before the first edit.
+- **Heavy items were taken at once, mostly by their author:** of the 70 items with weight 7 or more, 33 were first taken by the agent that added them, 25 by another agent (mostly within 0.5 minutes), and 12 never.
+- **Shared holding was used but rare:** 21 of 97 items had two or more distinct takers (up to four).
+- **Expr:** the final diff reaches parser, compiler and VM in 4 of 5 runs, but scores spread from 0 to 0.76: r2 had no edit on expr at all (0), r0 touched the core and scored 0.025, r3 had a single writer and scored 0.759.
+- **Broken builds or existing tests at the end:** wasmi r0 (0), scriggo r3 (existing tests 1.5% passing) and r1 (62%), oxvg r1 and r3 (no existing test passing; oxvg scores 0 in every arm).
+
+**From the transcripts** (subagent report, key claims checked by hand):
+- **Weights tell building from repair, not hard from easy.** In 17 of 25 run × project pairs the first agent added the whole project as one item (12 at weight 10); "implement" items averaged 8.8, tests 6.5, fixes 5.9. Hard parts (wasmi frame capture, expr's syntax) got the same weights as the rest; expr r4 is the one clean case (builtins 4, syntax 10).
+- **Decomposition came first, but mostly as one item per project.** Every project's first item came before its first edit (25 of 25), but only 8 of 25 first adders split the project into parts. Duplicate whole-project items (13 in 4 runs) were a race: **all 12 agents entered within 0.66–0.73 minutes**, so `spawnAfterTurns: 2` staggers by about 4 seconds; in r3 wren added an item for every project in the first 0.45 minutes and swift added wasmi again 0.01 minutes later, having listed the tasks 0.02 minutes before.
+- **Joining a held item worked when it was early and split by layer on the board** (tengo r4, wasmi r2: 0.857 and 0.773); in 9 of 24 shared items a sharer never edited the project.
+- **Expr:** r2 had no edit at all: finch and swift each posted at 0.4–0.6 minutes that the other had expr, and finch then sat in a long test run until the cap (0). In r0 three agents split expr by layer and nobody took the checker: the grader stops at `panic: undefined node type (*ast.TryNode)` (0.025). In r3 a single writer went through builtins, VM, compiler, parser, AST and checker, running the suite after each (0.759).
+- **Breaks at the end:** wasmi r0 ended on one agent's edit at 8.6 minutes (`state` used where the parameter is `_state`), after a duplicate-definition fight in `state.rs` on a shared item; oxvg r1/r3 and scriggo r3 were single writers' late edits. Long cold builds (oxvg `cargo test`) blocked 3–4 agents for 6–9 minutes per run, as in earlier arms.
+- **More staggered entry** (the user's question): it would remove the duplicate-add race and plausibly the r2 deferral, but not the stalls, the late breaks or the unowned layer; with the budget gone in 9–12 minutes, a larger gap also delays the last agents (model reading, not tested).
+
+Transcript analysis: [report](reports/2026-10-08-round27-transcripts.md) (model output; the claims listed at its top checked by hand). Counts: [`deepswe/traces27.md`](deepswe/traces27.md).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -2744,3 +2786,4 @@ Transcript analysis: [report](reports/2026-10-08-round26-transcripts.md) (model 
 | 2026-10-07 | round 24, calling departed agents back (batches `e24-mention-r0..r4`, `e24-mtasks-r0..r4`; code `cd5cfde`, from `e24-mtasks-r2` `3e52e3e`) | M n12-mention, MT n12-mention-tasks (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5 each, 32M, 120 min | 320.4M ($5.03) | five-task means: M 0.434 (0.17–0.64), MT 0.370 (0.29–0.50), baseline 0.357; revivals M 5, MT 8 (4 by one @all); 8 of 174 mentions reached a departed agent | both not decided (p 0.46 and 0.85); callbacks work but are rarely used, early departures unchanged |
 | 2026-10-07/08 | round 25, roles without owners and a budget clock (batches `e25-roles-r0..r4`, `e25-rclock-r0..r4`, code `7f6d59e`) | R n12-roles9, RC n12-roles9-clock (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5 each, 32M, 120 min | 285.1M ($4.53) | five-task means: R 0.241, RC 0.190, baseline 0.357; `done` per run R 0–1, RC 11–12; write/edit per run R 82–125, RC 53–84, baseline 125–165 | both not decided (p 0.20 and 0.071, RC's interval below 0); roles end early departures but build less; the budget clock makes the team wrap up and stop with budget left |
 | 2026-10-08 | round 26, roles that mostly build with the task list for findings (batches `e26-rtasks-r0..r4`, code `f602660`) | RT n12-roles9-tasks (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.63) | five-task mean RT 0.292 (0.09–0.44), baseline 0.357, R 0.241; write/edit per run 119–150; 44 task items, 17 of 31 non-builder items taken by another agent, 8 of those done; expr core reached in 4 of 5 runs | not decided (p 0.44); building and expr recover from R, wasmi lost to two broken final builds |
+| 2026-10-08 | round 27, a weighted, shared task list and building from the heaviest item (batches `e27-rweights-r0..r4`, code `7e54b16`) | RW n12-roles9-weights (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.67) | five-task mean RW 0.351 (0.19–0.44), baseline 0.357, RT 0.292; 97 task items, 70 of weight ≥7 (32 of weight 10); 21 items with two or more holders | not decided (p 0.91); weights inflated, projects decomposed in the first minute, heavy items mostly taken by their author |

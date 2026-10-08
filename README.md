@@ -6,6 +6,8 @@
 
 ## Findings so far (2026-10-06)
 
+**Without an oracle, a weighted, shared task list (round 27, k=5 against the baseline).** Letting agents weigh task items from 1 to 10, hold an item together, and build from the heaviest one scored 0.35, level with the baseline's 0.36. Agents planned every project before editing it, but gave nearly every item a high weight, so the weights did not point them at the hard parts.
+
 **Without an oracle, roles that mostly build (round 26, k=5 against the baseline).** Asking most of the team to build, to join the hardest unfinished part, and to put concrete findings on a shared task list brought building back to the baseline's level and scored 0.29 against 0.36, inside the run-to-run spread. Small defects on the list were fixed within a minute; the hard parts still waited, and four agents writing the same function at once broke one build.
 
 **Without an oracle, roles without owners (round 25, k=5 against the baseline).** Telling twelve agents that nobody owns a project and letting them pick roles (builder, reviewer, tester, scout and five more) stopped them leaving early, but they built less and scored 0.24 against the baseline's 0.36. A clock counting down to the end of the budget made the team wrap up together and stop with budget left (0.19).
