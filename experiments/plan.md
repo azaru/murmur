@@ -2518,7 +2518,7 @@ Transcript analysis: [report](reports/2026-10-07-round24-transcripts.md) (model 
 - Smoke (deleted): one agent looping `sleep 4; date` with 120k and 10 minutes switched to the budget line after 30 s and reached 0 when the budget ran out at 4.2 minutes; early estimates run high (6.8 shown at 0.6 minutes, 3.6 real) because turns grow more expensive as the context grows.
 - **Fix found by the roles smoke:** a profile with `roles` but without "role" in `boardTools` silently offered no role tool (since 2026-10-06, `boardTools` defaults to `["post"]`). `loadProfile` now rejects it; `c2-roles.json`, which relied on the old default, no longer loads.
 
-## Round 25: roles without owners, and a clock that counts the budget, against the fixed baseline (fixed before measuring, 2026-10-07 19:25; the user's design, "lanza")
+## Round 25: roles without owners, and a clock that counts the budget, against the fixed baseline (fixed before measuring, 2026-10-07 21:36, the commit time; the heading first said 19:25 by mistake; the user's design, "lanza")
 
 **Why.** In rounds 23–24 most early departures gave the same reason: every repository already had an owner, so there was nothing left for the agent. The user: drop ownership, and add roles beyond building (builder, verifier, reviewer, researcher, plus five more identified from observed failures: tester, integrator, fixer, scout, finisher), chosen on entry after looking at the state, and switched instead of leaving. Separately, the clock reads about 100 minutes left while the budget runs out at 10–20 minutes, so agents never see the end coming; `clockEffective` (commit `7e3c32b`) shows the minutes until the budget runs out at the current pace.
 
@@ -2536,6 +2536,43 @@ Transcript analysis: [report](reports/2026-10-07-round24-transcripts.md) (model 
 **Estimate:** 10 × 32M = 320M tokens, about $5; about 4 hours.
 
 **Known threats:** the control is not paired in time and ran slightly older code; R changes the team sentence and adds the roles at once, so its effect cannot be split between them; RC differs from R only by the clock line; at k=5 only differences of about ±0.25 are decidable.
+
+### Round 25 result and rule applied (2026-10-08 09:10; batches 2026-10-07 19:36 UTC to 2026-10-08 00:50 UTC, code `7f6d59e`)
+
+| task | baseline (k=5) | R mean (sd) | RC mean (sd) |
+|---|---:|---:|---:|
+| expr | 0.420 | 0.086 (0.066) | 0.076 (0.028) |
+| oxvg | 0.000 | 0.000 | 0.133 (0.298) |
+| scriggo | 0.150 | 0.146 (0.326) | 0.000 |
+| tengo | 0.749 | 0.609 (0.405) | 0.375 (0.482) |
+| wasmi | 0.464 | 0.364 (0.000) | 0.364 (0.000) |
+| **five-task mean** | **0.357** | **0.241** (0.116) | **0.190** (0.094) |
+| runs | 0.257, 0.518, 0.356, 0.194, 0.458 | 0.190, 0.085, 0.269, 0.257, 0.403 | 0.241, 0.088, 0.257, 0.088, 0.274 |
+
+285.1M tokens, $4.53. R's runs all ended at the 32M cap after 12–21 minutes; RC's ended by `done` (`all_done` or `quiescent`) after 21–40 minutes with 20.7–28.1M spent. No run failed, no model error, and the quota held.
+
+**Rule as written** (`compare.py`, each arm against the baseline):
+- **R** (no owners, nine roles): Δ −0.116, 95% interval [−0.254, +0.024], p = 0.20, lower on 4 of 5 tasks: **not decided**.
+- **RC** (R plus `clockEffective`): Δ −0.167, interval [−0.296, −0.039], p = 0.071, lower on 4 of 5: **not decided** (the interval excludes 0, the permutation test does not reach 0.05).
+- RC against R (descriptive): Δ −0.051, p = 0.52.
+
+**Process** (events):
+
+| | baseline | R | RC |
+|---|---|---|---|
+| `done` calls per run | 3–7 | 0–1 | 11–12 (near the end) |
+| write/edit calls per run | 125–165 | 82–125 | 53–84 |
+| expr write/edit calls per run | 17–53 | 5–42 | 4–14 |
+| role calls per run | — | 42–65 | 58–73 |
+| tool calls per run | 894–1011 | 925–1043 | 849–933 |
+
+- **The roles stopped the early departures**: 3 `done` calls in five R runs, each followed by another role. Nobody idled.
+- **But less was built.** First roles taken by the 120 R and RC agents: builder 47, scout 27, researcher 20, verifier 12, reviewer 9, tester 3, integrator 2. At the same number of tool calls, write/edit calls fell by about a quarter in R and by half in RC, and re-running test suites rose (Rust test/build commands per run: baseline 18–31, RC 58–94). Reviewer, verifier, scout and tester work was partly real (a reviewer's Tengo defect fixed within two minutes; the oxvg 0.667 in RC r0 came from scouts flagging oxvg untouched and a scout-turned-builder posting the fix path) and partly status posts on unfinished code ("tree still clean").
+- **Expr collapsed** (0.08 against 0.42): in 8 of 10 role runs expr ended with only the `throw`/`errtype` builtins; ownership re-formed in the first minute despite "nobody owns a project", and the one agent on expr built the easy slice, posted what remained, and took another role ("…full try/fallback, block catch/finally/retry remains unimplemented", then "I take the role reviewer"). The builder text ("if a teammate is building the same part … take another part") encourages slicing.
+- **The budget clock made the team wrap up and stop with budget left.** Agents read the line ("Only ~7 minutes shared budget. I'll finalize…"; `done`: "cannot be completed safely in the remaining time"), switched together to review, test and finish, which burned the budget faster and dropped the estimate further (r2: 8.5M in three minutes, the line falling from 30.7 to 4.2 minutes), and then called `done` with 4–11M unspent. The estimate itself is noisy (implied end 17–116 minutes). RC's wall time was also longer from build-lock contention (blocked or timed-out bash results per run: baseline 1–12, R 17–30, RC 29–83). No finisher reverted teammates' work.
+- Role announcements add 42–73 automatic posts per run; agents' own posts are about as many as in the baseline.
+
+Transcript analysis: [report](reports/2026-10-08-round25-transcripts.md) (model output; the claims listed at its top checked by hand). Counts: [`deepswe/traces25.md`](deepswe/traces25.md).
 
 ## Campaign registry
 
@@ -2612,3 +2649,4 @@ Transcript analysis: [report](reports/2026-10-07-round24-transcripts.md) (model 
 | 2026-10-06 | round 22, DeepSWE batch, rival teams sharing a pool, closed after the quota stop (valid `e22-teams-r0`, `e22-swarm-r0`, `e22-swarm-r1`; invalid `e22-teams-r1`; code `aca4e9b`) | Teams: three teams of 4 (n12-base-peers), one 32M pool, rivalry text and /rivals as in round 21; Swarm: n12-base-peers n=12, 32M | expr, oxvg, scriggo, tengo, wasmi; teams × 1, swarm × 2; 120 min | 112.5M ($1.85; 16.2M invalid) | five-task means: teams 0.239 (0.357, 0.276, 0.085), swarm 0.303 (0.320, 0.285); pool split 12.7M / 12.9M / 6.6M | no rule applied (closed by the user at k=1 / k=2); the arithmetic would be not decided (2 of 5 each way) |
 | 2026-10-07 | round 23, the fixed baseline (batches `e23-base-r0` to `r4`, code `0b0e12c`) | Baseline: n12-base-peers n=12 (the defaults of `03aa568`) | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.3M ($2.52) | five-task mean 0.357 (sd 0.135, 0.19–0.52); per task expr 0.420, oxvg 0, scriggo 0.150, tengo 0.749, wasmi 0.464 | reference for later arms; rerun only when defaults, model, tasks or setup change |
 | 2026-10-07 | round 24, calling departed agents back (batches `e24-mention-r0..r4`, `e24-mtasks-r0..r4`; code `cd5cfde`, from `e24-mtasks-r2` `3e52e3e`) | M n12-mention, MT n12-mention-tasks (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5 each, 32M, 120 min | 320.4M ($5.03) | five-task means: M 0.434 (0.17–0.64), MT 0.370 (0.29–0.50), baseline 0.357; revivals M 5, MT 8 (4 by one @all); 8 of 174 mentions reached a departed agent | both not decided (p 0.46 and 0.85); callbacks work but are rarely used, early departures unchanged |
+| 2026-10-07/08 | round 25, roles without owners and a budget clock (batches `e25-roles-r0..r4`, `e25-rclock-r0..r4`, code `7f6d59e`) | R n12-roles9, RC n12-roles9-clock (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5 each, 32M, 120 min | 285.1M ($4.53) | five-task means: R 0.241, RC 0.190, baseline 0.357; `done` per run R 0–1, RC 11–12; write/edit per run R 82–125, RC 53–84, baseline 125–165 | both not decided (p 0.20 and 0.071, RC's interval below 0); roles end early departures but build less; the budget clock makes the team wrap up and stop with budget left |
