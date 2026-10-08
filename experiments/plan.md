@@ -2574,6 +2574,28 @@ Transcript analysis: [report](reports/2026-10-07-round24-transcripts.md) (model 
 
 Transcript analysis: [report](reports/2026-10-08-round25-transcripts.md) (model output; the claims listed at its top checked by hand). Counts: [`deepswe/traces25.md`](deepswe/traces25.md).
 
+## Round 26: roles that mostly build, with the task list as the channel for findings, against the fixed baseline (fixed before measuring, 2026-10-08 08:05; the user approved the proposal, "si, preparalo asi")
+
+**Why.** In round 25 the roles ended the early departures but half of the calls went to roles that do not build, their findings stayed as status posts nobody turned into work, and builders sliced the work so that the hard core of expr was left undone. The task list costs 3–9% of calls (round 24), but there it became an up-front plan handed out by the first agent. The user's idea: non-builders add tasks.
+
+**Arm RT** (`profiles/n12-roles9-tasks.json`; 12 agents, 32M, 120 minutes, five DeepSWE tasks, k=5), changed from R (round 25) in three ways at once:
+- **The task list as the findings channel:** `taskList` on, no `taskAssign`, the list starts empty. The team sentence: "Whoever finds something concrete to do (a defect, a failing test, a missing requirement) adds it to the task list with how to reproduce it; builders and fixers take items from it. Post only what someone can act on." Reviewer, verifier, tester, researcher, integrator and scout add their findings with `task_add`; the fixer takes items.
+- **Building by default:** "Most of the team should be building… take a role…: builder, unless you see a need for another role right now (a broken build, a change nobody has reviewed or tested, a project nobody is advancing)." Roles are still taken on entry and switched instead of leaving.
+- **No slicing:** the builder joins "the hardest unfinished part of a project over an easier separate one", splitting it with the teammates already on it by file or function; the "take another part" sentence is gone.
+- No `clockEffective`.
+
+**Control:** the round 23 baseline (not rerun). R (round 25) is a descriptive reference only.
+
+**Rule** (`compare.py`): better if p < 0.05, Δ > 0 and higher on at least 3 of 5 tasks; worse symmetric; otherwise not decided.
+
+**What is read:** the share of tool calls by role and the share of write/edit calls (baseline 125–165 per run, R 82–125); task items added by non-builders, taken, done and dropped; first roles; `done` calls; work on expr's core (parser, compiler, VM) and whether expr's change goes beyond the builtins; a transcript analysis (subagent) on whether findings turn into work and whether builders gang up on hard parts or still slice.
+
+**Smoke:** `examples/trio.json` with `n12-roles9-tasks`: all three agents took builder on entry, read the task list (4 calls), switched roles before leaving (8 `role` calls) and ended `all_done`; no task was added (the task has no defects to find).
+
+**Estimate:** 5 × 32M = 160M tokens, about $2.5; about 2 hours.
+
+**Known threats:** RT changes three things against R at once (task list, building by default, no slicing), so a difference cannot be assigned to one of them; the control is not paired in time; at k=5 only differences of about ±0.25 are decidable.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
