@@ -2961,6 +2961,68 @@ Transcript analysis: [report](reports/2026-10-08-round28-transcripts.md) (model 
 
 Transcript analysis: [report](reports/2026-10-08-round29-transcripts.md) (model output; the claims listed at its top were checked by hand). Counts: [`deepswe/traces29.md`](deepswe/traces29.md).
 
+## Round 30: an integrate item per project and stubs before tests, against the fixed baseline (fixed before measuring, 2026-10-08, the commit time; the user approved the three changes, "Me parece bien los cambios", asked for a review of existing levers, then "Prepáralo así")
+
+**Why** (round 29's findings):
+- **Layers split with no one wiring them failed.** Scriggo scored 0 in r1–r4, where its layers were split, and 0.854 in r0, where one agent built them all. Expr r1 never lowered `TryNode` in the compiler.
+- **The strict tests-first rule could not hold where the tests need a new API.** In wasmi it was broken in all five runs.
+- **The idle marks were shown 37 times and never acted on.**
+
+**Lever review** (the user's request; existing levers checked against the remaining failures). None is added.
+- **Shared-file and locking levers:**
+  - `staleGuard`: there is nothing for it to catch. Round 29 had 0 full writes over a teammate's unread change; 571 of 641 file changes were `edit` calls, which already fail on stale text.
+  - `claimLease`: file locks were neutral or negative in the early rounds.
+- **Making the team's state visible:**
+  - `teamStatus` was worse in round 20 (−0.076).
+  - `boardTail`, `sharedNotes`, `threads`, `notices` and `findings` were worse, unused or without effect in rounds 5–20.
+- **Context, time and departures:**
+  - `relayContext` has little to save. Per-turn context is a median 32k tokens and a 90th percentile of 65k.
+  - `clockEffective` made the team wrap up together and leave 4–11M unspent in round 25.
+  - `reviveOnMention` has little to do: agents now call `done` 0–1 times per run.
+- **Branches:** `branches` would give each agent its own Rust build, but each cold oxvg build takes about 6.5 minutes.
+- **The one candidate, left for a later round:** `taskAssign`, a request between equals that could hand the integrate item to a named teammate. Adding it here would mix effects.
+
+**Arm TI** (`profiles/n12-roles9-integrate.json`; 12 agents, 32M, 120 minutes, five DeepSWE tasks, k=5). It is TF (round 29) without `taskIdleMinutes`, plus three prompt changes:
+- **Stubs:**
+  - "Nobody writes implementation code in a project until its test items are done" now goes on: ", except what the tests need to compile: a new function, type or method the tests call may be added first as a stub (its signature, with a body that returns an error rather than panicking)".
+  - "A test that cannot compile until new code exists stays in a folder outside the project until that code exists." becomes "If a test needs code that does not exist yet, add that code as a stub so that the test compiles and fails."
+- **Integrate item:**
+  - The build items sentence adds: "and one last item, "integrate: make every end-to-end test of <project> pass", for wiring the layers together and fixing what falls between them".
+  - The done rule becomes: "A build item is done when its tests pass, and the integrate item, like the project, only when all its end-to-end tests pass."
+  - The builder adds "and the project's integrate item" when it adds build items.
+  - The integrator role starts with "Take a project's integrate item (task_take), or pick a project where…".
+- Everything else is as in TF.
+
+**Control:** the round 23 baseline. It is not rerun, because the code is unchanged since round 29. TF (round 29) and RP (round 28) are descriptive references.
+
+**Rule** (`compare.py`): better if p < 0.05, Δ > 0 and higher on at least 3 of 5 tasks; worse is symmetric; otherwise not decided. TI against TF is descriptive only.
+
+**What is read:**
+- **Integrate items:** per project, who took them and when, and whether their project's end-to-end tests pass at the end.
+- **Stubs:** whether stubs were written before the tests in wasmi (and elsewhere), and whether the strict rule held in wasmi.
+- **As in round 29:**
+  - **Order and splitting:** whether the first write in each project is a test, and how many agents wrote its tests.
+  - **Cost:** tokens before the first implementation write.
+  - **Breakage:** late build breaks.
+- **Splitting by project:** scriggo's split against its single-builder runs.
+- **Transcripts:** a transcript analysis (subagent).
+
+**Smoke** (this profile, three agents, on a small Go module written for the test: add a power operator, `EvalWith` with variables, and `Names`, across `lexer.go`, `parser.go` and `eval.go`):
+- **Result:** `all_done` in 96 seconds, 0.55M tokens.
+- **Tests first:** wren wrote end-to-end tests in their own package `e2e/` before any implementation.
+- **Items:** three items followed, two build items by layer and "integrate: make every end-to-end test of calc pass".
+- **The integrate item was used:** wren took it at 60 seconds and finch joined it after its own item. Both `go test ./...` and an independent probe test in the main session passed.
+- **The stub rule was not exercised.** wren left the end-to-end tests not compiling in their own package until the API existed, which broke nothing else.
+- **No default-profile run:** the code is unchanged.
+
+**Estimate:** 5 × 32M = 160M tokens, about $2.6; about 2 hours.
+
+**Known threats:**
+- TI changes three things against TF at once (integrate item, stubs, no idle marks).
+- Stubs that panic, or that compile but are never replaced, could hurt.
+- The control is not paired in time.
+- At k=5 only differences of about ±0.25 are decidable: the last three rounds moved the mean by +0.07 and +0.02, which this design cannot confirm.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
