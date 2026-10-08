@@ -3023,6 +3023,73 @@ Transcript analysis: [report](reports/2026-10-08-round29-transcripts.md) (model 
 - The control is not paired in time.
 - At k=5 only differences of about ±0.25 are decidable: the last three rounds moved the mean by +0.07 and +0.02, which this design cannot confirm.
 
+### Round 30 result and rule applied (2026-10-08 22:30; batches 18:40–20:16 UTC, code `3e23e34`)
+
+| task | baseline (k=5) | TF (round 29) | TI mean (sd) |
+|---|---:|---:|---:|
+| expr | 0.420 | 0.602 | 0.468 (0.464) |
+| oxvg | 0.000 | 0.100 | 0.000 (0.000) |
+| scriggo | 0.150 | 0.171 | 0.321 (0.441) |
+| tengo | 0.749 | 0.877 | 0.881 (0.051) |
+| wasmi | 0.464 | 0.445 | 0.500 (0.334) |
+| **five-task mean** | **0.357** | **0.439** | **0.434** (0.092) |
+| runs | 0.257, 0.518, 0.356, 0.194, 0.458 | 0.555, 0.312, 0.390, 0.618, 0.320 | 0.494, 0.339, 0.410, 0.561, 0.366 |
+
+160.1M tokens, $2.54. Every run ended at the 32M cap, after 12.3–13.8 minutes. No run failed, there was no model error, the quota held, and `srcDirty` was false.
+
+**Rule as written** (`compare.py` against the baseline):
+- Δ +0.077, 95% interval [−0.051, +0.204], p = 0.32.
+- Higher on 4 of 5 tasks, lower on none (oxvg tied at 0).
+- **Not decided.**
+- Against TF (descriptive): Δ −0.005, p = 0.94, higher on 3 of 5 tasks (scriggo, wasmi, tengo), lower on expr and oxvg.
+
+**Process** (events; one short script over `events.jsonl`, run on both rounds so the columns are comparable; a write is an `edit`/`write` call, a path is a test when it contains "test" or "e2e", and relative paths count. For TF it gives 17 rather than 16 multi-writer projects, 8 rather than 9 strict-rule breaks and 17 of 133 rather than 23 of 142 idle take pairs, because round 29's script was not kept):
+
+| | TF | TI |
+|---|---|---|
+| all 12 agents entered within | 6.5–8.9 min | 6.3–7.6 min |
+| a project's first write is a test | 24 of 24 with writes | 23 of 25 (wasmi r2 and r4 began with `config.rs`) |
+| projects whose tests had 2 or more writers | 17 of 25 | 17 of 25 |
+| implementation write before every test item naming the project was done | 8 of 25 | 7 of 25 (wasmi r0, r1, r2, r4; scriggo r0, r4; oxvg r0) |
+| projects with 2 or more adders before the first write | 3 of 25 | 3 of 25 |
+| weights 1–3 / 4–7 / 8–10 | 22 / 85 / 3 | 11 / 97 / 6 |
+| take × holder pairs whose holder never edited that project | 17 of 133 | 13 of 137 |
+| drops | 25 | 15 |
+| write/edit calls per run | 106–139 | 104–156 |
+| projects with no implementation write | oxvg r0, r1, r2 | oxvg r3, r4 |
+
+- **Integrate items** (from `task_add` titles):
+  - **Where they appeared:** in 8 of 25 projects (r0 tengo, expr and oxvg; r2 expr; r3 tengo; r4 tengo, scriggo and expr). There were none in r1, and none in wasmi in any run.
+  - **When:** they were added at 1.2–3.6 minutes (oxvg at 6.1, r4 expr at 7.1) and taken at 4.8–10.4 minutes.
+  - **What happened to them:** 6 were taken and 4 marked done (r0 tengo, r2 expr, r3 tengo, r4 tengo). r0 oxvg and r4 expr were never taken; r0 expr and r4 scriggo were taken and never done.
+  - **The integrator role** was chosen once in 50 role calls, in r1, which had no integrate item.
+- **Stubs were barely used.** Only r1 wasmi mentions a stub, and it returned `None`, not an error. Wasmi's new API (`config.rs`, `error.rs`) was again written before its tests were done in 4 of 5 runs, now as real fields and setters. Its first implementation write came no earlier (5.2, 6.7 and 5.5 minutes in r0, r2 and r3). No final diff has an unreplaced or panicking stub.
+- **Cost of waiting:** the first implementation write came at a median 4.3 minutes and 2.8M tokens (TF: 4.2 minutes and 2.6M). Oxvg's came at 8.5–9.5 minutes after 13.7–21.8M tokens, and never in r3 or r4.
+
+**From the transcripts** (subagent report, key claims checked by hand; two corrected):
+- **What separates scores is whether every layer was built, not the integrate item.**
+  - **Expr:** r2 (1.0) and r3 (0.936) had separate agents on the compiler and the VM. r0 (0) had no compiler change at all; its hidden log shows `undefined node type (*ast.TryNode)`, checked by hand. r1 and r4 (0.202) changed the compiler, but one nil-node panic took down the whole Go package, and 62 of 79 hidden tests with it.
+  - **Scriggo:** r0 (0.75) and r3 (0.854) edited the emitter. r1 and r2 (0) did not. In r4 (0) the selector path was left unwired (`x.Double undefined`), although heron held the integrate item from 10.4 minutes; heron edited checker types instead.
+  - **Integrate item holders** mostly built layers rather than wiring them. In r0 expr, robin took the item at 7.7 minutes and wrote VM files and tests, never the compiler.
+- **Wasmi r2 and r3 (0.136)** lack capture on the executor side; in r3 every hidden test fails on a header bug ("unsupported Wasm version"). The other runs pass 15–17 of 22.
+- **Oxvg (0 everywhere) is starved by the cold Rust build.** A cold `cargo` build takes 6.4–7.6 minutes. Implementation started only at 8.5–9.5 minutes, and the cargo calls started after it were still waiting for the build lock when the cap hit. r0 and r2 end with a library that does not compile, and the team never saw the errors.
+  - **Corrected by hand.** The subagent read the "Command aborted" results as cargo calls interrupted by incoming posts. In fact every one of them, 5–9 per run, carries the minutes-left stamp of the budget abort at the end of the run, the only place murmur aborts sessions (`src/swarm.ts:240`).
+- **Leaving with items held:** all 6 agents who called `done` held an item (TF 5 of 8).
+  - **Corrected by hand.** The subagent's main example was expr r4: tern left at 3.5 minutes holding its build item, but finch and kite took that item at 3.8 minutes. So the departure does not explain the 0.202.
+- **Late edits:** builds were not broken at the end in wasmi or tengo. In scriggo r1 the base tests fell to 0.38 after 13 implementation edits in the last 2 minutes.
+
+**Reading.**
+- TI ties TF (−0.005), and both are about +0.08 over the baseline, which k=5 cannot decide.
+- **The integrate item did not take hold.** It appeared in a third of the projects, was often taken late, and its holders built layers rather than wiring them.
+- **The stub rule was not used**: agents wrote the real API first, as in TF.
+- **The idle marks' absence changed nothing visible.**
+- **The remaining losses:**
+  - a missing layer (expr compiler, scriggo emitter);
+  - a single panic that loses a whole package;
+  - oxvg's build time against a 13-minute run.
+
+Transcript analysis: [report](reports/2026-10-08-round30-transcripts.md) (model output; the claims listed at its top were checked by hand). Counts: [`deepswe/traces30.md`](deepswe/traces30.md).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -3103,3 +3170,4 @@ Transcript analysis: [report](reports/2026-10-08-round29-transcripts.md) (model 
 | 2026-10-08 | round 27, a weighted, shared task list and building from the heaviest item (batches `e27-rweights-r0..r4`, code `7e54b16`) | RW n12-roles9-weights (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.67) | five-task mean RW 0.351 (0.19–0.44), baseline 0.357, RT 0.292; 97 task items, 70 of weight ≥7 (32 of weight 10); 21 items with two or more holders | not decided (p 0.91); weights inflated, projects decomposed in the first minute, heavy items mostly taken by their author |
 | 2026-10-08 | round 28, RW with parts read from the code, a weight guide, a slower stagger and three working rules (batches `e28-rparts-r0..r4`, code `e1d84cf`) | RP n12-roles9-parts (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.61) | five-task mean RP 0.422 (0.28–0.52), baseline 0.357, RW 0.351; entry spread over 6.4–8.7 min; weights 1–3/4–7/8–10: 25/66/8 of 99; duplicate decompositions 6 of 25 | not decided (p 0.39); highest mean so far; expr r1 core started at 13.9 of 14 min; oxvg 0 in every run |
 | 2026-10-08 | round 29, end-to-end tests before implementation, build items per layer, idle-holder marks (batches `e29-rtests-r0..r4`, code `9b74367`) | TF n12-roles9-tests (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.59) | five-task mean TF 0.439 (0.31–0.62), baseline 0.357, RP 0.422; first write a test in 24 of 25 projects; oxvg 0.5 in r3 (first non-zero); 37 idle marks shown, none acted on | not decided (p 0.38); highest mean so far; the strict rule starved the Rust projects; layers split without an integrator (scriggo r1–r4) |
+| 2026-10-08 | round 30, an integrate item per project, stubs before tests, no idle marks (batches `e30-rinteg-r0..r4`, code `3e23e34`) | TI n12-roles9-integrate (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.54) | five-task mean TI 0.434 (0.34–0.56), baseline 0.357, TF 0.439; integrate items in 8 of 25 projects, 4 done; stubs barely used; oxvg 0 in every run | not decided (p 0.32); ties TF; scores follow whether every layer was built, not the integrate item; oxvg starved by cold Rust builds |
