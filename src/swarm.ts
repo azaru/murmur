@@ -127,7 +127,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   const board = new Board(names, log, notify, budgetText);
   board.lease = profile.claimLease * 1000;
   board.threaded = profile.threads;
-  const tasks = profile.taskList ? new TaskList(log) : undefined;
+  const tasks = profile.taskList ? new TaskList(log, { shared: profile.taskShared, weights: profile.taskWeights }) : undefined;
   const branches = profile.branches !== "off" ? new Branches(workspace, opts.runDir, profile.branches, log) : undefined;
   const root = (name: string) => branches?.root(name) ?? workspace; // the folder an agent works in
   const seen = new Map<string, string>(); // agent and path -> content digest it last read or wrote
@@ -365,7 +365,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       ...(tasks ? taskTools(tasks, name, profile.toolDescriptions, profile.taskAssign ? { names, assigned: (to, id, title) => {
         if (board.members.get(to)!.doneReason !== undefined) recall.add(to);
         board.post(name, `(sent by murmur) ${name} handed task #${id} "${title}" to ${to}. ${to}: it is yours now; task_drop gives it back.`);
-      } } : undefined) : []), ...(branches?.tools(name, profile.toolDescriptions) ?? [])];
+      } } : undefined, { weights: profile.taskWeights, shared: profile.taskShared }) : []), ...(branches?.tools(name, profile.toolDescriptions) ?? [])];
     const { session } = await createAgentSession({
       cwd: root(name), modelRuntime: runtime, model,
       thinkingLevel: task.thinking as CreateAgentSessionOptions["thinkingLevel"],

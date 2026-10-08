@@ -21,7 +21,7 @@ test("dropping or finishing the run gives items back", () => {
   list.drop("b", 1, "needs the parser first");
   assert.match(list.list(), /#1 \[open\] x \(added by a\)\n {2}last note: needs the parser first/);
   list.release("b");
-  assert.ok(list.items.every(i => i.state === "open" && !i.holder));
+  assert.ok(list.items.every(i => i.state === "open" && !i.holders.length));
 });
 
 test("the progress line is shown only when it changed for that agent", () => {
@@ -44,4 +44,27 @@ test("an item can be handed to a teammate, who can give it back", () => {
   assert.throws(() => list.assign("a", 2, "b"), /taken by c/);
   list.drop("b", 1, "busy");
   assert.match(list.list(), /#1 \[open\] x \(added by a\)/);
+});
+
+test("with shared, a second agent joins the holders; the item reopens when every holder dropped it", () => {
+  const list = new TaskList(() => {}, { shared: true });
+  list.add("a", "core");
+  list.take("a", 1), list.take("b", 1);
+  assert.match(list.list(), /#1 \[taken by a, b\] core/);
+  assert.equal(list.news("b"), "[task list: 0 open, 1 taken (by you: #1), 0 done]");
+  list.drop("a", 1);
+  assert.match(list.list(), /#1 \[taken by b\] core/);
+  list.release("b");
+  assert.match(list.list(), /#1 \[open\] core/);
+  list.take("c", 1), list.take("d", 1);
+  list.finish("d", 1, "both halves");
+  assert.match(list.list(), /#1 \[done by c, d\] core/);
+});
+
+test("with weights, unfinished items are listed heaviest first and done items last", () => {
+  const list = new TaskList(() => {}, { weights: true });
+  list.add("a", "detail", "", 2), list.add("a", "core", "", 9), list.add("a", "middle", "", 5);
+  list.take("b", 2), list.finish("b", 2);
+  assert.deepEqual(list.list().split("\n").map(l => l.match(/^#\d+/)?.[0]), ["#3", "#1", "#2"]);
+  assert.match(list.list(), /^#3 \(weight 5\) \[open\] middle/);
 });

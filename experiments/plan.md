@@ -2643,6 +2643,30 @@ Transcript analysis: [report](reports/2026-10-08-round26-transcripts.md) (model 
 - **`profiles/c2-roles.json` stays as an old profile.** It no longer loads, because roles now require `role` in `boardTools`; it is not edited in place and not reused.
 - The sixteen 2026-10-06 reports linked from this notebook are now committed.
 
+## Round 27: roles that build from the heaviest item of a weighted, shared task list, against the fixed baseline (fixed before measuring, 2026-10-08 12:01; the user approved the proposal, "si, esa combinacion me parece bien")
+
+**Why.** In round 26 (RT) building came back and expr reached its core in 4 of 5 runs, but the agents took the easy work first: small defects on the task list were taken within a minute, hard gaps waited about 11 minutes, and in every run the first agent on expr built the builtins before the syntax. Builders ganged up on the hard part once (r0, five agents split by layer, expr 0.81), after the first agent named the parts and asked for help. Prompts that set a concrete default action worked ("builder, unless…": 49 of 60), prompts that ask for a judgment did not ("nobody owns a project" in R, "join the hardest unfinished part" in RT). The design turns "the hardest part" into an observable rule: weights on the list and "take the heaviest". The list also allowed one holder per item, which works against several builders on one hard part (2 refused takes in round 26).
+
+**Two new levers, default off** (commit of this pre-registration; unit tests in `test/tasklist.test.ts`):
+- `taskWeights`: with `taskList`, `task_add` requires a weight from 1 to 10 for how much of the goal the item covers, and `tasks` lists unfinished items heaviest first.
+- `taskShared`: with `taskList`, `task_take` on an item a teammate holds joins its holders instead of failing ("You share it with …"); any holder may mark it done; the item reopens once every holder dropped it. The task list's internals now keep a list of holders; with the lever off, behaviour is as before (same messages and refusals).
+
+**Arm RW** (`profiles/n12-roles9-weights.json`; 12 agents, 32M, 120 minutes, five DeepSWE tasks, k=5): RT (round 26) plus both levers and two prompt changes:
+- team sentence: "Every item on the list has a weight from 1 to 10 for how much of the goal it covers, and tasks shows the heaviest unfinished items first. The first of you to work on a project that is more than one piece of work adds its parts to the task list, each with its weight, before writing code. Several of you can take the same item, and the heavy ones need more than one builder."
+- builder: "Call tasks and take the heaviest unfinished item you can work on (task_take), even if teammates already hold it: you join them, and you agree on the board how to split it by file or function and on names and interfaces. If the project you start on has no items yet, first add its parts to the task list with their weights (task_add). Mark an item done (task_done) when the whole item works, not one part of it." (The rest of the builder text and the other eight roles are unchanged.)
+
+**Control:** the round 23 baseline (not rerun; the code since only adds default-off levers and the lone-agent briefing fix, which does not touch 12-agent runs). RT (round 26) is a descriptive reference.
+
+**Rule** (`compare.py`): better if p < 0.05, Δ > 0 and higher on at least 3 of 5 tasks; worse symmetric; otherwise not decided. RW against RT is descriptive only.
+
+**What is read:** weights given (distribution, and whether hard parts get high weights); share of items taken by more than one holder, and how many holders; time from adding a heavy item (weight ≥ 7) to its first and second take; whether the first agent on a project decomposes it before writing code, and duplicate decompositions; per-task writers on expr and wasmi and whether they split by file; expr's core in the final diff; same-file collisions and broken final builds; write/edit calls and builder share as in round 26; a transcript analysis (subagent).
+
+**Smoke** (code of this commit): a scripted three-agent task forcing the behaviour: one agent added "small" (weight 2) and "big" (weight 9), all three took "big" (`task_take` with `with: [...]`), each saw "taken by finch, robin, wren", sorted heaviest first, and each `done` released it. `examples/trio.json` with RW: three builders, six weighted items (weights 3–4) added before any code, one shared take, `all_done`, 0.41M tokens; two agents decomposed the project at the same time, so each part appeared twice. Default-profile `examples/trio.json`: `all_done`, unchanged.
+
+**Estimate:** 5 × 32M = 160M tokens, about $2.6; about 1.5 hours.
+
+**Known threats:** RW changes four things against RT at once (weights, shared holding, decomposition first, take-the-heaviest), so a difference cannot be assigned to one of them; agents may inflate weights or decompose the same project twice (seen in the smoke); shared holding may bring more same-file collisions (wasmi r0 in round 26); the control is not paired in time; at k=5 only differences of about ±0.25 are decidable.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
