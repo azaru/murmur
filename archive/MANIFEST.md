@@ -74,3 +74,41 @@ shasum -a 256 murmur-raw-runs-20261003.tar.xz
 tar -xJf murmur-raw-runs-20261003.tar.xz
 ```
 
+
+# Raw runs archive, part 3 (rounds 11 to 26)
+
+`murmur-raw-runs-20261008.tar.xz` holds the raw data that is **not** in the first two archives: the agents' transcripts, event traces and results for the swarmtest campaigns after round 10 and for the DeepSWE batches (rounds 17 to 26). Together with `murmur-raw-runs-20261002.tar.xz` and `murmur-raw-runs-20261003.tar.xz` it covers every run. It does not include any conversation with the human or with the coding assistant. It is **not uploaded yet**.
+
+| | |
+|---|---|
+| File | `murmur-raw-runs-20261008.tar.xz` |
+| Size | 132 MiB compressed (138,190,804 bytes), 1,008 MiB uncompressed (35,362 files) |
+| SHA-256 | `cf679bd8843cd500575d2538c9083a141753c22828849d44e6c918f6b8c9513b` |
+| Created | 2026-10-08, after round 26 |
+
+## Layout
+
+- **`swarmtest-runs/<campaign>/`**: 145 swarmtest campaigns, from `20261003T080947Z-2337418f` (round 11) to `20261004T220858Z-7ac6739b`. Same layout as the first archive: `campaign.json`, `report.json`, `report.md`, `run-NNNN/{record.json,request.json,adapter-result.json}`, `state/` and the graded `workspace/` (including `.git`).
+- **`deepswe-runs/<batch>/`**: 67 DeepSWE batches (`cal16-r*`, `scr17-b1..b3`, `e17-` to `e26-<arm>-r<rep>`; the `e21-teams-*` and `e22-teams-*` batches have `team1/` to `team3/` instead of `b/`). Includes the failed batches `e20-stagger-status-r1-fetchfail`, `e20-stagger-tasks-r1-fetchfail` and `e22-teams-r1-quota`. Each `b/` (or `team*/`) holds:
+  - `murmur/`: `events.jsonl`, `result.json` and `<agent>.messages.json` (under `murmur/run/` for the swarm);
+  - per task: `<task>.diff` (the agents' final patch), `<task>.score.json` (grader result) and `<task>-logs/new.log` (test output after the patch);
+  - `cfg/` (`profile.json`, `task.json`, `entry.mjs`), `tasks/` (task statements) and `hub.log`.
+
+Left out:
+
+- `<task>-logs/base.log` in every DeepSWE batch: test output of the unmodified repository, produced by the grader and not by the agents (3.4 GB of the 3.9 GB in `experiments/deepswe/runs/`). The per-test pass/fail lists of the base run stay in `*.score.json`.
+- `dry-*` and `smoke-*` batches in `experiments/deepswe/runs/` (dry runs of the batch scripts and smoke tests, no experiment data).
+- `experiments/batch/`: already complete in the first two archives (all 42 batch directories; only three `lane-*.log` files are new and they are driver logs).
+- `runs/` at the project root (local smoke runs).
+
+## Checks done before packaging
+
+- Exact search for the operator's Pi credentials (every secret value and JWT segment in `~/.pi/agent/auth.json`) in all 35,362 packed files: 0 hits.
+- Pattern search (`eyJ…`, `sk-…`, `"refresh":`, `"access":`, `Bearer `): `"refresh":`, `"access":` and `Bearer ` have 0 hits. `eyJ…` (351 files) and `sk-…` (326 files) match only as random substrings inside agent `*.messages.json` (encrypted reasoning blobs), as `sk-` inside task names such as `task-creation-validation` in `record.json`, and as base85 noise in one binary patch (`e26-rtasks-r3/b/scriggo-method-declarations.diff`). No `eyJ…` string followed by the `.xxx.` JWT structure was found in any transcript.
+
+## Use
+
+```sh
+shasum -a 256 murmur-raw-runs-20261008.tar.xz
+tar -xJf murmur-raw-runs-20261008.tar.xz
+```
