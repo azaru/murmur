@@ -2596,6 +2596,47 @@ Transcript analysis: [report](reports/2026-10-08-round25-transcripts.md) (model 
 
 **Known threats:** RT changes three things against R at once (task list, building by default, no slicing), so a difference cannot be assigned to one of them; the control is not paired in time; at k=5 only differences of about ±0.25 are decidable.
 
+### Round 26 result and rule applied (2026-10-08 09:55; batches 06:04–07:37 UTC, code `f602660`)
+
+| task | baseline (k=5) | R (round 25) | RT mean (sd) |
+|---|---:|---:|---:|
+| expr | 0.420 | 0.086 | 0.352 (0.281) |
+| oxvg | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.150 | 0.146 | 0.140 (0.227) |
+| tengo | 0.749 | 0.609 | 0.752 (0.370) |
+| wasmi | 0.464 | 0.364 | 0.218 (0.199) |
+| **five-task mean** | **0.357** | **0.241** | **0.292** (0.131) |
+| runs | 0.257, 0.518, 0.356, 0.194, 0.458 | 0.190, 0.085, 0.269, 0.257, 0.403 | 0.438, 0.257, 0.088, 0.349, 0.330 |
+
+160.1M tokens, $2.63. Every run ended at the 32M cap after 9.4–17.3 minutes (R 12–21). No run failed, no model error, and the quota held.
+
+**Rule as written** (`compare.py` against the baseline): Δ −0.064, 95% interval [−0.214, +0.078], p = 0.44, higher on 1 of 5 tasks and lower on 3: **not decided**. Against R (descriptive): Δ +0.051, p = 0.52, higher on 2 (expr +0.27, tengo +0.14) and lower on 2 (wasmi −0.15).
+
+**Process** (events; short scripts over `events.jsonl`, role at a call = the agent's latest `role` call):
+
+| | baseline | R | RT |
+|---|---|---|---|
+| first roles (of 60) | — | builder 23, scout 15, researcher 12, verifier 8, tester 1, reviewer 1 | builder 49, scout 6, verifier 4, reviewer 1 |
+| builder share of tool calls per run | — | 39–54% | 48–79% (plus fixer 6% in r4) |
+| `done` calls per run | 3–7 | 0–1 | 0 |
+| role calls per run | — | 42–65 | 26–39 |
+| write/edit calls per run | 125–165 | 82–125 | 119–150 |
+| tool calls per run | 894–1011 | 925–1043 | 955–1067 |
+
+- **Building came back** to the baseline's level: write/edit calls 119–150 per run, against 82–125 in R, and 49 of 60 agents took builder on entry.
+- **The task list:** 44 items in five runs (11, 4, 8, 9, 12). 31 were added by non-builders; 17 of those were taken by a different agent (within 0.1–12 minutes, most within 2), and 8 of the 17 were marked done; 8 more were taken by their own adder. The 13 items added by builders or fixers were mostly self-claims (10). 5 items were dropped.
+- **Expr reached its core in 4 of 5 runs** (R: 1 of 5): the final diff touches parser, compiler and VM in r0, r2 and r3, compiler and VM in r4; r1 stayed at the builtins (0.063). Scores 0.81, 0.06, 0.34, 0.20, 0.34.
+- **Wasmi fell** (0.218 against 0.464) because the final build did not compile in r0 and r2 (score 0; r0: duplicate definitions of `coredump_frames` and a missing struct field). Broken builds at the end also happened in earlier arms (baseline scriggo three times, M wasmi twice).
+- Oxvg stayed untouched or nearly (0–11 write/edit calls per run), as in the baseline.
+
+**From the transcripts** (subagent report, key claims checked by hand):
+- **The list carries small defects, not the hard parts.** Of the 44 items, 18 were reproducible defects and 26 plans, gaps or status ("X has no diff yet" moved from the board to the list; 14 items came from scouts). Small compile and test defects were taken within 0.1–1.4 minutes and fixed. Hard gaps waited: in r3, crane's item for expr's block try/catch ("No task currently tracks this uncovered half", 1.1 min) was taken and dropped at 7.6–7.7 and staffed only at 12.4; wasmi's "dump is empty" stayed open 11.5 minutes in r4. Defect reports with repro commands still went mostly to the board.
+- **Ganging up on the hard part happened once.** In r0 the expr starter asked at 1.2 minutes for help on the try/catch/finally core; five agents wrote expr within 2.4 minutes, split by layer, and it scored 0.81. In r2–r4 the second writer arrived at 8–16 minutes, mostly on the easier `try(expr, fallback)` form; in every run the first writer built the builtins first. In r1 the first agent scoped expr to the builtins in its own task item ("plus try function if feasible") and a teammate read it as ownership ("Expr finch owns try/catch builtins"); expr got 9 edits and scored 0.06.
+- **Ganging up without coordination broke wasmi in r0:** after one agent asked for accessors in `state.rs` at 8.2 minutes, four agents wrote their own `coredump_frames` there within 1.1 minutes (two task items for the same request, each taken by its own adder), and the build ended with duplicate definitions. In r2 the break was one edit at the cap (`Vec` without its import, 10.7 minutes, nothing built after). Nobody joined wasmi's coredump capture until the last minutes.
+- Tengo r2 (0.10) is one panic in the parser that stops the whole test package (9 of 91 tests run).
+
+Transcript analysis: [report](reports/2026-10-08-round26-transcripts.md) (model output; the claims listed at its top checked by hand). Counts: [`deepswe/traces26.md`](deepswe/traces26.md).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -2672,3 +2713,4 @@ Transcript analysis: [report](reports/2026-10-08-round25-transcripts.md) (model 
 | 2026-10-07 | round 23, the fixed baseline (batches `e23-base-r0` to `r4`, code `0b0e12c`) | Baseline: n12-base-peers n=12 (the defaults of `03aa568`) | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.3M ($2.52) | five-task mean 0.357 (sd 0.135, 0.19–0.52); per task expr 0.420, oxvg 0, scriggo 0.150, tengo 0.749, wasmi 0.464 | reference for later arms; rerun only when defaults, model, tasks or setup change |
 | 2026-10-07 | round 24, calling departed agents back (batches `e24-mention-r0..r4`, `e24-mtasks-r0..r4`; code `cd5cfde`, from `e24-mtasks-r2` `3e52e3e`) | M n12-mention, MT n12-mention-tasks (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5 each, 32M, 120 min | 320.4M ($5.03) | five-task means: M 0.434 (0.17–0.64), MT 0.370 (0.29–0.50), baseline 0.357; revivals M 5, MT 8 (4 by one @all); 8 of 174 mentions reached a departed agent | both not decided (p 0.46 and 0.85); callbacks work but are rarely used, early departures unchanged |
 | 2026-10-07/08 | round 25, roles without owners and a budget clock (batches `e25-roles-r0..r4`, `e25-rclock-r0..r4`, code `7f6d59e`) | R n12-roles9, RC n12-roles9-clock (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5 each, 32M, 120 min | 285.1M ($4.53) | five-task means: R 0.241, RC 0.190, baseline 0.357; `done` per run R 0–1, RC 11–12; write/edit per run R 82–125, RC 53–84, baseline 125–165 | both not decided (p 0.20 and 0.071, RC's interval below 0); roles end early departures but build less; the budget clock makes the team wrap up and stop with budget left |
+| 2026-10-08 | round 26, roles that mostly build with the task list for findings (batches `e26-rtasks-r0..r4`, code `f602660`) | RT n12-roles9-tasks (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.63) | five-task mean RT 0.292 (0.09–0.44), baseline 0.357, R 0.241; write/edit per run 119–150; 44 task items, 17 of 31 non-builder items taken by another agent, 8 of those done; expr core reached in 4 of 5 runs | not decided (p 0.44); building and expr recover from R, wasmi lost to two broken final builds |
