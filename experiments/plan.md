@@ -2905,6 +2905,62 @@ Transcript analysis: [report](reports/2026-10-08-round28-transcripts.md) (model 
 - The control is not paired in time.
 - At k=5 only differences of about ±0.25 are decidable.
 
+### Round 29 result and rule applied (2026-10-08 20:19; batches 16:27–18:09 UTC, code `9b74367`)
+
+| task | baseline (k=5) | RP (round 28) | TF mean (sd) |
+|---|---:|---:|---:|
+| expr | 0.420 | 0.524 | 0.602 (0.395) |
+| oxvg | 0.000 | 0.000 | 0.100 (0.224) |
+| scriggo | 0.150 | 0.150 | 0.171 (0.382) |
+| tengo | 0.749 | 0.866 | 0.877 (0.038) |
+| wasmi | 0.464 | 0.573 | 0.445 (0.304) |
+| **five-task mean** | **0.357** | **0.422** | **0.439** (0.140) |
+| runs | 0.257, 0.518, 0.356, 0.194, 0.458 | 0.446, 0.279, 0.520, 0.356, 0.511 | 0.555, 0.312, 0.390, 0.618, 0.320 |
+
+160.1M tokens, $2.59. Every run ended at the 32M cap, after 11.1–16.9 minutes. No run failed, there was no model error, the quota held, and `srcDirty` was false.
+
+**Rule as written** (`compare.py` against the baseline):
+- Δ +0.082, 95% interval [−0.069, +0.234], p = 0.38.
+- Higher on 4 of 5 tasks, lower on wasmi.
+- **Not decided.**
+- Against RP (descriptive): Δ +0.017, p = 0.83, higher on 4 of 5 tasks.
+- Oxvg scored above 0 for the first time in any arm: 0.5 in r3.
+
+**Process** (events; short scripts over `events.jsonl`):
+
+| | RP | TF |
+|---|---|---|
+| all 12 agents entered within | 6.4–8.7 min | 6.5–8.9 min |
+| a project's first write is a test | — | 24 of 25 (oxvg r1 had no write) |
+| projects whose tests had 2 or more writers | — | 16 of 25 |
+| implementation write before every test item naming the project was done | — | 9 of 25 (wasmi in 5 of 5 runs, oxvg r3 and r4, expr r1 and r2) |
+| projects with 2 or more adders before the first write | 6 of 25 | 3 of 25 |
+| weights 1–3 / 4–7 / 8–10 | 25 / 66 / 8 | 22 / 85 / 3 |
+| take × holder pairs whose holder never edited that project | 13 of 104 | 23 of 142 |
+| drops | 11 | 25 |
+| write/edit calls per run | 118–152 | 108–141 |
+| `tasks` results showing an idle mark | — | 37 (r0 1, r1 2, r2 24, r3 10, r4 0) |
+
+- **Cost of the strict rule.**
+  - Tokens spent before a project's first implementation write: 0.6–5.2M for expr, scriggo, tengo and wasmi, and 9.9–12.0M for oxvg.
+  - Oxvg got no implementation write at all in r0, r1 and r2.
+  - The subagent measures the first implementation write at a median 4.2 minutes and 2.6M tokens; in round 28 it was 3.2 minutes and 2.0M.
+- **The organic split happened in the writing, not in the items.** The tests had several writers, but there was usually one test item per project, not one per requirement.
+
+**From the transcripts** (subagent report, key claims checked by hand):
+- **Oxvg r3 (0.5).** It is the only oxvg diff in any arm that changes `visitor.rs` as well as `collapse_groups.rs`. plover entered at 6.7 minutes, read lark's end-to-end test and wrote all four implementation edits. The hidden tests that still fail are the adjacent-sibling case and both `remove_empty_containers` tests; no run's tests covered that job.
+- **Oxvg elsewhere:** in r0–r2 there was no implementation at all. Cold Rust builds took about 6.5 minutes, cargo lock contention was frequent, and in r2 the idle-marked test item held two implementers back until its holder's build finished. Oxvg r4 (0) ended with the build broken by an implementation file last written at 12.0 minutes.
+- **Scriggo:** r0 scored 0.854 with a single agent (lark, the only agent writing in scriggo) building the whole pipeline. r1–r4 split it into layers with no integrator, and each scored 0. In 5 of 5 runs scriggo's build items were whole-project items, by the subagent's hand classification from titles.
+- **Expr:**
+  - r4 (0.063): a single item, held by one agent who wrote only the builtins.
+  - r1 (0.342): nobody lowered `TryNode` in the compiler.
+  - r2 (0.683): the hidden `TestTryCatch_RetryExhaustion` was killed after 17 seconds, and 22 of 79 tests were lost with it. The agents' own `trycatch_e2e` package was killed the same way, but it sat in its own package as the profile asks.
+- **Wasmi r0 (0):** the build broke in the last minute, on an implementation file (`core_dump.rs`, edited at 16.3 minutes), not on a test.
+- **Idle marks were shown but not acted on.** They appeared on 5 distinct items. No one joined or dropped a marked item, and no post mentions a mark.
+- **Did the tests encode the description better?** The subagent found no sign of it. Its reading (model output, not tested) is that the main remaining failure is that nobody owns the integration of a project's layers. It suggests a final "make the entry-point tests pass: wire the layers" item per project, and counting idle time per project.
+
+Transcript analysis: [report](reports/2026-10-08-round29-transcripts.md) (model output; the claims listed at its top were checked by hand). Counts: [`deepswe/traces29.md`](deepswe/traces29.md).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -2984,3 +3040,4 @@ Transcript analysis: [report](reports/2026-10-08-round28-transcripts.md) (model 
 | 2026-10-08 | round 26, roles that mostly build with the task list for findings (batches `e26-rtasks-r0..r4`, code `f602660`) | RT n12-roles9-tasks (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.63) | five-task mean RT 0.292 (0.09–0.44), baseline 0.357, R 0.241; write/edit per run 119–150; 44 task items, 17 of 31 non-builder items taken by another agent, 8 of those done; expr core reached in 4 of 5 runs | not decided (p 0.44); building and expr recover from R, wasmi lost to two broken final builds |
 | 2026-10-08 | round 27, a weighted, shared task list and building from the heaviest item (batches `e27-rweights-r0..r4`, code `7e54b16`) | RW n12-roles9-weights (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.67) | five-task mean RW 0.351 (0.19–0.44), baseline 0.357, RT 0.292; 97 task items, 70 of weight ≥7 (32 of weight 10); 21 items with two or more holders | not decided (p 0.91); weights inflated, projects decomposed in the first minute, heavy items mostly taken by their author |
 | 2026-10-08 | round 28, RW with parts read from the code, a weight guide, a slower stagger and three working rules (batches `e28-rparts-r0..r4`, code `e1d84cf`) | RP n12-roles9-parts (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.61) | five-task mean RP 0.422 (0.28–0.52), baseline 0.357, RW 0.351; entry spread over 6.4–8.7 min; weights 1–3/4–7/8–10: 25/66/8 of 99; duplicate decompositions 6 of 25 | not decided (p 0.39); highest mean so far; expr r1 core started at 13.9 of 14 min; oxvg 0 in every run |
+| 2026-10-08 | round 29, end-to-end tests before implementation, build items per layer, idle-holder marks (batches `e29-rtests-r0..r4`, code `9b74367`) | TF n12-roles9-tests (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.59) | five-task mean TF 0.439 (0.31–0.62), baseline 0.357, RP 0.422; first write a test in 24 of 25 projects; oxvg 0.5 in r3 (first non-zero); 37 idle marks shown, none acted on | not decided (p 0.38); highest mean so far; the strict rule starved the Rust projects; layers split without an integrator (scriggo r1–r4) |
