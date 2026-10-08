@@ -6,6 +6,8 @@
 
 ## Findings so far (2026-10-06)
 
+**Without an oracle, parts read from the code and a slower stagger (round 28, k=5 against the baseline).** Letting agents enter about 50 seconds apart, read the code before listing a project's parts, and weigh items with a guide (1–3 a detail, 4–7 a part, 8–10 most of a project) scored 0.42 against the baseline's 0.36. This is the best mean so far, but the difference is still inside the noise (p = 0.39). The weights and the stagger worked as intended. Projects were still rarely split before building, and one task (oxvg) stays at 0 in every configuration.
+
 **Without an oracle, a weighted, shared task list (round 27, k=5 against the baseline).** Letting agents weigh task items from 1 to 10, hold an item together, and build from the heaviest one scored 0.35, level with the baseline's 0.36. Agents planned every project before editing it, but gave nearly every item a high weight, so the weights did not point them at the hard parts.
 
 **Without an oracle, roles that mostly build (round 26, k=5 against the baseline).** Asking most of the team to build, to join the hardest unfinished part, and to put concrete findings on a shared task list brought building back to the baseline's level and scored 0.29 against 0.36, inside the run-to-run spread. Small defects on the list were fixed within a minute; the hard parts still waited, and four agents writing the same function at once broke one build.

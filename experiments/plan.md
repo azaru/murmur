@@ -2764,6 +2764,77 @@ Transcript analysis: [report](reports/2026-10-08-round27-transcripts.md) (model 
 - The control is not paired in time.
 - At k=5 only differences of about ±0.25 are decidable.
 
+### Round 28 result and rule applied (2026-10-08 18:05; batches 14:01–15:57 UTC, code `e1d84cf`)
+
+The heading above says 16:05. The pre-registration commit `e1d84cf` is dated 16:01, and that commit time is what fixes it.
+
+| task | baseline (k=5) | RW (round 27) | RP mean (sd) |
+|---|---:|---:|---:|
+| expr | 0.420 | 0.369 | 0.524 (0.415) |
+| oxvg | 0.000 | 0.000 | 0.000 |
+| scriggo | 0.150 | 0.093 | 0.150 (0.335) |
+| tengo | 0.749 | 0.886 | 0.866 (0.073) |
+| wasmi | 0.464 | 0.409 | 0.573 (0.330) |
+| **five-task mean** | **0.357** | **0.351** | **0.422** (0.104) |
+| runs | 0.257, 0.518, 0.356, 0.194, 0.458 | 0.192, 0.431, 0.355, 0.337, 0.442 | 0.446, 0.279, 0.520, 0.356, 0.511 |
+
+- **Spend:** 160.2M tokens, $2.61. Every run ended at the 32M cap, after 12.7–14.4 minutes; the simulation had given 11–15.
+- **Validity:** no run failed, there was no model error, and the quota held. `srcDirty` was false in every run.
+
+**Rule as written** (`compare.py` against the baseline):
+- Δ +0.066, 95% interval [−0.069, +0.198], p = 0.39.
+- Higher on 3 of 5 tasks (expr, tengo, wasmi), lower on none.
+- **Not decided.**
+- RP's mean is the highest of any arm against this baseline so far. The difference is still well inside the noise.
+- Against RW (descriptive): Δ +0.071, p = 0.25. RP is higher on expr, wasmi and scriggo, and lower on tengo (−0.02).
+
+**Process** (events; short scripts over `events.jsonl`, the same scripts for both arms):
+
+| | RW | RP |
+|---|---|---|
+| all 12 agents entered within | 0.7 min | 6.4–8.7 min |
+| first adder had a call with a path inside the repository before its first item | 3 of 25 | 15 of 24 (oxvg r1 got no item) |
+| projects with 2 or more adders before the first write | 11 of 25 | 6 of 25 |
+| weights 1–3 / 4–7 / 8–10 | 7 / 31 / 59 | 25 / 66 / 8 |
+| items added after their project's first write | 41 (8–10: 14) | 52 (8–10: 1) |
+| task items per run | 16–25 | 16–23 |
+| items with two or more holders | 21 | 20 |
+| take × holder pairs whose holder never edited that project | 30 of 104 | 13 of 104 |
+| drops | 10 | 11 |
+| first roles (of 60) | builder 51, scout 5 | builder 48, scout 10 |
+| write/edit calls per run | 104–183 | 118–152 |
+| `done` calls per run | 0–1 | 0–1 |
+
+- **The stagger worked as designed.** Agents entered 22–60 seconds apart.
+- **The weight guide was followed.** Bugs found along the way were added at low and middle weights.
+- **Items did not get split before building.** Most projects still had one item before their first write.
+- **The last entrants got little budget.** By entry order, agents 11 and 12 used 0.1–2.6M tokens each; the first two used 0.8–5.8M. Per-agent tokens are in the subagent report.
+
+**From the transcripts** (subagent report, key claims checked by hand; a correction is noted at its top):
+- **A short look, not a deep read.** The first adder looked at the repository before its first item in 21 of 23 project-runs by the subagent's broader count. Only 10 of the 23 made three or more calls there. In 12 of 25, the first adder still added one item for the whole project (RW 17), but only 5 of those 12 had weight 7 or more (RW 15 at weight 8 or more).
+- **Taking and holding:**
+  - The take-and-drop rule did not change behaviour: 33 takes came while the taker already held another item (RW 33).
+  - Saying which part one writes did change behaviour: 105 of 113 takes were followed by a post from the taker within a minute.
+  - Deferral ("you take it") happened once, in expr r1 at 11.7–11.9 minutes.
+- **Expr r1 (0):** the syntax layer was not built until the end.
+  - finch built only the builtins (edits at 1.6–4.6 min).
+  - An end-to-end expr item added at 8.1 minutes was taken at 8.3 by linnet, who never edited expr.
+  - heron's first core edits came at 13.9–14.0 minutes, and the run ended at 14.0 with the `ast` package not building.
+  - This one cell accounts for most of the spread: 0.86 of the 1.205 summed per-task gap between r1 and r2.
+- **Expr r3 (0.152):** one editor, and 67 of 79 new hidden tests fail.
+- **Wasmi r4 (0):** the library tests do not compile (`module coredump is private`). The subagent could not trace which edit caused it.
+- **Scriggo r0–r3 (0):** the hidden tests fail 50 of 53. Parsing and type checking were done, but the emitter and runtime wiring were thin. r4 (0.75) changed the most emitter files.
+- **Oxvg (0 in every run and arm):** this is neither a build bottleneck nor unfinished work.
+  - The same 6 of 10 hidden tests fail every time.
+  - 1–2 agents edited only `collapse_groups.rs` or `inline_styles.rs`, and passed the repository's own suite ("59/59 pass", wren, r1).
+  - No run touched `remove_empty_containers`.
+  - The change the description asks for is understood narrowly. The subagent's reading is that the swarm verifies only against existing tests.
+- **The subagent's suggestions (model reading, not tested):**
+  - Before calling a project finished, write and run one end-to-end example for each requirement of the task description.
+  - Have `tasks` show projects whose heavy part nobody holds. This needs code.
+
+Transcript analysis: [report](reports/2026-10-08-round28-transcripts.md) (model output; the claims listed at its top were checked by hand). Counts: [`deepswe/traces28.md`](deepswe/traces28.md).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -2842,3 +2913,4 @@ Transcript analysis: [report](reports/2026-10-08-round27-transcripts.md) (model 
 | 2026-10-07/08 | round 25, roles without owners and a budget clock (batches `e25-roles-r0..r4`, `e25-rclock-r0..r4`, code `7f6d59e`) | R n12-roles9, RC n12-roles9-clock (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5 each, 32M, 120 min | 285.1M ($4.53) | five-task means: R 0.241, RC 0.190, baseline 0.357; `done` per run R 0–1, RC 11–12; write/edit per run R 82–125, RC 53–84, baseline 125–165 | both not decided (p 0.20 and 0.071, RC's interval below 0); roles end early departures but build less; the budget clock makes the team wrap up and stop with budget left |
 | 2026-10-08 | round 26, roles that mostly build with the task list for findings (batches `e26-rtasks-r0..r4`, code `f602660`) | RT n12-roles9-tasks (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.63) | five-task mean RT 0.292 (0.09–0.44), baseline 0.357, R 0.241; write/edit per run 119–150; 44 task items, 17 of 31 non-builder items taken by another agent, 8 of those done; expr core reached in 4 of 5 runs | not decided (p 0.44); building and expr recover from R, wasmi lost to two broken final builds |
 | 2026-10-08 | round 27, a weighted, shared task list and building from the heaviest item (batches `e27-rweights-r0..r4`, code `7e54b16`) | RW n12-roles9-weights (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.67) | five-task mean RW 0.351 (0.19–0.44), baseline 0.357, RT 0.292; 97 task items, 70 of weight ≥7 (32 of weight 10); 21 items with two or more holders | not decided (p 0.91); weights inflated, projects decomposed in the first minute, heavy items mostly taken by their author |
+| 2026-10-08 | round 28, RW with parts read from the code, a weight guide, a slower stagger and three working rules (batches `e28-rparts-r0..r4`, code `e1d84cf`) | RP n12-roles9-parts (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.61) | five-task mean RP 0.422 (0.28–0.52), baseline 0.357, RW 0.351; entry spread over 6.4–8.7 min; weights 1–3/4–7/8–10: 25/66/8 of 99; duplicate decompositions 6 of 25 | not decided (p 0.39); highest mean so far; expr r1 core started at 13.9 of 14 min; oxvg 0 in every run |
