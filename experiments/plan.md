@@ -2637,6 +2637,12 @@ Transcript analysis: [report](reports/2026-10-08-round25-transcripts.md) (model 
 
 Transcript analysis: [report](reports/2026-10-08-round26-transcripts.md) (model output; the claims listed at its top checked by hand). Counts: [`deepswe/traces26.md`](deepswe/traces26.md).
 
+## 2026-10-08: housekeeping after round 26 (the user: "si" to each pending item; no measurement)
+
+- **A lone agent gets no team sentence.** With `messaging` on and one agent, the briefing read "Teammates: none. You are all equals…". `briefing()` in `src/swarm.ts` now leaves the team sentence out when there is only one agent (in the same commit as this note, "Leave out the team sentence when an agent has no teammates"). This changes the briefing of every single-agent run whose profile keeps `messaging` on, notably the strong single agent c4n1 (`c4g-*` profiles, one agent with messaging, the clock and the guards) used to calibrate tasks: its earlier calibrations ran with the contradictory sentence. Profiles with `messaging: false` (`solo*`) and every multi-agent profile are unchanged (smoke: `examples/hello.json` briefing without the sentence, `examples/trio.json` with it for all three agents).
+- **`profiles/c2-roles.json` stays as an old profile.** It no longer loads, because roles now require `role` in `boardTools`; it is not edited in place and not reused.
+- The sixteen 2026-10-06 reports linked from this notebook are now committed.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

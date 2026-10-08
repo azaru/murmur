@@ -442,7 +442,8 @@ export async function runSwarm(task: Task, opts: RunOptions) {
 function briefing(task: Task, profile: Profile, name: string, names: string[]) {
   const teammates = names.filter(n => n !== name).join(", ") || "none";
   const roles = Object.entries(profile.roles).map(([role, { summary }]) => `- ${role}: ${summary}`).join("\n");
-  const team = profile.messaging ? render(profile.teamBriefing, { teammates, roles }) : "";
+  // A lone agent gets no team sentence: "Teammates: none. You are all equals…" contradicts itself.
+  const team = profile.messaging && names.length > 1 ? render(profile.teamBriefing, { teammates, roles }) : "";
   return render(profile.briefing, { name, teammates, team, goal: task.goal, done: task.done, check: task.check });
 }
 
