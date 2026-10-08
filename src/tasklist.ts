@@ -2,19 +2,24 @@ import { defineTool } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import type { Log } from "./board.ts";
 
-type Item = { id: number; title: string; details: string; author: string; state: "open" | "taken" | "done"; holders: string[]; assignedBy?: string; note?: string; weight?: number };
+type Item = { id: number; title: string; details: string; author: string; state: "open" | "taken" | "done"; holders: string[]; takenAt: Record<string, number>; assignedBy?: string; note?: string; weight?: number };
 
 /** A shared list of work items, like an issue tracker: any agent adds items and takes them, and with taskAssign any agent may
  * hand an item to a teammate, who can give it back. murmur only keeps the list. With `shared`, several agents may hold one
- * item; with `weights`, items carry the weight their author gave them and the list shows the heaviest first. */
+ * item; with `weights`, items carry the weight their author gave them and the list shows the heaviest first; with `idle`, the
+ * list marks holders who have not written or edited a file since they took the item, once that is `minutes` old. */
 export class TaskList {
   items: Item[] = [];
   private shown = new Map<string, string>(); // agent -> progress line it last saw
 
-  constructor(private log: Log, private opts: { shared?: boolean; weights?: boolean } = {}) {}
+  constructor(private log: Log, private opts: {
+    shared?: boolean; weights?: boolean; idle?: { minutes: number; lastEdit: (agent: string) => number | undefined }; now?: () => number;
+  } = {}) {}
+
+  private now() { return (this.opts.now ?? Date.now)(); }
 
   add(agent: string, title: string, details = "", weight?: number) {
-    const item: Item = { id: this.items.length + 1, title, details, author: agent, state: "open", holders: [], weight };
+    const item: Item = { id: this.items.length + 1, title, details, author: agent, state: "open", holders: [], takenAt: {}, weight };
     this.items.push(item);
     this.log("task_add", { agent, id: item.id, title, ...(weight !== undefined ? { weight } : {}) });
     return item.id;
@@ -26,7 +31,7 @@ export class TaskList {
     if (item.state === "done") throw new Error(`#${id} is already done`);
     const others = item.holders.filter(h => h !== agent);
     if (others.length && !this.opts.shared) throw new Error(`#${id} is taken by ${others.join(", ")}`);
-    if (!item.holders.includes(agent)) item.holders.push(agent);
+    if (!item.holders.includes(agent)) item.holders.push(agent), item.takenAt[agent] = this.now();
     item.state = "taken";
     this.log("task_take", { agent, id, ...(others.length ? { with: others } : {}) });
   }
@@ -37,7 +42,7 @@ export class TaskList {
     if (item.state === "done") throw new Error(`#${id} is already done`);
     const others = item.holders.filter(h => h !== agent);
     if (others.length) throw new Error(`#${id} is taken by ${others.join(", ")}`);
-    Object.assign(item, { state: "taken", holders: [to], assignedBy: to === agent ? undefined : agent });
+    Object.assign(item, { state: "taken", holders: [to], takenAt: { [to]: this.now() }, assignedBy: to === agent ? undefined : agent });
     this.log("task_assign", { agent, id, to });
     return item;
   }
@@ -54,6 +59,7 @@ export class TaskList {
     const item = this.item(id);
     if (!item.holders.includes(agent) || item.state !== "taken") throw new Error(`you have not taken #${id}`);
     item.holders = item.holders.filter(h => h !== agent);
+    delete item.takenAt[agent];
     if (!item.holders.length) Object.assign(item, { state: "open", assignedBy: undefined });
     item.note = note;
     this.log("task_drop", { agent, id, note });
@@ -69,10 +75,17 @@ export class TaskList {
     const items = this.opts.weights
       ? [...this.items].sort((a, b) => Number(a.state === "done") - Number(b.state === "done") || (b.weight ?? 0) - (a.weight ?? 0) || a.id - b.id)
       : this.items;
-    return items.map(({ id, title, details, author, state, holders, assignedBy, note, weight }) => {
+    const idle = this.opts.idle, now = this.now();
+    // A holder is idle once it has held the item for idle.minutes without a write/edit anywhere since taking it.
+    const holder = (h: string, at: number) => {
+      const minutes = Math.floor((now - at) / 60_000);
+      return idle && minutes >= idle.minutes && (idle.lastEdit(h) ?? -Infinity) < at ? `${h} (no write/edit since taking it ${minutes} min ago)` : h;
+    };
+    return items.map(({ id, title, details, author, state, holders, takenAt, assignedBy, note, weight }) => {
       const by = assignedBy ? `, assigned by ${assignedBy}` : "";
       const w = weight !== undefined ? ` (weight ${weight})` : "";
-      const head = `#${id}${w} [${state === "open" ? "open" : state === "taken" ? `taken by ${holders.join(", ")}${by}` : `done by ${holders.join(", ")}`}] ${title} (added by ${author})`;
+      const taken = holders.map(h => holder(h, takenAt[h])).join(", ");
+      const head = `#${id}${w} [${state === "open" ? "open" : state === "taken" ? `taken by ${taken}${by}` : `done by ${holders.join(", ")}`}] ${title} (added by ${author})`;
       const body = state === "done" ? note : [details, note && `last note: ${note}`].filter(Boolean).join("\n");
       return body ? `${head}\n  ${body.replace(/\n/g, "\n  ")}` : head;
     }).join("\n");

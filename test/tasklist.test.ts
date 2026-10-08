@@ -68,3 +68,18 @@ test("with weights, unfinished items are listed heaviest first and done items la
   assert.deepEqual(list.list().split("\n").map(l => l.match(/^#\d+/)?.[0]), ["#3", "#1", "#2"]);
   assert.match(list.list(), /^#3 \(weight 5\) \[open\] middle/);
 });
+
+test("with idle, a holder without a write/edit since taking the item is marked once it held it long enough", () => {
+  let now = 0;
+  const edits = new Map<string, number>();
+  const list = new TaskList(() => {}, { shared: true, idle: { minutes: 3, lastEdit: a => edits.get(a) }, now: () => now });
+  list.add("a", "core");
+  list.take("a", 1), list.take("b", 1);
+  now = 2 * 60_000;
+  assert.match(list.list(), /#1 \[taken by a, b\] core/);
+  edits.set("b", now);
+  now = 5 * 60_000;
+  assert.match(list.list(), /#1 \[taken by a \(no write\/edit since taking it 5 min ago\), b\] core/);
+  list.drop("a", 1), list.take("a", 1);
+  assert.match(list.list(), /#1 \[taken by b, a\] core/);
+});

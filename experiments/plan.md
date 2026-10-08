@@ -2835,6 +2835,76 @@ The heading above says 16:05. The pre-registration commit `e1d84cf` is dated 16:
 
 Transcript analysis: [report](reports/2026-10-08-round28-transcripts.md) (model output; the claims listed at its top were checked by hand). Counts: [`deepswe/traces28.md`](deepswe/traces28.md).
 
+## Round 29: end-to-end tests before implementation, build items per layer, and marks on idle holders, against the fixed baseline (fixed before measuring, 2026-10-08, the commit time; the user's design: "Y si decimos que los test end to end sea lo primero que se escriba? Hay que afinar más lo de dividir. Tus opciones me gustan", then "B" (no implementation code before the tests), "no quiero forzar que sea el primero quien los escriba, sino que sea orgánico", and "Si, genial")
+
+**Why** (round 28's findings):
+- **Oxvg scored 0 in every run of every arm.** Agents changed one module and passed the repository's own 59 tests, while the same 6 of 10 hidden tests failed each time. Expr r3 and scriggo r0–r3 also failed most hidden tests after their own checks passed. The agents check a change against existing tests, not against the behaviour the description asks for.
+- **Splitting stayed rare.** 12 of 25 projects still had one item for the whole project.
+- **Expr r1 (0) failed on nominal holding.** The end-to-end item was held from 8.3 minutes by an agent who never edited expr, and the syntax layer was started at 13.9 of 14 minutes.
+- **The user's design:**
+  - End-to-end tests are written first, and no implementation code is written in a project until they exist (option B, strict).
+  - Whoever comes first writes them, not a designated agent: test items per requirement on the task list, taken by whoever arrives.
+  - Splitting is tied to the tests: one build item per layer, naming the tests it makes pass.
+  - Both of the main session's options are included: run every end-to-end test before calling a project finished, and mark idle holders in `tasks`.
+- **Stagger stays as in RP.** The user asked whether to stagger more. Entry already spans 6.4–8.7 of 13–14 minutes, and the last two entrants get 0.1–2.6M tokens. With test items split by requirement, more agents early can write tests in parallel.
+
+**New lever, default off:** `taskIdleMinutes` (this commit, with a unit test in `test/tasklist.test.ts`).
+- With `taskList`, `tasks` marks a holder who has held an item for that many minutes without a write/edit since taking it: "[taken by linnet (no write/edit since taking it 5 min ago)]".
+- A write/edit anywhere counts. Edits through bash are not seen.
+- The task list now records when each holder took an item. With the lever off, the list's output is unchanged.
+- The threshold is 3 minutes. In round 28, 90% of takes were followed by the holder's next write/edit within 2.2 minutes (median 0.8), and 11 of 113 takes by none.
+
+**Arm TF** (`profiles/n12-roles9-tests.json`; 12 agents, 32M, 120 minutes, five DeepSWE tasks, k=5). It is RP (round 28) with `taskIdleMinutes: 3` and these prompt changes:
+- **Team sentence.** It replaces "The first of you to work on a project reads the code the change touches, then adds its parts to the task list, each with its weight, before writing code." with:
+  - "Each project starts with end-to-end tests. Whoever finds a project without them on the task list reads its task description and adds one item per requirement, or group of related requirements, for its tests (titled "tests: ..."), takes one and says so on the board; whoever comes next takes another."
+  - "Nobody writes implementation code in a project until its test items are done. Meanwhile, read the code the change touches and add the build items: one for each layer or file the change crosses (for example parser, checker, compiler, runtime), each saying which tests it makes pass."
+  - "An end-to-end test drives the project through the entry point it already has (source text or input files in, output out), so that it compiles before the feature exists, and lives in its own test package or folder, so that a failure or a panic cannot stop the project's other tests. A test that cannot compile until new code exists stays in a folder outside the project until that code exists."
+  - "A build item is done when its tests pass, and a project is finished only when all its end-to-end tests pass."
+  - The rest is unchanged: the weight guide, "whoever finds more work on the way adds it", the take, say and drop rules, and building after a change.
+- **Builder.** It replaces the RP decomposition sentence and "Mark an item done … when the whole item works" with: "If the project you start on has no test items yet, start with its tests. If its tests exist but it has no build items, or one item for the whole project, read the code the change touches, then add one build item for each layer or file the change crosses (task_add), each naming the tests it makes pass, with its weight. Mark an item done (task_done) when its tests pass." The last sentence now also runs the end-to-end tests: "Build the project and run its existing tests and its end-to-end tests with run before you post that something works."
+- The other eight roles, the stagger (15 turns, 60-second ceiling) and `task_add`'s description are unchanged.
+
+**Realism check.**
+- Writing end-to-end tests from the specification before implementing is ordinary practice (test-first).
+- The tests are the agents' own. Nothing reveals the hidden grader, and the prompt names no task-provided signal. It would work for a task with no tests at all.
+
+**Control:** the round 23 baseline. It is not rerun, because the code since only adds a default-off lever. RP (round 28) and RW (round 27) are descriptive references.
+
+**Rule** (`compare.py`): better if p < 0.05, Δ > 0 and higher on at least 3 of 5 tasks; worse is symmetric; otherwise not decided. TF against RP is descriptive only.
+
+**What is read:**
+- **Order in each project:** whether the first write is a test, and the time from the project's first item to its first implementation write.
+- **Test items:** per project, and how many distinct agents wrote them (the organic split).
+- **Build items:** per project, and whole-project items.
+- **Where tests live:** whether the agents' tests sit in their own package or folder, and whether any agent test breaks a build or panics at the end.
+- **Idle marks:** how many marks were shown, and whether a marked item was joined or dropped afterwards.
+- **Spend:** tokens before the first implementation write, as the cost of B.
+- **Final diffs:** expr's core, and oxvg's files.
+- **As in round 28:** duplicates, weights by band, and holders who never edited.
+- **Transcripts:** a transcript analysis (subagent).
+
+**Smoke** (the code of this commit):
+- **Scripted, two agents, `taskIdleMinutes: 1` in a temporary copy of the profile:**
+  - wren took the item and slept 75 seconds. Its `tasks` then showed "[taken by wren (no write/edit since taking it 1 min ago), finch]".
+  - After wren wrote a file, the mark disappeared.
+  - finch, who joined at 63 seconds, was not marked until it too had held the item for a minute without a write.
+- **TF on a three-agent task with no tests (a calculator, unit conversion and a CLI written from scratch):** `all_done` in 122 seconds, 0.43M tokens.
+  - The first write was `tests_e2e/test_cli.py`, end-to-end tests through the CLI in their own folder, confirmed failing before any code existed.
+  - Three build items followed, one per module, each naming the tests it makes pass.
+  - Nobody wrote implementation code before the test item was done.
+  - The task was too small for the tests to be split: there was one test item, and the second agent entered after it was done.
+- **No default-profile run.** The lever is off by default, and the list's output with the lever off is checked by the existing unit tests (16 of 16 pass).
+
+**Estimate:** 5 × 32M = 160M tokens, about $2.6; about 2 hours.
+
+**Known threats:**
+- TF changes several things against RP at once (tests first, build items per layer, finishing on the end-to-end tests, idle marks), so a difference cannot be assigned to one of them.
+- B holds back building in a run of about 13 minutes.
+- Agents' tests may encode a narrow reading of the description, as their implementations did on oxvg.
+- An agent's test may break a package if the placement rule is ignored.
+- The control is not paired in time.
+- At k=5 only differences of about ±0.25 are decidable.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

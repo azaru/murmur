@@ -48,6 +48,7 @@ Teammates: {teammates}. You are all equals working on the same goal in this fold
   /** With taskList: task_add takes an optional teammate (`for`) and task_assign hands an item to one. It is a request between equals: the teammate is told on the board, called back if it had called done, and can give the item back with task_drop. */ taskAssign: false,
   /** With taskList: task_add requires a weight from 1 to 10 (how much of the goal the item covers), and tasks lists unfinished items heaviest first. */ taskWeights: false,
   /** With taskList: task_take on an item a teammate holds joins its holders instead of failing; any holder may mark it done, and it is open again once every holder dropped it. */ taskShared: false,
+  /** With taskList: tasks marks a holder who has held an item for this many minutes without a write/edit since taking it ("no write/edit since taking it 5 min ago"); write/edit anywhere counts, edits through bash are not seen. 0 is off. */ taskIdleMinutes: 0,
   /** done is refused while the agent has unread messages or the acceptance check fails. */ doneGate: false,
   /** How posts reach a busy agent: "steer" interrupts it; "attach" appends them to its next tool result; "pull" waits for inbox. */ delivery: "attach" as "steer" | "attach" | "pull",
   /** Share each agent's file writes and acceptance-check runs with teammates; needs delivery "attach". */ notices: false,
@@ -76,7 +77,7 @@ const ProfileSchema = Type.Object({
   briefing: text, teamBriefing: text, steer: text, wake: text, systemPromptAppend: text, sharedNotes: text,
   messaging: flag, threads: flag, taskList: flag, doneGate: flag, notices: flag, append: flag, writeGuard: flag, staleGuard: flag, clock: flag, clockTokens: flag, clockEffective: flag, clockUnlimited: flag, enterOnDone: flag, boardTail: flag, departureNotice: flag, teamStatus: flag, findings: flag, reviveOnMention: flag, taskAssign: flag, taskWeights: flag, taskShared: flag,
   revive: count, doneAfterGreen: count, relay: count, relayContext: count, helpAfter: count,
-  spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })), spawnAfterTurns: count, claimLease: Type.Optional(Type.Number({ minimum: 0 })),
+  spawnGapSeconds: Type.Optional(Type.Number({ minimum: 0 })), spawnAfterTurns: count, taskIdleMinutes: Type.Optional(Type.Number({ minimum: 0 })), claimLease: Type.Optional(Type.Number({ minimum: 0 })),
   toolDescriptions: Type.Optional(Type.Record(Type.String(), Type.String())),
   tools: Type.Optional(Type.Array(Type.String())), boardTools: Type.Optional(Type.Array(Type.String())),
   roles: Type.Optional(Type.Record(Type.String(), Type.Object({ summary: Type.String(), instructions: Type.String() }, { additionalProperties: false }))),
@@ -106,7 +107,7 @@ export function loadProfile(path?: string): Profile {
   if (profile.clockEffective && !profile.clock) throw new Error(`profile ${path}: clockEffective needs clock`);
   if (Object.keys(profile.roles).length && profile.messaging && !profile.boardTools.includes("role")) throw new Error(`profile ${path}: roles need "role" in boardTools`);
   if (profile.taskAssign && !profile.taskList) throw new Error(`profile ${path}: taskAssign needs taskList`);
-  if ((profile.taskWeights || profile.taskShared) && !profile.taskList) throw new Error(`profile ${path}: taskWeights and taskShared need taskList`);
+  if ((profile.taskWeights || profile.taskShared || profile.taskIdleMinutes) && !profile.taskList) throw new Error(`profile ${path}: taskWeights, taskShared and taskIdleMinutes need taskList`);
   if (profile.reviveOnMention && !profile.messaging) throw new Error(`profile ${path}: reviveOnMention needs messaging`);
   if (profile.notices && profile.delivery !== "attach") throw new Error(`profile ${path}: notices need delivery "attach"`);
   if (profile.threads && profile.boardTools.includes("post")) throw new Error(`profile ${path}: with threads, boardTools cannot offer post (use thread_new and reply)`);

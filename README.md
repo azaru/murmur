@@ -138,6 +138,7 @@ A profile holds everything an experiment may tune; the defaults are in `src/prof
   - `taskAssign`: with `taskList`, `task_add` takes an optional teammate (`for`) and `task_assign` hands an item to one, as a request between equals: the teammate is told on the board, called back if it had called `done`, and can give the item back;
   - `taskWeights`: with `taskList`, `task_add` requires a weight from 1 to 10 (how much of the goal the item covers) and `tasks` lists unfinished items heaviest first;
   - `taskShared`: with `taskList`, `task_take` on an item a teammate holds joins its holders instead of failing; any holder may mark it done, and it reopens once every holder dropped it;
+  - `taskIdleMinutes`: with `taskList`, `tasks` marks a holder who has held an item this many minutes without a write/edit since taking it ("no write/edit since taking it 5 min ago"); write/edit anywhere counts, edits through bash are not seen; 0 is off (default);
   - `branches`: a git branch per agent in its own worktree, with `merge` (integrate into the shared folder, reporting conflicts) and `update`; `"required"` puts every agent in its branch, `"optional"` leaves agents in the shared folder with a `branch` tool;
   - `roles`: a menu agents pick from, never assigned.
 - **Delivery of posts:**

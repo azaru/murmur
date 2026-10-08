@@ -127,7 +127,10 @@ export async function runSwarm(task: Task, opts: RunOptions) {
   const board = new Board(names, log, notify, budgetText);
   board.lease = profile.claimLease * 1000;
   board.threaded = profile.threads;
-  const tasks = profile.taskList ? new TaskList(log, { shared: profile.taskShared, weights: profile.taskWeights }) : undefined;
+  const tasks = profile.taskList ? new TaskList(log, {
+    shared: profile.taskShared, weights: profile.taskWeights,
+    idle: profile.taskIdleMinutes ? { minutes: profile.taskIdleMinutes, lastEdit: name => agentEdits.get(name)?.at } : undefined,
+  }) : undefined;
   const branches = profile.branches !== "off" ? new Branches(workspace, opts.runDir, profile.branches, log) : undefined;
   const root = (name: string) => branches?.root(name) ?? workspace; // the folder an agent works in
   const seen = new Map<string, string>(); // agent and path -> content digest it last read or wrote
@@ -198,7 +201,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
         board.notice(name, `${name} ran the acceptance check: ${failed ? `FAIL\n${tail}` : "PASS"}`);
       }
     }
-    if ((profile.departureNotice || profile.teamStatus) && ["write", "edit", "append"].includes(event.toolName) && !event.isError) recordEdit(name, String(event.input.path));
+    if ((profile.departureNotice || profile.teamStatus || profile.taskIdleMinutes) && ["write", "edit", "append"].includes(event.toolName) && !event.isError) recordEdit(name, String(event.input.path));
     if (event.toolName === "done" && output.startsWith("You are done")) {
       tasks?.release(name);
       left.set(name, Date.now());
