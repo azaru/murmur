@@ -2709,6 +2709,61 @@ Transcript analysis: [report](reports/2026-10-08-round26-transcripts.md) (model 
 
 Transcript analysis: [report](reports/2026-10-08-round27-transcripts.md) (model output; the claims listed at its top checked by hand). Counts: [`deepswe/traces27.md`](deepswe/traces27.md).
 
+## Round 28: RW with parts read from the code, a weight guide, a slower stagger and three working rules, against the fixed baseline (fixed before measuring, 2026-10-08 16:05; the user's design, "bien, perfecto, preparalo asi")
+
+**Why** (measured on round 27's events, `e27-rweights-r0..4`):
+- **Items were added before anyone read the code.** In 22 of 25 run × project pairs, the first agent to add an item for a project had made no tool call inside that project's repository; it had read the task description only. The first `task_add` of each run came at the agent's turn 3–6, 9–14 seconds in. This explains the whole-project items (17 of 25).
+- **Entry barely staggered.** Each agent entered 2–7 seconds after the previous one; all 12 were in within 40–44 seconds. In 11 of 25 projects, 2–4 agents added items before anyone wrote code (the duplicate decompositions). `spawnAfterTurns: 2` passes after two turns, and a turn lasts a median 3.7 seconds.
+- **Agents read the code before they write.** A project's first write came at its writer’s turn 12–31 (median about 20), 41–130 seconds in for 24 of 25 (oxvg r4: 11 minutes).
+- **Simulation of a larger gate**, made by shifting each agent's real token stream (no change in behaviour assumed, so only a rough guide):
+  - 15 turns or 60 seconds: the last agent enters at 6–8 minutes, the run ends at 11–15 minutes;
+  - 20 turns or 75 seconds: the last agent enters at 9–11 minutes, the run ends at 13–17 minutes;
+  - the current gate: the last agent enters at 0.7 minutes, the run ends at 9–12 minutes.
+  - A time ceiling is needed, because one turn can be a 6-minute build (oxvg).
+- **The user's decisions:**
+  - Stagger much more.
+  - The weights get a guide by bands, not a rule that a project's parts add up to 10 ("evitará que añadan mas tareas si ya suman 10, cada bug encontrado por el camino debe poder añadirlo").
+
+**Arm RP** (`profiles/n12-roles9-parts.json`; 12 agents, 32M, 120 minutes, five DeepSWE tasks, k=5). It is RW (round 27) with profile changes only; there is no code change:
+- **Stagger:** `spawnAfterTurns: 15` (was 2). `spawnGapSeconds: 60` is unchanged and is now the ceiling: each agent enters about 50 seconds after the previous one.
+- **Weight guide**, in the team sentence and in `task_add`'s description (`toolDescriptions`): "1-3 for a detail fixed in one place (a bug found on the way, a missing import, a test, an edge case); 4-7 for one part of a change that can be built and tested on its own (a function, a file, a layer); 8-10 for most of a project, several parts together, which is split into parts before anyone builds it." The weight parameter's own description in `src/` ("1 is a detail, 10 is most of a project") is unchanged.
+- **Team sentence:**
+  - "The first of you to work on a project reads the code the change touches, then adds its parts to the task list, each with its weight, before writing code. Whoever finds more work on the way, however small, adds it too."
+  - "Take an item only when you start on it now, and say on the board which part you are writing; before you move to other work, drop what you hold (task_drop)."
+  - "When you finish a change, build its project: if your change broke the build, fix it or undo it before anything else." The proposal said "after every edit"; it was narrowed to "a change" because an oxvg build takes minutes.
+- **Builder:** "If the project you start on has no items yet, or one item for the whole project, first read the code the change touches, then add its parts (task_add): one item for each piece that can be built and tested on its own, with its weight." The rest of RW's text and the other eight roles are unchanged.
+
+**Control:** the round 23 baseline. It is not rerun, because the code is the same as round 27 (`7e54b16` plus the record commits). RW (round 27) and RT (round 26) are descriptive references.
+
+**Rule** (`compare.py`): better if p < 0.05, Δ > 0 and higher on at least 3 of 5 tasks; worse is symmetric; otherwise not decided. RP against RW is descriptive only.
+
+**What is read:**
+- **Entry:** entry times, and how many agents are in when each project gets its first item.
+- **Before the first item:** the first adder's code reads in the repository before that item.
+- **Decomposition:** parts per project before its first write, and whole-project items (weight 8–10 that are never split).
+- **Weights:** their distribution by band, and items added after the first write (bugs found on the way).
+- **Duplicates:** projects with 2 or more adders before the first write.
+- **Holding:** drops, and holders who never edit the project.
+- **Builds:** broken builds at the end.
+- **Expr:** writers and its core in the final diff.
+- **Spend:** tokens per agent (the last entrants' share).
+- **Transcripts:** a transcript analysis (subagent).
+
+**Smoke** (this profile, `examples/trio.json` with 3 agents): `all_done` in 101 seconds, 0.28M tokens.
+- wren read `test_trio.py`, then added three parts (weights 4, 5, 4) at turns 5–7, and said on the board which one it was writing.
+- finch entered at 25 seconds, at wren's 15th turn. Its first `tasks` showed the three parts, and it took a different one.
+- robin entered at 79 seconds, when finch ended its turn.
+- There was no code change, so no default-profile run was needed.
+
+**Estimate:** 5 × 32M = 160M tokens, about $2.7. Runs should last longer than round 27's (the simulation gives 11–15 minutes), so the round takes about 1.5–2 hours.
+
+**Known threats:**
+- RP changes several things against RW at once (stagger, reading before adding, weight guide, three working rules), so a difference cannot be assigned to one of them.
+- The later entrants get less of the budget.
+- Reading code first may move the first item past the 15-turn gate, so that the second agent enters to an empty list.
+- The control is not paired in time.
+- At k=5 only differences of about ±0.25 are decidable.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

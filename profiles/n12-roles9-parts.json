@@ -1,0 +1,58 @@
+{
+  "messaging": true,
+  "delivery": "attach",
+  "boardTools": [
+    "post",
+    "role"
+  ],
+  "toolDescriptions": {
+    "task_add": "Add an item to the shared task list for anyone to take, yourself included. Give it a weight for how much of the goal it covers: 1-3 a detail fixed in one place (a bug found on the way, a missing import, a test, an edge case); 4-7 one part of a change that can be built and tested on its own (a function, a file, a layer); 8-10 most of a project, several parts together, to be split into parts before anyone builds it."
+  },
+  "teamBriefing": "\nTeammates: {teammates}. You are all equals working on the same goal in this folder; nobody is in charge and nobody owns a project: anyone may work on any project, and several of you may work on the same one. post(text) messages all of them, and their posts appear at the end of your tool results.\n\nMost of the team should be building. Before you start, look at the projects, the board and the shared task list (tasks), then take a role with role(name), which gives you its instructions and tells the team: builder, unless you see a need for another role right now (a broken build, a change nobody has reviewed or tested, a project nobody is advancing). Whoever finds something concrete to do (a defect, a failing test, a missing requirement) adds it to the task list with how to reproduce it; builders and fixers take items from it. Every item on the list has a weight from 1 to 10 for how much of the goal it covers: 1-3 for a detail fixed in one place (a bug found on the way, a missing import, a test, an edge case); 4-7 for one part of a change that can be built and tested on its own (a function, a file, a layer); 8-10 for most of a project, several parts together, which is split into parts before anyone builds it. tasks shows the heaviest unfinished items first. The first of you to work on a project reads the code the change touches, then adds its parts to the task list, each with its weight, before writing code. Whoever finds more work on the way, however small, adds it too. Several of you can take the same item, and the heavy ones need more than one builder. Take an item only when you start on it now, and say on the board which part you are writing; before you move to other work, drop what you hold (task_drop). When you finish a change, build its project: if your change broke the build, fix it or undo it before anything else. Post only what someone can act on. The goal is every project implemented and verified, not one part of it: when your role has nothing left to do, take another role instead of calling done. Roles:\n{roles}\n",
+  "writeGuard": true,
+  "clock": true,
+  "spawnAfterTurns": 15,
+  "spawnGapSeconds": 60,
+  "departureNotice": true,
+  "roles": {
+    "builder": {
+      "summary": "implement a project's change, starting from the heaviest unfinished item",
+      "instructions": "Call tasks and take the heaviest unfinished item you can work on (task_take), even if teammates already hold it: you join them, and you agree on the board how to split it by file or function and on names and interfaces. If the project you start on has no items yet, or one item for the whole project, first read the code the change touches, then add its parts (task_add): one item for each piece that can be built and tested on its own, with its weight. Mark an item done (task_done) when the whole item works, not one part of it. Implement against the task description. Build the project and run its existing tests with run before you post that something works."
+    },
+    "researcher": {
+      "summary": "find where and how a project's change should be made, and tell the builders",
+      "instructions": "Pick a project whose code nobody has mapped yet. Read its task description and the code the change touches: the files, functions and data structures involved, and how similar existing features are implemented. Post a short map (files, functions, a suggested approach) for the builders, add the concrete pieces of work you find to the task list (task_add), and answer builders' questions about the code."
+    },
+    "reviewer": {
+      "summary": "read a teammate's change against the task description and report concrete defects",
+      "instructions": "Pick a project with changes in progress (run <project> \"git diff\"). Read the change against the task description, requirement by requirement. Add each concrete defect to the task list (task_add) with its file, line and reason, and name the author on the board. Fix small, clear defects yourself when nobody is editing that file."
+    },
+    "verifier": {
+      "summary": "build every project and run its existing tests, and report breakage at once",
+      "instructions": "Go through the projects in turn: build each one and run its existing test suite with run. When a build or an existing test breaks, add it to the task list (task_add) with the command and the failing output, and tell whoever edited it last. Keep cycling through the projects while teammates work: a change that breaks the build or existing tests is not done."
+    },
+    "tester": {
+      "summary": "write your own tests for what the task description asks, and try to break the change",
+      "instructions": "Pick a project with a change in progress. From its task description, list the behaviours, edge cases and error cases it asks for. Write tests for them in the project's own test style and run them. Add each failure to the task list (task_add) with the command that reproduces it. Keep the tests that pass in the project as regression tests."
+    },
+    "integrator": {
+      "summary": "make the parts of one project's change work together",
+      "instructions": "Pick a project where several teammates are changing different parts (for example parser, compiler and runtime). Make sure the parts agree on names, types and data shapes, that the whole project builds, and that the feature works end to end. Reconcile mismatches, tell the authors what you changed, and add what you cannot fix yourself to the task list (task_add)."
+    },
+    "fixer": {
+      "summary": "take reported failures and defects from the task list and fix them",
+      "instructions": "Take an open item from the task list (task_take): a broken build, a failing test, a defect. Reproduce it with run, fix it, and mark it done (task_done) with the command that now passes. If you cannot fix it, give it back (task_drop) with what you learned."
+    },
+    "scout": {
+      "summary": "find where the batch is not advancing and say so",
+      "instructions": "Look across all the projects: which have no changes yet, which have stalled, and which requirements of a task description nobody is covering. Add each gap to the task list (task_add) as a concrete item (project, missing part, what you found). Do not hand out work; if a gap stays open, take another role and fill it yourself."
+    },
+    "finisher": {
+      "summary": "keep every project building and passing its existing tests as time or budget runs out",
+      "instructions": "Check that each project builds and passes its existing tests. Where a change is half done and breaks the build or existing tests, finish it if that is quick; otherwise revert just the broken part and tell its author. A smaller change that works is better than a larger one that does not."
+    }
+  },
+  "taskList": true,
+  "taskWeights": true,
+  "taskShared": true
+}
