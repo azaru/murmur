@@ -3368,6 +3368,15 @@ Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model 
 - **Why:** the single agent's scores track when it gives up, not how hard the task is. It called `done` after 0.25–6M of its 6.4M (meriyah 0.25M in 1.1 minutes, 0; bandit 0.25M in 1.8 minutes, 0.98; katex 0.67M in 2.7 minutes, 0, against 0.96 in the other repetition), so its "middle" means were often 0 and 1 averaged.
 - **More candidates:** the new tasks were mostly easy for the swarm (all of group 2 at 0.88 or more in its first repetition), so a second, harder selection (changes that cross a parser, checker, compiler or interpreter, like expr, tengo, scriggo and anko) is validated without a model and screened with the swarm in a follow-up batch under the same rule (k=2, 32M per batch of five).
 
+**Amendment 2 (2026-10-09 ~21:50, after the first set finished and before the second set was launched; the user approved the main session's recommendation, "Sigue tu recomendaciónes").**
+- **First set, swarm means (k=2):** anko 0.52, yaegi 0.48 (0.97, 0), bandit 0.44 (0.88, 0), abs 0.74, sql-formatter 0.84, sqlfmt 0.88, tomlkit 0.90, csstree 0.90, meriyah 0.95, katex 0.99. With expr 0.42 and wasmi 0.46 (round 23), exactly five were eligible, but two of them are all-or-nothing.
+- **Second set:** ten more candidates ([report](reports/2026-10-09-deepswe-candidates3.md), model output; three tasks' test counts checked by hand), screened with the default swarm only (`deepswe/screen33b.sh`, two groups of five, 32M, k=2, the two groups at once): group h1 tengo-callable-instance-isolation, dynamodb-toolbox-lazy-recursive-schemas, python-statemachine-state-data-scoping, helm-array-merge-strategies, gql-incremental-graphql-delivery; group h2 kea-atomic-signal-selectors, adaptix-name-mapping-aliases, kombu-virtual-queue-dead-lettering, superjson-error-stack-serialization, task-task-graph-export.
+- **Selection rule, final:**
+  - eligible: swarm mean in [0.2, 0.7] (both sets; expr, wasmi, tengo and scriggo from round 23);
+  - a task is **all-or-nothing** when every one of its swarm runs is ≤0.1 or ≥0.85; all-or-nothing tasks rank after every other eligible task;
+  - then expr and wasmi first, then the distance of the swarm mean from 0.45, smallest first;
+  - at most one task per repository.
+
 **Known threats:**
 - k=2 is a screen; a task's mean can move by ±0.3 between runs (Pi alone spans 0.0–0.75 on one task).
 - A swarm's per-task score depends on the other four tasks of its batch (agents spread over them), and the groups here differ from the final batch.
