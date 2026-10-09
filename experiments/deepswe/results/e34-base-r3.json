@@ -1,0 +1,120 @@
+{
+  "batch": "e34-base-r3",
+  "arm": "swarm",
+  "profile": "profiles/n12-base-peers.json",
+  "profileSha256": "33092e7840624775",
+  "agents": 12,
+  "tasks": [
+    "expr-try-catch-errors",
+    "wasmi-trap-coredumps",
+    "dynamodb-toolbox-lazy-recursive-schemas",
+    "anko-typed-variable-bindings",
+    "python-statemachine-state-data-scoping"
+  ],
+  "tokenCap": 32000000,
+  "timeoutMinutes": 120,
+  "tokens": 32034398,
+  "costUsd": 0.4920342,
+  "minutes": 15,
+  "endReason": "budget",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "expr-try-catch-errors": {
+      "diffBytes": 7154,
+      "leakCheck": {
+        "ok": true,
+        "all": 1023,
+        "head": 1023,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "686643214052394fb41e743ccc34f4f3beedef46",
+        "log": "all=1023 | head=1023 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 0.00961322492251022,
+      "binary": 0,
+      "parsed": 663
+    },
+    "wasmi-trap-coredumps": {
+      "diffBytes": 23682,
+      "leakCheck": {
+        "ok": true,
+        "all": 1364,
+        "head": 1364,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "564a5c17e53ff516bdb4418a56b34dfb7c7da39d",
+        "log": "all=1364 | head=1364 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.36363636363636365,
+      "new_frac": 0.36363636363636365,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 83
+    },
+    "dynamodb-toolbox-lazy-recursive-schemas": {
+      "diffBytes": 23089,
+      "leakCheck": {
+        "ok": true,
+        "all": 1660,
+        "head": 1660,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "b47066219124d81838c066c0990524ec19292df0",
+        "log": "all=1660 | head=1660 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.32381236801126306,
+      "new_frac": 0.32432432432432434,
+      "base_frac": 0.9984214680347278,
+      "binary": 0,
+      "parsed": 1306
+    },
+    "anko-typed-variable-bindings": {
+      "diffBytes": 96347,
+      "leakCheck": {
+        "ok": true,
+        "all": 1102,
+        "head": 1102,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "da7ded2c6eb1b93186d46294914289f8342a0411",
+        "log": "all=1102 | head=1102 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.5555555555555556,
+      "new_frac": 0.5555555555555556,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 102
+    },
+    "python-statemachine-state-data-scoping": {
+      "diffBytes": 13040,
+      "leakCheck": {
+        "ok": true,
+        "all": 494,
+        "head": 494,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "754e1a52f3fe28c83eb4f2b3d1b1734786de9a56",
+        "log": "all=494 | head=494 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.5694444444444444,
+      "new_frac": 0.5694444444444444,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 1434
+    }
+  },
+  "meanScore": 0.36248974632952535,
+  "code": {
+    "commit": "d5ac68984cb81e001e88c923bf6f121ed2768ffc",
+    "srcDirty": false
+  },
+  "date": "2026-10-09T23:16:03.526Z"
+}

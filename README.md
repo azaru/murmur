@@ -6,7 +6,7 @@
 
 ## Findings so far (2026-10-06)
 
-**A new task batch is being chosen (round 33, a screen).** One of the five benchmark tasks (oxvg, in Rust) scored 0 for every configuration, so it measured slow builds, not teamwork. Twenty new tasks were tried with the default swarm, and the five whose scores sit in the middle (room to improve, not all or nothing) will form a new baseline. Results from rounds 23–32 compare only with each other.
+**A new task batch and baseline (rounds 33–34).** One of the five benchmark tasks (oxvg, in Rust) scored 0 for every configuration, so it measured slow builds, not teamwork. Twenty new tasks were tried with the default swarm. Three of them, with the old expr and wasmi, form a batch whose scores sit in the middle: room to improve, not all or nothing. The default swarm scores 0.45 on it (five runs, 0.32 to 0.58). As before, runs end at the budget cap within 11–15 minutes; agents leave hard parts unfinished with most of the budget unspent, and the cap cuts edits in progress. Results from rounds 23–32 compare only with each other.
 
 **Without an oracle, a deadline notice near the end of the budget (round 32, k=5 against the baseline).** Agents could not see the end coming: their clock read about 100 minutes left while the shared budget ran out after 11–15. A new lever gives each agent one notice once 75% of the budget is spent: start nothing new, and leave every project building. Agents were also told to run tests under a time limit. The swarm scored 0.41 against 0.36 (p = 0.48, not decided). No test hung, nobody stopped early, and late edits fell by a third. But trees left broken only fell from 4 to 2 of 25: the notice comes about 1.5 minutes before the end, and some agents still start new work after it. A clock that counts down to whichever runs out first was tried in round 25: it protected the tree, but sent the team home with budget left.
 
@@ -26,7 +26,7 @@
 
 **Without an oracle, calling departed agents back (round 24, k=5 against the baseline).** Letting teammates wake an agent that left by naming it scored 0.43 against the baseline's 0.36, and adding task hand-overs 0.37; neither difference is outside the run-to-run spread. Revived agents did go back to work, but agents rarely called anyone back: they took over the leaver's work instead.
 
-**A fixed baseline (round 23).** One swarm of twelve agents with the current defaults scores 0.36 on the five real repository tasks (five runs, 0.19 to 0.52). Later experiments are compared with it instead of rerunning a control each time.
+**A fixed baseline (round 23, replaced by round 34).** One swarm of twelve agents with the current defaults scores 0.36 on the five real repository tasks (five runs, 0.19 to 0.52). Later experiments are compared with it instead of rerunning a control each time. Since round 34 the baseline is the same swarm on a recalibrated batch without oxvg: 0.45 (five runs, 0.32 to 0.58).
 
 **Without an oracle, rival teams against one swarm at equal size and budget (round 22, closed early, no verdict).** Splitting twelve agents and 32M tokens into three rival teams of four gave 0.24 on average against 0.30 for one swarm of twelve. The best team reached 0.36, but nothing could pick it without the grader. Small teams lost whole repositories when one agent quit in the first minutes.
 
@@ -129,7 +129,7 @@ docker run --rm -v "$PWD/runs:/murmur/runs" -v "$PWD/examples:/murmur/examples:r
 
 #### Profile
 
-A profile holds everything an experiment may tune; the defaults are in `src/profile.ts`. Since 2026-10-07 the defaults are the base profile, [`profiles/n12-base-peers.json`](profiles/n12-base-peers.json) (the round 23 baseline; `n12-base.json` keeps the earlier team sentence): a post-only board whose posts arrive on tool results (`delivery: "attach"`, `boardTools: ["post"]`), staggered entry (`spawnAfterTurns: 2`, `spawnGapSeconds: 60`), `writeGuard`, `clock` and `departureNotice` on. Before that date all of these were off and the board offered every tool, so an older profile that omits one of them behaved differently at its own commit.
+A profile holds everything an experiment may tune; the defaults are in `src/profile.ts`. Since 2026-10-07 the defaults are the base profile, [`profiles/n12-base-peers.json`](profiles/n12-base-peers.json) (the round 23 and round 34 baseline; `n12-base.json` keeps the earlier team sentence): a post-only board whose posts arrive on tool results (`delivery: "attach"`, `boardTools: ["post"]`), staggered entry (`spawnAfterTurns: 2`, `spawnGapSeconds: 60`), `writeGuard`, `clock` and `departureNotice` on. Before that date all of these were off and the board offered every tool, so an older profile that omits one of them behaved differently at its own commit.
 
 - **Prompts:**
   - `briefing` and `teamBriefing` templates;

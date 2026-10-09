@@ -3430,7 +3430,7 @@ Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model 
 
 **Cost:** swarm 231.0M ($3.66: first set 102.8M, second 128.2M), one agent 50.8M ($0.89); 281.8M, $4.55 in all.
 
-**Pending, once the new baseline is chosen and run** (its own pre-registration, k=5, `n12-base-peers`, 32M): `compare.py`'s default baseline, the round 23 sentence in AGENTS.md ("the baseline is round 23"), and the TL;DR of `docs/research.md` all change to the new batch. Rounds 23–32 stay comparable only with each other.
+**Pending, once the new baseline is chosen and run** (done in round 34) (its own pre-registration, k=5, `n12-base-peers`, 32M): `compare.py`'s default baseline, the round 23 sentence in AGENTS.md ("the baseline is round 23"), and the TL;DR of `docs/research.md` all change to the new batch. Rounds 23–32 stay comparable only with each other.
 
 ## Round 34: the new fixed baseline on the recalibrated DeepSWE batch (fixed before measuring, 2026-10-10, the commit time; the user approved the main session's recommendation after round 33, helm swapped for python-statemachine: "Si, adelante con lo recomendado")
 
@@ -3456,6 +3456,33 @@ Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model 
 - k=5: the round 23 baseline spanned 0.19–0.52 on identical runs, so the reference itself carries noise of about ±0.06 on its mean.
 - Two tasks (expr, wasmi) have swarm values from a batch that included oxvg; their scores may move with the new neighbours.
 - The selection used the swarm screen (k=2), so the chosen tasks' means may regress towards the extremes.
+
+### Round 34 result (2026-10-10; batches 22:14–23:30 UTC on 2026-10-09, code `d5ac689`)
+
+| task | runs | mean (sd) | round 33 screen (k=2) |
+|---|---|---:|---:|
+| expr | 0.000, 0.342, 0.038, 0.000, 0.645 | 0.205 (0.285) | 0.420 (round 23) |
+| wasmi | 0.636, 0.364, 0.955, 0.364, 0.000 | 0.464 (0.356) | 0.464 (round 23) |
+| dynamodb-toolbox | 0.784, 0.513, 0.432, 0.324, 0.162 | 0.443 (0.232) | 0.500 |
+| anko | 0.222, 0.556, 0.556, 0.556, 0.222 | 0.422 (0.183) | 0.514 |
+| python-statemachine | 0.556, 0.958, 0.931, 0.569, 0.583 | 0.719 (0.206) | 0.583 |
+| **five-task mean** | 0.440, 0.546, 0.582, 0.362, 0.323 | **0.451** (0.113) | |
+
+160.2M tokens, $2.43. Every run ended at the 32M cap, after 11.3–15.0 minutes. No usage-limit stop, no invalid batch.
+
+**Checks as pre-registered:**
+- **python-statemachine's mean, 0.719, is just above the band** (0.7); it is not all-or-nothing (0.56–0.96). Reported to the user.
+- **expr fell to 0.205**, inside the band, because two of its five trees were broken at the end (r0: `vm.handleTryPanic undefined`; r3: `*ast.TryNode does not implement ast.Node`); with r2 (0.038) it scored under 0.05 three times.
+- **Broken trees: 3 of 25** (expr r0, expr r3, wasmi r4 with five rustc errors in the lib tests), each checked by hand in the `base.log` of the grading.
+- **Spread:** sd 0.113 against round 23's 0.135. With the exact permutation rule at k=5, a simulated difference of +0.23 is decided about 80% of the time (+0.20 about 70%, +0.15 about 43%).
+
+**Switched:** `compare.py`'s default baseline is now `e34-base-r0..r4`; AGENTS.md and README.md say so.
+
+**Findings from the transcripts** ([report](reports/2026-10-10-round34-transcripts.md), model output; three claims checked by hand):
+- **The three broken trees are the cap cutting an unbuilt edit burst:** expr r0 (heron called `vm.handleTryPanic` 0.5 minutes before the cap and never defined it; it ran no build on expr), expr r3 (linnet added `TryNode` without `String()` 2.1 minutes before the cap, last build before its syntax edits), wasmi r4 (crane mid-refactor; a teammate's `cargo test` 0.1 minutes before the cap shows the errors). The same failure as in rounds 23–32, now on the new batch.
+- **Owners leave hard slices early:** 29 `done` calls; 10 from agents that never edited (0.6–3.1 minutes, 84–99% of the budget left, "every repository is claimed"), and 6 from owners who said the rest was unfinished (2.0–6.4 minutes, 75–95% left). A run scored high when one agent picked up the orphaned slice alone (wasmi r2 0.955, expr r4 0.645) and low when several split it without integrating (wasmi r3).
+- **Per task, one missing layer decides the score:** expr's parser/compiler/VM work started at 5.3–13.8 minutes, and every run missed a part (block `try {}`, named catch); python-statemachine scored 0.93–0.96 when the async engine got the change and 0.56–0.58 when only the base engine did (27 of the 30–32 failures are `[async]`); anko's 0.222 runs parsed the type as a bare identifier (`[]int64`, `map`, `*T` fail), and every run returns the assigned value instead of `nil` on a type error, the repo's `RunOutput` convention; dynamodb-toolbox has one different defect per run.
+- **Other costs:** one agent spent 33% of r0's tokens hopping across three tasks and finished none; cargo lock waits 1–8 per batch; no hang.
 
 ## Campaign registry
 
@@ -3541,3 +3568,4 @@ Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model 
 | 2026-10-09 | round 31, trace the siblings of what is new, a failing end-to-end test is open work (batches `e31-rsibl-r0..r4`, code `5048291`) | TS n12-roles9-siblings (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.63) | five-task mean TS 0.368 (0.14–0.53), baseline 0.357, TF 0.439; missed places 2 of 10 (TF 5); tengo r1 0 (a test file that never ends), wasmi r4 0 (edit 2 s before the cap) | not decided (p 0.91); the targeted measure moved but scores did not; loopholes: multi-layer item titles, end-to-end tests through a shortcut entry point |
 | 2026-10-09 | round 32, a deadline notice at 75% of the budget, one layer per build item, end-to-end tests through the user's path (batches `e32-rdead-r0..r4`, code `3f2065b`) | TD n12-roles9-deadline (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.67) | five-task mean TD 0.405 (0.34–0.50, sd 0.067), baseline 0.357, TS 0.368, TF 0.439; broken trees 2 of 25 (TS 4), one from an edit after the notice; no hang, no `done` after the notice, late writes 63 (TS 99); missed places 6 of 10 | not decided (p 0.48); A removed hangs and early stops but not the late break; B changed nothing measurable |
 | 2026-10-09 | round 33, screen for a recalibrated DeepSWE batch (batches `s33-swarm-g{1,2}-r{0,1}`, `s33-swarm-h{1,2}-r{0,1}`, `s33-solo-g{1,2,3}-r{0,1}`, code `c68fc44`) | default swarm n12-base-peers (n=12, 32M per batch of five); one agent per task solo-clock-tokens (6.4M per task) | 20 new candidates × 2 (swarm), first 10 + expr, wasmi, tengo, scriggo × 2 (one agent) | 281.8M ($4.55) | swarm means in [0.2, 0.7]: expr 0.42, wasmi 0.46, dynamodb-toolbox 0.50, anko 0.51, helm 0.52 (0.84, 0.20), python-statemachine 0.58, kea 0.63, task 0.63; all-or-nothing bandit 0.44, yaegi 0.49; 10 of 20 new tasks at 0.8 or more | batch by the rule: expr, wasmi, dynamodb-toolbox, anko, helm; helm borderline, python-statemachine the alternative, to the user before the new baseline |
+| 2026-10-10 | round 34, the new fixed baseline on the recalibrated batch (batches `e34-base-r0..r4`, code `d5ac689`) | default swarm n12-base-peers (n=12) | expr, wasmi, dynamodb-toolbox, anko, python-statemachine × 5, 32M, 120 min | 160.2M ($2.43) | five-task mean 0.451 (0.32–0.58, sd 0.113); expr 0.205, wasmi 0.464, dynamodb-toolbox 0.443, anko 0.422, python-statemachine 0.719 (just above the band); broken trees 3 of 25 | the new baseline; `compare.py` defaults to it; python-statemachine's 0.72 reported to the user |

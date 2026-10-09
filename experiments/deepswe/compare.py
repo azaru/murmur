@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compare an arm's DeepSWE batches with the fixed baseline (the decision rule since 2026-10-07).
 
-  python3 experiments/deepswe/compare.py <arm-batch>... [--baseline e23-base-r0,...,e23-base-r4]
+  python3 experiments/deepswe/compare.py <arm-batch>... [--baseline e34-base-r0,...,e34-base-r4]
 
 Each batch is one run: its five-task mean is one observation. The rule:
 - Δ = arm mean − baseline mean of the per-run five-task means;
@@ -9,13 +9,16 @@ Each batch is one run: its five-task mean is one observation. The rule:
 - better if p < 0.05, Δ > 0 and the arm's per-task mean is higher on at least 3 of the 5 tasks; worse if p < 0.05, Δ < 0
   and lower on at least 3 of 5; otherwise not decided.
 Also printed: per-task means and sd, and a 95% bootstrap interval for Δ (resampling runs within each group).
+
+The default baseline is round 34 (the recalibrated batch, since 2026-10-10); round 23 (`e23-base-r*`, with oxvg) compares
+only with rounds 23–32.
 """
 import itertools, json, random, statistics as st, sys
 from pathlib import Path
 
 RESULTS = Path(__file__).parent / "results"
 args = sys.argv[1:]
-baseline = [f"e23-base-r{i}" for i in range(5)]
+baseline = [f"e34-base-r{i}" for i in range(5)]
 if "--baseline" in args:
     i = args.index("--baseline"); baseline = args[i + 1].split(","); del args[i:i + 2]
 if not args: sys.exit(__doc__)
