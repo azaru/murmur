@@ -26,6 +26,8 @@ This is the curated record of every experiment run with murmur so far: the quest
 
 ## TL;DR
 
+**Tracing the siblings of what is new (round 31, against the fixed baseline, k=5):** TS is TF (round 29, end-to-end tests first) with two rules taken from a contrast of high- and low-scoring runs. First, to find every place a change must reach, search the project for every place that handles an existing feature like the new one, and add each missing place as an item. Second, a failing end-to-end test with no item covering its cause becomes an item. It scored 0.368 against 0.357 (p = 0.91, not decided), and 0.07 below TF on all five tasks. The targeted measure moved: projects that missed a required place (expr compiler or visitors, scriggo emitter) fell from 5 of 10 in TF to 2 of 10. The scores did not follow. Most of the drop is two accidents: a test file that never ends sank tengo r1 to 0, and an edit two seconds before the cap broke wasmi r4. The round also exposed two loopholes. An item titled with several layers counted as covering them, and end-to-end tests that drive a shortcut entry point went green while the real path failed.
+
 **An integrate item per project and stubs (round 30, against the fixed baseline, k=5):** TI is TF (round 29, end-to-end tests first) with three changes: a last item per project, "integrate: make every end-to-end test pass"; stubs allowed so that tests compile before the API exists; and no idle marks. It scored 0.434 against 0.357 (p = 0.32, higher on 4 of 5 tasks, not decided), level with TF (−0.005). Neither mechanism took hold. The integrate item appeared in only 8 of 25 projects, 4 were marked done, and its holders mostly built layers instead of wiring them. Stubs were mentioned once. What still separates high from low scores is whether every layer of the change was built: the expr compiler and the scriggo emitter were missing in the runs that scored 0. Oxvg scored 0 in every run, because a cold Rust build of about 6.5 minutes does not fit a 13-minute run.
 
 **End-to-end tests before implementation (round 29, against the fixed baseline, k=5):** TF is RP plus four changes. Whoever finds a project without end-to-end tests adds test items and writes them, and nobody implements before they are done. Build items are cut per layer and name the tests they make pass. A new lever, `taskIdleMinutes`, marks idle holders in `tasks`. It scored 0.439 against 0.357 (p = 0.38, higher on 4 of 5 tasks, not decided), the highest mean so far, and +0.02 over RP. In 24 of 25 projects the first write was a test, and in 16 the tests had several writers. Oxvg scored for the first time in any arm (0.5 in r3), in the one run that changed the selector visitor as well as the optimiser job. The strict rule cost Rust projects the most: oxvg got no implementation in three runs, and wasmi's tests could not compile before its new API existed. Projects split into layers without an integrator failed (scriggo r1–r4 at 0, while one agent alone scored 0.854). The idle marks were shown 37 times and acted on never.
@@ -689,6 +691,40 @@ The user's design: three teams of three (the base profile `n12-base` inside each
 
 **From the transcripts** ([report](../experiments/reports/2026-10-06-round21-transcripts.md), model output; key claims checked by hand): no agent doubts or tests the "unseen" claim, hides work or looks for its own team under `/rivals`; reasoning is recorded only as short titles, so belief and indifference cannot be told apart. No post or `done` reason restates the aim of beating the others. Leaving is unchanged: all six `done` calls by team members say the work is incomplete and none mentions the rivals. In teams of three, the default briefing "Teammates: finch, robin, equals working on the same goal" is read as a fourth teammate called "equals" (17 posts in 3 of 6 teams; none in round 20's 12-agent runs).
 
+### Round 31: trace the siblings of what is new, a failing end-to-end test is open work (160.1M tokens, $2.63; code `5048291`)
+
+The user preferred finding what to polish to repeating runs. Two analyses came first:
+- **Deference to stale owners** proved rare: 2–4 of 50 projects lost time to it ([report](../experiments/reports/2026-10-09-deference.md)).
+- **A contrast of high- and low-scoring runs** found that the lows missed a place the change must reach: the scriggo emitter, the expr compiler or a visitor, or wasmi's capture. The failure was often visible in the agents' own output ([report](../experiments/reports/2026-10-09-high-vs-low.md)).
+
+**TS** (`n12-roles9-siblings`) is TF with three sentences:
+- **Team sentence:** look for an existing feature of the same kind and search the whole project for every place that handles it; each place the new one must reach is an item.
+- **Team sentence:** a failing end-to-end test with no item covering its cause becomes an item, done only when that test passes.
+- **Builder:** the same search when adding something new.
+
+| | expr | oxvg | scriggo | tengo | wasmi | five-task mean (runs) | missed places (expr + scriggo, of 10) |
+|---|---:|---:|---:|---:|---:|---|---|
+| baseline | 0.420 | 0 | 0.150 | 0.749 | 0.464 | **0.357** (0.19–0.52) | 4 |
+| TF (round 29) | 0.602 | 0.100 | 0.171 | 0.877 | 0.445 | **0.439** (0.31–0.62) | 5 |
+| TI (round 30) | 0.468 | 0 | 0.321 | 0.881 | 0.500 | **0.434** (0.34–0.56) | 5 |
+| TS | 0.600 | 0 | 0.124 | 0.705 | 0.409 | **0.368** (0.14–0.53), p = 0.91 | 2 |
+
+Rule as written: not decided against the baseline (Δ +0.011, interval [−0.160, +0.172]). Against TF, descriptive: −0.071, p = 0.47, lower on all five tasks.
+
+**From the transcripts** ([report](../experiments/reports/2026-10-09-round31-transcripts.md), model output; key claims checked by hand; counts in [`deepswe/traces31.md`](../experiments/deepswe/traces31.md)):
+- **The rules were used, unevenly.**
+  - Sibling searches were as frequent as in TF, but came earlier in expr (median 2.9 against 5.5 minutes).
+  - Few items came from them.
+  - About 17 items named a failing end-to-end test, and about 9 were closed with that test passing.
+- **Two accidents explain most of the drop.**
+  - **Tengo r1 (0):** a scratch test file with a loop that never ends was left in the tree. The hidden base suite timed out on it after 10 minutes, and the agents' own test calls on it never returned.
+  - **Wasmi r4 (0):** an edit to the executor two seconds before the budget cap left four compile errors.
+  - Together with oxvg's single TF success (0.5 in r3, 0 here), these account for 0.054 of the 0.071 gap.
+- **Expr r1 (0.025): two loopholes.**
+  - A search reached the checker, but item #6, titled "checker/compiler/VM", counted as covering it, and its holder built only the compiler and VM.
+  - The team's end-to-end tests called `Eval(source, nil)`, which skips the checker, so they went green while the real path panicked.
+- **Scriggo** touched the emitter in four runs and still failed. Its hidden panics were in the agents' own output from 6–10 minutes, too late to fix the wide emitter before the cap.
+
 ### Round 30: an integrate item per project, stubs before tests, no idle marks (160.1M tokens, $2.54; code `3e23e34`)
 
 The user approved three changes after round 29 and asked for a review of the existing levers first. The review found no lever that fits the remaining failures (in `experiments/plan.md`), and `taskAssign` was left for a later round. **TI** (`n12-roles9-integrate`) is TF with three changes:
@@ -889,6 +925,7 @@ No rule is applied (k=1 for the teams). The rule's arithmetic would give −0.06
 | Reading the code before decomposing, a weight guide and a slower stagger turn the task list into parts that builders share | 28 | **Not decided** (+0.066 against the baseline, p = 0.39; +0.071 against RW): stagger and weights worked as designed (duplicate decompositions 11 → 6 of 25; 8 of 99 items at 8–10); splitting before building stayed rare; one unbuilt expr core decided the spread |
 | Writing end-to-end tests before implementing makes the swarm build what the description asks | 29 | **Not decided** (+0.082 against the baseline, p = 0.38; +0.017 against RP): tests came first in 24 of 25 projects and oxvg scored for the first time (one run); waiting starved the Rust projects, and split layers without an integrator failed (scriggo r1–r4) |
 | An integrate item per project and stubs let a swarm that splits a change into layers wire them together | 30 | **Not decided** (+0.077 against the baseline, p = 0.32; −0.005 against TF): integrate items appeared in 8 of 25 projects and their holders mostly built layers; stubs were not used; scores still follow whether every layer was built |
+| Searching for every place an existing feature like the new one is handled, and turning red end-to-end tests into items, makes the swarm build every layer | 31 | **Not decided** (+0.011 against the baseline, p = 0.91; −0.071 against TF): missed places fell from 5 to 2 of 10, but scores did not follow; two end-of-run accidents (a non-terminating test, a last-second edit) and two loopholes (multi-layer item titles, tests through a shortcut entry point) |
 | Roles that build by default, joining the hardest part, with findings on the task list, help 12 agents | 26 | **Not decided** (−0.064 against the baseline, p = 0.44; +0.051 against R): building and expr recover from R; the list carries small defects, not hard gaps; ganging up on the hard part happened in 1 of 5 runs and once broke a build |
 | Telling agents nobody owns a project and offering a menu of roles keeps them working and helps | 25 | **Not decided, lower** (−0.116, p = 0.20): early departures end (0–1 `done` per run), but a quarter fewer edits and expr 0.42 → 0.08; ownership re-forms anyway |
 | A clock that counts down to the end of the budget helps the team use it | 25 | **Not decided, lower** (−0.167, p = 0.071, interval below 0): agents wrap up together and stop with 4–11M of 32M unspent |
@@ -930,6 +967,7 @@ No rule is applied (k=1 for the teams). The rule's arithmetic would give −0.06
 - **Round 28:** RP changes several things against RW at once (stagger, reading before adding, weight guide, three working rules), so no effect can be assigned to one of them. The last entrants spend less of the budget. oxvg scores 0 in every arm, which caps every arm's mean near 0.8. At k=5 only differences of about ±0.25 are decidable.
 - **Round 29:** TF changes four things against RP at once (tests first, build items per layer, finishing on the end-to-end tests, idle marks), so no effect can be assigned to one of them. The strict rule interacts with the language: tests that need new APIs cannot compile first, and Rust build times make waiting expensive. Oxvg's first non-zero is a single run. At k=5 only differences of about ±0.25 are decidable.
 - **Round 30:** TI changes three things against TF at once (integrate item, stubs, no idle marks). Neither new mechanism was used much, so the round mostly re-measures TF. Its tie with TF (−0.005) is within run-to-run noise, and at k=5 only about ±0.25 is decidable.
+- **Round 31:** the missed-place measure is coarse: touching a layer is not building it (scriggo touched its emitter in four runs and still failed). Two zeros came from end-of-run accidents that any arm can suffer, so the −0.07 against TF is within noise. At k=5 only about ±0.25 is decidable.
 - **Round 26:** RT changes three things against R at once (the task list for findings, builder by default, no slicing), so no effect can be assigned to one of them; two of its five wasmi results are 0 from a final build that did not compile, which a single late edit decides; at k=5 only differences of about ±0.25 are decidable.
 - **Round 25:** R changes the team sentence and adds the roles at once; RC's clock estimate is noisy and its wall time was longer from build-lock contention; at k=5 only differences of about ±0.25 are decidable.
 - **Round 24:** the code changed mid-round (`3e52e3e`: the `done` result no longer carries unread posts) after five of ten batches; M and MT differ by the task list as well as by hand-over; at k=5 only differences of about ±0.25 are decidable.
@@ -1049,6 +1087,7 @@ For each experiment: whether its question or theory was written down before meas
 | Round 28 (parts, weight guide, slower stagger) | yes, committed before launch (`e1d84cf`) | `deepswe/batch28.sh`, `profiles/n12-roles9-parts.json` | `deepswe/results/e28-*.json`, `deepswe/traces28.md` | yes, `reports/2026-10-08-round28-transcripts.md` | yes (not decided) |
 | Round 29 (end-to-end tests first, items per layer, idle marks) | yes, committed before launch (`9b74367`) | `deepswe/batch29.sh`, `profiles/n12-roles9-tests.json` | `deepswe/results/e29-*.json`, `deepswe/traces29.md` | yes, `reports/2026-10-08-round29-transcripts.md` | yes (not decided) |
 | Round 30 (an integrate item per project, stubs) | yes, committed before launch (`3e23e34`) | `deepswe/batch30.sh`, `profiles/n12-roles9-integrate.json` | `deepswe/results/e30-*.json`, `deepswe/traces30.md` | yes, `reports/2026-10-08-round30-transcripts.md` | yes (not decided) |
+| Round 31 (trace siblings, red end-to-end tests as items) | yes, committed before launch (`5048291`) | `deepswe/batch31.sh`, `profiles/n12-roles9-siblings.json` | `deepswe/results/e31-*.json`, `deepswe/traces31.md` | yes, `reports/2026-10-09-round31-transcripts.md`, with `reports/2026-10-09-deference.md` and `reports/2026-10-09-high-vs-low.md` | yes (not decided) |
 | Task families (L2, L3) | calibration rule yes | `reports/2026-10-01-task-families.md` | calibration batches in `batch/` | yes | L2 dropped by rule, L3 used |
 
 **Known gaps** (they cannot be fixed after the fact, or they live outside this repo):
@@ -1075,7 +1114,7 @@ An index by round and by kind is in [`experiments/README.md`](../experiments/REA
   - the oracle audit and the build of the blind panel;
   - the round 11 phase 1 transcript analysis and the tool-usage audit;
   - the lever recount for 12-agent swarms and the round 15 transcript analyses (stages A, B and C);
-  - the round 16 stage A, round 17, rounds 18–19, round 20 to round 30 transcript analyses, and the swarm communication diagnosis;
+  - the round 16 stage A, round 17, rounds 18–19, round 20 to round 31 transcript analyses, and the swarm communication diagnosis;
   - the DeepSWE candidate selection for round 17;
   - the DeepSWE batch feasibility notes, driver build and offline-scorer fix (the driver and per-batch results are in `experiments/deepswe/`);
   - the literature review (eight source reviews and a synthesis).

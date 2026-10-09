@@ -3159,6 +3159,74 @@ Transcript analysis: [report](reports/2026-10-08-round30-transcripts.md) (model 
 - **Prompt length:** the rules add three sentences to an already long briefing.
 - **The control** is not paired in time.
 
+### Round 31 result and rule applied (2026-10-09 12:50; batches 08:53–10:39 UTC, code `5048291`)
+
+| task | baseline (k=5) | TF (round 29) | TS mean (sd) |
+|---|---:|---:|---:|
+| expr | 0.420 | 0.602 | 0.600 (0.390) |
+| oxvg | 0.000 | 0.100 | 0.000 (0.000) |
+| scriggo | 0.150 | 0.171 | 0.124 (0.224) |
+| tengo | 0.749 | 0.877 | 0.705 (0.396) |
+| wasmi | 0.464 | 0.445 | 0.409 (0.329) |
+| **five-task mean** | **0.357** | **0.439** | **0.368** (0.163) |
+| runs | 0.257, 0.518, 0.356, 0.194, 0.458 | 0.555, 0.312, 0.390, 0.618, 0.320 | 0.471, 0.136, 0.430, 0.534, 0.268 |
+
+160.1M tokens, $2.63. Every run ended at the 32M cap, after 10.9–14.4 minutes. No run failed, there was no model error, the quota held, and `srcDirty` was false.
+
+**Rule as written** (`compare.py` against the baseline):
+- Δ +0.011, 95% interval [−0.160, +0.172], p = 0.91.
+- Higher on 1 of 5 tasks, lower on 3.
+- **Not decided.**
+- Against TF (descriptive): Δ −0.071, p = 0.47, lower on all 5 tasks.
+
+**Pre-registered behaviour measure: missed places.**
+- **Result:** 2 of 10 projects (expr r1, scriggo r4), against TF 5, TI 5 and the baseline 4. That meets the descriptive threshold (2 or fewer).
+- **But the scores did not follow:**
+  - scriggo touched the emitter in r0–r3 and scored 0, 0.517, 0 and 0.104;
+  - expr r1, the one missed expr, scored 0.025.
+
+**Process** (same script as rounds 29–30):
+
+| | TF | TI | TS |
+|---|---|---|---|
+| all 12 agents entered within | 6.5–8.9 min | 6.3–7.6 min | 6.1–6.9 min |
+| a project's first write is a test | 24 of 24 | 23 of 25 | 20 of 25 |
+| projects whose tests had 2 or more writers | 17 | 17 | 12 |
+| implementation write before every test item naming the project was done | 8 | 7 | 6 |
+| items | 110 | 114 | 116 |
+| weights 1–3 / 4–7 / 8–10 | 22 / 85 / 3 | 11 / 97 / 6 | 18 / 92 / 6 |
+| first implementation write, median | 4.2 min, 2.6M | 4.3 min, 2.8M | 3.9 min, 3.1M |
+| write/edit calls per run | 106–139 | 104–156 | 127–167 |
+| implementation writes in the last 2 minutes | 100 | 97 | 99 |
+
+**From the transcripts** (subagent report, key claims checked by hand):
+- **Use of the rules:**
+  - **Sibling searches:**
+    - their number did not change: 267 against 265 (TF) and 277 (TI);
+    - in expr they came earlier: the first multi-layer search was at a median 2.9 minutes, against 5.5 in TF;
+    - only 3 of 116 items mention a sibling, and none was created from a search.
+  - **Items naming a failing end-to-end test:** about 17. 12 were closed, about 9 of them with the named test passing.
+- **Two events explain most of the gap against TF.** The other part of the gap is oxvg, where TF's single 0.5 (r3) has no counterpart; oxvg was 0 in every TS run. Tengo r1 and oxvg together are 0.054 of the 0.071 gap.
+  - **Tengo r1 (0, existing tests too).** robin wrote `parser/tmp_test.go` at 5.8 minutes, with a loop that never ends, and left it in the tree. The hidden base log times out after 10 minutes in `TestTmpAhead` (checked by hand). robin's and tern's test calls never returned, so nobody saw it fail. The other four TS tengo runs average 0.882 (TF 0.877).
+  - **Wasmi r4 (0, nothing ran).** linnet's edit to `engine/executor/mod.rs` at 10.53 minutes, 2 seconds before the budget abort, left four compile errors (checked by hand: last edit 10.53, abort 10.56).
+- **Expr r1 (0.025): a title covered a layer that nobody built.**
+  - wren's sibling search at 3.9 minutes reached the checker. No item followed, because item #6 was titled "checker/compiler/VM", and the rule says "unless an item already covers it".
+  - Its holder built the VM and the compiler.
+  - The team's end-to-end tests call `expr.Eval(source, nil)`, which skips the checker, so they went green (checked by hand: no `checker/` file in the diff, and the hidden panic is through `checker.go:233`).
+- **Scriggo failed on depth and time, not on untouched layers.**
+  - The hidden panics (`reflect.Type is types.definedType, not *reflect.rtype`) were in the agents' own output from 6–10 minutes, and the runs ended at 10.6–14.1.
+  - Rule 2 works when the failing test is quick to fix (all 7 such items closed in r0). It comes too late for scriggo's wide emitter.
+
+**Reading.**
+- **The rules changed the targeted measure** (missed places from 5 to 2 of 10) **but not the outcome.** Touching a layer is not building it, and the measure was coarse, as the pre-registration warned.
+- **The drop against TF is mostly two accidents** (a non-terminating test file, an edit at the last second) **and oxvg's single TF success.** At k=5 that cannot be told from noise.
+- **Two loopholes appeared:**
+  - an item title that names several layers counts as covering them;
+  - end-to-end tests that drive a shortcut entry point (`Eval` without the checker) can go green while the real path fails.
+- **The remaining loss is shared by every arm:** an end-of-run tree that does not build or test. Here that was a test that never ends and a last-second edit.
+
+Transcript analysis: [report](reports/2026-10-09-round31-transcripts.md) (model output; the claims listed at its top were checked by hand). Counts: [`deepswe/traces31.md`](deepswe/traces31.md).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -3240,3 +3308,4 @@ Transcript analysis: [report](reports/2026-10-08-round30-transcripts.md) (model 
 | 2026-10-08 | round 28, RW with parts read from the code, a weight guide, a slower stagger and three working rules (batches `e28-rparts-r0..r4`, code `e1d84cf`) | RP n12-roles9-parts (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.61) | five-task mean RP 0.422 (0.28–0.52), baseline 0.357, RW 0.351; entry spread over 6.4–8.7 min; weights 1–3/4–7/8–10: 25/66/8 of 99; duplicate decompositions 6 of 25 | not decided (p 0.39); highest mean so far; expr r1 core started at 13.9 of 14 min; oxvg 0 in every run |
 | 2026-10-08 | round 29, end-to-end tests before implementation, build items per layer, idle-holder marks (batches `e29-rtests-r0..r4`, code `9b74367`) | TF n12-roles9-tests (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.59) | five-task mean TF 0.439 (0.31–0.62), baseline 0.357, RP 0.422; first write a test in 24 of 25 projects; oxvg 0.5 in r3 (first non-zero); 37 idle marks shown, none acted on | not decided (p 0.38); highest mean so far; the strict rule starved the Rust projects; layers split without an integrator (scriggo r1–r4) |
 | 2026-10-08 | round 30, an integrate item per project, stubs before tests, no idle marks (batches `e30-rinteg-r0..r4`, code `3e23e34`) | TI n12-roles9-integrate (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.54) | five-task mean TI 0.434 (0.34–0.56), baseline 0.357, TF 0.439; integrate items in 8 of 25 projects, 4 done; stubs barely used; oxvg 0 in every run | not decided (p 0.32); ties TF; scores follow whether every layer was built, not the integrate item; oxvg starved by cold Rust builds |
+| 2026-10-09 | round 31, trace the siblings of what is new, a failing end-to-end test is open work (batches `e31-rsibl-r0..r4`, code `5048291`) | TS n12-roles9-siblings (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.63) | five-task mean TS 0.368 (0.14–0.53), baseline 0.357, TF 0.439; missed places 2 of 10 (TF 5); tengo r1 0 (a test file that never ends), wasmi r4 0 (edit 2 s before the cap) | not decided (p 0.91); the targeted measure moved but scores did not; loopholes: multi-layer item titles, end-to-end tests through a shortcut entry point |
