@@ -1,0 +1,120 @@
+{
+  "batch": "s33-swarm-h1-r1",
+  "arm": "swarm",
+  "profile": "profiles/n12-base-peers.json",
+  "profileSha256": "33092e7840624775",
+  "agents": 12,
+  "tasks": [
+    "tengo-callable-instance-isolation",
+    "dynamodb-toolbox-lazy-recursive-schemas",
+    "python-statemachine-state-data-scoping",
+    "helm-array-merge-strategies",
+    "gql-incremental-graphql-delivery"
+  ],
+  "tokenCap": 32000000,
+  "timeoutMinutes": 120,
+  "tokens": 32058136,
+  "costUsd": 0.49887280000000006,
+  "minutes": 25.2,
+  "endReason": "budget",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "tengo-callable-instance-isolation": {
+      "diffBytes": 18963,
+      "leakCheck": {
+        "ok": true,
+        "all": 344,
+        "head": 344,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "a8c6a82ceb4186b06c83b26a3a505bc5488c8063",
+        "log": "all=344 | head=344 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.5217391304347826,
+      "new_frac": 0.5217391304347826,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 139
+    },
+    "dynamodb-toolbox-lazy-recursive-schemas": {
+      "diffBytes": 30823,
+      "leakCheck": {
+        "ok": true,
+        "all": 1660,
+        "head": 1660,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "b47066219124d81838c066c0990524ec19292df0",
+        "log": "all=1660 | head=1660 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.7027027027027027,
+      "new_frac": 0.7027027027027027,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 1307
+    },
+    "python-statemachine-state-data-scoping": {
+      "diffBytes": 18990,
+      "leakCheck": {
+        "ok": true,
+        "all": 494,
+        "head": 494,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "754e1a52f3fe28c83eb4f2b3d1b1734786de9a56",
+        "log": "all=494 | head=494 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.5967837330722793,
+      "new_frac": 0.5972222222222222,
+      "base_frac": 0.9992657856093979,
+      "binary": 0,
+      "parsed": 1434
+    },
+    "helm-array-merge-strategies": {
+      "diffBytes": 20145,
+      "leakCheck": {
+        "ok": true,
+        "all": 9421,
+        "head": 9421,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "f2e60c2c3868d670f91555588491f43f962e20e2",
+        "log": "all=9421 | head=9421 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.19607843137254902,
+      "new_frac": 0.19607843137254902,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 19
+    },
+    "gql-incremental-graphql-delivery": {
+      "diffBytes": 26861,
+      "leakCheck": {
+        "ok": true,
+        "all": 398,
+        "head": 398,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "f94442b070b1867cbcbb60c2f2b39c71d82393d0",
+        "log": "all=398 | head=398 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9411764705882353,
+      "new_frac": 0.9411764705882353,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 820
+    }
+  },
+  "meanScore": 0.5916960936341098,
+  "code": {
+    "commit": "c68fc448eef5cfba96139f6dffcfeb1bd1cc9a6b",
+    "srcDirty": false
+  },
+  "date": "2026-10-09T21:22:40.676Z"
+}

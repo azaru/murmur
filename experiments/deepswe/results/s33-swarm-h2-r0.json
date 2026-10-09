@@ -1,0 +1,120 @@
+{
+  "batch": "s33-swarm-h2-r0",
+  "arm": "swarm",
+  "profile": "profiles/n12-base-peers.json",
+  "profileSha256": "33092e7840624775",
+  "agents": 12,
+  "tasks": [
+    "kea-atomic-signal-selectors",
+    "adaptix-name-mapping-aliases",
+    "kombu-virtual-queue-dead-lettering",
+    "superjson-error-stack-serialization",
+    "task-task-graph-export"
+  ],
+  "tokenCap": 32000000,
+  "timeoutMinutes": 120,
+  "tokens": 32095007,
+  "costUsd": 0.5093643000000002,
+  "minutes": 17.9,
+  "endReason": "budget",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "kea-atomic-signal-selectors": {
+      "diffBytes": 22448,
+      "leakCheck": {
+        "ok": true,
+        "all": 1106,
+        "head": 1106,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "7788561c3af327b6c3268b350435fed0294c30b5",
+        "log": "all=1106 | head=1106 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.3333333333333333,
+      "new_frac": 0.3333333333333333,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 173
+    },
+    "adaptix-name-mapping-aliases": {
+      "diffBytes": 16842,
+      "leakCheck": {
+        "ok": true,
+        "all": 1719,
+        "head": 1719,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "642b73ff9ddc8e337f6c64a1598f471e4604d5be",
+        "log": "all=1719 | head=1719 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.8636363636363636,
+      "new_frac": 0.8636363636363636,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 2738
+    },
+    "kombu-virtual-queue-dead-lettering": {
+      "diffBytes": 19020,
+      "leakCheck": {
+        "ok": true,
+        "all": 3898,
+        "head": 3898,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "8f5527b390a1470744de326f79e1341c427f6e3b",
+        "log": "all=3898 | head=3898 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9571250186372446,
+      "new_frac": 0.9605263157894737,
+      "base_frac": 0.9964589235127479,
+      "binary": 0,
+      "parsed": 1490
+    },
+    "superjson-error-stack-serialization": {
+      "diffBytes": 15337,
+      "leakCheck": {
+        "ok": true,
+        "all": 302,
+        "head": 302,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "cdbb7ecf4c8cbd189b427513e649d58386341283",
+        "log": "all=302 | head=302 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.7375,
+      "new_frac": 0.7375,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 197
+    },
+    "task-task-graph-export": {
+      "diffBytes": 12978,
+      "leakCheck": {
+        "ok": true,
+        "all": 2680,
+        "head": 2680,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "2d4be63c688c8d53ee8652f542fee28548571a6f",
+        "log": "all=2680 | head=2680 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.3,
+      "new_frac": 0.3,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 36
+    }
+  },
+  "meanScore": 0.6383189431213883,
+  "code": {
+    "commit": "c68fc448eef5cfba96139f6dffcfeb1bd1cc9a6b",
+    "srcDirty": false
+  },
+  "date": "2026-10-09T20:37:48.949Z"
+}

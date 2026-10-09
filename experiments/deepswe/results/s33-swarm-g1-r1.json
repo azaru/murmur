@@ -1,0 +1,120 @@
+{
+  "batch": "s33-swarm-g1-r1",
+  "arm": "swarm",
+  "profile": "profiles/n12-base-peers.json",
+  "profileSha256": "33092e7840624775",
+  "agents": 12,
+  "tasks": [
+    "sql-formatter-bigquery-pipe-formatting",
+    "sqlfmt-create-table-ddl-formatting",
+    "anko-typed-variable-bindings",
+    "yaegi-go-embed-directives",
+    "katex-multicolumn-array-spans"
+  ],
+  "tokenCap": 32000000,
+  "timeoutMinutes": 120,
+  "tokens": 32026729,
+  "costUsd": 0.48415298000000007,
+  "minutes": 21.1,
+  "endReason": "budget",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "sql-formatter-bigquery-pipe-formatting": {
+      "diffBytes": 545004,
+      "leakCheck": {
+        "ok": true,
+        "all": 3095,
+        "head": 3095,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "6c936a87a8abdf07e15fb88f12ca9b3f543d6f0f",
+        "log": "all=3095 | head=3095 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 1,
+      "new_frac": 1,
+      "base_frac": 1,
+      "binary": 1,
+      "parsed": 5737
+    },
+    "sqlfmt-create-table-ddl-formatting": {
+      "diffBytes": 13976,
+      "leakCheck": {
+        "ok": true,
+        "all": 503,
+        "head": 503,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "c71e2e8e09edd8115e798c9ff0e48e1c8288ff29",
+        "log": "all=503 | head=503 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.875,
+      "new_frac": 0.875,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 1241
+    },
+    "anko-typed-variable-bindings": {
+      "diffBytes": 385958,
+      "leakCheck": {
+        "ok": true,
+        "all": 1102,
+        "head": 1102,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "da7ded2c6eb1b93186d46294914289f8342a0411",
+        "log": "all=1102 | head=1102 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.5555555555555556,
+      "new_frac": 0.5555555555555556,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 102
+    },
+    "yaegi-go-embed-directives": {
+      "diffBytes": 7394,
+      "leakCheck": {
+        "ok": true,
+        "all": 1097,
+        "head": 1097,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "0b39f81f91c8e3b73ec7111a572da39fb750f5ce",
+        "log": "all=1097 | head=1097 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0,
+      "new_frac": 0,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 96
+    },
+    "katex-multicolumn-array-spans": {
+      "diffBytes": 1923911,
+      "leakCheck": {
+        "ok": true,
+        "all": 2246,
+        "head": 2246,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "9446482b2a8773d21735f609ea3196d28aa8e79d",
+        "log": "all=2246 | head=2246 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 1,
+      "new_frac": 1,
+      "base_frac": 1,
+      "binary": 1,
+      "parsed": 696
+    }
+  },
+  "meanScore": 0.6861111111111111,
+  "code": {
+    "commit": "a69d2484fb69f5ba9b3ea9d6142dcff4de32ad9d",
+    "srcDirty": false
+  },
+  "date": "2026-10-09T18:55:54.023Z"
+}

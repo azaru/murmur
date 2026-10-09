@@ -1,0 +1,120 @@
+{
+  "batch": "s33-swarm-g2-r0",
+  "arm": "swarm",
+  "profile": "profiles/n12-base-peers.json",
+  "profileSha256": "33092e7840624775",
+  "agents": 12,
+  "tasks": [
+    "meriyah-explicit-resource-declarations",
+    "bandit-interprocedural-taint-checks",
+    "tomlkit-toml-table-converters",
+    "csstree-shorthand-expansion-compression",
+    "abs-module-cache-flags"
+  ],
+  "tokenCap": 32000000,
+  "timeoutMinutes": 120,
+  "tokens": 29835660,
+  "costUsd": 0.4811115200000001,
+  "minutes": 31.8,
+  "endReason": "all_done",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "meriyah-explicit-resource-declarations": {
+      "diffBytes": 13949,
+      "leakCheck": {
+        "ok": true,
+        "all": 971,
+        "head": 971,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "65111108e498336efe8f59f65ad10c57abe03e04",
+        "log": "all=971 | head=971 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9591459355902726,
+      "new_frac": 0.9591836734693877,
+      "base_frac": 0.9999606562536885,
+      "binary": 0,
+      "parsed": 50899
+    },
+    "bandit-interprocedural-taint-checks": {
+      "diffBytes": 14376,
+      "leakCheck": {
+        "ok": true,
+        "all": 1498,
+        "head": 1498,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "10c10f3cf0d0df608a0faaf4349f1f659eef6f22",
+        "log": "all=1498 | head=1498 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.8787878787878788,
+      "new_frac": 0.8787878787878788,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 363
+    },
+    "tomlkit-toml-table-converters": {
+      "diffBytes": 11287,
+      "leakCheck": {
+        "ok": true,
+        "all": 459,
+        "head": 459,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "0e4f4fc48c4484707016adc940b19537d76ffdb8",
+        "log": "all=459 | head=459 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9166666666666666,
+      "new_frac": 0.9166666666666666,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 1024
+    },
+    "csstree-shorthand-expansion-compression": {
+      "diffBytes": 17712,
+      "leakCheck": {
+        "ok": true,
+        "all": 1249,
+        "head": 1249,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "b8943c94281a2091f5dae90f1673c68a3185a539",
+        "log": "all=1249 | head=1249 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.8860759493670886,
+      "new_frac": 0.8860759493670886,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 16790
+    },
+    "abs-module-cache-flags": {
+      "diffBytes": 13899,
+      "leakCheck": {
+        "ok": true,
+        "all": 652,
+        "head": 652,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "0c2b24c8a6c49eb7fffb1747eb08177175cb742d",
+        "log": "all=652 | head=652 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 1,
+      "new_frac": 1,
+      "base_frac": 1,
+      "binary": 1,
+      "parsed": 23
+    }
+  },
+  "meanScore": 0.9281352860823813,
+  "code": {
+    "commit": "a69d2484fb69f5ba9b3ea9d6142dcff4de32ad9d",
+    "srcDirty": false
+  },
+  "date": "2026-10-09T18:33:34.409Z"
+}

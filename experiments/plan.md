@@ -3383,6 +3383,55 @@ Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model 
 - The kept tasks' swarm values come from round 23 (with oxvg in the batch), not from this screen.
 - The band and the tie-breaking are the main session's proposal, not calibrated.
 
+### Round 33 result and rule applied (2026-10-09 23:40; batches 17:17–19:20 and 20:17–21:23 UTC, code `c68fc44`)
+
+**Default swarm (`n12-base-peers`, 12 agents, 32M per batch of five), k=2, per-task means of partial credit:**
+
+| task | runs | mean | eligible | all-or-nothing |
+|---|---|---:|---|---|
+| expr (round 23, k=5) | 0.20, 0.54, 0.56, 0.00, 0.80 | 0.420 | yes | no |
+| wasmi (round 23, k=5) | 0.14, 0.36, 0.36, 0.82, 0.64 | 0.464 | yes | no |
+| tengo (round 23, k=5) | 0.95, 0.93, 0.86, 0.15, 0.86 | 0.749 | no | |
+| scriggo (round 23, k=5) | 0.00, 0.75, 0.00, 0.00, 0.00 | 0.150 | no | |
+| anko-typed-variable-bindings | 0.473, 0.556 | 0.514 | yes | no |
+| yaegi-go-embed-directives | 0.974, 0.000 | 0.487 | yes | yes |
+| bandit-interprocedural-taint-checks | 0.879, 0.000 | 0.440 | yes | yes |
+| abs-module-cache-flags | 1.000, 0.476 | 0.738 | no | |
+| sql-formatter-bigquery-pipe-formatting | 0.692, 1.000 | 0.846 | no | |
+| sqlfmt-create-table-ddl-formatting | 0.875, 0.875 | 0.875 | no | |
+| tomlkit-toml-table-converters | 0.917, 0.883 | 0.900 | no | |
+| csstree-shorthand-expansion-compression | 0.886, 0.899 | 0.893 | no | |
+| meriyah-explicit-resource-declarations | 0.959, 0.939 | 0.949 | no | |
+| katex-multicolumn-array-spans | 0.979, 1.000 | 0.990 | no | |
+| tengo-callable-instance-isolation | 0.913, 0.522 | 0.718 | no | |
+| dynamodb-toolbox-lazy-recursive-schemas | 0.297, 0.703 | 0.500 | yes | no |
+| python-statemachine-state-data-scoping | 0.569, 0.597 | 0.583 | yes | no |
+| helm-array-merge-strategies | 0.843, 0.196 | 0.519 | yes | no (0.843 is 0.007 under the 0.85 line) |
+| gql-incremental-graphql-delivery | 0.941, 0.941 | 0.941 | no | |
+| kea-atomic-signal-selectors | 0.333, 0.917 | 0.625 | yes | no |
+| task-task-graph-export | 0.300, 0.950 | 0.625 | yes | no |
+| superjson-error-stack-serialization | 0.738, 0.900 | 0.819 | no | |
+| adaptix-name-mapping-aliases | 0.864, 0.909 | 0.887 | no | |
+| kombu-virtual-queue-dead-lettering | 0.957, 0.941 | 0.949 | no | |
+
+**One agent per task** (`isolated`, `solo-clock-tokens`, 6.4M per task), k=2, reported as the comparison and not used to select (amendment 1): sql-formatter 1.0, sqlfmt 0.91, anko 0.48, yaegi 0.01, katex 0.48 (0.96, 0), meriyah 0.45 (0, 0.9), bandit 0.49 (0.98, 0), tomlkit 0.80, csstree 0.93, abs 1.0, expr 0.35, wasmi 0.56, tengo 0.67, scriggo 0. The second set was not run with one agent.
+
+**Rule as written (amendment 2):**
+- Eligible and not all-or-nothing: expr, wasmi, dynamodb-toolbox (0.050 from 0.45), anko (0.064), helm (0.069), python-statemachine (0.133), kea and task (0.175). All-or-nothing, ranked last: bandit, yaegi.
+- Order: expr and wasmi first, then dynamodb-toolbox, anko, helm. Five repositories, no clash.
+- **Batch by the rule: expr, wasmi, dynamodb-toolbox-lazy-recursive-schemas, anko-typed-variable-bindings, helm-array-merge-strategies** (Go ×3, Rust, TypeScript).
+- **Borderline:** helm's two runs (0.843, 0.196) behave like the all-or-nothing tasks the rule meant to push down, and miss the line by 0.007. The next task by the rule, python-statemachine (0.569, 0.597, Python), is the stable alternative. Reported to the user as a choice before the baseline; not resolved here.
+
+**Grading checks (by hand):**
+- Three runs parsed far fewer tests than the reference total. In the two batch tasks the swarm's code panicked and killed the test binary, so the remaining tests count as failures (a real defect, not a grading fault): helm h1-r1 19 of 57 (an interface conversion panic in the new merge path), anko g1-r0 76 of 102 (assignment to a nil map in `vm`; the parser was regenerated, so not the stale `parser.go.y` case). abs g2-r1 parsed 17 of 23 with plain failures and no panic; the six missing tests were not traced (abs is not selected).
+- Two score files checked against the batch result (helm h1-r1 0.196, dynamodb h1-r1 0.703): they match.
+
+**How the runs ended:** the first set ended mostly by `all_done` (3 of 4 batches, 11.5–29.8M), the second set always at the 32M cap (17.9–38.1 minutes). The second set is harder for the swarm, as intended.
+
+**Cost:** swarm 231.0M ($3.66: first set 102.8M, second 128.2M), one agent 50.8M ($0.89); 281.8M, $4.55 in all.
+
+**Pending, once the new baseline is chosen and run** (its own pre-registration, k=5, `n12-base-peers`, 32M): `compare.py`'s default baseline, the round 23 sentence in AGENTS.md ("the baseline is round 23"), and the TL;DR of `docs/research.md` all change to the new batch. Rounds 23–32 stay comparable only with each other.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -3466,3 +3515,4 @@ Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model 
 | 2026-10-08 | round 30, an integrate item per project, stubs before tests, no idle marks (batches `e30-rinteg-r0..r4`, code `3e23e34`) | TI n12-roles9-integrate (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.54) | five-task mean TI 0.434 (0.34–0.56), baseline 0.357, TF 0.439; integrate items in 8 of 25 projects, 4 done; stubs barely used; oxvg 0 in every run | not decided (p 0.32); ties TF; scores follow whether every layer was built, not the integrate item; oxvg starved by cold Rust builds |
 | 2026-10-09 | round 31, trace the siblings of what is new, a failing end-to-end test is open work (batches `e31-rsibl-r0..r4`, code `5048291`) | TS n12-roles9-siblings (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.63) | five-task mean TS 0.368 (0.14–0.53), baseline 0.357, TF 0.439; missed places 2 of 10 (TF 5); tengo r1 0 (a test file that never ends), wasmi r4 0 (edit 2 s before the cap) | not decided (p 0.91); the targeted measure moved but scores did not; loopholes: multi-layer item titles, end-to-end tests through a shortcut entry point |
 | 2026-10-09 | round 32, a deadline notice at 75% of the budget, one layer per build item, end-to-end tests through the user's path (batches `e32-rdead-r0..r4`, code `3f2065b`) | TD n12-roles9-deadline (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.67) | five-task mean TD 0.405 (0.34–0.50, sd 0.067), baseline 0.357, TS 0.368, TF 0.439; broken trees 2 of 25 (TS 4), one from an edit after the notice; no hang, no `done` after the notice, late writes 63 (TS 99); missed places 6 of 10 | not decided (p 0.48); A removed hangs and early stops but not the late break; B changed nothing measurable |
+| 2026-10-09 | round 33, screen for a recalibrated DeepSWE batch (batches `s33-swarm-g{1,2}-r{0,1}`, `s33-swarm-h{1,2}-r{0,1}`, `s33-solo-g{1,2,3}-r{0,1}`, code `c68fc44`) | default swarm n12-base-peers (n=12, 32M per batch of five); one agent per task solo-clock-tokens (6.4M per task) | 20 new candidates × 2 (swarm), first 10 + expr, wasmi, tengo, scriggo × 2 (one agent) | 281.8M ($4.55) | swarm means in [0.2, 0.7]: expr 0.42, wasmi 0.46, dynamodb-toolbox 0.50, anko 0.51, helm 0.52 (0.84, 0.20), python-statemachine 0.58, kea 0.63, task 0.63; all-or-nothing bandit 0.44, yaegi 0.49; 10 of 20 new tasks at 0.8 or more | batch by the rule: expr, wasmi, dynamodb-toolbox, anko, helm; helm borderline, python-statemachine the alternative, to the user before the new baseline |

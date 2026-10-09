@@ -1,0 +1,120 @@
+{
+  "batch": "s33-swarm-g1-r0",
+  "arm": "swarm",
+  "profile": "profiles/n12-base-peers.json",
+  "profileSha256": "33092e7840624775",
+  "agents": 12,
+  "tasks": [
+    "sql-formatter-bigquery-pipe-formatting",
+    "sqlfmt-create-table-ddl-formatting",
+    "anko-typed-variable-bindings",
+    "yaegi-go-embed-directives",
+    "katex-multicolumn-array-spans"
+  ],
+  "tokenCap": 32000000,
+  "timeoutMinutes": 120,
+  "tokens": 29457121,
+  "costUsd": 0.4597597800000001,
+  "minutes": 39.8,
+  "endReason": "all_done",
+  "cmdTimeoutSeconds": 1200,
+  "hubImage": "murmur:latest",
+  "perTask": {
+    "sql-formatter-bigquery-pipe-formatting": {
+      "diffBytes": 7300,
+      "leakCheck": {
+        "ok": true,
+        "all": 3095,
+        "head": 3095,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "6c936a87a8abdf07e15fb88f12ca9b3f543d6f0f",
+        "log": "all=3095 | head=3095 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.6923076923076923,
+      "new_frac": 0.6923076923076923,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 5736
+    },
+    "sqlfmt-create-table-ddl-formatting": {
+      "diffBytes": 11057,
+      "leakCheck": {
+        "ok": true,
+        "all": 503,
+        "head": 503,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "c71e2e8e09edd8115e798c9ff0e48e1c8288ff29",
+        "log": "all=503 | head=503 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.875,
+      "new_frac": 0.875,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 1238
+    },
+    "anko-typed-variable-bindings": {
+      "diffBytes": 99042,
+      "leakCheck": {
+        "ok": true,
+        "all": 1102,
+        "head": 1102,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "da7ded2c6eb1b93186d46294914289f8342a0411",
+        "log": "all=1102 | head=1102 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.4731182795698925,
+      "new_frac": 0.6666666666666666,
+      "base_frac": 0.7096774193548387,
+      "binary": 0,
+      "parsed": 76
+    },
+    "yaegi-go-embed-directives": {
+      "diffBytes": 17505,
+      "leakCheck": {
+        "ok": true,
+        "all": 1097,
+        "head": 1097,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "0b39f81f91c8e3b73ec7111a572da39fb750f5ce",
+        "log": "all=1097 | head=1097 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9736842105263158,
+      "new_frac": 0.9736842105263158,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 96
+    },
+    "katex-multicolumn-array-spans": {
+      "diffBytes": 1924113,
+      "leakCheck": {
+        "ok": true,
+        "all": 2246,
+        "head": 2246,
+        "unreachable": 0,
+        "refs": 0,
+        "remotes": 0,
+        "baseTree": "9446482b2a8773d21735f609ea3196d28aa8e79d",
+        "log": "all=2246 | head=2246 | unreachable=0 | refs=0 | remotes=0 | base_present=1"
+      },
+      "score": 0.9787234042553191,
+      "new_frac": 0.9787234042553191,
+      "base_frac": 1,
+      "binary": 0,
+      "parsed": 694
+    }
+  },
+  "meanScore": 0.7985667173318439,
+  "code": {
+    "commit": "a69d2484fb69f5ba9b3ea9d6142dcff4de32ad9d",
+    "srcDirty": false
+  },
+  "date": "2026-10-09T17:58:35.684Z"
+}
