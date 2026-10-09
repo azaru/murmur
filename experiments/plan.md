@@ -3336,6 +3336,39 @@ Transcript analysis: [report](reports/2026-10-09-round31-transcripts.md) (model 
 
 Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model output; the claims listed at its top were checked by hand). Counts: [`deepswe/traces32.md`](deepswe/traces32.md), [`deepswe/endstate.py`](deepswe/endstate.py), [`deepswe/process.py`](deepswe/process.py).
 
+## Round 33: screen DeepSWE tasks for a recalibrated batch, where a single agent and the swarm both land in the middle (fixed before measuring, 2026-10-09, the commit time; the user's decision after round 32: drop the Rust task and redo the baseline with another, "creo que vamos a quitar la tarea de rust y rehacer el baseline", then "queremos una tarea que solo/baseline queden en rango medio para tener margen de mejora" and "recalibra el lote")
+
+**Why.**
+- **Oxvg measures nothing.** It scored 0 in almost every run of every arm since round 23 (non-zero: TF r3 0.5, RC r0 0.667), and also for one agent with 90 minutes (round 17, all 6 new tests panic) and for the swarm with 120 minutes and 337M (round 18). It takes a fifth of the team and the budget and most of the broken trees at the end. Wasmi, also Rust, builds in seconds and stays.
+- **The user's criterion:** every task of the batch should leave room to improve, with both a single agent and the default swarm in a middle band. By that criterion two kept tasks are doubtful: tengo (baseline swarm 0.75, TF 0.88) and scriggo (baseline 0.15, one agent 0 in round 17). Since the baseline must be rerun anyway, the whole batch is re-chosen once.
+
+**Candidates.** Ten new DeepSWE tasks chosen and validated by a subagent ([report](reports/2026-10-09-deepswe-candidates2.md), model output; the test counts checked by hand): fast-building Go, Python and JS/TS, a change that crosses several layers or many call sites, one per repository, all passing the driver's dry mode (reference 1.0, base 0, no leak):
+- sql-formatter-bigquery-pipe-formatting (TS), sqlfmt-create-table-ddl-formatting (Python), anko-typed-variable-bindings (Go), yaegi-go-embed-directives (Go), katex-multicolumn-array-spans (JS) — group 1;
+- meriyah-explicit-resource-declarations (TS), bandit-interprocedural-taint-checks (Python), tomlkit-toml-table-converters (Python), csstree-shorthand-expansion-compression (JS), abs-module-cache-flags (Go) — group 2;
+- plus the four kept tasks: expr, wasmi, tengo, scriggo — group 3 (single agent only).
+
+**Arms** (`experiments/deepswe/screen33.sh`, two lanes at once, 120 minutes per batch, k=2):
+- **Swarm:** the default 12-agent swarm (`n12-base-peers`, the round 23 baseline profile), 32M per batch of five, on groups 1 and 2. The kept tasks use their round 23 baseline (k=5).
+- **One agent per task:** the `isolated` arm (`solo-clock-tokens`, one agent with the clock and the tokens left, a separate run per task), 6.4M per task (the swarm's 32M over five tasks), on groups 1, 2 and 3.
+
+**Rule** (on per-task means of partial credit):
+- A task is **eligible** when its single-agent mean and its swarm mean are both in [0.2, 0.7].
+- **The new batch is five eligible tasks:** expr and wasmi first if eligible (continuity with rounds 17–32), then the others by the distance of the average of the two means from 0.45, smallest first, at most one per repository.
+- **If fewer than five are eligible**, the batch is filled with the tasks whose worse mean lies closest to the band, and this is reported as a deviation; the two reserves of the candidates report (abs-stepped-slices, opa-template-string-reconstruction) are not screened in this round.
+- The selection is reported to the user before the new baseline (k=5, its own pre-registration) is launched.
+
+**What is read:** per-task scores and their spread, tokens and minutes, how each run ended (`done`, quiescent, cap), and grading failures (no tests parsed, a timeout). Tasks that score 0 because of a stale generated file (anko's `parser.go.y`, sql-formatter's `grammar.ne`) are noted as such.
+
+**Smoke:** none with a model. The arms and profiles are the ones used since rounds 17 and 23, and every new task passed the dry mode.
+
+**Estimate:** swarm 4 × 32M = 128M; one agent per task up to 6 × 32M, in practice about 30–60M (in round 17 single agents used 0.5–12M per task). About $3; 2–4 hours with the two lanes at once.
+
+**Known threats:**
+- k=2 is a screen; a task's mean can move by ±0.3 between runs (Pi alone spans 0.0–0.75 on one task).
+- A swarm's per-task score depends on the other four tasks of its batch (agents spread over them), and the groups here differ from the final batch.
+- The kept tasks' swarm values come from round 23 (with oxvg in the batch), not from this screen.
+- The band and the tie-breaking are the main session's proposal, not calibrated.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
