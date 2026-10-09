@@ -3432,6 +3432,31 @@ Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model 
 
 **Pending, once the new baseline is chosen and run** (its own pre-registration, k=5, `n12-base-peers`, 32M): `compare.py`'s default baseline, the round 23 sentence in AGENTS.md ("the baseline is round 23"), and the TL;DR of `docs/research.md` all change to the new batch. Rounds 23–32 stay comparable only with each other.
 
+## Round 34: the new fixed baseline on the recalibrated DeepSWE batch (fixed before measuring, 2026-10-10, the commit time; the user approved the main session's recommendation after round 33, helm swapped for python-statemachine: "Si, adelante con lo recomendado")
+
+**Why.** Round 33 re-chose the batch. The rule picked expr, wasmi, dynamodb-toolbox, anko and helm. Helm (0.84, 0.20) is all-or-nothing in substance and missed the line by 0.007, so the user took the stable next task, python-statemachine (0.57, 0.60). Every later arm is compared with this baseline, so it is measured once, with the default swarm, at k=5.
+
+**Tasks** (`refs/*.json` committed in round 33, all passing the driver's dry mode): expr-try-catch-errors (Go), wasmi-trap-coredumps (Rust), dynamodb-toolbox-lazy-recursive-schemas (TypeScript), anko-typed-variable-bindings (Go), python-statemachine-state-data-scoping (Python).
+
+**Arm:** the default 12-agent swarm (`n12-base-peers`, the round 23 baseline profile, unchanged), 32M per batch of five, 120 minutes, k=5, the batches one after another (`experiments/deepswe/batch34.sh`, ids `e34-base-r0..r4`), as in rounds 23–32.
+
+**No decision rule:** this round measures the reference. What is read: the per-run five-task means and their spread, per-task means, how each run ended, broken trees (no existing test passes) and grading failures.
+
+**Checks, reported but not acted on automatically:**
+- if a task's k=5 mean falls outside [0.2, 0.7], or every one of its runs is ≤0.1 or ≥0.85, it is reported to the user, who decides whether to keep it (a swap would need a new baseline);
+- the spread of the run means is compared with round 23's (sd 0.135), since it sets the smallest decidable difference.
+
+**After the round:** `compare.py`'s default baseline becomes `e34-base-r0..r4`; the baseline sentence in AGENTS.md and the TL;DR of `docs/research.md` change to this batch. Rounds 23–32 stay comparable only with each other.
+
+**Smoke:** none with a model. The profile is unchanged since round 23 and every task passed the dry mode and the round 33 screen.
+
+**Estimate:** 5 × 32M = 160M, about $2.6, 1.5–2 hours.
+
+**Known threats:**
+- k=5: the round 23 baseline spanned 0.19–0.52 on identical runs, so the reference itself carries noise of about ±0.06 on its mean.
+- Two tasks (expr, wasmi) have swarm values from a batch that included oxvg; their scores may move with the new neighbours.
+- The selection used the swarm screen (k=2), so the chosen tasks' means may regress towards the extremes.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
