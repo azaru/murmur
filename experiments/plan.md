@@ -3363,6 +3363,11 @@ Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model 
 
 **Estimate:** swarm 4 × 32M = 128M; one agent per task up to 6 × 32M, in practice about 30–60M (in round 17 single agents used 0.5–12M per task). About $3; 2–4 hours with the two lanes at once.
 
+**Amendment (2026-10-09 ~21:00, while the last swarm batch `s33-swarm-g2-r1` was running; the user's decision, "Calibra solo con swarm").**
+- **Eligibility uses the swarm mean only:** a task is eligible when the default swarm's mean is in [0.2, 0.7]. The single agent is still measured and reported, as the comparison, but not used to select.
+- **Why:** the single agent's scores track when it gives up, not how hard the task is. It called `done` after 0.25–6M of its 6.4M (meriyah 0.25M in 1.1 minutes, 0; bandit 0.25M in 1.8 minutes, 0.98; katex 0.67M in 2.7 minutes, 0, against 0.96 in the other repetition), so its "middle" means were often 0 and 1 averaged.
+- **More candidates:** the new tasks were mostly easy for the swarm (all of group 2 at 0.88 or more in its first repetition), so a second, harder selection (changes that cross a parser, checker, compiler or interpreter, like expr, tengo, scriggo and anko) is validated without a model and screened with the swarm in a follow-up batch under the same rule (k=2, 32M per batch of five).
+
 **Known threats:**
 - k=2 is a screen; a task's mean can move by ±0.3 between runs (Pi alone spans 0.0–0.75 on one task).
 - A swarm's per-task score depends on the other four tasks of its batch (agents spread over them), and the groups here differ from the final batch.
