@@ -3269,6 +3269,73 @@ Transcript analysis: [report](reports/2026-10-09-round31-transcripts.md) (model 
 - **Prompt length:** two more sentences and a clause on an already long briefing.
 - **The control** is not paired in time.
 
+### Round 32 result and rule applied (2026-10-09 18:55; batches 14:40–16:18 UTC, code `3f2065b`)
+
+| task | baseline (k=5) | TF (round 29) | TS (round 31) | TD mean (sd) |
+|---|---:|---:|---:|---:|
+| expr | 0.420 | 0.602 | 0.600 | 0.526 (0.413) |
+| oxvg | 0.000 | 0.100 | 0.000 | 0.000 (0.000) |
+| scriggo | 0.150 | 0.171 | 0.124 | 0.125 (0.280) |
+| tengo | 0.749 | 0.877 | 0.705 | 0.892 (0.048) |
+| wasmi | 0.464 | 0.445 | 0.409 | 0.482 (0.322) |
+| **five-task mean** | **0.357** | **0.439** | **0.368** | **0.405** (0.067) |
+| runs | 0.257, 0.518, 0.356, 0.194, 0.458 | 0.555, 0.312, 0.390, 0.618, 0.320 | 0.471, 0.136, 0.430, 0.534, 0.268 | 0.338, 0.495, 0.448, 0.349, 0.394 |
+
+160.2M tokens, $2.67. Every run ended at the 32M cap, after 11.9–14.6 minutes. No run failed, there was no model error, the quota held, and `srcDirty` was false.
+
+**Rule as written** (`compare.py` against the baseline):
+- Δ +0.048, 95% interval [−0.069, +0.166], p = 0.48.
+- Higher on 3 of 5 tasks, lower on 1.
+- **Not decided.**
+- Descriptive: against TS Δ +0.037 (p = 0.67), against TF Δ −0.034 (p = 0.64). The run means have the smallest spread of any arm so far (sd 0.067), mostly by composition: oxvg 0 in every run, scriggo 0 in 4 of 5, tengo 0.86–0.95, expr bimodal (0.80–0.85 three times, 0.03 and 0.13).
+
+**Primary measure (A): broken trees at the end** (`deepswe/endstate.py`):
+- **2 of 25** (oxvg r0, oxvg r4), against TS 4, TF 2, TI 2 and the baseline 4. The descriptive threshold (1 or fewer) is **not met**.
+- **Oxvg r4:** heron's two edits to `collapse_groups.rs` at 11.55 and 11.64 minutes, after heron's notice at 10.82, left an unclosed delimiter; the abort was at 11.94 (checked by hand).
+- **Oxvg r0:** dunlin's edits to `inline_styles.rs` at 9.3 call a function that does not exist; dunlin was inside a cargo call blocked on the build lock and got the notice at the abort (checked by hand).
+- Both cargo checks sat on "Blocking waiting for file lock on build directory" and ended in "Command aborted", so neither error was ever visible to the team.
+- **What disappeared:** no test that never ends and no scratch test file left in a diff (TS: tengo r1); test commands under `timeout`: 549 of 601 (TS 0 of 588); all 13 `timeout 300` kills were oxvg cargo calls.
+- **Partial damage the measure does not count:** robin's scriggo `parser_test.go`, written after the notice (11.4–12.3), panics the whole `internal/compiler` test package (scriggo r0 `base_frac` 0.419).
+
+**A's known risk (RC's failure) did not happen:**
+- No `done` after a notice, and every run spent the whole 32M. The five `done` calls (r1 wren, finch, crane; r4 tern, plover) came at 2.3–7.4 minutes, before any notice; those are the 5 agents never reached.
+- **When the notice arrived:** the first 1.5–2.8 minutes before the abort (pre-registered estimate 2.0, 1.2–3.8). Per agent 0–169 seconds before; 10 of 55 agents got it 10 seconds or less before, because they were inside long cargo or `go test` calls.
+- **What agents did after it** (subagent classes): 8 made no further call, 14 only read, tested or posted, 8 finished their own files and tested, 7 took an item without editing, 13 started new files or surface, 5 edited teammates' files. No one reverted a teammate's working code. 75 write/edit calls came after the agent's notice.
+- **Implementation writes in the last 2 minutes:** 63, against 100 (TF), 97 (TI) and 99 (TS).
+
+**B: did not change behaviour.**
+- **Missed places: 6 of 10** (scriggo r0–r3, expr r3, r4), against TS 2 and TF 5.
+- **Multi-layer build items** (`deepswe/process.py`): 18 in TD, against 17 (TS), 14 (TI) and 9 (TF), for example "Expr checker/compiler: typecheck and emit error handling constructs" and "Scriggo: implement checker/compiler/runtime support for declared methods".
+- **End-to-end tests through a shortcut:** expr's tests still call `expr.Eval(src, nil)`, which skips the checker, in r1, r2 and r3 (TS: r0, r1). Expr r3 (0.025) is round 31's expr r1 again: no `checker/` file in the diff, the hidden panic in `checker.(*Checker).visit` (checked by hand).
+- **Scriggo:** someone named the emitter at 7.9–10.8 minutes in r0–r3, but the end-to-end tests still panicked in the checker, so emitter items waited behind it or came after the notice. The only run with emitter edits, r4 (0.625), wrote them at 10.5–11.6.
+- **Expr r4 (0.127):** the hidden tests panic in `compiler.compile`; the compiler item was held by one agent whose first compiler edit came at 11.9 of 11.9, and item #28 "e2e: compiler dispatch missing TryNode" was never taken.
+
+**Process** (`deepswe/process.py`, same definitions as rounds 29–31; it reproduces the published TF, TI and TS values except TF's "implementation write before every test item was done", 9 rather than 8, and TF's write/edit range):
+
+| | TF | TI | TS | TD |
+|---|---|---|---|---|
+| all 12 agents entered within | 6.5–8.9 min | 6.3–7.6 min | 6.1–6.9 min | 6.3–8.9 min |
+| a project's first write is a test | 24 of 24 | 23 of 25 | 20 of 25 | 24 of 25 |
+| projects whose tests had 2 or more writers | 17 | 17 | 12 | 17 |
+| implementation write before every test item naming the project was done | 9 | 7 | 6 | 10 |
+| items | 110 | 114 | 116 | 152 |
+| weights 1–3 / 4–7 / 8–10 | 22 / 85 / 3 | 11 / 97 / 6 | 18 / 92 / 6 | 41 / 95 / 16 |
+| first implementation write, median | 4.2 min, 2.6M | 4.3 min, 2.8M | 3.9 min, 3.1M | 4.1 min, 2.6M |
+| write/edit calls per run | 108–141 | 104–156 | 128–167 | 117–138 |
+| implementation writes in the last 2 minutes | 100 | 97 | 99 | 63 |
+| build items naming more than one layer | 9 | 14 | 17 | 18 |
+
+**Also from the transcripts:**
+- **Wasmi r0 (0) is a deadlock in the text TD shares with TF and TS.** "Nobody writes implementation code in a project until its test items are done" met "a test that cannot compile until new code exists stays in a folder outside the project": finch's external test package could not be reached, the test item never closed, kite posted at 6.0 "rule blocks wasmi implementation until its tests are marked done", and nobody took the build items in 12.5 minutes. The final diff has only tests (checked by hand).
+- Three TD diffs carry a cargo `target/` directory from a team-made end-to-end crate (TS one).
+
+**Reading.**
+- **A removed the hang and the early stop, but not the late break.** No test hung, test commands carried a time limit, nobody went home after the notice, and late implementation writes fell by a third. But the notice comes about 1.5 minutes before the end, a quarter of the agents started new work after it, and one of them broke oxvg 18 seconds before the abort. The other break was invisible: oxvg's build lock kept the error from anyone.
+- **B's two sentences did nothing measurable.** Titles naming several layers and tests through `Eval` without the checker continued as in TS; missed places rose to 6 of 10 (TS 2, TF 5), which says more about this measure's noise than about B.
+- **The score did not move** beyond the noise in either direction.
+
+Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model output; the claims listed at its top were checked by hand). Counts: [`deepswe/traces32.md`](deepswe/traces32.md), [`deepswe/endstate.py`](deepswe/endstate.py), [`deepswe/process.py`](deepswe/process.py).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
@@ -3351,3 +3418,4 @@ Transcript analysis: [report](reports/2026-10-09-round31-transcripts.md) (model 
 | 2026-10-08 | round 29, end-to-end tests before implementation, build items per layer, idle-holder marks (batches `e29-rtests-r0..r4`, code `9b74367`) | TF n12-roles9-tests (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.59) | five-task mean TF 0.439 (0.31–0.62), baseline 0.357, RP 0.422; first write a test in 24 of 25 projects; oxvg 0.5 in r3 (first non-zero); 37 idle marks shown, none acted on | not decided (p 0.38); highest mean so far; the strict rule starved the Rust projects; layers split without an integrator (scriggo r1–r4) |
 | 2026-10-08 | round 30, an integrate item per project, stubs before tests, no idle marks (batches `e30-rinteg-r0..r4`, code `3e23e34`) | TI n12-roles9-integrate (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.54) | five-task mean TI 0.434 (0.34–0.56), baseline 0.357, TF 0.439; integrate items in 8 of 25 projects, 4 done; stubs barely used; oxvg 0 in every run | not decided (p 0.32); ties TF; scores follow whether every layer was built, not the integrate item; oxvg starved by cold Rust builds |
 | 2026-10-09 | round 31, trace the siblings of what is new, a failing end-to-end test is open work (batches `e31-rsibl-r0..r4`, code `5048291`) | TS n12-roles9-siblings (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.1M ($2.63) | five-task mean TS 0.368 (0.14–0.53), baseline 0.357, TF 0.439; missed places 2 of 10 (TF 5); tengo r1 0 (a test file that never ends), wasmi r4 0 (edit 2 s before the cap) | not decided (p 0.91); the targeted measure moved but scores did not; loopholes: multi-layer item titles, end-to-end tests through a shortcut entry point |
+| 2026-10-09 | round 32, a deadline notice at 75% of the budget, one layer per build item, end-to-end tests through the user's path (batches `e32-rdead-r0..r4`, code `3f2065b`) | TD n12-roles9-deadline (n=12), against the round 23 baseline | expr, oxvg, scriggo, tengo, wasmi × 5, 32M, 120 min | 160.2M ($2.67) | five-task mean TD 0.405 (0.34–0.50, sd 0.067), baseline 0.357, TS 0.368, TF 0.439; broken trees 2 of 25 (TS 4), one from an edit after the notice; no hang, no `done` after the notice, late writes 63 (TS 99); missed places 6 of 10 | not decided (p 0.48); A removed hangs and early stops but not the late break; B changed nothing measurable |
