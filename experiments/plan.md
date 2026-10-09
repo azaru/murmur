@@ -3227,6 +3227,48 @@ Transcript analysis: [report](reports/2026-10-08-round30-transcripts.md) (model 
 
 Transcript analysis: [report](reports/2026-10-09-round31-transcripts.md) (model output; the claims listed at its top were checked by hand). Counts: [`deepswe/traces31.md`](deepswe/traces31.md).
 
+## Round 32: a deadline notice near the end of the budget, one layer per build item, and end-to-end tests through the user's path, against the fixed baseline (fixed before measuring, 2026-10-09, the commit time; the user approved the proposal, "si, a+b")
+
+**Why** (round 31 and a count over rounds 23–31):
+- **The end of a run leaves trees that do not build or test.** A project counts here when the grader's run of its existing tests passed none of them (a compile error or a 10-minute timeout; the oxvg cases are compile errors in the agents' code, checked by hand in `e31-rsibl-r2`). Per arm, of 25 projects: baseline 4, TF 2, TI 2, TS 4; 30 of 250 over the ten arms of rounds 23–31 that ended at the cap. Round 31 lost tengo r1 to a scratch test that never ends, left in the tree, and wasmi r4 to an edit 2 seconds before the budget abort.
+- **The agents do not see the end coming.** Their clock reads about 100 minutes left while the budget runs out after 11–15 minutes. RC (round 25), whose clock counted down to the budget at the current pace, is the only arm with 0 of 25 broken trees, but its team wrapped up together and called `done` with 4–11M unspent (0.190). The user asked whether a clock that reaches 0 with whichever runs out first had been tried: it had, in RC.
+- **Two loopholes in round 31's rules** (expr r1, 0.025): an item titled "checker/compiler/VM" counted as covering the checker, which nobody built; and the team's end-to-end tests called `expr.Eval(source, nil)`, which skips the checker, so they went green while the real path panicked.
+
+**Arm TD** (`profiles/n12-roles9-deadline.json`; 12 agents, 32M, 120 minutes, five DeepSWE tasks, k=5). It is TS (round 31, `n12-roles9-siblings`) with one lever and three sentences:
+- **A, new default-off lever `deadlineNotice: 0.75`.** Once 75% of the shared token budget or of the timeout is spent, whichever comes first, each agent's next tool result carries one notice, once: "[The deadline is close: 75% of the shared budget is spent, and the run stops without warning when the budget or the time runs out. Start nothing new. Finish or undo what you have half done so that every project you touched builds and its tests finish, and delete any scratch files you made.]" Unlike RC's clock it is one fixed threshold, not a running estimate, and it does not mention calling `done`. Over the 50 cap-ended runs of rounds 23–31 except RC, 75% came a median 2.0 minutes before the abort (1.2–3.8); 80% gave 1.6 (0.9–3.4) and 90% under a minute. A deadline warning exists in real work, and the lever reads only murmur's own budget and clock.
+- **A, team sentence, before "When you finish a change, build its project":** "Run every test command with a time limit (for example timeout 300), and delete scratch tests and files once they have served."
+- **B, team sentence, after "unless an item already covers it.":** "Each build item covers one layer or file: an item whose title names several layers covers none of them, so split it into one item per layer."
+- **B, in the end-to-end test sentence, after "(source text or input files in, output out),":** "the way a user calls it, so that the input passes every stage a user's input passes (such as checking or validation) and no shortcut skips one,".
+
+**Control:** the round 23 baseline, not rerun: the new lever is off by default, so no existing profile changes. TS (round 31) is the descriptive reference: TD differs from it only by the lever and these sentences.
+
+**Rule** (`compare.py`):
+- better if p < 0.05, Δ > 0 and higher on at least 3 of 5 tasks;
+- worse is symmetric;
+- otherwise not decided.
+- TD against TS and TF is descriptive only.
+
+**What is read:**
+- **Primary behaviour measure (A): broken trees at the end**, counted mechanically from the grader's score files (no test of the existing suite passed). References above; TD clearly better means 1 or fewer of 25 (a descriptive threshold, not a test).
+- **A's known risk, RC's failure:** `done` calls after the notice, unspent tokens at the end, and runs that end by `done` rather than at the cap. When each agent got the notice (`deadline_notice` events) and agents who never did (inside a long model call or a test at the time). Implementation writes after the notice, and whether they finished or undid work (transcripts). Test commands run with a time limit, against TS.
+- **B: missed places** (round 31's measure; TS 2, TF 5 of 10), build items whose title names more than one layer, and end-to-end tests that enter through a shortcut skipping a stage (transcripts).
+- **As in rounds 29–31:** first write is a test, tests' writers, items and weights, first implementation write, late implementation writes.
+- **Transcripts:** a transcript analysis (subagent).
+
+**Smoke** (both runs deleted after reading):
+- **Forced notice:** `examples/trio` (three agents, 1.5M) with this profile and `deadlineNotice` lowered to 0.2, 370k tokens, `all_done`, passed. The notice reached each of the three agents exactly once, at 20.2–21.2% of the budget (`deadline_notice` events), and every test command after it ran under `timeout 300`. All three called `done` within 5 seconds of the notice; the three modules and their 12 tests were already passing, so the trio cannot tell a finished team from one the notice sent home, which is why `done` after the notice is a read measure.
+- **Default profile:** `examples/trio`, 83k tokens, `quiescent`, passed, no `deadline_notice` event.
+
+**Estimate:** 5 × 32M = 160M tokens, about $2.6; about 2 hours.
+
+**Known threats:**
+- **A and B are mixed in one arm.** Each has its own measure, but a change in the score cannot be assigned to one of them.
+- **The gain is small against the noise:** fixing the broken trees completely is worth a few hundredths on the five-task mean, below what k=5 can decide, so the round is read mainly on the behaviour measures.
+- **The notice may change the pace** of spending, as RC's clock did, so the real warning time may differ from 2 minutes.
+- **The broken-tree measure** counts only trees where nothing of the existing suite ran, not partial breaks.
+- **Prompt length:** two more sentences and a clause on an already long briefing.
+- **The control** is not paired in time.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |

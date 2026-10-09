@@ -89,6 +89,13 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     const left = (task.budgetTokens - tokens) / ((tokens - before) / ((now - at) / 60_000));
     return left < task.timeoutMinutes - (now - started) / 60_000 ? Math.max(0, left) : undefined;
   };
+  // deadlineNotice: the share of the token budget or of the timeout spent, whichever is larger.
+  const deadlineWarned = new Set<string>();
+  const deadlineShare = () => {
+    const time = (Date.now() - started) / 60_000 / task.timeoutMinutes;
+    const budget = task.budgetTokens ? pooled(totals().tokens) / task.budgetTokens : 0;
+    return { share: Math.max(time, budget), what: budget >= time ? `${task.agents > 1 ? "shared " : ""}budget` : "time" };
+  };
   const minutesLeft = () => Math.max(0, task.timeoutMinutes - (Date.now() - started) / 60_000).toFixed(1);
   const tokensLeft = () => `${(Math.max(0, task.budgetTokens! - pooled(totals().tokens)) / 1e6).toFixed(1)}M`;
   const budgetText = () => {
@@ -226,6 +233,14 @@ export async function runSwarm(task: Task, opts: RunOptions) {
     if (profile.clock) lines.push(profile.clockUnlimited ? "[time left: unlimited]" : budgetFirst !== undefined
       ? `[about ${budgetFirst.toFixed(1)} minutes left: at ${task.agents > 1 ? "the team's" : "your"} current pace the ${task.agents > 1 ? "shared " : ""}budget runs out before the timeout]`
       : `[${minutesLeft()} minutes left before the timeout]`);
+    if (profile.deadlineNotice && !deadlineWarned.has(name)) {
+      const { share, what } = deadlineShare();
+      if (share >= profile.deadlineNotice) {
+        deadlineWarned.add(name);
+        log("deadline_notice", { agent: name, share: Number(share.toFixed(3)) });
+        lines.push(`[The deadline is close: ${Math.round(share * 100)}% of the ${what} is spent, and the run stops without warning when the budget or the time runs out. Start nothing new. Finish or undo what you have half done so that every project you touched builds and its tests finish, and delete any scratch files you made.]`);
+      }
+    }
     if (profile.clockTokens && profile.clockUnlimited) lines.push("[tokens left: unlimited]");
     else if (profile.clockTokens && task.budgetTokens) lines.push(`[${tokensLeft()} tokens left in the budget${task.agents > 1 ? " shared by all agents" : ""}]`);
     const text = lines.filter(Boolean).join("\n");
@@ -356,7 +371,7 @@ export async function runSwarm(task: Task, opts: RunOptions) {
       noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
       appendSystemPrompt: profile.systemPromptAppend ? [profile.systemPromptAppend] : undefined,
       extensionFactories: profile.delivery === "attach" || profile.notices || profile.writeGuard || profile.claimLease || profile.staleGuard
-        || profile.doneAfterGreen || profile.clock || profile.boardTail || profile.departureNotice || profile.teamStatus || profile.helpAfter || profile.taskList || branches ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
+        || profile.doneAfterGreen || profile.clock || profile.deadlineNotice || profile.boardTail || profile.departureNotice || profile.teamStatus || profile.helpAfter || profile.taskList || branches ? [pi => { pi.on("tool_result", event => attach(name, event)); pi.on("tool_call", event => guard(name, event)); }] : [],
     });
     await loader.reload();
     const verify = async () => {
