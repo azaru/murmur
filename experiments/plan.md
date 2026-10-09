@@ -3090,6 +3090,75 @@ Transcript analysis: [report](reports/2026-10-08-round29-transcripts.md) (model 
 
 Transcript analysis: [report](reports/2026-10-08-round30-transcripts.md) (model output; the claims listed at its top were checked by hand). Counts: [`deepswe/traces30.md`](deepswe/traces30.md).
 
+## Round 31: trace the siblings of what is new, and treat a failing end-to-end test as open work, against the fixed baseline (fixed before measuring, 2026-10-09, the commit time; the user asked to find what to polish rather than repeat runs, "prefiero identificar que hay que pulir, modificar/crear una palanca y volver a probar", then approved the proposal, "si")
+
+**Why** (two analyses after round 30, both committed):
+- **Deference to stale owners is rare** ([report](reports/2026-10-09-deference.md)):
+  - there were 75 episodes in the 50 projects of rounds 29–30, and 56 of them were live;
+  - only 2–4 projects lost 2 minutes or more;
+  - so no rule against waiting.
+- **High and low runs differ in whether every place the change must reach was changed** ([report](reports/2026-10-09-high-vs-low.md), counts checked by hand):
+  - **Scriggo:** no run without an emitter change scores ≥0.7.
+  - **Expr:**
+    - 10 runs changed only `builtin/` (0.063);
+    - 10 runs that touched every layer panic with "undefined node type" in a visitor (`Checker.visit`, `ast.Walk`);
+    - with all five layers touched, the mean is 0.68.
+  - **Wasmi:** 19 of 50 runs stop at 0.364 (the API without capture).
+- **The failure is often visible to the team:**
+  - in 24 of 40 low scriggo runs, the grader's error text appeared in the agents' own output;
+  - in 18 of them it appeared again in the last 3 minutes, and stayed red;
+  - in 9 of 11 builtin-only expr runs, the team's last own test was green.
+- **Upper bound:** the subagent estimates that fixing this completely is worth at most about +0.09 on the five-task mean. That is below what k=5 can decide, so the round is read mainly on the targeted behaviour (below).
+
+**Arm TS** (`profiles/n12-roles9-siblings.json`; 12 agents, 32M, 120 minutes, five DeepSWE tasks, k=5). It is TF (round 29, `n12-roles9-tests`, idle marks included) with three added sentences and no other change:
+- **Team sentence, after the build items:** "To find every place the change must reach, look for an existing feature of the same kind as the new one (a node, statement, type, opcode or option like it) and search the whole project for every place that handles it: each place where the new one must be handled too is a part, so add it as an item unless an item already covers it."
+- **Team sentence, after the done rule:** "An end-to-end test that fails is open work: whoever sees one fail and finds no item covering its cause adds one, naming the test and the failure, and that item is done only when that test passes."
+- **Builder, before "Mark an item done":** "When you add something new (a node, type, opcode or option), search the project for every place that handles an existing one like it, and handle the new one there too or add an item for it."
+- Both are ordinary engineering practice, and neither depends on a task-provided test: the end-to-end tests are the agents' own.
+
+**Control:** the round 23 baseline. It is not rerun, because the code is unchanged. TF (round 29) is the descriptive reference: TS differs from it only by these sentences.
+
+**Rule** (`compare.py`):
+- better if p < 0.05, Δ > 0 and higher on at least 3 of 5 tasks;
+- worse is symmetric;
+- otherwise not decided.
+- TS against TF is descriptive only.
+
+**What is read:**
+- **Primary behaviour measure: missed places,** counted mechanically on the final diffs and the grader logs. The grader only measures; nothing from it reaches the agents.
+  - **expr:** the diff changes no file under `compiler/`, or a hidden-test log contains "undefined node type".
+  - **scriggo:** no changed path contains `emitter`.
+  - **References, missed of 10** (expr + scriggo): baseline 4, RP (round 28) 1, TF 5, TI (round 30) 5.
+  - **What would count as a change:** TS clearly better on this measure means 2 or fewer of 10. This is a descriptive threshold, not a test.
+- **Wasmi:** missing capture is judged in the transcript analysis, because no mechanical marker separates it (an `executor` path does not).
+- **Use of the rules** (transcripts):
+  - searches for an existing sibling, and items added from them;
+  - items that name a failing end-to-end test, and whether they were closed with that test passing;
+  - red end-to-end tests left red at the end.
+- **As in rounds 29–30:**
+  - first write is a test;
+  - tests' writers;
+  - tokens before the first implementation write;
+  - late build breaks.
+- **Transcripts:** a transcript analysis (subagent).
+
+**Smoke:**
+- **Toy module, first version.** A small Go calculator with a conditional expression to add, and three agents. The sites were all in one file, so the sibling search was not needed. It passed, `all_done`, 0.61M tokens.
+- **Toy module, second version.** It added a constant folder in another package that panics on unknown nodes. The first agent found it by reading the five files and handled it. It passed, `all_done`, 0.84M tokens.
+- **The real expr repository** (three agents, 4M tokens, 9.5 minutes; its hidden score was not looked at, and its results and run files were deleted):
+  - **Sibling search:** at 1.7 minutes finch searched `SequenceNode|VariableDeclaratorNode` across `ast`, `compiler`, `checker`, `optimizer` and `parser`.
+  - **Red test as open work:** at 4.8 minutes robin saw the end-to-end tests panic in `checker.visit` with "undefined node type (*ast.TryNode)". Robin added item #5 naming that failure, finch fixed the checker, and #5 was closed at 6.2 minutes with the checker and end-to-end tests passing.
+  - The checker item came from the red test, not from the search.
+- **No default-profile run:** the code is unchanged.
+
+**Estimate:** 5 × 32M = 160M tokens, about $2.6; about 2 hours.
+
+**Known threats:**
+- **The upper bound** of the targeted gain (+0.09) is below what k=5 can decide on the mean.
+- **The missed-place measure** is coarse. It misses a wrong emitter or compiler change, and RP's 1 of 10 shows that it does not track the score closely.
+- **Prompt length:** the rules add three sentences to an already long briefing.
+- **The control** is not paired in time.
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
