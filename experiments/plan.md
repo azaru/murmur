@@ -3484,6 +3484,14 @@ Transcript analysis: [report](reports/2026-10-09-round32-transcripts.md) (model 
 - **Per task, one missing layer decides the score:** expr's parser/compiler/VM work started at 5.3–13.8 minutes, and every run missed a part (block `try {}`, named catch); python-statemachine scored 0.93–0.96 when the async engine got the change and 0.56–0.58 when only the base engine did (27 of the 30–32 failures are `[async]`); anko's 0.222 runs parsed the type as a bare identifier (`[]int64`, `map`, `*T` fail), and every run returns the assigned value instead of `nil` on a type error, the repo's `RunOutput` convention; dynamodb-toolbox has one different defect per run.
 - **Other costs:** one agent spent 33% of r0's tokens hopping across three tasks and finished none; cargo lock waits 1–8 per batch; no hang.
 
+## 2026-10-10: proposal after round 34, not pre-registered (paused: the weekly model quota is nearly spent)
+
+- **Lever (a), `doneConfirm`, default off:** when an agent calls `done` with more than a share (proposed 0.5) of the budget or of the time left, whichever is more spent, its first `done` is answered with one message instead of ending its turn: finish or describe on the board what it leaves unfinished; if it has not worked on anything, a claimed project is not a covered one, so read the board and the departure notices and ask an owner which part to take; call `done` again to leave. Once per agent, no refusal after that, no task signal.
+- **Why:** in round 34, 10 agents left with no edits and 84–99% of the budget unspent ("every repository is claimed"), and 6 owners left hard slices unfinished with 75–95% unspent; runs scored high when one agent picked up the orphaned slice.
+- **Proposed measures:** the rule against round 34 (k=5); budget left at each `done`; agents that keep working after the message and those that call `done` again at once; orphaned slices picked up; broken trees (more agents working may bring the cap sooner, problem (b): build after every edit burst).
+- **Open, for the user:** the threshold (0.5 proposed) and whether to add a team sentence ("a claimed project can take more hands"); the main session recommends the lever alone, for attribution.
+- Lever (b), building after every edit burst, comes after (a).
+
 ## Campaign registry
 
 | Date | Phase | Arms | Tasks × k | Tokens | Result | Decision |
